@@ -1,0 +1,2338 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		C93EA1F520E1144B00C733A3 /* PackageFetch */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = C93EA1F620E1144B00C733A3 /* Build configuration list for PBXAggregateTarget "PackageFetch" */;
+			buildPhases = (
+				C93EA1F920E1145A00C733A3 /* Run PackageFetch.swift to download dependencies, if needed */,
+			);
+			dependencies = (
+			);
+			name = PackageFetch;
+			productName = PackageFetch;
+		};
+		C9A3803F1EFF9C0B00BFF2E5 /* CwlViewsConcat */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = C9A380421EFF9C0B00BFF2E5 /* Build configuration list for PBXAggregateTarget "CwlViewsConcat" */;
+			buildPhases = (
+				C9A380451EFF9C2800BFF2E5 /* Invoke CwlPackageBuild/main.swift to build CwlSignalConcat */,
+				C9A380461EFF9D9F00BFF2E5 /* ShellScript */,
+			);
+			dependencies = (
+				C9A8AF2F20E8646B0068E99B /* PBXTargetDependency */,
+			);
+			name = CwlViewsConcat;
+			productName = CwlViewsConcat;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		C9111CBC1E361D670029DD2F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A45E1E3476E50088F2AD /* main.swift */; };
+		C9111CBD1E3623470029DD2F /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A4651E34CD900088F2AD /* MainMenu.swift */; };
+		C912FC4A1EB62B7800D679E7 /* CwlViews.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C91307401F66384200174902 /* CwlCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C913073F1F66384200174902 /* CwlCoder.swift */; };
+		C91307411F66384200174902 /* CwlCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C913073F1F66384200174902 /* CwlCoder.swift */; };
+		C91625DB206FBE57002E44D9 /* CwlBinderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91625DA206FBE57002E44D9 /* CwlBinderState.swift */; };
+		C91625DC206FBE57002E44D9 /* CwlBinderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91625DA206FBE57002E44D9 /* CwlBinderState.swift */; };
+		C91625DE206FBE8E002E44D9 /* CwlBinderParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91625DD206FBE8E002E44D9 /* CwlBinderParameters.swift */; };
+		C91625DF206FBE8E002E44D9 /* CwlBinderParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91625DD206FBE8E002E44D9 /* CwlBinderParameters.swift */; };
+		C91683FC203FC1BA00B4D40E /* CwlTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91683FB203FC1BA00B4D40E /* CwlTabBar.swift */; };
+		C91CC2D0206F0DD7006FFF97 /* CwlBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */; };
+		C91CC2D1206F0DD7006FFF97 /* CwlBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */; };
+		C91CC2D3206F0E45006FFF97 /* CwlConstructingBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2D2206F0E45006FFF97 /* CwlConstructingBinder.swift */; };
+		C91CC2D4206F0E45006FFF97 /* CwlConstructingBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2D2206F0E45006FFF97 /* CwlConstructingBinder.swift */; };
+		C91CC2D5206F15C3006FFF97 /* CwlBackingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948542F1DC6E8AD009CC145 /* CwlBackingLayer.swift */; };
+		C91CC2D6206F15C9006FFF97 /* CwlApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CA94D1E55C82D00AD10E3 /* CwlApplication.swift */; };
+		C91D0CE31ED088A300CDE205 /* CwlLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */; };
+		C925223A20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = C925223920957D3400CA39A4 /* CwlSignalCallback.swift */; };
+		C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = C925223920957D3400CA39A4 /* CwlSignalCallback.swift */; };
+		C926D05F1FF058D4002BF020 /* CwlSetMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */; };
+		C926D0601FF058D4002BF020 /* CwlSetMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */; };
+		C926D0621FF07348002BF020 /* CwlSearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C926D0611FF07348002BF020 /* CwlSearchBar.swift */; };
+		C9287EE4202D3FE50046732C /* CwlScopedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9287EE3202D3FE50046732C /* CwlScopedValues.swift */; };
+		C9287EE5202D3FE50046732C /* CwlScopedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9287EE3202D3FE50046732C /* CwlScopedValues.swift */; };
+		C93605EA1F3EA952007AE776 /* CwlLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C984984A1DC8AB66001F12B2 /* CwlLayer.swift */; };
+		C93605EC1F3EA960007AE776 /* CwlGradientLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C958521EB8E16300D86558 /* CwlGradientLayer.swift */; };
+		C93605ED1F3EA960007AE776 /* CwlStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C935AC071E81762F006C1165 /* CwlStackView.swift */; };
+		C93605EF1F3EA9D8007AE776 /* CwlApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = C981E3401E2E33E2003A5A55 /* CwlApplication.swift */; };
+		C93605F01F3EA9FC007AE776 /* CwlButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C952092F1DCB0F02005F478B /* CwlButton.swift */; };
+		C93605F11F3EA9FC007AE776 /* CwlClickGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95209331DCB14A4005F478B /* CwlClickGestureRecognizer.swift */; };
+		C93605F21F3EA9FC007AE776 /* CwlClipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95209311DCB1164005F478B /* CwlClipView.swift */; };
+		C93605F31F3EA9FC007AE776 /* CwlControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C952092A1DCB0B5C005F478B /* CwlControl.swift */; };
+		C93605F41F3EA9FC007AE776 /* CwlGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB225B1DC9BB80009E0885 /* CwlGestureRecognizer.swift */; };
+		C93606091F3EAA60007AE776 /* CwlWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A4CC9C1EA658EC0096F68D /* CwlWebView.swift */; };
+		C9375D031F57A7C1005FAFD5 /* CwlScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB11DD0087900913019 /* CwlScrollView.swift */; };
+		C9375D041F57B259005FAFD5 /* CwlMagnificationGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95209351DCB14B7005F478B /* CwlMagnificationGestureRecognizer.swift */; };
+		C9375D051F57B259005FAFD5 /* CwlMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C947105D1E3364A300EC50D6 /* CwlMenu.swift */; };
+		C9375D061F57B259005FAFD5 /* CwlMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9351F251DCAD3D0001D484B /* CwlMenuItem.swift */; };
+		C9375D071F57B259005FAFD5 /* CwlPanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95209371DCB14C8005F478B /* CwlPanGestureRecognizer.swift */; };
+		C9375D081F57B259005FAFD5 /* CwlPopUpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F9406A1EA86693002011D2 /* CwlPopUpButton.swift */; };
+		C9375D091F57B259005FAFD5 /* CwlPressGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95209391DCB14D8005F478B /* CwlPressGestureRecognizer.swift */; };
+		C9375D0A1F57B259005FAFD5 /* CwlRotationGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C952093B1DCB14E7005F478B /* CwlRotationGestureRecognizer.swift */; };
+		C9375D0B1F57B259005FAFD5 /* CwlTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBC1DD0160A00913019 /* CwlTextField.swift */; };
+		C9375D0C1F57B259005FAFD5 /* CwlToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9351F1E1DCAD2BC001D484B /* CwlToolbar.swift */; };
+		C9375D0D1F57B259005FAFD5 /* CwlToolbarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9351F231DCAD2CA001D484B /* CwlToolbarItem.swift */; };
+		C9375D0E1F57B259005FAFD5 /* CwlWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948540E1DC4E8E1009CC145 /* CwlWindow.swift */; };
+		C9375D101F57D568005FAFD5 /* CwlTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB71DD0160A00913019 /* CwlTableCellView.swift */; };
+		C9375D111F57D568005FAFD5 /* CwlTableColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB81DD0160A00913019 /* CwlTableColumn.swift */; };
+		C9375D121F57D568005FAFD5 /* CwlTableHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB91DD0160A00913019 /* CwlTableHeaderView.swift */; };
+		C9375D131F57D568005FAFD5 /* CwlTableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBA1DD0160A00913019 /* CwlTableRowView.swift */; };
+		C9375D151F57D568005FAFD5 /* CwlTreeMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB56941EAC4A49000EC5F4 /* CwlTreeMutation.swift */; };
+		C9375D161F57E6FE005FAFD5 /* CwlTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBB1DD0160A00913019 /* CwlTableView.swift */; };
+		C9375D171F57EC32005FAFD5 /* CwlOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E181211EA89B6F00DD0107 /* CwlOutlineView.swift */; };
+		C937E76D20046BE000E63965 /* CwlStateContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C937E76C20046BE000E63965 /* CwlStateContainer.swift */; };
+		C937E76E20046BE000E63965 /* CwlStateContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C937E76C20046BE000E63965 /* CwlStateContainer.swift */; };
+		C93A2C0E1F567B2A005C3E7B /* CwlTableRowMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */; };
+		C93A2C0F1F567B2A005C3E7B /* CwlTableRowMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */; };
+		C93A2C101F572009005C3E7B /* CwlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94854151DC59DFC009CC145 /* CwlView.swift */; };
+		C945207C205152CE00693C43 /* CwlTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C945207B205152CE00693C43 /* CwlTabBarController.swift */; };
+		C9460DA521605F1000DBB58F /* CwlUtils.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9E9E215EFD1E004481B0 /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C9460DA621605F1000DBB58F /* CwlSignal.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9EAB215EFD2C004481B0 /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C9460DA721605F1B00DBB58F /* CwlUtils.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9E84215EFCFB004481B0 /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C9460DA821605F1B00DBB58F /* CwlSignal.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9E91215EFD0C004481B0 /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C9460DAA2160601300DBB58F /* CwlSignal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9EAB215EFD2C004481B0 /* CwlSignal.framework */; };
+		C9460DAB2160601300DBB58F /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9E9E215EFD1E004481B0 /* CwlUtils.framework */; };
+		C9460DAC2160602300DBB58F /* CwlSignal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9E91215EFD0C004481B0 /* CwlSignal.framework */; };
+		C9460DAD2160602300DBB58F /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9CA9E84215EFCFB004481B0 /* CwlUtils.framework */; };
+		C94853CA1DC4E306009CC145 /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C94853C01DC4E306009CC145 /* CwlViews.framework */; };
+		C94853CF1DC4E306009CC145 /* CwlViews_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94853CE1DC4E306009CC145 /* CwlViews_macOSTests.swift */; };
+		C94853F51DC4E4EA009CC145 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C94853F41DC4E4EA009CC145 /* Assets.xcassets */; };
+		C94854031DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94854021DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.swift */; };
+		C952BB341F3DCAE200B61DF1 /* CwlLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */; };
+		C974DBA2213A609700E1A278 /* CwlViews.h in Headers */ = {isa = PBXBuildFile; fileRef = C9B040871EDBF35B0088A3CC /* CwlViews.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C98639EE1FE9DCE80047C273 /* CwlBindingName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */; };
+		C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */; };
+		C98639F11FEA38C10047C273 /* CwlSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639F01FEA38C10047C273 /* CwlSwitch.swift */; };
+		C99574BB1F406F8800F95CCF /* CwlBackingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948542F1DC6E8AD009CC145 /* CwlBackingLayer.swift */; };
+		C997F859206600B0001A7BF8 /* CwlPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C997F858206600B0001A7BF8 /* CwlPageViewController.swift */; };
+		C99946591F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */; };
+		C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */; };
+		C9A18B381E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */; };
+		C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */; };
+		C9A18B3B1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */; };
+		C9A18B3C1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */; };
+		C9A18B3E1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */; };
+		C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */; };
+		C9A97C611F284693006DDD6D /* CwlViews.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C94853C01DC4E306009CC145 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C9AD96A31DF8415500D66AD9 /* CwlArrayMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */; };
+		C9ADA3A41EE3BFE400C29925 /* CwlBinderBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A31EE3BFE400C29925 /* CwlBinderBase.swift */; };
+		C9ADA3A51EE3BFE400C29925 /* CwlBinderBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A31EE3BFE400C29925 /* CwlBinderBase.swift */; };
+		C9ADA3A71EE3BFEC00C29925 /* CwlObjectStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A61EE3BFEC00C29925 /* CwlObjectStorage.swift */; };
+		C9ADA3A81EE3BFEC00C29925 /* CwlObjectStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A61EE3BFEC00C29925 /* CwlObjectStorage.swift */; };
+		C9B040891EDBF40D0088A3CC /* CwlViews.h in Headers */ = {isa = PBXBuildFile; fileRef = C9B040871EDBF35B0088A3CC /* CwlViews.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C9B27E6E1E51CA9700265580 /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
+		C9B27E731E51CA9700265580 /* CwlViews_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B27E721E51CA9700265580 /* CwlViews_iOSTests.swift */; };
+		C9B27E8A1E51CAD100265580 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9B27E891E51CAD100265580 /* Assets.xcassets */; };
+		C9B27E8D1E51CAD100265580 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */; };
+		C9B27E981E51CAD100265580 /* CwlViewsHarness_iOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B27E971E51CAD100265580 /* CwlViewsHarness_iOSUITests.swift */; };
+		C9B27EA91E51D34300265580 /* CwlArrayMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */; };
+		C9B705EC20686CBD00B4CD29 /* CwlViewsTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C9B705F92068758900B4CD29 /* CwlViewControllerTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B705F220686DAA00B4CD29 /* CwlViewControllerTesting.swift */; };
+		C9B705FA2068758F00B4CD29 /* CwlBindingParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B705F520686E3200B4CD29 /* CwlBindingParser.swift */; };
+		C9B705FE20687D7800B4CD29 /* CwlTableViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B705FD20687D7800B4CD29 /* CwlTableViewTesting.swift */; };
+		C9B70602206884B800B4CD29 /* CwlTableViewCellTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B70601206884B800B4CD29 /* CwlTableViewCellTesting.swift */; };
+		C9B706042068902B00B4CD29 /* CwlLabelTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B706032068902B00B4CD29 /* CwlLabelTesting.swift */; };
+		C9B70606206890FB00B4CD29 /* CwlViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B70605206890FB00B4CD29 /* CwlViewTesting.swift */; };
+		C9B706082068C81500B4CD29 /* CwlNavigationItemTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B706072068C81500B4CD29 /* CwlNavigationItemTesting.swift */; };
+		C9B7060A2068C86700B4CD29 /* CwlBarButtonItemTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B706092068C86700B4CD29 /* CwlBarButtonItemTesting.swift */; };
+		C9BB0CC0200AF01C0062FB08 /* CwlStackAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */; };
+		C9C868601FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */; };
+		C9C868611FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */; };
+		C9DF3DDA1FF5B6DB0058E427 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD21FF5B6DA0058E427 /* Document.swift */; };
+		C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */; };
+		C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD51FF5B6DA0058E427 /* main.swift */; };
+		C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */; };
+		C9EC1C0D213BB1F3009F062D /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C94853C01DC4E306009CC145 /* CwlViews.framework */; };
+		C9EC1C0E213BB1FE009F062D /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
+		C9EC312B1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */; };
+		C9EC312C1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */; };
+		C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143961FF5BB8A002BBB13 /* NavView.swift */; };
+		C9F143991FF5BB98002BBB13 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143981FF5BB98002BBB13 /* TableView.swift */; };
+		C9F397811FCFB18B00BEE049 /* CwlLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C984984A1DC8AB66001F12B2 /* CwlLayer.swift */; };
+		C9F397821FCFB45700BEE049 /* CwlGradientLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C958521EB8E16300D86558 /* CwlGradientLayer.swift */; };
+		C9F397831FD0195C00BEE049 /* CwlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9924B3C1E6E8A38006CD314 /* CwlView.swift */; };
+		C9F397841FD022DF00BEE049 /* CwlWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9924B3A1E6E8058006CD314 /* CwlWindow.swift */; };
+		C9F397851FD0256400BEE049 /* CwlViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D282341E76398A0072A18C /* CwlViewController.swift */; };
+		C9F397861FD026DC00BEE049 /* CwlSetOrAnimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BDF5A91F3DD4F3001928B2 /* CwlSetOrAnimate.swift */; };
+		C9F397871FD0270C00BEE049 /* CwlNavigationItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C945561E80DABE00325F12 /* CwlNavigationItem.swift */; };
+		C9F397881FD0290400BEE049 /* CwlStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C935AC071E81762F006C1165 /* CwlStackView.swift */; };
+		C9F397891FD0290400BEE049 /* CwlWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A4CC9C1EA658EC0096F68D /* CwlWebView.swift */; };
+		C9F3978A1FD02C5D00BEE049 /* CwlScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3B31E87751B001F1310 /* CwlScrollView.swift */; };
+		C9F3978B1FD02D5E00BEE049 /* CwlGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3B51E877CBD001F1310 /* CwlGestureRecognizer.swift */; };
+		C9F3978C1FD02D5E00BEE049 /* CwlPanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3BF1E877DBD001F1310 /* CwlPanGestureRecognizer.swift */; };
+		C9F3978D1FD02D5E00BEE049 /* CwlPinchGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3B91E877D55001F1310 /* CwlPinchGestureRecognizer.swift */; };
+		C9F3978E1FD0332600BEE049 /* CwlButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B331E82BCCD00ADDCD4 /* CwlButton.swift */; };
+		C9F3978F1FD0332600BEE049 /* CwlControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B311E827F9D00ADDCD4 /* CwlControl.swift */; };
+		C9F397901FD0332600BEE049 /* CwlSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9785B961EB9BC4B00B29F64 /* CwlSplitViewController.swift */; };
+		C9F397911FD035A900BEE049 /* CwlImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C978CCF41E8747BE00A0BF05 /* CwlImageView.swift */; };
+		C9F397921FD035A900BEE049 /* CwlLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B351E838B5900ADDCD4 /* CwlLabel.swift */; };
+		C9F397931FD0CA3E00BEE049 /* CwlAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90AAA511EBCA83000E2C0EE /* CwlAlertAction.swift */; };
+		C9F397941FD0CA3E00BEE049 /* CwlAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90AAA4F1EBCA12400E2C0EE /* CwlAlertController.swift */; };
+		C9F397961FD0CA3E00BEE049 /* CwlBarButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62281EA5B1BB0059D152 /* CwlBarButtonItem.swift */; };
+		C9F397971FD0CA3E00BEE049 /* CwlBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62261EA59F560059D152 /* CwlBarItem.swift */; };
+		C9F397981FD0CA3E00BEE049 /* CwlLongPressGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3C31E877DF8001F1310 /* CwlLongPressGestureRecognizer.swift */; };
+		C9F397991FD0CA3E00BEE049 /* CwlNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95D21761EC967020082A31E /* CwlNavigationBar.swift */; };
+		C9F3979A1FD0CA3E00BEE049 /* CwlNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F35BB61E7ABA8900D948D2 /* CwlNavigationController.swift */; };
+		C9F3979B1FD0CA3E00BEE049 /* CwlStackAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */; };
+		C9F3979C1FD0CA3E00BEE049 /* CwlRotationGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3BB1E877D74001F1310 /* CwlRotationGestureRecognizer.swift */; };
+		C9F3979D1FD0CA3E00BEE049 /* CwlScreenEdgePanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3C11E877DDA001F1310 /* CwlScreenEdgePanGestureRecognizer.swift */; };
+		C9F3979E1FD0CA3E00BEE049 /* CwlSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CFB0C1EE505DD00C18737 /* CwlSlider.swift */; };
+		C9F3979F1FD0CA3E00BEE049 /* CwlSwipeGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3BD1E877D92001F1310 /* CwlSwipeGestureRecognizer.swift */; };
+		C9F397A01FD0CA3E00BEE049 /* CwlTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193C81E8913CC00ED86D4 /* CwlTableView.swift */; };
+		C9F397A11FD0CA3E00BEE049 /* CwlTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193CA1E89140000ED86D4 /* CwlTableViewCell.swift */; };
+		C9F397A21FD0CA3E00BEE049 /* CwlTableSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB56921EAC49F8000EC5F4 /* CwlTableSection.swift */; };
+		C9F397A31FD0CA3E00BEE049 /* CwlTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A3B71E877D38001F1310 /* CwlTapGestureRecognizer.swift */; };
+		C9F397A41FD0CA3E00BEE049 /* CwlTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62301EA5E5550059D152 /* CwlTextField.swift */; };
+		C9F397A51FD0CA3E00BEE049 /* CwlTextInputTraits.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62321EA5EB6F0059D152 /* CwlTextInputTraits.swift */; };
+		C9F397A61FD0CA3E00BEE049 /* CwlTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95D897F1ED9934E008A5753 /* CwlTextView.swift */; };
+		C9F397A81FD2602200BEE049 /* CwlTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F397A71FD2602200BEE049 /* CwlTabBarItem.swift */; };
+		C9FDAD2F1F3AB30900154DA8 /* CwlStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */; };
+		C9FDAD301F3AB30900154DA8 /* CwlStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C94853CB1DC4E306009CC145 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C94853BF1DC4E306009CC145;
+			remoteInfo = CwlViews;
+		};
+		C94853FF1DC4E4EA009CC145 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C94853EF1DC4E4EA009CC145;
+			remoteInfo = CwlViewsHarness;
+		};
+		C95EE978215F73DC00FD1F2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9CA9EAA215EFD2C004481B0;
+			remoteInfo = CwlSignal_macOS;
+		};
+		C9A8AF2E20E8646B0068E99B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C93EA1F520E1144B00C733A3;
+			remoteInfo = PackageFetch;
+		};
+		C9A97C5D1F28468D006DDD6D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C94853BF1DC4E306009CC145;
+			remoteInfo = CwlViews_macOS;
+		};
+		C9B27E6F1E51CA9700265580 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9B27E641E51CA9700265580;
+			remoteInfo = CwlViews_iOS;
+		};
+		C9B27E941E51CAD100265580 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9B27E7F1E51CAD100265580;
+			remoteInfo = CwlViewsHarness_iOS;
+		};
+		C9B27EA21E51D2E200265580 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9B27E641E51CA9700265580;
+			remoteInfo = CwlViews_iOS;
+		};
+		C9B705FB20687A9A00B4CD29 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9B27E641E51CA9700265580;
+			remoteInfo = CwlViews_iOS;
+		};
+		C9CA9EB7215EFFAE004481B0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C93EA1F520E1144B00C733A3;
+			remoteInfo = PackageFetch;
+		};
+		C9CA9EB9215EFFC0004481B0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9CA9E90215EFD0C004481B0;
+			remoteInfo = CwlSignal_iOS;
+		};
+		C9CA9EBB215F51FE004481B0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C93EA1F520E1144B00C733A3;
+			remoteInfo = PackageFetch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C948540B1DC4E4F7009CC145 /* Copy Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C9460DA521605F1000DBB58F /* CwlUtils.framework in Copy Frameworks */,
+				C9460DA621605F1000DBB58F /* CwlSignal.framework in Copy Frameworks */,
+				C9A97C611F284693006DDD6D /* CwlViews.framework in Copy Frameworks */,
+			);
+			name = "Copy Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27EA41E51D2FE00265580 /* Copy frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C9460DA721605F1B00DBB58F /* CwlUtils.framework in Copy frameworks */,
+				C9460DA821605F1B00DBB58F /* CwlSignal.framework in Copy frameworks */,
+				C912FC4A1EB62B7800D679E7 /* CwlViews.framework in Copy frameworks */,
+			);
+			name = "Copy frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		C90AAA4F1EBCA12400E2C0EE /* CwlAlertController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertController.swift; sourceTree = "<group>"; };
+		C90AAA511EBCA83000E2C0EE /* CwlAlertAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertAction.swift; sourceTree = "<group>"; };
+		C913073F1F66384200174902 /* CwlCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlCoder.swift; sourceTree = "<group>"; };
+		C91625DA206FBE57002E44D9 /* CwlBinderState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBinderState.swift; sourceTree = "<group>"; };
+		C91625DD206FBE8E002E44D9 /* CwlBinderParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBinderParameters.swift; sourceTree = "<group>"; };
+		C91683FB203FC1BA00B4D40E /* CwlTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabBar.swift; sourceTree = "<group>"; };
+		C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBinder.swift; sourceTree = "<group>"; };
+		C91CC2D2206F0E45006FFF97 /* CwlConstructingBinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlConstructingBinder.swift; sourceTree = "<group>"; };
+		C925223920957D3400CA39A4 /* CwlSignalCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSignalCallback.swift; sourceTree = "<group>"; };
+		C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSetMutation.swift; sourceTree = "<group>"; };
+		C926D0611FF07348002BF020 /* CwlSearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSearchBar.swift; sourceTree = "<group>"; };
+		C9287EE3202D3FE50046732C /* CwlScopedValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlScopedValues.swift; sourceTree = "<group>"; };
+		C9351F1E1DCAD2BC001D484B /* CwlToolbar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlToolbar.swift; sourceTree = "<group>"; };
+		C9351F231DCAD2CA001D484B /* CwlToolbarItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlToolbarItem.swift; sourceTree = "<group>"; };
+		C9351F251DCAD3D0001D484B /* CwlMenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMenuItem.swift; sourceTree = "<group>"; };
+		C935AC071E81762F006C1165 /* CwlStackView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlStackView.swift; sourceTree = "<group>"; };
+		C937E76C20046BE000E63965 /* CwlStateContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStateContainer.swift; sourceTree = "<group>"; };
+		C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTableRowMutation.swift; sourceTree = "<group>"; };
+		C940A3B31E87751B001F1310 /* CwlScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollView.swift; sourceTree = "<group>"; };
+		C940A3B51E877CBD001F1310 /* CwlGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3B71E877D38001F1310 /* CwlTapGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTapGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3B91E877D55001F1310 /* CwlPinchGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPinchGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3BB1E877D74001F1310 /* CwlRotationGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlRotationGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3BD1E877D92001F1310 /* CwlSwipeGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSwipeGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3BF1E877DBD001F1310 /* CwlPanGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPanGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3C11E877DDA001F1310 /* CwlScreenEdgePanGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScreenEdgePanGestureRecognizer.swift; sourceTree = "<group>"; };
+		C940A3C31E877DF8001F1310 /* CwlLongPressGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLongPressGestureRecognizer.swift; sourceTree = "<group>"; };
+		C945207B205152CE00693C43 /* CwlTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabBarController.swift; sourceTree = "<group>"; };
+		C945D7481E5017CF009AFB8E /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		C947105D1E3364A300EC50D6 /* CwlMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMenu.swift; sourceTree = "<group>"; };
+		C94853C01DC4E306009CC145 /* CwlViews.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlViews.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C94853C41DC4E306009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C94853C91DC4E306009CC145 /* CwlViews_macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViews_macOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C94853CE1DC4E306009CC145 /* CwlViews_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViews_macOSTests.swift; sourceTree = "<group>"; };
+		C94853D01DC4E306009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C94853F01DC4E4EA009CC145 /* CwlViewsHarness_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViewsHarness_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C94853F41DC4E4EA009CC145 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C94853F91DC4E4EA009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C94853FE1DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViewsHarness_macOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C94854021DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViewsHarness_macOSUITests.swift; sourceTree = "<group>"; };
+		C94854041DC4E4EA009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C948540E1DC4E8E1009CC145 /* CwlWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindow.swift; sourceTree = "<group>"; };
+		C94854151DC59DFC009CC145 /* CwlView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlView.swift; sourceTree = "<group>"; };
+		C948542F1DC6E8AD009CC145 /* CwlBackingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBackingLayer.swift; sourceTree = "<group>"; };
+		C95193C81E8913CC00ED86D4 /* CwlTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableView.swift; sourceTree = "<group>"; };
+		C95193CA1E89140000ED86D4 /* CwlTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableViewCell.swift; sourceTree = "<group>"; };
+		C952092A1DCB0B5C005F478B /* CwlControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlControl.swift; sourceTree = "<group>"; };
+		C952092F1DCB0F02005F478B /* CwlButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlButton.swift; sourceTree = "<group>"; };
+		C95209311DCB1164005F478B /* CwlClipView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlClipView.swift; sourceTree = "<group>"; };
+		C95209331DCB14A4005F478B /* CwlClickGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlClickGestureRecognizer.swift; sourceTree = "<group>"; };
+		C95209351DCB14B7005F478B /* CwlMagnificationGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMagnificationGestureRecognizer.swift; sourceTree = "<group>"; };
+		C95209371DCB14C8005F478B /* CwlPanGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPanGestureRecognizer.swift; sourceTree = "<group>"; };
+		C95209391DCB14D8005F478B /* CwlPressGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPressGestureRecognizer.swift; sourceTree = "<group>"; };
+		C952093B1DCB14E7005F478B /* CwlRotationGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlRotationGestureRecognizer.swift; sourceTree = "<group>"; };
+		C95A62261EA59F560059D152 /* CwlBarItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBarItem.swift; sourceTree = "<group>"; };
+		C95A62281EA5B1BB0059D152 /* CwlBarButtonItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBarButtonItem.swift; sourceTree = "<group>"; };
+		C95A62301EA5E5550059D152 /* CwlTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextField.swift; sourceTree = "<group>"; };
+		C95A62321EA5EB6F0059D152 /* CwlTextInputTraits.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextInputTraits.swift; sourceTree = "<group>"; };
+		C95D21761EC967020082A31E /* CwlNavigationBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationBar.swift; sourceTree = "<group>"; };
+		C95D897F1ED9934E008A5753 /* CwlTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextView.swift; sourceTree = "<group>"; };
+		C9785B961EB9BC4B00B29F64 /* CwlSplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSplitViewController.swift; sourceTree = "<group>"; };
+		C978CCF41E8747BE00A0BF05 /* CwlImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlImageView.swift; sourceTree = "<group>"; };
+		C97CA94D1E55C82D00AD10E3 /* CwlApplication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlApplication.swift; sourceTree = "<group>"; };
+		C97CFB0C1EE505DD00C18737 /* CwlSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSlider.swift; sourceTree = "<group>"; };
+		C981E3401E2E33E2003A5A55 /* CwlApplication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlApplication.swift; sourceTree = "<group>"; };
+		C984984A1DC8AB66001F12B2 /* CwlLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLayer.swift; sourceTree = "<group>"; };
+		C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBindingName.swift; sourceTree = "<group>"; };
+		C98639F01FEA38C10047C273 /* CwlSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSwitch.swift; sourceTree = "<group>"; };
+		C9924B3A1E6E8058006CD314 /* CwlWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindow.swift; sourceTree = "<group>"; };
+		C9924B3C1E6E8A38006CD314 /* CwlView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlView.swift; sourceTree = "<group>"; };
+		C997F858206600B0001A7BF8 /* CwlPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlPageViewController.swift; sourceTree = "<group>"; };
+		C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStackMutation.swift; sourceTree = "<group>"; };
+		C9A18B311E827F9D00ADDCD4 /* CwlControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlControl.swift; sourceTree = "<group>"; };
+		C9A18B331E82BCCD00ADDCD4 /* CwlButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlButton.swift; sourceTree = "<group>"; };
+		C9A18B351E838B5900ADDCD4 /* CwlLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLabel.swift; sourceTree = "<group>"; };
+		C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBinderPreparer.swift; sourceTree = "<group>"; };
+		C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlDynamicValue.swift; sourceTree = "<group>"; };
+		C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTargetAction.swift; sourceTree = "<group>"; };
+		C9A4CC9C1EA658EC0096F68D /* CwlWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWebView.swift; sourceTree = "<group>"; };
+		C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStackAdapter.swift; sourceTree = "<group>"; };
+		C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlArrayMutation.swift; sourceTree = "<group>"; };
+		C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLayout.swift; sourceTree = "<group>"; };
+		C9ADA3A31EE3BFE400C29925 /* CwlBinderBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBinderBase.swift; sourceTree = "<group>"; };
+		C9ADA3A61EE3BFEC00C29925 /* CwlObjectStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlObjectStorage.swift; sourceTree = "<group>"; };
+		C9B040871EDBF35B0088A3CC /* CwlViews.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CwlViews.h; sourceTree = "<group>"; };
+		C9B07EE3213A4F5600CDA519 /* install_cwlviews_templates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = install_cwlviews_templates.swift; sourceTree = "<group>"; };
+		C9B27E651E51CA9700265580 /* CwlViews.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlViews.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9B27E6D1E51CA9700265580 /* CwlViews_iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViews_iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9B27E721E51CA9700265580 /* CwlViews_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViews_iOSTests.swift; sourceTree = "<group>"; };
+		C9B27E741E51CA9700265580 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C9B27E801E51CAD100265580 /* CwlViewsHarness_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViewsHarness_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9B27E891E51CAD100265580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C9B27E8C1E51CAD100265580 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		C9B27E8E1E51CAD100265580 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C9B27E931E51CAD100265580 /* CwlViewsHarness_iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViewsHarness_iOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9B27E971E51CAD100265580 /* CwlViewsHarness_iOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViewsHarness_iOSUITests.swift; sourceTree = "<group>"; };
+		C9B27E991E51CAD100265580 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C9B38DB11DD0087900913019 /* CwlScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollView.swift; sourceTree = "<group>"; };
+		C9B38DB71DD0160A00913019 /* CwlTableCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableCellView.swift; sourceTree = "<group>"; };
+		C9B38DB81DD0160A00913019 /* CwlTableColumn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableColumn.swift; sourceTree = "<group>"; };
+		C9B38DB91DD0160A00913019 /* CwlTableHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableHeaderView.swift; sourceTree = "<group>"; };
+		C9B38DBA1DD0160A00913019 /* CwlTableRowView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableRowView.swift; sourceTree = "<group>"; };
+		C9B38DBB1DD0160A00913019 /* CwlTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableView.swift; sourceTree = "<group>"; };
+		C9B38DBC1DD0160A00913019 /* CwlTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextField.swift; sourceTree = "<group>"; };
+		C9B705E820686CBD00B4CD29 /* CwlViewsTesting.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlViewsTesting.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CwlViewsTesting.h; sourceTree = "<group>"; };
+		C9B705EB20686CBD00B4CD29 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C9B705F220686DAA00B4CD29 /* CwlViewControllerTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViewControllerTesting.swift; sourceTree = "<group>"; };
+		C9B705F520686E3200B4CD29 /* CwlBindingParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBindingParser.swift; sourceTree = "<group>"; };
+		C9B705FD20687D7800B4CD29 /* CwlTableViewTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTableViewTesting.swift; sourceTree = "<group>"; };
+		C9B70601206884B800B4CD29 /* CwlTableViewCellTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTableViewCellTesting.swift; sourceTree = "<group>"; };
+		C9B706032068902B00B4CD29 /* CwlLabelTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlLabelTesting.swift; sourceTree = "<group>"; };
+		C9B70605206890FB00B4CD29 /* CwlViewTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViewTesting.swift; sourceTree = "<group>"; };
+		C9B706072068C81500B4CD29 /* CwlNavigationItemTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlNavigationItemTesting.swift; sourceTree = "<group>"; };
+		C9B706092068C86700B4CD29 /* CwlBarButtonItemTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBarButtonItemTesting.swift; sourceTree = "<group>"; };
+		C9BDF5A91F3DD4F3001928B2 /* CwlSetOrAnimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSetOrAnimate.swift; sourceTree = "<group>"; };
+		C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlArrayMutationUtilities.swift; sourceTree = "<group>"; };
+		C9C945561E80DABE00325F12 /* CwlNavigationItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationItem.swift; sourceTree = "<group>"; };
+		C9C958521EB8E16300D86558 /* CwlGradientLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGradientLayer.swift; sourceTree = "<group>"; };
+		C9CA9E84215EFCFB004481B0 /* CwlUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9CA9E91215EFD0C004481B0 /* CwlSignal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlSignal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9CA9E9E215EFD1E004481B0 /* CwlUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9CA9EAB215EFD2C004481B0 /* CwlSignal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlSignal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9D0A45E1E3476E50088F2AD /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C9D0A4651E34CD900088F2AD /* MainMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
+		C9D282341E76398A0072A18C /* CwlViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewController.swift; sourceTree = "<group>"; };
+		C9DF3DD21FF5B6DA0058E427 /* Document.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
+		C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentAdapter.swift; sourceTree = "<group>"; };
+		C9DF3DD51FF5B6DA0058E427 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		C9E181211EA89B6F00DD0107 /* CwlOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlOutlineView.swift; sourceTree = "<group>"; };
+		C9EB225B1DC9BB80009E0885 /* CwlGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGestureRecognizer.swift; sourceTree = "<group>"; };
+		C9EB56921EAC49F8000EC5F4 /* CwlTableSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableSection.swift; sourceTree = "<group>"; };
+		C9EB56941EAC4A49000EC5F4 /* CwlTreeMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTreeMutation.swift; sourceTree = "<group>"; };
+		C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlFilteredAdapter.swift; sourceTree = "<group>"; };
+		C9F143961FF5BB8A002BBB13 /* NavView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavView.swift; sourceTree = "<group>"; };
+		C9F143981FF5BB98002BBB13 /* TableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
+		C9F35BB61E7ABA8900D948D2 /* CwlNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationController.swift; sourceTree = "<group>"; };
+		C9F397A71FD2602200BEE049 /* CwlTabBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabBarItem.swift; sourceTree = "<group>"; };
+		C9F9406A1EA86693002011D2 /* CwlPopUpButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPopUpButton.swift; sourceTree = "<group>"; };
+		C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStateAdapter.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C94853BC1DC4E306009CC145 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9460DAA2160601300DBB58F /* CwlSignal.framework in Frameworks */,
+				C9460DAB2160601300DBB58F /* CwlUtils.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853C61DC4E306009CC145 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C94853CA1DC4E306009CC145 /* CwlViews.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853ED1DC4E4EA009CC145 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9EC1C0D213BB1F3009F062D /* CwlViews.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853FB1DC4E4EA009CC145 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E611E51CA9700265580 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9460DAC2160602300DBB58F /* CwlSignal.framework in Frameworks */,
+				C9460DAD2160602300DBB58F /* CwlUtils.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E6A1E51CA9700265580 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B27E6E1E51CA9700265580 /* CwlViews.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E7D1E51CAD100265580 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9EC1C0E213BB1FE009F062D /* CwlViews.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E901E51CAD100265580 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B705E420686CBD00B4CD29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C93EA1EA20E1121400C733A3 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				C9B07EE3213A4F5600CDA519 /* install_cwlviews_templates.swift */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		C9460DA92160601300DBB58F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C94853B61DC4E306009CC145 = {
+			isa = PBXGroup;
+			children = (
+				C945D7481E5017CF009AFB8E /* Package.swift */,
+				C94853C11DC4E306009CC145 /* Products */,
+				C93EA1EA20E1121400C733A3 /* Scripts */,
+				C99A6E2B1E4F348D004C4928 /* Sources */,
+				C99A6E2C1E4F34CD004C4928 /* Tests */,
+				C9460DA92160601300DBB58F /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		C94853C11DC4E306009CC145 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C9CA9E84215EFCFB004481B0 /* CwlUtils.framework */,
+				C9CA9E91215EFD0C004481B0 /* CwlSignal.framework */,
+				C9B27E651E51CA9700265580 /* CwlViews.framework */,
+				C9B27E6D1E51CA9700265580 /* CwlViews_iOSTests.xctest */,
+				C9B27E801E51CAD100265580 /* CwlViewsHarness_iOS.app */,
+				C9B27E931E51CAD100265580 /* CwlViewsHarness_iOSUITests.xctest */,
+				C9B705E820686CBD00B4CD29 /* CwlViewsTesting.framework */,
+				C9CA9E9E215EFD1E004481B0 /* CwlUtils.framework */,
+				C9CA9EAB215EFD2C004481B0 /* CwlSignal.framework */,
+				C94853C01DC4E306009CC145 /* CwlViews.framework */,
+				C94853C91DC4E306009CC145 /* CwlViews_macOSTests.xctest */,
+				C94853F01DC4E4EA009CC145 /* CwlViewsHarness_macOS.app */,
+				C94853FE1DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C94853C21DC4E306009CC145 /* CwlViews */ = {
+			isa = PBXGroup;
+			children = (
+				C9B040871EDBF35B0088A3CC /* CwlViews.h */,
+				C94853C41DC4E306009CC145 /* Info.plist */,
+				C94854101DC58FF5009CC145 /* Core */,
+				C9924B3E1E6F81CA006CD314 /* Common */,
+				C948540D1DC4E8D1009CC145 /* macOS */,
+				C9B27EAB1E51DA5100265580 /* iOS */,
+			);
+			path = CwlViews;
+			sourceTree = "<group>";
+		};
+		C94853CD1DC4E306009CC145 /* CwlViews_macOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				C94853CE1DC4E306009CC145 /* CwlViews_macOSTests.swift */,
+				C94853D01DC4E306009CC145 /* Info.plist */,
+			);
+			path = CwlViews_macOSTests;
+			sourceTree = "<group>";
+		};
+		C94853F11DC4E4EA009CC145 /* CwlViewsHarness_macOS */ = {
+			isa = PBXGroup;
+			children = (
+				C9D0A45E1E3476E50088F2AD /* main.swift */,
+				C9D0A4651E34CD900088F2AD /* MainMenu.swift */,
+				C94853F41DC4E4EA009CC145 /* Assets.xcassets */,
+				C94853F91DC4E4EA009CC145 /* Info.plist */,
+			);
+			path = CwlViewsHarness_macOS;
+			sourceTree = "<group>";
+		};
+		C94854011DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				C94854021DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.swift */,
+				C94854041DC4E4EA009CC145 /* Info.plist */,
+			);
+			path = CwlViewsHarness_macOSUITests;
+			sourceTree = "<group>";
+		};
+		C948540D1DC4E8D1009CC145 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				C981E3401E2E33E2003A5A55 /* CwlApplication.swift */,
+				C952092F1DCB0F02005F478B /* CwlButton.swift */,
+				C95209331DCB14A4005F478B /* CwlClickGestureRecognizer.swift */,
+				C95209311DCB1164005F478B /* CwlClipView.swift */,
+				C952092A1DCB0B5C005F478B /* CwlControl.swift */,
+				C9EB225B1DC9BB80009E0885 /* CwlGestureRecognizer.swift */,
+				C95209351DCB14B7005F478B /* CwlMagnificationGestureRecognizer.swift */,
+				C947105D1E3364A300EC50D6 /* CwlMenu.swift */,
+				C9351F251DCAD3D0001D484B /* CwlMenuItem.swift */,
+				C9E181211EA89B6F00DD0107 /* CwlOutlineView.swift */,
+				C95209371DCB14C8005F478B /* CwlPanGestureRecognizer.swift */,
+				C9F9406A1EA86693002011D2 /* CwlPopUpButton.swift */,
+				C95209391DCB14D8005F478B /* CwlPressGestureRecognizer.swift */,
+				C952093B1DCB14E7005F478B /* CwlRotationGestureRecognizer.swift */,
+				C9B38DB11DD0087900913019 /* CwlScrollView.swift */,
+				C9B38DB71DD0160A00913019 /* CwlTableCellView.swift */,
+				C9B38DB81DD0160A00913019 /* CwlTableColumn.swift */,
+				C9B38DB91DD0160A00913019 /* CwlTableHeaderView.swift */,
+				C9B38DBA1DD0160A00913019 /* CwlTableRowView.swift */,
+				C9B38DBB1DD0160A00913019 /* CwlTableView.swift */,
+				C9B38DBC1DD0160A00913019 /* CwlTextField.swift */,
+				C9351F1E1DCAD2BC001D484B /* CwlToolbar.swift */,
+				C9351F231DCAD2CA001D484B /* CwlToolbarItem.swift */,
+				C9EB56941EAC4A49000EC5F4 /* CwlTreeMutation.swift */,
+				C94854151DC59DFC009CC145 /* CwlView.swift */,
+				C948540E1DC4E8E1009CC145 /* CwlWindow.swift */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		C94854101DC58FF5009CC145 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */,
+				C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */,
+				C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */,
+				C9ADA3A31EE3BFE400C29925 /* CwlBinderBase.swift */,
+				C91625DD206FBE8E002E44D9 /* CwlBinderParameters.swift */,
+				C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */,
+				C91625DA206FBE57002E44D9 /* CwlBinderState.swift */,
+				C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */,
+				C913073F1F66384200174902 /* CwlCoder.swift */,
+				C91CC2D2206F0E45006FFF97 /* CwlConstructingBinder.swift */,
+				C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */,
+				C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */,
+				C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */,
+				C9ADA3A61EE3BFEC00C29925 /* CwlObjectStorage.swift */,
+				C9287EE3202D3FE50046732C /* CwlScopedValues.swift */,
+				C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */,
+				C925223920957D3400CA39A4 /* CwlSignalCallback.swift */,
+				C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */,
+				C937E76C20046BE000E63965 /* CwlStateContainer.swift */,
+				C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */,
+				C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */,
+				C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */,
+				C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		C9924B3E1E6F81CA006CD314 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				C948542F1DC6E8AD009CC145 /* CwlBackingLayer.swift */,
+				C9C958521EB8E16300D86558 /* CwlGradientLayer.swift */,
+				C984984A1DC8AB66001F12B2 /* CwlLayer.swift */,
+				C935AC071E81762F006C1165 /* CwlStackView.swift */,
+				C9A4CC9C1EA658EC0096F68D /* CwlWebView.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		C99A6E2B1E4F348D004C4928 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				C94853C21DC4E306009CC145 /* CwlViews */,
+				C9B705F020686D2200B4CD29 /* CwlViewsTesting */,
+				C94853F11DC4E4EA009CC145 /* CwlViewsHarness_macOS */,
+				C9B27E811E51CAD100265580 /* CwlViewsHarness_iOS */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		C99A6E2C1E4F34CD004C4928 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				C94853CD1DC4E306009CC145 /* CwlViews_macOSTests */,
+				C9B27E711E51CA9700265580 /* CwlViews_iOSTests */,
+				C94854011DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests */,
+				C9B27E961E51CAD100265580 /* CwlViewsHarness_iOSUITests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		C9B27E711E51CA9700265580 /* CwlViews_iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				C9B27E721E51CA9700265580 /* CwlViews_iOSTests.swift */,
+				C9B27E741E51CA9700265580 /* Info.plist */,
+			);
+			path = CwlViews_iOSTests;
+			sourceTree = "<group>";
+		};
+		C9B27E811E51CAD100265580 /* CwlViewsHarness_iOS */ = {
+			isa = PBXGroup;
+			children = (
+				C9DF3DD51FF5B6DA0058E427 /* main.swift */,
+				C9F143961FF5BB8A002BBB13 /* NavView.swift */,
+				C9F143981FF5BB98002BBB13 /* TableView.swift */,
+				C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */,
+				C9DF3DD21FF5B6DA0058E427 /* Document.swift */,
+				C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */,
+				C9B27E891E51CAD100265580 /* Assets.xcassets */,
+				C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */,
+				C9B27E8E1E51CAD100265580 /* Info.plist */,
+			);
+			path = CwlViewsHarness_iOS;
+			sourceTree = "<group>";
+		};
+		C9B27E961E51CAD100265580 /* CwlViewsHarness_iOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				C9B27E971E51CAD100265580 /* CwlViewsHarness_iOSUITests.swift */,
+				C9B27E991E51CAD100265580 /* Info.plist */,
+			);
+			path = CwlViewsHarness_iOSUITests;
+			sourceTree = "<group>";
+		};
+		C9B27EAB1E51DA5100265580 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				C90AAA511EBCA83000E2C0EE /* CwlAlertAction.swift */,
+				C90AAA4F1EBCA12400E2C0EE /* CwlAlertController.swift */,
+				C97CA94D1E55C82D00AD10E3 /* CwlApplication.swift */,
+				C95A62281EA5B1BB0059D152 /* CwlBarButtonItem.swift */,
+				C95A62261EA59F560059D152 /* CwlBarItem.swift */,
+				C9A18B331E82BCCD00ADDCD4 /* CwlButton.swift */,
+				C9A18B311E827F9D00ADDCD4 /* CwlControl.swift */,
+				C940A3B51E877CBD001F1310 /* CwlGestureRecognizer.swift */,
+				C978CCF41E8747BE00A0BF05 /* CwlImageView.swift */,
+				C9A18B351E838B5900ADDCD4 /* CwlLabel.swift */,
+				C940A3C31E877DF8001F1310 /* CwlLongPressGestureRecognizer.swift */,
+				C95D21761EC967020082A31E /* CwlNavigationBar.swift */,
+				C9F35BB61E7ABA8900D948D2 /* CwlNavigationController.swift */,
+				C9C945561E80DABE00325F12 /* CwlNavigationItem.swift */,
+				C997F858206600B0001A7BF8 /* CwlPageViewController.swift */,
+				C940A3BF1E877DBD001F1310 /* CwlPanGestureRecognizer.swift */,
+				C940A3B91E877D55001F1310 /* CwlPinchGestureRecognizer.swift */,
+				C940A3BB1E877D74001F1310 /* CwlRotationGestureRecognizer.swift */,
+				C940A3C11E877DDA001F1310 /* CwlScreenEdgePanGestureRecognizer.swift */,
+				C940A3B31E87751B001F1310 /* CwlScrollView.swift */,
+				C926D0611FF07348002BF020 /* CwlSearchBar.swift */,
+				C9BDF5A91F3DD4F3001928B2 /* CwlSetOrAnimate.swift */,
+				C97CFB0C1EE505DD00C18737 /* CwlSlider.swift */,
+				C9785B961EB9BC4B00B29F64 /* CwlSplitViewController.swift */,
+				C940A3BD1E877D92001F1310 /* CwlSwipeGestureRecognizer.swift */,
+				C98639F01FEA38C10047C273 /* CwlSwitch.swift */,
+				C91683FB203FC1BA00B4D40E /* CwlTabBar.swift */,
+				C945207B205152CE00693C43 /* CwlTabBarController.swift */,
+				C9F397A71FD2602200BEE049 /* CwlTabBarItem.swift */,
+				C9EB56921EAC49F8000EC5F4 /* CwlTableSection.swift */,
+				C95193C81E8913CC00ED86D4 /* CwlTableView.swift */,
+				C95193CA1E89140000ED86D4 /* CwlTableViewCell.swift */,
+				C940A3B71E877D38001F1310 /* CwlTapGestureRecognizer.swift */,
+				C95A62301EA5E5550059D152 /* CwlTextField.swift */,
+				C95A62321EA5EB6F0059D152 /* CwlTextInputTraits.swift */,
+				C95D897F1ED9934E008A5753 /* CwlTextView.swift */,
+				C9924B3C1E6E8A38006CD314 /* CwlView.swift */,
+				C9D282341E76398A0072A18C /* CwlViewController.swift */,
+				C9924B3A1E6E8058006CD314 /* CwlWindow.swift */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		C9B705F020686D2200B4CD29 /* CwlViewsTesting */ = {
+			isa = PBXGroup;
+			children = (
+				C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */,
+				C9B705EB20686CBD00B4CD29 /* Info.plist */,
+				C9B705F420686DD300B4CD29 /* Core */,
+				C9B705F120686D8600B4CD29 /* iOS */,
+			);
+			path = CwlViewsTesting;
+			sourceTree = "<group>";
+		};
+		C9B705F120686D8600B4CD29 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				C9B706092068C86700B4CD29 /* CwlBarButtonItemTesting.swift */,
+				C9B706032068902B00B4CD29 /* CwlLabelTesting.swift */,
+				C9B706072068C81500B4CD29 /* CwlNavigationItemTesting.swift */,
+				C9B70601206884B800B4CD29 /* CwlTableViewCellTesting.swift */,
+				C9B705FD20687D7800B4CD29 /* CwlTableViewTesting.swift */,
+				C9B705F220686DAA00B4CD29 /* CwlViewControllerTesting.swift */,
+				C9B70605206890FB00B4CD29 /* CwlViewTesting.swift */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		C9B705F420686DD300B4CD29 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				C9B705F520686E3200B4CD29 /* CwlBindingParser.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		C9B040881EDBF4090088A3CC /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B040891EDBF40D0088A3CC /* CwlViews.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B0408A1EDBF4110088A3CC /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C974DBA2213A609700E1A278 /* CwlViews.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B705E520686CBD00B4CD29 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B705EC20686CBD00B4CD29 /* CwlViewsTesting.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		C94853BF1DC4E306009CC145 /* CwlViews_macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C94853D41DC4E306009CC145 /* Build configuration list for PBXNativeTarget "CwlViews_macOS" */;
+			buildPhases = (
+				C94853BB1DC4E306009CC145 /* Sources */,
+				C94853BC1DC4E306009CC145 /* Frameworks */,
+				C9B040881EDBF4090088A3CC /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CwlViews_macOS;
+			productName = CwlViews;
+			productReference = C94853C01DC4E306009CC145 /* CwlViews.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		C94853C81DC4E306009CC145 /* CwlViews_macOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C94853D71DC4E306009CC145 /* Build configuration list for PBXNativeTarget "CwlViews_macOSTests" */;
+			buildPhases = (
+				C94853C51DC4E306009CC145 /* Sources */,
+				C94853C61DC4E306009CC145 /* Frameworks */,
+				C94853C71DC4E306009CC145 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C94853CC1DC4E306009CC145 /* PBXTargetDependency */,
+			);
+			name = CwlViews_macOSTests;
+			productName = CwlViewsTests;
+			productReference = C94853C91DC4E306009CC145 /* CwlViews_macOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C94853EF1DC4E4EA009CC145 /* CwlViewsHarness_macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C94854051DC4E4EA009CC145 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_macOS" */;
+			buildPhases = (
+				C94853EC1DC4E4EA009CC145 /* Sources */,
+				C94853ED1DC4E4EA009CC145 /* Frameworks */,
+				C94853EE1DC4E4EA009CC145 /* Resources */,
+				C948540B1DC4E4F7009CC145 /* Copy Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9A97C5E1F28468D006DDD6D /* PBXTargetDependency */,
+			);
+			name = CwlViewsHarness_macOS;
+			productName = CwlViewsHarness;
+			productReference = C94853F01DC4E4EA009CC145 /* CwlViewsHarness_macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C94853FD1DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C94854081DC4E4EA009CC145 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_macOSUITests" */;
+			buildPhases = (
+				C94853FA1DC4E4EA009CC145 /* Sources */,
+				C94853FB1DC4E4EA009CC145 /* Frameworks */,
+				C94853FC1DC4E4EA009CC145 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C94854001DC4E4EA009CC145 /* PBXTargetDependency */,
+			);
+			name = CwlViewsHarness_macOSUITests;
+			productName = CwlViewsHarnessUITests;
+			productReference = C94853FE1DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		C9B27E641E51CA9700265580 /* CwlViews_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9B27E761E51CA9700265580 /* Build configuration list for PBXNativeTarget "CwlViews_iOS" */;
+			buildPhases = (
+				C9B27E601E51CA9700265580 /* Sources */,
+				C9B27E611E51CA9700265580 /* Frameworks */,
+				C9B0408A1EDBF4110088A3CC /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CwlViews_iOS;
+			productName = CwlViews_iOS;
+			productReference = C9B27E651E51CA9700265580 /* CwlViews.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		C9B27E6C1E51CA9700265580 /* CwlViews_iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9B27E791E51CA9700265580 /* Build configuration list for PBXNativeTarget "CwlViews_iOSTests" */;
+			buildPhases = (
+				C9B27E691E51CA9700265580 /* Sources */,
+				C9B27E6A1E51CA9700265580 /* Frameworks */,
+				C9B27E6B1E51CA9700265580 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9B27E701E51CA9700265580 /* PBXTargetDependency */,
+			);
+			name = CwlViews_iOSTests;
+			productName = CwlViews_iOSTests;
+			productReference = C9B27E6D1E51CA9700265580 /* CwlViews_iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C9B27E7F1E51CAD100265580 /* CwlViewsHarness_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9B27E9A1E51CAD100265580 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_iOS" */;
+			buildPhases = (
+				C9B27E7C1E51CAD100265580 /* Sources */,
+				C9B27E7D1E51CAD100265580 /* Frameworks */,
+				C9B27E7E1E51CAD100265580 /* Resources */,
+				C9B27EA41E51D2FE00265580 /* Copy frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9B27EA31E51D2E200265580 /* PBXTargetDependency */,
+			);
+			name = CwlViewsHarness_iOS;
+			productName = CwlViewsHarness_iOS;
+			productReference = C9B27E801E51CAD100265580 /* CwlViewsHarness_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C9B27E921E51CAD100265580 /* CwlViewsHarness_iOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9B27E9D1E51CAD100265580 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_iOSUITests" */;
+			buildPhases = (
+				C9B27E8F1E51CAD100265580 /* Sources */,
+				C9B27E901E51CAD100265580 /* Frameworks */,
+				C9B27E911E51CAD100265580 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9B27E951E51CAD100265580 /* PBXTargetDependency */,
+			);
+			name = CwlViewsHarness_iOSUITests;
+			productName = CwlViewsHarness_iOSUITests;
+			productReference = C9B27E931E51CAD100265580 /* CwlViewsHarness_iOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		C9B705E720686CBD00B4CD29 /* CwlViewsTesting_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9B705EF20686CBD00B4CD29 /* Build configuration list for PBXNativeTarget "CwlViewsTesting_iOS" */;
+			buildPhases = (
+				C9B705E320686CBD00B4CD29 /* Sources */,
+				C9B705E420686CBD00B4CD29 /* Frameworks */,
+				C9B705E520686CBD00B4CD29 /* Headers */,
+				C9B705E620686CBD00B4CD29 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9B705FC20687A9A00B4CD29 /* PBXTargetDependency */,
+			);
+			name = CwlViewsTesting_iOS;
+			productName = CwlViewsTesting_iOS;
+			productReference = C9B705E820686CBD00B4CD29 /* CwlViewsTesting.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		C9CA9E83215EFCFB004481B0 /* CwlUtils_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9CA9E8B215EFCFB004481B0 /* Build configuration list for PBXNativeTarget "CwlUtils_iOS" */;
+			buildPhases = (
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9CA9EBA215EFFC0004481B0 /* PBXTargetDependency */,
+			);
+			name = CwlUtils_iOS;
+			productName = CwlUtils_iOS;
+			productReference = C9CA9E84215EFCFB004481B0 /* CwlUtils.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		C9CA9E90215EFD0C004481B0 /* CwlSignal_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9CA9E96215EFD0C004481B0 /* Build configuration list for PBXNativeTarget "CwlSignal_iOS" */;
+			buildPhases = (
+				C9CA9EB6215EFF9E004481B0 /* Invoke CwlPackageBuild/main.swift to build CwlUtils and CwlSignal */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9CA9EB8215EFFAE004481B0 /* PBXTargetDependency */,
+			);
+			name = CwlSignal_iOS;
+			productName = CwlSignal_iOS;
+			productReference = C9CA9E91215EFD0C004481B0 /* CwlSignal.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		C9CA9E9D215EFD1E004481B0 /* CwlUtils_macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9CA9EA3215EFD1E004481B0 /* Build configuration list for PBXNativeTarget "CwlUtils_macOS" */;
+			buildPhases = (
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C95EE979215F73DC00FD1F2C /* PBXTargetDependency */,
+			);
+			name = CwlUtils_macOS;
+			productName = CwlUtils_macOS;
+			productReference = C9CA9E9E215EFD1E004481B0 /* CwlUtils.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		C9CA9EAA215EFD2C004481B0 /* CwlSignal_macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9CA9EB0215EFD2C004481B0 /* Build configuration list for PBXNativeTarget "CwlSignal_macOS" */;
+			buildPhases = (
+				C9CA9EBD215F520F004481B0 /* Invoke CwlPackageBuild/main.swift to build CwlUtils and CwlSignal */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9CA9EBC215F51FE004481B0 /* PBXTargetDependency */,
+			);
+			name = CwlSignal_macOS;
+			productName = CwlSignal_macOS;
+			productReference = C9CA9EAB215EFD2C004481B0 /* CwlSignal.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C94853B71DC4E306009CC145 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0930;
+				ORGANIZATIONNAME = "Matt Gallagher ( https://www.cocoawithlove.com )";
+				TargetAttributes = {
+					C93EA1F520E1144B00C733A3 = {
+						CreatedOnToolsVersion = 10.0;
+						ProvisioningStyle = Automatic;
+					};
+					C94853BF1DC4E306009CC145 = {
+						CreatedOnToolsVersion = 8.1;
+						LastSwiftMigration = 0900;
+						ProvisioningStyle = Manual;
+					};
+					C94853C81DC4E306009CC145 = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = S7YQ892G6G;
+						LastSwiftMigration = 0900;
+						ProvisioningStyle = Automatic;
+					};
+					C94853EF1DC4E4EA009CC145 = {
+						CreatedOnToolsVersion = 8.1;
+						ProvisioningStyle = Automatic;
+					};
+					C94853FD1DC4E4EA009CC145 = {
+						CreatedOnToolsVersion = 8.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = C94853EF1DC4E4EA009CC145;
+					};
+					C9A3803F1EFF9C0B00BFF2E5 = {
+						CreatedOnToolsVersion = 9.0;
+					};
+					C9B27E641E51CA9700265580 = {
+						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0900;
+						ProvisioningStyle = Manual;
+					};
+					C9B27E6C1E51CA9700265580 = {
+						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0900;
+						ProvisioningStyle = Automatic;
+					};
+					C9B27E7F1E51CAD100265580 = {
+						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0920;
+						ProvisioningStyle = Manual;
+					};
+					C9B27E921E51CAD100265580 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = C9B27E7F1E51CAD100265580;
+					};
+					C9B705E720686CBD00B4CD29 = {
+						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 0920;
+						ProvisioningStyle = Manual;
+					};
+					C9CA9E83215EFCFB004481B0 = {
+						CreatedOnToolsVersion = 10.0;
+					};
+					C9CA9E90215EFD0C004481B0 = {
+						CreatedOnToolsVersion = 10.0;
+					};
+					C9CA9E9D215EFD1E004481B0 = {
+						CreatedOnToolsVersion = 10.0;
+						ProvisioningStyle = Automatic;
+					};
+					C9CA9EAA215EFD2C004481B0 = {
+						CreatedOnToolsVersion = 10.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = C94853BA1DC4E306009CC145 /* Build configuration list for PBXProject "CwlViews" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C94853B61DC4E306009CC145;
+			productRefGroup = C94853C11DC4E306009CC145 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C93EA1F520E1144B00C733A3 /* PackageFetch */,
+				C9CA9E83215EFCFB004481B0 /* CwlUtils_iOS */,
+				C9CA9E90215EFD0C004481B0 /* CwlSignal_iOS */,
+				C9B27E641E51CA9700265580 /* CwlViews_iOS */,
+				C9B705E720686CBD00B4CD29 /* CwlViewsTesting_iOS */,
+				C9B27E6C1E51CA9700265580 /* CwlViews_iOSTests */,
+				C9B27E7F1E51CAD100265580 /* CwlViewsHarness_iOS */,
+				C9B27E921E51CAD100265580 /* CwlViewsHarness_iOSUITests */,
+				C9CA9E9D215EFD1E004481B0 /* CwlUtils_macOS */,
+				C9CA9EAA215EFD2C004481B0 /* CwlSignal_macOS */,
+				C94853BF1DC4E306009CC145 /* CwlViews_macOS */,
+				C94853C81DC4E306009CC145 /* CwlViews_macOSTests */,
+				C94853EF1DC4E4EA009CC145 /* CwlViewsHarness_macOS */,
+				C94853FD1DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests */,
+				C9A3803F1EFF9C0B00BFF2E5 /* CwlViewsConcat */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C94853C71DC4E306009CC145 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853EE1DC4E4EA009CC145 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C94853F51DC4E4EA009CC145 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853FC1DC4E4EA009CC145 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E6B1E51CA9700265580 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E7E1E51CAD100265580 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B27E8D1E51CAD100265580 /* LaunchScreen.storyboard in Resources */,
+				C9B27E8A1E51CAD100265580 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E911E51CAD100265580 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B705E620686CBD00B4CD29 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C93EA1F920E1145A00C733A3 /* Run PackageFetch.swift to download dependencies, if needed */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Package.swift",
+			);
+			name = "Run PackageFetch.swift to download dependencies, if needed";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/.build/dependencies-state.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/usr/bin/xcrun --sdk macosx swift";
+			shellScript = "//\n//  main.swift\n//  CwlPackageFetch\n//\n//  Created by Matt Gallagher on 2018/06/14.\n//  Copyright © 2018 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.\n//\n//  Permission to use, copy, modify, and/or distribute this software for any\n//  purpose with or without fee is hereby granted, provided that the above\n//  copyright notice and this permission notice appear in all copies.\n//\n//  THE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\n//  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\n//  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY\n//  SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\n//  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\n//  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\n//  IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\n//\n\nimport Foundation\n\nfunc env(_ key: String) -> String? { return ProcessInfo.processInfo.environment[key] }\nextension FileHandle: TextOutputStream {\n    public func write(_ string: String) { string.data(using: .utf8).map { write($0) } }\n    static var err = FileHandle.standardError\n}\nextension Process {\n    struct Failure: Error {\n        let code: Int32\n        let output: String\n    }\n    convenience init(path: String, directory: URL? = nil, environment: [String: String]? = nil, arguments: String...) {\n        self.init()\n        (self.launchPath, self.arguments) = (path, arguments)\n        _ = directory.map { self.currentDirectoryPath = $0.path }\n        _ = environment.map { self.environment = $0 }\n    }\n    func printInvocation() -> Process {\n        print(\"\\(self.launchPath ?? \"\") \\(self.arguments?.joined(separator: \" \") ?? \"\")\", to: &FileHandle.err)\n        return self\n    }\n    @available(OSX 10.13, *) func runToString() throws -> String {\n        let pipe = Pipe()\n        self.standardOutput = pipe\n        try self.run()\n        let result = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? \"\"\n        self.waitUntilExit()\n        if terminationStatus != 0 { throw Failure(code: terminationStatus, output: result) }\n        return result\n    }\n}\n\n@available(OSX 10.13, *)\nstruct PackageFetch {\n    enum Failure: Swift.Error {\n        case disablingInFavorOfCarthage\n        case fetchAlreadyProcessed\n        case missingEnvironment(String)\n        case cantCreateOutputFile(String)\n    }\n    struct DependencyParseFailure: Error {\n        let srcRoot: URL\n        let description: Dictionary<String, Any>\n        let topLevelPath: String\n    }\n    \n    let toolchainDir: String\n    let projectName: String\n    let srcRoot: URL\n    let packageDir: URL\n    let symlinksURL: URL\n    \n    static func requireEnv(_ key: String) throws -> String {\n        guard let value = env(key) else { throw Failure.missingEnvironment(key) }\n        return value\n    }\n    \n    init() throws {\n        self.toolchainDir = try PackageFetch.requireEnv(\"TOOLCHAIN_DIR\")\n        self.srcRoot = URL(fileURLWithPath: try PackageFetch.requireEnv(\"SRCROOT\"))\n        self.projectName = try PackageFetch.requireEnv(\"PROJECT_NAME\")\n        self.packageDir = srcRoot.appendingPathComponent(\".build\")\n        self.symlinksURL = packageDir.appendingPathComponent(\"symlinks\")\n    }\n    \n    func resolve() throws {\n        print(\"### Starting package resolve into \\(packageDir.path)\", to: &FileHandle.err)\n        \n        let resolveOutput = try Process(\n            path: toolchainDir + \"/usr/bin/swift\",\n            directory: srcRoot,\n            arguments: \"package\", \"--build-path\", \"\\(packageDir.path)\", \"resolve\"\n        ).printInvocation().runToString()\n        \n        if resolveOutput == \"\" {\n            print(\"### All dependencies up-to-date.\", to: &FileHandle.err)\n        } else {\n            print(resolveOutput, terminator: \"\")\n        }\n    }\n    \n    func showDependencies() throws -> String {\n        print(\"### Runing swift package show-dependencies to get package locations\", to: &FileHandle.err)\n        return try Process(\n            path: toolchainDir + \"/usr/bin/swift\",\n            directory: srcRoot,\n            arguments: \"package\", \"--build-path\", \"\\(packageDir.path)\", \"show-dependencies\", \"--format\", \"json\"\n        ).printInvocation().runToString()\n    }\n    \n    static func createSymlink(link: URL, destination: URL) throws {\n        let current = try? FileManager.default.destinationOfSymbolicLink(atPath: link.path)\n        if current == nil || current != destination.relativePath {\n            _ = try? FileManager.default.removeItem(at: link)\n            try FileManager.default.createSymbolicLink(atPath: link.path, withDestinationPath: destination.relativePath)\n            print(\"Created symbolic link: \\(link.path) -> \\(destination.relativePath)\", to: &FileHandle.err)\n        }\n    }\n    \n    func createSymlink(srcRoot: URL, name: String, destination: String) throws {\n        let linkLocation = symlinksURL.appendingPathComponent(name)\n        let linkDestination = URL(fileURLWithPath: \"../\\(destination)\", relativeTo: linkLocation)\n        try PackageFetch.createSymlink(link: linkLocation, destination: linkDestination)\n    }\n    \n    func traverse(srcRoot: URL, description: Dictionary<String, Any>, topLevelPath: String) throws {\n        guard let dependencies = description[\"dependencies\"] as? [Dictionary<String, Any>] else { return }\n        for dependency in dependencies {\n            guard\n                let path = dependency[\"path\"] as? String,\n                let relativePath = (path.range(of: topLevelPath)?.upperBound).map({ String(path[$0...]) }),\n                let name = dependency[\"name\"] as? String\n                else {\n                    throw DependencyParseFailure(srcRoot: srcRoot, description: description, topLevelPath: topLevelPath)\n            }\n            \n            let dependencyBuildDir = URL(fileURLWithPath: path).appendingPathComponent(\".build\")\n            try FileManager.default.createDirectory(at: dependencyBuildDir, withIntermediateDirectories: true, attributes: nil)\n            try PackageFetch.createSymlink(link: dependencyBuildDir.appendingPathComponent(\"symlinks\"), destination: symlinksURL)\n            \n            let dependencies = dependencyBuildDir.appendingPathComponent(\"dependencies-state.json\")\n            guard FileManager.default.createFile(atPath: dependencies.path, contents: nil) else {\n                throw PackageFetch.Failure.cantCreateOutputFile(dependencies.path)\n            }\n            \n            try createSymlink(srcRoot: srcRoot, name: name, destination: relativePath)\n            try traverse(srcRoot: srcRoot, description: dependency, topLevelPath: topLevelPath)\n        }\n    }\n    \n    func parseAndCreateSymlinks(dependencies: String) throws {\n        // Note: despite asking for JSON formatting, in Swift 4.0 there may be other info on STDOUT before the JSON starts.\n        guard\n            let jsonStartIndex = dependencies.index(of: \"{\"),\n            let descriptionData = String(dependencies[jsonStartIndex...]).data(using: .utf8),\n            let description = try JSONSerialization.jsonObject(with: descriptionData, options: []) as? Dictionary<String, Any>\n            else {\n                throw DependencyParseFailure(srcRoot: srcRoot, description: [:], topLevelPath: packageDir.path + \"/\")\n        }\n        try FileManager.default.createDirectory(at: symlinksURL, withIntermediateDirectories: true, attributes: nil)\n        try traverse(srcRoot: srcRoot, description: description, topLevelPath: packageDir.path + \"/\")\n    }\n    \n    static func fetch() throws {\n        guard env(\"CARTHAGE\") != \"YES\" else { throw Failure.disablingInFavorOfCarthage }\n        guard env(\"CWL_PACKAGE_DIR\") == nil else { throw Failure.fetchAlreadyProcessed }\n        \n        let fetch = try PackageFetch()\n        try fetch.resolve()\n        let dependencies = try fetch.showDependencies()\n        try fetch.parseAndCreateSymlinks(dependencies: dependencies)\n        print(\"### Complete.\", to: &FileHandle.err)\n    }\n}\n\nif #available(OSX 10.13, *) {\n    do {\n        try PackageFetch.fetch()\n    } catch PackageFetch.Failure.disablingInFavorOfCarthage {\n        print(\"Fetching using swift package manager disabled in favor of Carthage\", to: &FileHandle.err)\n    } catch PackageFetch.Failure.fetchAlreadyProcessed {\n        print(\"Package fetching disabled in child build\", to: &FileHandle.err)\n    } catch {\n        print(\"Failed: \\(error)\", to: &FileHandle.err)\n        exit(1)\n    }\n} else {\n    print(\"Failed: script must run on mac OS X 10.13 or newer\", to: &FileHandle.err)\n    exit(1)\n}\n";
+			showEnvVarsInLog = 0;
+		};
+		C9A380451EFF9C2800BFF2E5 /* Invoke CwlPackageBuild/main.swift to build CwlSignalConcat */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Invoke CwlPackageBuild/main.swift to build CwlSignalConcat";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/usr/bin/xcrun --sdk macosx swift $(SRCROOT)/.build/symlinks/CwlUtils/Scripts/CwlPackageBuild/main.swift";
+			shellScript = "
+";
+		};
+		C9A380461EFF9D9F00BFF2E5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/.build/symlinks/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsCore.swift -t \"\" -t \"import Foundation\" -i \"$SRCROOT/Sources/CwlViews/Core\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/.build/symlinks/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOS.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViews/iOS\" -i \"$SRCROOT/Sources/CwlViews/Common\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/.build/symlinks/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOSTesting.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/.build/symlinks/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOS.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViews/macOS\" -i \"$SRCROOT/Sources/CwlViews/Common\"\n";
+		};
+		C9CA9EB6215EFF9E004481B0 /* Invoke CwlPackageBuild/main.swift to build CwlUtils and CwlSignal */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.build/dependencies-state.json",
+				"$(SRCROOT)/Carthage/Build/iOS/CwlSignal.framework/CwlSignal",
+				"$(SRCROOT)/Carthage/Build/iOS/CwlUtils.framework/CwlUtils",
+			);
+			name = "Invoke CwlPackageBuild/main.swift to build CwlUtils and CwlSignal";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/CwlSignal.framework/CwlSignal",
+				"$(BUILT_PRODUCTS_DIR)/CwlUtils.framework/CwlUtils",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CARTHAGE\" == \"YES\" ]; then CHECKOUTS=\"$SRCROOT/Carthage/Checkouts\"; else CHECKOUTS=\"$SRCROOT/.build/symlinks\"; fi\n/usr/bin/xcrun --sdk macosx swift \"$CHECKOUTS/CwlUtils/Scripts/CwlPackageBuild/main.swift\"\n";
+		};
+		C9CA9EBD215F520F004481B0 /* Invoke CwlPackageBuild/main.swift to build CwlUtils and CwlSignal */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.build/dependencies-state.json",
+				"$(SRCROOT)/Carthage/Build/Mac/CwlSignal.framework/Versions/A/CwlSignal",
+				"$(SRCROOT)/Carthage/Build/Mac/CwlUtils.framework/Versions/A/CwlUtils",
+			);
+			name = "Invoke CwlPackageBuild/main.swift to build CwlUtils and CwlSignal";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/CwlUtils.framework/Versions/A/CwlUtils",
+				"$(BUILT_PRODUCTS_DIR)/CwlSignal.framework/Versions/A/CwlSignal",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CARTHAGE\" == \"YES\" ]; then CHECKOUTS=\"$SRCROOT/Carthage/Checkouts\"; else CHECKOUTS=\"$SRCROOT/.build/symlinks\"; fi\n/usr/bin/xcrun --sdk macosx swift \"$CHECKOUTS/CwlUtils/Scripts/CwlPackageBuild/main.swift\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C94853BB1DC4E306009CC145 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9375D121F57D568005FAFD5 /* CwlTableHeaderView.swift in Sources */,
+				C93605F01F3EA9FC007AE776 /* CwlButton.swift in Sources */,
+				C9375D051F57B259005FAFD5 /* CwlMenu.swift in Sources */,
+				C91CC2D0206F0DD7006FFF97 /* CwlBinder.swift in Sources */,
+				C9375D101F57D568005FAFD5 /* CwlTableCellView.swift in Sources */,
+				C91625DB206FBE57002E44D9 /* CwlBinderState.swift in Sources */,
+				C9375D041F57B259005FAFD5 /* CwlMagnificationGestureRecognizer.swift in Sources */,
+				C93605F21F3EA9FC007AE776 /* CwlClipView.swift in Sources */,
+				C93605EA1F3EA952007AE776 /* CwlLayer.swift in Sources */,
+				C9EC312B1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */,
+				C9375D131F57D568005FAFD5 /* CwlTableRowView.swift in Sources */,
+				C93606091F3EAA60007AE776 /* CwlWebView.swift in Sources */,
+				C9375D111F57D568005FAFD5 /* CwlTableColumn.swift in Sources */,
+				C9375D091F57B259005FAFD5 /* CwlPressGestureRecognizer.swift in Sources */,
+				C9375D031F57A7C1005FAFD5 /* CwlScrollView.swift in Sources */,
+				C93605ED1F3EA960007AE776 /* CwlStackView.swift in Sources */,
+				C91307401F66384200174902 /* CwlCoder.swift in Sources */,
+				C91CC2D3206F0E45006FFF97 /* CwlConstructingBinder.swift in Sources */,
+				C9BB0CC0200AF01C0062FB08 /* CwlStackAdapter.swift in Sources */,
+				C9375D151F57D568005FAFD5 /* CwlTreeMutation.swift in Sources */,
+				C9FDAD2F1F3AB30900154DA8 /* CwlStateAdapter.swift in Sources */,
+				C93A2C101F572009005C3E7B /* CwlView.swift in Sources */,
+				C9375D0D1F57B259005FAFD5 /* CwlToolbarItem.swift in Sources */,
+				C9375D071F57B259005FAFD5 /* CwlPanGestureRecognizer.swift in Sources */,
+				C9375D171F57EC32005FAFD5 /* CwlOutlineView.swift in Sources */,
+				C925223A20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
+				C9375D0C1F57B259005FAFD5 /* CwlToolbar.swift in Sources */,
+				C9375D081F57B259005FAFD5 /* CwlPopUpButton.swift in Sources */,
+				C91625DE206FBE8E002E44D9 /* CwlBinderParameters.swift in Sources */,
+				C9375D0E1F57B259005FAFD5 /* CwlWindow.swift in Sources */,
+				C93605F41F3EA9FC007AE776 /* CwlGestureRecognizer.swift in Sources */,
+				C99946591F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */,
+				C9ADA3A41EE3BFE400C29925 /* CwlBinderBase.swift in Sources */,
+				C926D05F1FF058D4002BF020 /* CwlSetMutation.swift in Sources */,
+				C937E76D20046BE000E63965 /* CwlStateContainer.swift in Sources */,
+				C93605EF1F3EA9D8007AE776 /* CwlApplication.swift in Sources */,
+				C9375D161F57E6FE005FAFD5 /* CwlTableView.swift in Sources */,
+				C9C868601FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */,
+				C93605F31F3EA9FC007AE776 /* CwlControl.swift in Sources */,
+				C99574BB1F406F8800F95CCF /* CwlBackingLayer.swift in Sources */,
+				C9ADA3A71EE3BFEC00C29925 /* CwlObjectStorage.swift in Sources */,
+				C9375D0A1F57B259005FAFD5 /* CwlRotationGestureRecognizer.swift in Sources */,
+				C93A2C0E1F567B2A005C3E7B /* CwlTableRowMutation.swift in Sources */,
+				C9AD96A31DF8415500D66AD9 /* CwlArrayMutation.swift in Sources */,
+				C9A18B3B1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */,
+				C98639EE1FE9DCE80047C273 /* CwlBindingName.swift in Sources */,
+				C93605EC1F3EA960007AE776 /* CwlGradientLayer.swift in Sources */,
+				C9A18B3E1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */,
+				C91D0CE31ED088A300CDE205 /* CwlLayout.swift in Sources */,
+				C9375D0B1F57B259005FAFD5 /* CwlTextField.swift in Sources */,
+				C9A18B381E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
+				C93605F11F3EA9FC007AE776 /* CwlClickGestureRecognizer.swift in Sources */,
+				C9375D061F57B259005FAFD5 /* CwlMenuItem.swift in Sources */,
+				C9287EE4202D3FE50046732C /* CwlScopedValues.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853C51DC4E306009CC145 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C94853CF1DC4E306009CC145 /* CwlViews_macOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853EC1DC4E4EA009CC145 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9111CBC1E361D670029DD2F /* main.swift in Sources */,
+				C9111CBD1E3623470029DD2F /* MainMenu.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C94853FA1DC4E4EA009CC145 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C94854031DC4E4EA009CC145 /* CwlViewsHarness_macOSUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E601E51CA9700265580 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9ADA3A51EE3BFE400C29925 /* CwlBinderBase.swift in Sources */,
+				C9F397A81FD2602200BEE049 /* CwlTabBarItem.swift in Sources */,
+				C9F3978F1FD0332600BEE049 /* CwlControl.swift in Sources */,
+				C9F397A21FD0CA3E00BEE049 /* CwlTableSection.swift in Sources */,
+				C91683FC203FC1BA00B4D40E /* CwlTabBar.swift in Sources */,
+				C91625DC206FBE57002E44D9 /* CwlBinderState.swift in Sources */,
+				C926D0621FF07348002BF020 /* CwlSearchBar.swift in Sources */,
+				C997F859206600B0001A7BF8 /* CwlPageViewController.swift in Sources */,
+				C9C868611FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */,
+				C9F397891FD0290400BEE049 /* CwlWebView.swift in Sources */,
+				C91625DF206FBE8E002E44D9 /* CwlBinderParameters.swift in Sources */,
+				C91CC2D6206F15C9006FFF97 /* CwlApplication.swift in Sources */,
+				C9F397841FD022DF00BEE049 /* CwlWindow.swift in Sources */,
+				C9F397851FD0256400BEE049 /* CwlViewController.swift in Sources */,
+				C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */,
+				C9F397871FD0270C00BEE049 /* CwlNavigationItem.swift in Sources */,
+				C9F3979B1FD0CA3E00BEE049 /* CwlStackAdapter.swift in Sources */,
+				C952BB341F3DCAE200B61DF1 /* CwlLayout.swift in Sources */,
+				C9F3978B1FD02D5E00BEE049 /* CwlGestureRecognizer.swift in Sources */,
+				C9F3979A1FD0CA3E00BEE049 /* CwlNavigationController.swift in Sources */,
+				C9F3978A1FD02C5D00BEE049 /* CwlScrollView.swift in Sources */,
+				C9F397A11FD0CA3E00BEE049 /* CwlTableViewCell.swift in Sources */,
+				C91CC2D1206F0DD7006FFF97 /* CwlBinder.swift in Sources */,
+				C9F3979D1FD0CA3E00BEE049 /* CwlScreenEdgePanGestureRecognizer.swift in Sources */,
+				C945207C205152CE00693C43 /* CwlTabBarController.swift in Sources */,
+				C9F3978D1FD02D5E00BEE049 /* CwlPinchGestureRecognizer.swift in Sources */,
+				C9F397931FD0CA3E00BEE049 /* CwlAlertAction.swift in Sources */,
+				C93A2C0F1F567B2A005C3E7B /* CwlTableRowMutation.swift in Sources */,
+				C9F397A31FD0CA3E00BEE049 /* CwlTapGestureRecognizer.swift in Sources */,
+				C9F397991FD0CA3E00BEE049 /* CwlNavigationBar.swift in Sources */,
+				C9F3978C1FD02D5E00BEE049 /* CwlPanGestureRecognizer.swift in Sources */,
+				C9F397911FD035A900BEE049 /* CwlImageView.swift in Sources */,
+				C9F397971FD0CA3E00BEE049 /* CwlBarItem.swift in Sources */,
+				C9F397A41FD0CA3E00BEE049 /* CwlTextField.swift in Sources */,
+				C9F397921FD035A900BEE049 /* CwlLabel.swift in Sources */,
+				C937E76E20046BE000E63965 /* CwlStateContainer.swift in Sources */,
+				C9F397901FD0332600BEE049 /* CwlSplitViewController.swift in Sources */,
+				C9F397981FD0CA3E00BEE049 /* CwlLongPressGestureRecognizer.swift in Sources */,
+				C9FDAD301F3AB30900154DA8 /* CwlStateAdapter.swift in Sources */,
+				C9EC312C1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */,
+				C926D0601FF058D4002BF020 /* CwlSetMutation.swift in Sources */,
+				C9A18B3C1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */,
+				C9F397831FD0195C00BEE049 /* CwlView.swift in Sources */,
+				C9ADA3A81EE3BFEC00C29925 /* CwlObjectStorage.swift in Sources */,
+				C9F397A61FD0CA3E00BEE049 /* CwlTextView.swift in Sources */,
+				C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */,
+				C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */,
+				C9B27EA91E51D34300265580 /* CwlArrayMutation.swift in Sources */,
+				C9F397811FCFB18B00BEE049 /* CwlLayer.swift in Sources */,
+				C9F3979F1FD0CA3E00BEE049 /* CwlSwipeGestureRecognizer.swift in Sources */,
+				C9F3979C1FD0CA3E00BEE049 /* CwlRotationGestureRecognizer.swift in Sources */,
+				C9F397861FD026DC00BEE049 /* CwlSetOrAnimate.swift in Sources */,
+				C9F3979E1FD0CA3E00BEE049 /* CwlSlider.swift in Sources */,
+				C91CC2D4206F0E45006FFF97 /* CwlConstructingBinder.swift in Sources */,
+				C9F397821FCFB45700BEE049 /* CwlGradientLayer.swift in Sources */,
+				C9287EE5202D3FE50046732C /* CwlScopedValues.swift in Sources */,
+				C9F397A01FD0CA3E00BEE049 /* CwlTableView.swift in Sources */,
+				C9F397881FD0290400BEE049 /* CwlStackView.swift in Sources */,
+				C9F3978E1FD0332600BEE049 /* CwlButton.swift in Sources */,
+				C91CC2D5206F15C3006FFF97 /* CwlBackingLayer.swift in Sources */,
+				C9F397A51FD0CA3E00BEE049 /* CwlTextInputTraits.swift in Sources */,
+				C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
+				C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
+				C91307411F66384200174902 /* CwlCoder.swift in Sources */,
+				C9F397941FD0CA3E00BEE049 /* CwlAlertController.swift in Sources */,
+				C9F397961FD0CA3E00BEE049 /* CwlBarButtonItem.swift in Sources */,
+				C98639F11FEA38C10047C273 /* CwlSwitch.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E691E51CA9700265580 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B27E731E51CA9700265580 /* CwlViews_iOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E7C1E51CAD100265580 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */,
+				C9F143991FF5BB98002BBB13 /* TableView.swift in Sources */,
+				C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */,
+				C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */,
+				C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */,
+				C9DF3DDA1FF5B6DB0058E427 /* Document.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B27E8F1E51CAD100265580 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B27E981E51CAD100265580 /* CwlViewsHarness_iOSUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9B705E320686CBD00B4CD29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B70606206890FB00B4CD29 /* CwlViewTesting.swift in Sources */,
+				C9B705FA2068758F00B4CD29 /* CwlBindingParser.swift in Sources */,
+				C9B705FE20687D7800B4CD29 /* CwlTableViewTesting.swift in Sources */,
+				C9B70602206884B800B4CD29 /* CwlTableViewCellTesting.swift in Sources */,
+				C9B7060A2068C86700B4CD29 /* CwlBarButtonItemTesting.swift in Sources */,
+				C9B706082068C81500B4CD29 /* CwlNavigationItemTesting.swift in Sources */,
+				C9B706042068902B00B4CD29 /* CwlLabelTesting.swift in Sources */,
+				C9B705F92068758900B4CD29 /* CwlViewControllerTesting.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C94853CC1DC4E306009CC145 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C94853BF1DC4E306009CC145 /* CwlViews_macOS */;
+			targetProxy = C94853CB1DC4E306009CC145 /* PBXContainerItemProxy */;
+		};
+		C94854001DC4E4EA009CC145 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C94853EF1DC4E4EA009CC145 /* CwlViewsHarness_macOS */;
+			targetProxy = C94853FF1DC4E4EA009CC145 /* PBXContainerItemProxy */;
+		};
+		C95EE979215F73DC00FD1F2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9CA9EAA215EFD2C004481B0 /* CwlSignal_macOS */;
+			targetProxy = C95EE978215F73DC00FD1F2C /* PBXContainerItemProxy */;
+		};
+		C9A8AF2F20E8646B0068E99B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C93EA1F520E1144B00C733A3 /* PackageFetch */;
+			targetProxy = C9A8AF2E20E8646B0068E99B /* PBXContainerItemProxy */;
+		};
+		C9A97C5E1F28468D006DDD6D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C94853BF1DC4E306009CC145 /* CwlViews_macOS */;
+			targetProxy = C9A97C5D1F28468D006DDD6D /* PBXContainerItemProxy */;
+		};
+		C9B27E701E51CA9700265580 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9B27E641E51CA9700265580 /* CwlViews_iOS */;
+			targetProxy = C9B27E6F1E51CA9700265580 /* PBXContainerItemProxy */;
+		};
+		C9B27E951E51CAD100265580 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9B27E7F1E51CAD100265580 /* CwlViewsHarness_iOS */;
+			targetProxy = C9B27E941E51CAD100265580 /* PBXContainerItemProxy */;
+		};
+		C9B27EA31E51D2E200265580 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9B27E641E51CA9700265580 /* CwlViews_iOS */;
+			targetProxy = C9B27EA21E51D2E200265580 /* PBXContainerItemProxy */;
+		};
+		C9B705FC20687A9A00B4CD29 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9B27E641E51CA9700265580 /* CwlViews_iOS */;
+			targetProxy = C9B705FB20687A9A00B4CD29 /* PBXContainerItemProxy */;
+		};
+		C9CA9EB8215EFFAE004481B0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C93EA1F520E1144B00C733A3 /* PackageFetch */;
+			targetProxy = C9CA9EB7215EFFAE004481B0 /* PBXContainerItemProxy */;
+		};
+		C9CA9EBA215EFFC0004481B0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9CA9E90215EFD0C004481B0 /* CwlSignal_iOS */;
+			targetProxy = C9CA9EB9215EFFC0004481B0 /* PBXContainerItemProxy */;
+		};
+		C9CA9EBC215F51FE004481B0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C93EA1F520E1144B00C733A3 /* PackageFetch */;
+			targetProxy = C9CA9EBB215F51FE004481B0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C9B27E8C1E51CAD100265580 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C93EA1F720E1144B00C733A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S7YQ892G6G;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C93EA1F820E1144B00C733A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S7YQ892G6G;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		C94853D21DC4E306009CC145 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				CWL_PRODUCT_NAMES = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		C94853D31DC4E306009CC145 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				CWL_PRODUCT_NAMES = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 4.2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C94853D51DC4E306009CC145 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_MODULES_AUTOLINK = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Sources/CwlViews/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-macOS";
+				PRODUCT_NAME = "$(PROJECT_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C94853D61DC4E306009CC145 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_MODULES_AUTOLINK = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Sources/CwlViews/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-macOS";
+				PRODUCT_NAME = "$(PROJECT_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+		C94853D81DC4E306009CC145 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViews_macOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Debug;
+		};
+		C94853D91DC4E306009CC145 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViews_macOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Release;
+		};
+		C94854061DC4E4EA009CC145 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Sources/CwlViewsHarness_macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_CODE_SIGN_FLAGS = "--deep";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarness;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Debug;
+		};
+		C94854071DC4E4EA009CC145 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Sources/CwlViewsHarness_macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_CODE_SIGN_FLAGS = "--deep";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarness;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Release;
+		};
+		C94854091DC4E4EA009CC145 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViewsHarnessUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarnessUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				TEST_TARGET_NAME = CwlViewsHarness;
+			};
+			name = Debug;
+		};
+		C948540A1DC4E4EA009CC145 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViewsHarnessUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarnessUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				TEST_TARGET_NAME = CwlViewsHarness;
+			};
+			name = Release;
+		};
+		C9A380401EFF9C0B00BFF2E5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlSignal;
+				CWL_PRODUCT_NAMES = "";
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlSignalConcat;
+				DEVELOPMENT_TEAM = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		C9A380411EFF9C0B00BFF2E5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlSignal;
+				CWL_PRODUCT_NAMES = "";
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlSignalConcat;
+				DEVELOPMENT_TEAM = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C9B27E771E51CA9700265580 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = Sources/CwlViews/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOS";
+				PRODUCT_NAME = CwlViews;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C9B27E781E51CA9700265580 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = Sources/CwlViews/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOS";
+				PRODUCT_NAME = CwlViews;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C9B27E7A1E51CA9700265580 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViews_iOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+			};
+			name = Debug;
+		};
+		C9B27E7B1E51CA9700265580 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViews_iOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C9B27E9B1E51CAD100265580 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Sources/CwlViewsHarness_iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C9B27E9C1E51CAD100265580 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Sources/CwlViewsHarness_iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C9B27E9E1E51CAD100265580 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViewsHarness_iOSUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TEST_TARGET_NAME = CwlViewsHarness_iOS;
+			};
+			name = Debug;
+		};
+		C9B27E9F1E51CAD100265580 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Tests/CwlViewsHarness_iOSUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TEST_TARGET_NAME = CwlViewsHarness_iOS;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C9B705ED20686CBD00B4CD29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = Sources/CwlViewsTesting/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsTesting-iOS";
+				PRODUCT_NAME = CwlViewsTesting;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C9B705EE20686CBD00B4CD29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = Sources/CwlViewsTesting/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsTesting-iOS";
+				PRODUCT_NAME = CwlViewsTesting;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C9CA9E89215EFCFB004481B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlUtils;
+				CWL_PRODUCT_NAMES = CwlUtils.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlUtils_iOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlUtils;
+			};
+			name = Debug;
+		};
+		C9CA9E8A215EFCFB004481B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlUtils;
+				CWL_PRODUCT_NAMES = CwlUtils.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlUtils_iOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlUtils;
+			};
+			name = Release;
+		};
+		C9CA9E97215EFD0C004481B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlSignal;
+				CWL_PRODUCT_NAMES = CwlSignal.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlSignal_iOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlSignal-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlSignal;
+			};
+			name = Debug;
+		};
+		C9CA9E98215EFD0C004481B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlSignal;
+				CWL_PRODUCT_NAMES = CwlSignal.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlSignal_iOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlSignal-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlSignal;
+			};
+			name = Release;
+		};
+		C9CA9EA4215EFD1E004481B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlUtils;
+				CWL_PRODUCT_NAMES = CwlUtils.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlUtils_macOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlUtils;
+			};
+			name = Debug;
+		};
+		C9CA9EA5215EFD1E004481B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlUtils;
+				CWL_PRODUCT_NAMES = CwlUtils.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlUtils_macOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlUtils;
+			};
+			name = Release;
+		};
+		C9CA9EB1215EFD2C004481B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlSignal;
+				CWL_PRODUCT_NAMES = CwlSignal.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlSignal_macOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlSignal;
+			};
+			name = Debug;
+		};
+		C9CA9EB2215EFD2C004481B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CWL_PACKAGE_NAME = CwlSignal;
+				CWL_PRODUCT_NAMES = CwlSignal.framework;
+				CWL_SDK = "$(SDKROOT)";
+				CWL_TARGET_NAME = CwlSignal_macOS;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/CwlViews/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGET_NAME = CwlSignal;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C93EA1F620E1144B00C733A3 /* Build configuration list for PBXAggregateTarget "PackageFetch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C93EA1F720E1144B00C733A3 /* Debug */,
+				C93EA1F820E1144B00C733A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C94853BA1DC4E306009CC145 /* Build configuration list for PBXProject "CwlViews" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C94853D21DC4E306009CC145 /* Debug */,
+				C94853D31DC4E306009CC145 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C94853D41DC4E306009CC145 /* Build configuration list for PBXNativeTarget "CwlViews_macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C94853D51DC4E306009CC145 /* Debug */,
+				C94853D61DC4E306009CC145 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C94853D71DC4E306009CC145 /* Build configuration list for PBXNativeTarget "CwlViews_macOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C94853D81DC4E306009CC145 /* Debug */,
+				C94853D91DC4E306009CC145 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C94854051DC4E4EA009CC145 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C94854061DC4E4EA009CC145 /* Debug */,
+				C94854071DC4E4EA009CC145 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C94854081DC4E4EA009CC145 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_macOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C94854091DC4E4EA009CC145 /* Debug */,
+				C948540A1DC4E4EA009CC145 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9A380421EFF9C0B00BFF2E5 /* Build configuration list for PBXAggregateTarget "CwlViewsConcat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9A380401EFF9C0B00BFF2E5 /* Debug */,
+				C9A380411EFF9C0B00BFF2E5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9B27E761E51CA9700265580 /* Build configuration list for PBXNativeTarget "CwlViews_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9B27E771E51CA9700265580 /* Debug */,
+				C9B27E781E51CA9700265580 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9B27E791E51CA9700265580 /* Build configuration list for PBXNativeTarget "CwlViews_iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9B27E7A1E51CA9700265580 /* Debug */,
+				C9B27E7B1E51CA9700265580 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9B27E9A1E51CAD100265580 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9B27E9B1E51CAD100265580 /* Debug */,
+				C9B27E9C1E51CAD100265580 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9B27E9D1E51CAD100265580 /* Build configuration list for PBXNativeTarget "CwlViewsHarness_iOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9B27E9E1E51CAD100265580 /* Debug */,
+				C9B27E9F1E51CAD100265580 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9B705EF20686CBD00B4CD29 /* Build configuration list for PBXNativeTarget "CwlViewsTesting_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9B705ED20686CBD00B4CD29 /* Debug */,
+				C9B705EE20686CBD00B4CD29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9CA9E8B215EFCFB004481B0 /* Build configuration list for PBXNativeTarget "CwlUtils_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9CA9E89215EFCFB004481B0 /* Debug */,
+				C9CA9E8A215EFCFB004481B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9CA9E96215EFD0C004481B0 /* Build configuration list for PBXNativeTarget "CwlSignal_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9CA9E97215EFD0C004481B0 /* Debug */,
+				C9CA9E98215EFD0C004481B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9CA9EA3215EFD1E004481B0 /* Build configuration list for PBXNativeTarget "CwlUtils_macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9CA9EA4215EFD1E004481B0 /* Debug */,
+				C9CA9EA5215EFD1E004481B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9CA9EB0215EFD2C004481B0 /* Build configuration list for PBXNativeTarget "CwlSignal_macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9CA9EB1215EFD2C004481B0 /* Debug */,
+				C9CA9EB2215EFD2C004481B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C94853B71DC4E306009CC145 /* Project object */;
+}

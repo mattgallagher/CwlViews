@@ -417,7 +417,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 					}
 					
 					instance.target = target
-					instance.action = target.selector
+					instance.action = SignalActionTarget.selector
 					
 					return target.signal.map { sender -> (clickedRow: Int?, clickedColumn: NSUserInterfaceItemIdentifier?) in
 						// Deliberately retain the "target" in this closure so it remains alive until the BinderStorage is closed.
@@ -442,7 +442,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 					}
 					
 					instance.target = target
-					instance.doubleAction = target.selector
+					instance.doubleAction = SignalDoubleActionTarget.secondSelector
 					
 					return target.secondSignal.map { sender -> (clickedRow: Int?, clickedColumn: NSUserInterfaceItemIdentifier?) in
 						// Deliberately retain the "target" in this closure so it remains alive until the BinderStorage is closed.

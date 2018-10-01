@@ -349,7 +349,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 					}
 					
 					instance.target = target
-					instance.action = target.selector
+					instance.action = SignalActionTarget.selector
 					
 					return target.signal.cancellableBind(to: s)
 				}
@@ -369,7 +369,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 					}
 					
 					instance.target = target
-					instance.doubleAction = target.selector
+					instance.doubleAction = SignalDoubleActionTarget.secondSelector
 					
 					return target.secondSignal.cancellableBind(to: s)
 				}

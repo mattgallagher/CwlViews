@@ -54,7 +54,7 @@ public class PinchGestureRecognizer: ConstructingBinder, PinchGestureRecognizerC
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .scale(let x): return x.apply(instance, storage) { i, s, v in i.scale = v }
 			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)

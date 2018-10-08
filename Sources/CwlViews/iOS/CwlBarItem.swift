@@ -61,7 +61,7 @@ public class BarItem: ConstructingBinder, BarItemConvertible {
 		
 		public init() {}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
 			case .image(let x): return x.apply(instance, storage) { i, s, v in i.image = v }

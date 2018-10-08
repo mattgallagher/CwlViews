@@ -254,7 +254,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .allowsColumnReordering(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnReordering = v }
 			case .allowsColumnResizing(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnResizing = v }

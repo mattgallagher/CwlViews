@@ -59,7 +59,7 @@ public class ClipView: ConstructingBinder, ClipViewConvertible {
 
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .copiesOnScroll(let x): return x.apply(instance, storage) { i, s, v in i.copiesOnScroll = v }
 			case .documentView(let x): return x.apply(instance, storage) { i, s, v in i.documentView = v?.nsView() }

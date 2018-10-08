@@ -55,7 +55,7 @@ public class TapGestureRecognizer: ConstructingBinder, TapGestureRecognizerConve
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .numberOfTapsRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTapsRequired = v }
 			case .numberOfTouchesRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTouchesRequired = v }

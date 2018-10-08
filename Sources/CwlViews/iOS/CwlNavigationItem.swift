@@ -61,7 +61,7 @@ public class NavigationItem: ConstructingBinder, NavigationItemConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
 			case .titleView(let x): return x.apply(instance, storage) { i, s, v in i.titleView = v?.uiView() }

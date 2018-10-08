@@ -83,7 +83,7 @@ public class View: ConstructingBinder, ViewConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .layer(let x):
 				x.value.applyBindings(to: instance.layer)

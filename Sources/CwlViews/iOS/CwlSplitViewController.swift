@@ -138,7 +138,7 @@ public class SplitViewController: ConstructingBinder, SplitViewControllerConvert
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .primaryViewController: return primary.resume()?.apply(instance, storage) { i, s, v in i.show(v.uiViewController(), sender: nil) }
 			case .secondaryViewController:
@@ -183,12 +183,12 @@ public class SplitViewController: ConstructingBinder, SplitViewControllerConvert
 			}
 		}
 
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Cancellable? {
-			let cancellable = linkedPreparer.finalizeInstance(instance, storage: storage)
+		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			if !instance.isCollapsed {
 				storage.displayModeButton?.send(value: instance.displayModeButtonItem)
 			}
-			return cancellable
+			return lifetime
 		}
 	}
 

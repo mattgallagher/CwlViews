@@ -83,7 +83,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .titleLabel(let x):
 				if let tl = instance.titleLabel {

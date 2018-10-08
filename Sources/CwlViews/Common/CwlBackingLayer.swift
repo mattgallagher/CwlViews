@@ -118,7 +118,7 @@ public class BackingLayer: Binder {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .autoresizingMask(let x):
 				#if os(macOS)

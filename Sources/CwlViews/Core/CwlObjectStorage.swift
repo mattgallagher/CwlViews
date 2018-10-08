@@ -19,15 +19,15 @@
 
 /// Implementation for `BinderStorage` that wraps Cocoa objects.
 open class ObjectBinderStorage: NSObject, BinderStorage {
-	fileprivate var cancellables: [Cancellable]? = nil
-	public func setCancellables(_ cancellables: [Cancellable]) {
-		assert(self.cancellables == nil, "Bindings should be set once only")
-		self.cancellables = cancellables
+	fileprivate var lifetimes: [Lifetime]? = nil
+	public func setLifetimes(_ lifetimes: [Lifetime]) {
+		assert(self.lifetimes == nil, "Bindings should be set once only")
+		self.lifetimes = lifetimes
 	}
 	
 	// An `ObjectBinderStorage` is an "internal" object but we don't need to keep it around if it isn't in-use. By default, that means: are we using the object for binding or delegation. Subclasses that store additional properties or implement delegate methods directly (without forwarding to the dynamic delegate) must override this with additional logic.
 	open var inUse: Bool {
-		return cancellables?.isEmpty == false || dynamicDelegate != nil
+		return lifetimes?.isEmpty == false || dynamicDelegate != nil
 	}
 	
 	/// Explicitly invoke `cancel` on each of the bindings.
@@ -35,7 +35,7 @@ open class ObjectBinderStorage: NSObject, BinderStorage {
 	/// WARNING: if `cancel` is invoked outside the main thread, it will be *asynchronously* invoked on the main thread.
 	/// Normally, a `cancel` effect is expected to have synchronous effect but it since `cancel` on EnclosingBinder objects is usually used for breaking reference counted loops, it is considered that the synchronous effect of cancel is less important than avoiding deadlocks – and deadlocks would be easy to accidentally trigger if this were synchronously invoked. If you need synchronous effect, ensure that cancel is invoked on the main thread.
 	public func cancel() {
-		if let cs = cancellables {
+		if let cs = lifetimes {
 			if Thread.isMainThread {
 				// `cancel` is mutating so we must use a `for var` (we can't use `forEach`)
 				for var c in cs {
@@ -49,7 +49,7 @@ open class ObjectBinderStorage: NSObject, BinderStorage {
 					}
 				}
 			}
-			cancellables?.removeAll()
+			lifetimes?.removeAll()
 		}
 	}
 	
@@ -106,8 +106,8 @@ extension NSObject {
 	}
 }
 
-public func embedStorageIfInUse<Storage: BinderStorage>(_ instance: NSObject, _ storage: Storage, _ cancellables: [Cancellable]) {
-	storage.setCancellables(cancellables)
+public func embedStorageIfInUse<Storage: BinderStorage>(_ instance: NSObject, _ storage: Storage, _ lifetimes: [Lifetime]) {
+	storage.setLifetimes(lifetimes)
 	if storage.inUse {
 		instance.setBinderStorage(storage)
 	}

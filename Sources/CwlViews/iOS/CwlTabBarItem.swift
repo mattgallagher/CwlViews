@@ -103,7 +103,7 @@ public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .badgeTextAttributes(let x):
 				if #available(iOS 10.0, *) {

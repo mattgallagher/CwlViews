@@ -82,7 +82,7 @@ public class AlertController: ConstructingBinder, AlertControllerConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .preferredStyle: return nil
 			case .actions(let x):

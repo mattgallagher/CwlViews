@@ -130,10 +130,10 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .textInputTraits(let x):
-				return ArrayOfCancellables(x.value.bindings.lazy.compactMap { trait in
+				return ArrayOfLifetimes(x.value.bindings.lazy.compactMap { trait in
 					switch trait {
 					case .autocapitalizationType(let y): return y.apply(instance, storage) { i, s, v in i.autocapitalizationType = v }
 					case .autocorrectionType(let y): return y.apply(instance, storage) { i, s, v in i.autocorrectionType = v }

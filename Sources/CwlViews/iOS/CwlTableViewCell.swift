@@ -28,7 +28,7 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
-	public func construct(reuseIdentifier: String?, additional: ((Instance) -> Cancellable?)? = nil) -> UITableViewCell {
+	public func construct(reuseIdentifier: String?, additional: ((Instance) -> Lifetime?)? = nil) -> UITableViewCell {
 		return binderConstruct(
 			additional: additional,
 			storageConstructor: { prep, params, i in prep.constructStorage() },
@@ -97,7 +97,7 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .cellStyle: return nil
 			case .textLabel(let x):

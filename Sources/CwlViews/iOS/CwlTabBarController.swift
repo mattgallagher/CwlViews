@@ -142,7 +142,7 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .tabBar(let x):
 				x.value.applyBindings(to: instance.tabBar)

@@ -60,7 +60,7 @@ public class Switch: ConstructingBinder, SwitchConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .isOn(let x): return x.apply(instance, storage) { i, s, v in i.setOn(v.value, animated: v.isAnimated) }
 			case .onTintColor(let x): return x.apply(instance, storage) { i, s, v in i.onTintColor = v }

@@ -54,7 +54,7 @@ public class MagnificationGestureRecognizer: ConstructingBinder, MagnificationGe
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .magnification(let x): return x.apply(instance, storage) { i, s, v in i.magnification = v }
 			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)

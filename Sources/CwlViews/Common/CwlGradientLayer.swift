@@ -57,7 +57,7 @@ public class GradientLayer: ConstructingBinder, GradientLayerConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .colors(let x): return x.apply(instance, storage) { i, s, v in i.colors = v }
 			case .locations(let x): return x.apply(instance, storage) { i, s, v in i.locations = v.map { NSNumber(value: Double($0)) } }

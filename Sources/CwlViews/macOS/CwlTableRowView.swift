@@ -62,7 +62,7 @@ public class TableRowView: ConstructingBinder, TableRowViewConvertible {
 		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
 		
 		public init() {}
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .isEmphasized(let x): return x.apply(instance, storage) { i, s, v in i.isEmphasized = v }
 			case .isFloating(let x): return x.apply(instance, storage) { i, s, v in i.isFloating = v }

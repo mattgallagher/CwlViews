@@ -151,7 +151,7 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .usesSingleLineMode(let x): return x.apply(instance, storage) { i, s, v in i.usesSingleLineMode = v }
 			case .allowsCharacterPickerTouchBarItem(let x):

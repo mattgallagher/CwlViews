@@ -55,7 +55,7 @@ public class SwipeGestureRecognizer: ConstructingBinder, SwipeGestureRecognizerC
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .direction(let x): return x.apply(instance, storage) { i, s, v in i.direction = v }
 			case .numberOfTouchesRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTouchesRequired = v }

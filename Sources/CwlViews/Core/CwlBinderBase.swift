@@ -41,21 +41,21 @@ public protocol BaseBinding {
 	static func baseBinding(_ binding: BaseBinder.Binding) -> Self
 }
 
-/// The primary purpose of the base binder is to terminate the BinderChain but it also includes the `cancelOnClose` binding which can be used for tying lifetimes to the lifetime of the binder's storage.
+/// The primary purpose of the base binder is to terminate the BinderChain but it also includes the `lifetimes` binding which can be used for tying lifetimes to the lifetime of the binder's storage.
 public class BaseBinder: BinderChain {
 	public typealias Instance = Any
 	public typealias Storage = Any
 	public typealias Inherited = ()
 	
-	/// BaseBinder bindings implement a single `cancelOnClose` binding to tie the lifetime of arbitrary `Cancellable`s to the lifetime of the bound instance.
+	/// BaseBinder bindings implement a single `lifetimes` binding to tie the lifetime of arbitrary `Lifetime`s to the lifetime of the bound instance.
 	public enum Binding: BaseBinding {
 		public typealias EnclosingBinder = BaseBinder
 		public static func baseBinding(_ binding: Binding) -> Binding { return binding }
 
-		case cancelOnClose(Dynamic<[Cancellable]>)
+		case lifetimes(Dynamic<[Lifetime]>)
 	}
 
-	/// BaseBinder preparer appends the `cancelOnClose` cancellables to the bound instance's cancellables.
+	/// BaseBinder preparer appends the `lifetimes` lifetimes to the bound instance's lifetimes.
 	public struct Preparer: BinderPreparer {
 		public typealias EnclosingBinder = BaseBinder
 
@@ -66,12 +66,12 @@ public class BaseBinder: BinderChain {
 		}
 		public mutating func prepareBinding(_ binding: Binding) {}
 		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {}
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Cancellable? { return nil }
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? { return nil }
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .cancelOnClose(let x):
+			case .lifetimes(let x):
 				switch x {
-				case .constant(let array): return ArrayOfCancellables(array)
+				case .constant(let array): return ArrayOfLifetimes(array)
 				case .dynamic(let signal): return signal.continuous().subscribe { r in }
 				}
 			}
@@ -84,15 +84,15 @@ extension BindingName where Binding: BaseBinding {
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .baseBinding(BaseBinder.Binding.$1(v)) }) }
 
-	/// Each value in the cancelOnClose will be cancelled when the `Storage` is released. This is guaranteed to be invoked on the main thread (if `Storage` is released on a non-main thread, the effect will occur asynchronously on the main thread).
-	public static var cancelOnClose: BindingName<Dynamic<[Cancellable]>, Binding> { return BindingName<Dynamic<[Cancellable]>, Binding>({ v in .baseBinding(BaseBinder.Binding.cancelOnClose(v)) }) }
+	/// Each value in the lifetimes will be cancelled when the `Storage` is released. This is guaranteed to be invoked on the main thread (if `Storage` is released on a non-main thread, the effect will occur asynchronously on the main thread).
+	public static var lifetimes: BindingName<Dynamic<[Lifetime]>, Binding> { return BindingName<Dynamic<[Lifetime]>, Binding>({ v in .baseBinding(BaseBinder.Binding.lifetimes(v)) }) }
 }
 
-/// All bound instances are required to have a binder storage for storing lifetime bound instances of type `Cancellable`. This is the standard representation of `Signal` and `SignalInput` implemented bindings.
-public protocol BinderStorage: class, Cancellable {
-	/// The `BinderStorage` needs to maintain the lifetime of all the self-managing objects, the most common of which are `Signal` and `SignalInput` instances but others may include `DispatchSourceTimer`. Most of these objects implement `Cancellable` so maintaining their lifetime is as simple as retaining these `Cancellable` instances in an array.
+/// All bound instances are required to have a binder storage for storing lifetime bound instances of type `Lifetime`. This is the standard representation of `Signal` and `SignalInput` implemented bindings.
+public protocol BinderStorage: class, Lifetime {
+	/// The `BinderStorage` needs to maintain the lifetime of all the self-managing objects, the most common of which are `Signal` and `SignalInput` instances but others may include `DispatchSourceTimer`. Most of these objects implement `Lifetime` so maintaining their lifetime is as simple as retaining these `Lifetime` instances in an array.
 	/// The `bindings` array should be set precisely once, at the end of construction and an assertion may be raised if subsequent mutations are attempted.
-	func setCancellables(_ cancellables: [Cancellable])
+	func setLifetimes(_ lifetimes: [Lifetime])
 	
 	/// Since the `BinderStorage` object is a supporting instance for the stateful object and exists to manage interactions but it is possible that the stateful object is constructed without the intention of mutation or interaction – in which case, the `BinderStorage` is not needed. The `inUse` getter is provided to ask if the `BinderStorage` is really necessary (a result of `true` may result in the `BinderStorage` being immediately discarded).
 	var inUse: Bool { get }

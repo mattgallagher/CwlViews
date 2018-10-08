@@ -294,7 +294,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .contentView(let x):
 				if let cv = instance.contentView {
@@ -541,8 +541,8 @@ public class Window: ConstructingBinder, WindowConvertible {
 			}
 		}
 
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Cancellable? {
-			let cancellable = linkedPreparer.finalizeInstance(instance, storage: storage)
+		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			
 			// Apply frame placement
 			instance.layoutIfNeeded()
@@ -581,7 +581,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 				}
 			}
 
-			return ArrayOfCancellables([cancellable, o, k, m, h, v, a].compactMap { $0 })
+			return ArrayOfLifetimes([lifetime, o, k, m, h, v, a].compactMap { $0 })
 		}
 	}
 
@@ -939,13 +939,16 @@ public struct WindowSize: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral
 }
 
 extension Window: AppLifetime {
-	public func terminateRelyHandler() -> ApplicationTerminateReplyHandler {
-		return nsWindow()
+	public var shouldTerminate: ApplicationTerminateReply {
+		return nsWindow().shouldTerminate()
+	}
+	public func cancel() {
+		return nsWindow().cancel()
 	}
 }
 
-extension NSWindow: ApplicationTerminateReplyHandler, AppLifetime {
-	public func shouldTerminate() -> ApplicationTerminateReply {
+extension NSWindow: AppLifetime {
+	public var shouldTerminate: ApplicationTerminateReply {
 		return (isVisible && delegate?.windowShouldClose?(self) == false) ? ApplicationTerminateReply.cancel : ApplicationTerminateReply.now
 	}
 	public func cancel() {

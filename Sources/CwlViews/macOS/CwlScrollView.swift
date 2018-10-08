@@ -92,7 +92,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
 			case .drawsBackground(let x): return x.apply(instance, storage) { i, s, v in i.drawsBackground = v }

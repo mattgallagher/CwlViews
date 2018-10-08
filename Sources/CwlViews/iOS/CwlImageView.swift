@@ -81,7 +81,7 @@ public class ImageView: ConstructingBinder, ImageViewConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .image: return image.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.image = v } }
 			case .highlightedImage: return highlightedImage.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.highlightedImage = v } }

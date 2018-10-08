@@ -36,14 +36,14 @@ public class TableColumn<RowData>: Binder {
 			to: instance,
 			additional: nil,
 			storageConstructor: { prep, params, i in Storage(column: instance) },
-			combine: { i, s, cs in s.setCancellables(cs) })
+			combine: { i, s, cs in s.setLifetimes(cs) })
 	}
-	public func construct(additional: ((Instance) -> Cancellable?)? = nil) -> Storage {
+	public func construct(additional: ((Instance) -> Lifetime?)? = nil) -> Storage {
 		return binderConstruct(
 			additional: additional,
 			storageConstructor: { prep, params, i in Storage(column: i) },
 			instanceConstructor: { prep, params in params.subclass.init(identifier: params.additional) },
-			combine: { i, s, cs in s.setCancellables(cs) },
+			combine: { i, s, cs in s.setLifetimes(cs) },
 			output: { i, s in s })
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -86,7 +86,7 @@ public class TableColumn<RowData>: Binder {
 
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .width(let x): return x.apply(instance, storage) { i, s, v in i.width = v }
 			case .minWidth(let x): return x.apply(instance, storage) { i, s, v in i.minWidth = v }

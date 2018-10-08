@@ -77,7 +77,7 @@ public class AlertAction: ConstructingBinder, AlertActionConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .title: return nil
 			case .style: return nil
@@ -87,9 +87,9 @@ public class AlertAction: ConstructingBinder, AlertActionConvertible {
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Cancellable? {
-			let linkedCancellable = linkedPreparer.finalizeInstance(instance, storage: storage)
-			return ArrayOfCancellables([linkedCancellable, handler as Cancellable?].compactMap { $0 })
+		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+			let linkedLifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
+			return Array<Lifetime>([linkedLifetime, handler as Optional<Lifetime>].compactMap { $0 })
 		}
 	}
 

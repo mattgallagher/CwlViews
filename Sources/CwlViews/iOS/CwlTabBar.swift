@@ -133,7 +133,7 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			// e.g. case .someProperty(let x): return x.apply(instance, storage) { inst, stor, val in inst.someProperty = val }
 			case .itemConstructor: return nil

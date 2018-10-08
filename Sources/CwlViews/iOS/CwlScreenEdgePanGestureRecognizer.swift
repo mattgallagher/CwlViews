@@ -66,7 +66,7 @@ public class ScreenEdgePanGestureRecognizer: ConstructingBinder, ScreenEdgePanGe
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .edges(let x): return x.apply(instance, storage) { i, s, v in i.edges = v }
 			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)

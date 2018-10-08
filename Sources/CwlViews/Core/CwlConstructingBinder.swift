@@ -23,7 +23,7 @@ public protocol ConstructingBinder: Binder where Output == Instance {
 	///
 	/// - Parameter additional: ad hoc bindings (this is a chance to apply changes to the instance after construction and establish additional behaviors).
 	/// - Returns: the constructed and configured instance (newly created if state was `.pending` or pre-existing if state was `.constructed`)
-	func instance(additional: ((Instance) -> Cancellable?)?) -> Instance
+	func instance(additional: ((Instance) -> Lifetime?)?) -> Instance
 }
 
 extension ConstructingBinder where Parameters == BinderSubclassParameters<Instance, Binding>, Preparer: ConstructingPreparer, Instance: NSObject {
@@ -31,7 +31,7 @@ extension ConstructingBinder where Parameters == BinderSubclassParameters<Instan
 	///
 	/// - Parameter additional: ad hoc bindings (this is a chance to apply changes to the instance after construction and establish additional behaviors).
 	/// - Returns: the constructed and configured instance (newly created if state was `.pending` or pre-existing if state was `.constructed`)
-	public func instance(additional: ((Instance) -> Cancellable?)? = nil) -> Instance {
+	public func instance(additional: ((Instance) -> Lifetime?)? = nil) -> Instance {
 		return binderConstruct(
 			additional: additional,
 			storageConstructor: { prep, params, i in prep.constructStorage() },

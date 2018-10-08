@@ -70,7 +70,7 @@ public class Label: ConstructingBinder, LabelConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .text(let x): return x.apply(instance, storage) { i, s, v in i.text = v }
 			case .attributedText(let x): return x.apply(instance, storage) { i, s, v in i.attributedText = v }

@@ -57,7 +57,7 @@ public class LongPressGestureRecognizer: ConstructingBinder, LongPressGestureRec
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .minimumPressDuration(let x): return x.apply(instance, storage) { i, s, v in i.minimumPressDuration = v }
 			case .numberOfTouchesRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTouchesRequired = v }

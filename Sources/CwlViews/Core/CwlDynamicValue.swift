@@ -63,7 +63,7 @@ public enum Dynamic<Value> {
 	}
 	
 	// Gets the subsequent (i.e. after construction) values from the `Dynamic`
-	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I, _ storage: B, _ onError: Value? = nil, handler: @escaping (I, B, Value) -> Void) -> Cancellable? {
+	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I, _ storage: B, _ onError: Value? = nil, handler: @escaping (I, B, Value) -> Void) -> Lifetime? {
 		switch self {
 		case .constant(let v):
 			handler(instance, storage, v)
@@ -110,7 +110,7 @@ public struct InitialSubsequent<Value> {
 }
 
 extension Signal {
-	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I?, _ storage: B?, handler: @escaping (I, B, OutputValue) -> Void) -> Cancellable? {
+	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I?, _ storage: B?, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
 		return subscribeValues(context: .main) { [weak instance, weak storage] v in
 			guard let i = instance, let s = storage else { return }
 			handler(i, s, v)
@@ -119,7 +119,7 @@ extension Signal {
 }
 
 extension SignalCapture {
-	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I, _ storage: B, handler: @escaping (I, B, OutputValue) -> Void) -> Cancellable? {
+	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I, _ storage: B, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
 		return subscribeValues(context: .main) { [weak instance, weak storage] v in
 			guard let i = instance, let s = storage else { return }
 			handler(i, s, v)
@@ -128,8 +128,8 @@ extension SignalCapture {
 }
 
 extension SignalInterface {
-	public func adhocBinding<Subclass: AnyObject>(toType: Subclass.Type, using: @escaping (Subclass, OutputValue) -> Void) -> (AnyObject) -> Cancellable? {
-		return { (instance: AnyObject) -> Cancellable? in
+	public func adhocBinding<Subclass: AnyObject>(toType: Subclass.Type, using: @escaping (Subclass, OutputValue) -> Void) -> (AnyObject) -> Lifetime? {
+		return { (instance: AnyObject) -> Lifetime? in
 			return self.signal.subscribeValues(context: .main) { [weak instance] value in
 				if let i = instance as? Subclass {
 					using(i, value)

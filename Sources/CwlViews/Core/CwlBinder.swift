@@ -83,14 +83,14 @@ extension Binder {
 	///   - additional: ad hoc bindings, applied after other bindings
 	///   - storageConstructor: function to construct an empty BinderStorage, usually Preparer.constructStorage()
 	///   - instanceConstructor: function to construct an unconfigured instance, usually Preparer.constructInstance(subclass:)
-	///   - combine: function to link the instance, storage and generated Cancellables
+	///   - combine: function to link the instance, storage and generated Lifetimes
 	///   - output: chooses the instance or storage to return as the primary output
 	/// - Returns: the output
 	public func binderConstruct(
-		additional: ((Instance) -> Cancellable?)?,
+		additional: ((Instance) -> Lifetime?)?,
 		storageConstructor: (Preparer, Parameters, Instance) -> Storage,
 		instanceConstructor: (Preparer, Parameters) -> Instance,
-		combine: (Instance, Storage, [Cancellable]) -> Void,
+		combine: (Instance, Storage, [Lifetime]) -> Void,
 		output: (Instance, Storage) -> Output) -> Output {
 		return state.construct { parameters in
 			var preparer = Preparer.init()
@@ -108,12 +108,12 @@ extension Binder {
 	///	- instance: the instance to which bindings should be applied
 	///   - additional: ad hoc bindings, applied after other bindings
 	///   - storageConstructor: function to construct an empty BinderStorage, usually Preparer.constructStorage()
-	///   - combine: function to link the instance, storage and generated Cancellables
+	///   - combine: function to link the instance, storage and generated Lifetimes
 	/// - Returns: the output
 	public func binderApply(to instance: Instance,
-		additional: ((Instance) -> Cancellable?)?,
+		additional: ((Instance) -> Lifetime?)?,
 		storageConstructor: (Preparer, Parameters, Instance) -> Storage,
-		combine: (Instance, Storage, [Cancellable]) -> Void) {
+		combine: (Instance, Storage, [Lifetime]) -> Void) {
 		state.apply(instance: instance) { inst, parameters in
 			var preparer = Preparer.init()
 			preparer.prepareBindings(parameters.bindings)

@@ -34,7 +34,7 @@ public class Toolbar: Binder, ToolbarConvertible {
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
-	public func instance(additional: ((Instance) -> Cancellable?)? = nil) -> Instance {
+	public func instance(additional: ((Instance) -> Lifetime?)? = nil) -> Instance {
 		return binderConstruct(
 			additional: additional,
 			storageConstructor: { prep, params, i in prep.constructStorage() },
@@ -89,7 +89,7 @@ public class Toolbar: Binder, ToolbarConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .displayMode(let x): return x.apply(instance, storage) { i, s, v in i.displayMode = v }
 			case .showsBaselineSeparator(let x): return x.apply(instance, storage) { i, s, v in i.showsBaselineSeparator = v }

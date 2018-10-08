@@ -81,7 +81,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .buttonType(let x): return x.apply(instance, storage) { i, s, v in i.setButtonType(v) }
 			case .periodicDelay(let x): return x.apply(instance, storage) { i, s, v in i.setPeriodicDelay(v.delay, interval: v.interval) }

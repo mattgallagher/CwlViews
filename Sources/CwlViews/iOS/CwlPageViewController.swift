@@ -127,7 +127,7 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .pageData(let x):
 				return x.apply(instance, storage) { inst, stor, val in

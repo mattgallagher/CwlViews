@@ -55,7 +55,7 @@ public class TableCellView: ConstructingBinder, TableCellViewConvertible {
 		
 		public init() {}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .backgroundStyle(let x): return x.apply(instance, storage) { i, s, v in i.backgroundStyle = v }
 			case .rowSizeStyle(let x): return x.apply(instance, storage) { i, s, v in i.rowSizeStyle = v }

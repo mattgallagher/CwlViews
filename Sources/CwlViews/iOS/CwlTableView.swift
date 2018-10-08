@@ -271,7 +271,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .cellIdentifier: return nil
 			case .tableViewStyle: return nil

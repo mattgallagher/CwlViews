@@ -112,7 +112,7 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .loadView: return nil
 			case .view:
@@ -174,14 +174,14 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Cancellable? {
-			let cancellable = linkedPreparer.finalizeInstance((), storage: ())
+		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+			let lifetime = linkedPreparer.finalizeInstance((), storage: ())
 			
 			// Send the initial "traitsCollection" once construction is complete.
 			if let tcdc = storage.traitCollectionDidChange {
 				tcdc.send(value: (previous: nil, new: instance.traitCollection))
 			}
-			return cancellable
+			return lifetime
 		}
 	}
 	

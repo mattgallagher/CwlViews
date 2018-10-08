@@ -47,7 +47,6 @@ public class Application: Binder {
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case mainMenu(Dynamic<MenuConvertible?>)
 		case dockMenu(Dynamic<MenuConvertible?>)
-		case content(Dynamic<[AppLifetime]>)
 		case applicationIconImage(Dynamic<NSImage>)
 		case activationPolicy(Dynamic<NSApplication.ActivationPolicy>)
 		case presentationOptions(Dynamic<NSApplication.PresentationOptions>)
@@ -235,7 +234,7 @@ public class Application: Binder {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .content(let x): return x.apply(instance, storage) { i, s, v in s.terminationReplyHandlers = v.map { $0.terminateRelyHandler() } }
 			case .remoteNotifications(let x): return x.apply(instance, storage) { i, s, v in
@@ -271,7 +270,7 @@ public class Application: Binder {
 			case .miniaturizeAll(let x): return x.apply(instance, storage) { i, s, v in i.miniaturizeAll(nil) }
 			case .terminate(let x): return x.apply(instance, storage) { i, s, v in i.terminate(nil) }
 			case .requestUserAttention(let x):
-				var outstandingRequests = [Cancellable]()
+				var outstandingRequests = [Lifetime]()
 				return x.apply(instance, storage) { i, s, v in
 					let requestIndex = i.requestUserAttention(v.0)
 					outstandingRequests += v.1.subscribe { [weak i] r in i?.cancelUserAttentionRequest(requestIndex) }
@@ -570,7 +569,7 @@ extension BindingName where Binding: ApplicationBinding {
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	public static var mainMenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.mainMenu(v)) }) }
 	public static var dockMenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.dockMenu(v)) }) }
-	public static var content: BindingName<Dynamic<[AppLifetime]>, Binding> { return BindingName<Dynamic<[AppLifetime]>, Binding>({ v in .applicationBinding(Application.Binding.content(v)) }) }
+	public static var content: BindingName<Dynamic<[AppLifecycle]>, Binding> { return BindingName<Dynamic<[AppLifecycle]>, Binding>({ v in .applicationBinding(Application.Binding.content(v)) }) }
 	public static var applicationIconImage: BindingName<Dynamic<NSImage>, Binding> { return BindingName<Dynamic<NSImage>, Binding>({ v in .applicationBinding(Application.Binding.applicationIconImage(v)) }) }
 	public static var activationPolicy: BindingName<Dynamic<NSApplication.ActivationPolicy>, Binding> { return BindingName<Dynamic<NSApplication.ActivationPolicy>, Binding>({ v in .applicationBinding(Application.Binding.activationPolicy(v)) }) }
 	public static var presentationOptions: BindingName<Dynamic<NSApplication.PresentationOptions>, Binding> { return BindingName<Dynamic<NSApplication.PresentationOptions>, Binding>({ v in .applicationBinding(Application.Binding.presentationOptions(v)) }) }
@@ -652,22 +651,6 @@ public enum ApplicationTerminateReply {
 	case later(Signal<Bool>)
 }
 
-public protocol ApplicationTerminateReplyHandler {
+public protocol AppLifetime: Lifetime {
 	func shouldTerminate() -> ApplicationTerminateReply
-}
-
-public protocol AppLifetime {
-	func terminateRelyHandler() -> ApplicationTerminateReplyHandler
-}
-
-public extension AppLifetime where Self: ApplicationTerminateReplyHandler {
-	func terminateRelyHandler() -> ApplicationTerminateReplyHandler {
-		return self
-	}
-}
-
-public extension ApplicationTerminateReplyHandler {
-	func shouldTerminate() -> ApplicationTerminateReply {
-		return .now
-	}
 }

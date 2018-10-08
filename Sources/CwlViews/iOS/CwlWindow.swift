@@ -78,7 +78,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .frame(let x): return x.apply(instance, storage) { i, s, v in i.frame = v }
 			case .rootViewController(let x):
@@ -107,14 +107,14 @@ public class Window: ConstructingBinder, WindowConvertible {
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: View.Storage) -> Cancellable? {
-			let cancellable = linkedPreparer.finalizeInstance(instance, storage: storage)
+		public mutating func finalizeInstance(_ instance: Instance, storage: View.Storage) -> Lifetime? {
+			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			if let h = isHidden?.resume() {
 				if let c2 = linkedPreparer.applyBinding(.isHidden(.dynamic(h)), instance: instance, storage: storage) {
-					return cancellable.map { c1 in ArrayOfCancellables([c2, c1]) } ?? c2
+					return lifetime.map { c1 in ArrayOfLifetimes([c2, c1]) } ?? c2
 				}
 			}
-			return cancellable
+			return lifetime
 		}
 	}
 	

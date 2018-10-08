@@ -59,7 +59,7 @@ public class Control: ConstructingBinder, ControlConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
 			case .isSelected(let x): return x.apply(instance, storage) { i, s, v in i.isSelected = v }
@@ -68,8 +68,8 @@ public class Control: ConstructingBinder, ControlConvertible {
 			case .contentHorizontalAlignment(let x): return x.apply(instance, storage) { i, s, v in i.contentHorizontalAlignment = v }
 			case .actions(let x):
 				var previous: ScopedValues<UIControl.Event, ControlAction>? = nil
-				var junctions = [Cancellable]()
-				var cancellable = x.apply(instance, storage) { i, s, v in
+				var junctions = [Lifetime]()
+				var lifetime = x.apply(instance, storage) { i, s, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.removeTarget(nil, action: nil, for: c.0)
@@ -92,7 +92,7 @@ public class Control: ConstructingBinder, ControlConvertible {
 					for var j in junctions {
 						j.cancel()
 					}
-					cancellable?.cancel()
+					lifetime?.cancel()
 				}
 			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
 			}

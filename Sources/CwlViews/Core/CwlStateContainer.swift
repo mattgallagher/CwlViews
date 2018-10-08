@@ -17,7 +17,7 @@
 //  OF THIS SOFTWARE.
 //
 
-public protocol StateContainer: Cancellable, Codable {
+public protocol StateContainer: Lifetime, Codable {
 	var persistentValueChanged: Signal<Void> { get }
 	var childValues: [StateContainer] { get }
 }
@@ -36,7 +36,7 @@ extension StateContainer {
 	}
 }
 
-extension Array: Cancellable where Element: StateContainer {
+extension Array: Lifetime where Element: StateContainer {
 	public mutating func cancel() {
 		for var v in self {
 			v.cancel()
@@ -44,7 +44,7 @@ extension Array: Cancellable where Element: StateContainer {
 	}
 }
 
-extension Optional: Cancellable where Wrapped: StateContainer {
+extension Optional: Lifetime where Wrapped: StateContainer {
 	public mutating func cancel() {
 		self?.cancel()
 	}

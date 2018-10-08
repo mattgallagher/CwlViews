@@ -100,7 +100,7 @@ public class StackView: ConstructingBinder, StackViewConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .alignment(let x): return x.apply(instance, storage) { i, s, v in i.alignment = v }
 			case .spacing(let x): return x.apply(instance, storage) { i, s, v in i.spacing = v }
@@ -204,7 +204,7 @@ extension BindingName where Binding: StackViewBinding {
 		public static var verticalHuggingPriority: BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding> { return BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding>({ v in .stackViewBinding(StackView.Binding.verticalHuggingPriority(v)) }) }
 		public static var edgeInsets: BindingName<Dynamic<NSEdgeInsets>, Binding> { return BindingName<Dynamic<NSEdgeInsets>, Binding>({ v in .stackViewBinding(StackView.Binding.edgeInsets(v)) }) }
 		@available(*, unavailable)
-		public static var isLayoutMarginsRelativeArrangement: BindingName<(), Binding> { return BindingName<(), Binding>({ v in .baseBinding(.cancelOnClose(.constant([]))) }) }
+		public static var isLayoutMarginsRelativeArrangement: BindingName<(), Binding> { return BindingName<(), Binding>({ v in .baseBinding(.lifetimes(.constant([]))) }) }
 	#endif
 }
 

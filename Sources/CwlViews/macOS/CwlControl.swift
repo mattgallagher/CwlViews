@@ -85,7 +85,7 @@ public class Control: ConstructingBinder, ControlConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .alignment(let x): return x.apply(instance, storage) { i, s, v in i.alignment = v }
 			case .allowsExpansionToolTips(let x): return x.apply(instance, storage) { i, s, v in i.allowsExpansionToolTips = v }

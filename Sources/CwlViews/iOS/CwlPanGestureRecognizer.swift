@@ -56,7 +56,7 @@ public class PanGestureRecognizer: ConstructingBinder, PanGestureRecognizerConve
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .maximumNumberOfTouches(let x): return x.apply(instance, storage) { i, s, v in i.maximumNumberOfTouches = v }
 			case .minimumNumberOfTouches(let x): return x.apply(instance, storage) { i, s, v in i.minimumNumberOfTouches = v }

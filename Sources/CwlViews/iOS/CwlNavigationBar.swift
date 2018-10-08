@@ -118,7 +118,7 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .backgroundImage(let x):
 				var previous: ScopedValues<PositionAndMetrics, UIImage?>? = nil

@@ -35,7 +35,7 @@ struct TableViewState: StateContainer {
 
 func tableViewController(_ tableState: TableViewState, _ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
 	return ViewController(
-		.cancelOnClose -- [
+		.lifetimes -- [
 			tableState.selection
 				.compactMap { $0.data }
 				.map { .detail(DetailViewState(row: $0)) }

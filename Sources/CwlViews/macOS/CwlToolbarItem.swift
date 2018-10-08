@@ -34,7 +34,7 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
-	public func instance(additional: ((Instance) -> Cancellable?)? = nil) -> Instance {
+	public func instance(additional: ((Instance) -> Lifetime?)? = nil) -> Instance {
 		return binderConstruct(
 			additional: additional,
 			storageConstructor: { prep, params, i in prep.constructStorage() },
@@ -90,7 +90,7 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 			}
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .label(let x): return x.apply(instance, storage) { i, s, v in i.label = v }
 			case .paletteLabel(let x): return x.apply(instance, storage) { i, s, v in i.paletteLabel = v }
@@ -109,14 +109,14 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Cancellable? {
-			let cancellable = linkedPreparer.finalizeInstance(instance, storage: storage)
+		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 
 			// Need to apply the validator *after* the action exists
 			if let v = validator, let target = instance.target as? ToolbarItemTarget {
 				target.validator = v
 			}
-			return cancellable
+			return lifetime
 		}
 	}
 

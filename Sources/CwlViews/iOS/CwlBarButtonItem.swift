@@ -114,7 +114,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .barButtonSystemItem: return nil
 			case .backgroundImage(let x):

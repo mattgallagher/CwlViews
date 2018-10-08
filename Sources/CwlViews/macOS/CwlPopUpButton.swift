@@ -74,7 +74,7 @@ public class PopUpButton: ConstructingBinder, PopUpButtonConvertible {
 			}
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .pullsDown: return pullsDown.resume()?.apply(instance, storage) { i, s, v in i.pullsDown = v }
 			case .autoenablesItems(let x): return x.apply(instance, storage) { i, s, v in i.autoenablesItems = v }

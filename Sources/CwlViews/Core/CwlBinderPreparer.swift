@@ -42,16 +42,16 @@ public protocol BinderPreparer {
 	///   - binding: the binding to apply
 	///   - instance: the instance
 	///   - storage: the storage
-	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Cancellable`.
-	func applyBinding(_ binding: EnclosingBinder.Binding, instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Cancellable?
+	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`.
+	func applyBinding(_ binding: EnclosingBinder.Binding, instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime?
 	
 	/// Bindings which need to be applied after others can be applied at this last stage.
 	///
 	/// - Parameters:
 	///   - instance: the instance
 	///   - storage: the storage
-	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Cancellable`
-	mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Cancellable?
+	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`
+	mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime?
 }
 
 /// Preparers are normally linked together in a chain, mimicking the chain of Binders, so Bindings from the linked Binder can be applied to current instance.
@@ -94,31 +94,31 @@ extension DerivedPreparer {
 	///   - instance: the constructed or apply instance
 	///   - storage: the constructed storage
 	///   - additional: any ad hoc bindings
-	///   - combine: link the instance, storage and cancellables together
-	public mutating func applyBindings(_ bindings: [EnclosingBinder.Binding], instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage, additional: ((EnclosingBinder.Instance) -> Cancellable?)?, combine: (EnclosingBinder.Instance, EnclosingBinder.Storage, [Cancellable]) -> Void) {
+	///   - combine: link the instance, storage and lifetimes together
+	public mutating func applyBindings(_ bindings: [EnclosingBinder.Binding], instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage, additional: ((EnclosingBinder.Instance) -> Lifetime?)?, combine: (EnclosingBinder.Instance, EnclosingBinder.Storage, [Lifetime]) -> Void) {
 		// Prepare.
 		prepareInstance(instance, storage: storage)
 		
 		// Apply styles that need to be applied after construction
-		var cancellables = [Cancellable]()
+		var lifetimes = [Lifetime]()
 		for b in bindings {
 			if let c = applyBinding(b, instance: instance, storage: storage) {
-				cancellables.append(c)
+				lifetimes.append(c)
 			}
 		}
 		
 		// Finalize the instance
 		if let c = finalizeInstance(instance, storage: storage) {
-			cancellables.append(c)
+			lifetimes.append(c)
 		}
 		
 		// Append adhoc bindings, if any
 		if let a = additional, let c = a(instance) {
-			cancellables.append(c)
+			lifetimes.append(c)
 		}
 		
 		// Combine the instance and binder
-		combine(instance, storage, cancellables)
+		combine(instance, storage, lifetimes)
 	}
 
 	/// A first scan of the bindings. Information about bindings present may be recorded during this time.
@@ -147,8 +147,8 @@ extension DerivedPreparer {
 	///   - binding: the binding to apply
 	///   - instance: the instance
 	///   - storage: the storage
-	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Cancellable`.
-	public func applyBinding(_ binding: EnclosingBinder.Binding, instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Cancellable? {
+	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`.
+	public func applyBinding(_ binding: EnclosingBinder.Binding, instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime? {
 		if let ls = EnclosingBinder.bindingToInherited(binding), let i = instance as? EnclosingBinder.Inherited.Instance, let s = storage as? EnclosingBinder.Inherited.Storage {
 			return linkedPreparer.applyBinding(ls, instance: i, storage: s)
 		}
@@ -160,8 +160,8 @@ extension DerivedPreparer {
 	/// - Parameters:
 	///   - instance: the instance
 	///   - storage: the storage
-	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Cancellable`
-	public mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Cancellable? {
+	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`
+	public mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime? {
 		if let i = instance as? EnclosingBinder.Inherited.Instance, let s = storage as? EnclosingBinder.Inherited.Storage {
 			return linkedPreparer.finalizeInstance(i, storage: s)
 		}

@@ -56,7 +56,7 @@ public class PressGestureRecognizer: ConstructingBinder, PressGestureRecognizerC
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .buttonMask(let x): return x.apply(instance, storage) { i, s, v in i.buttonMask = v }
 			case .minimumPressDuration(let x): return x.apply(instance, storage) { i, s, v in i.minimumPressDuration = v }

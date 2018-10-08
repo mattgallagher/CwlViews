@@ -117,7 +117,7 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .navigationBar(let x):
 				x.value.applyBindings(to: instance.navigationBar)

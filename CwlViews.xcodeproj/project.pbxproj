@@ -11,10 +11,10 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = C9A380421EFF9C0B00BFF2E5 /* Build configuration list for PBXAggregateTarget "CwlViewsConcat" */;
 			buildPhases = (
-				C9A380451EFF9C2800BFF2E5 /* Invoke CwlPackageBuild/main.swift to build CwlSignalConcat */,
 				C9A380461EFF9D9F00BFF2E5 /* ShellScript */,
 			);
 			dependencies = (
+				C9E4DB3C21624CDB00BD4A66 /* PBXTargetDependency */,
 			);
 			name = CwlViewsConcat;
 			productName = CwlViewsConcat;
@@ -256,6 +256,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = C9B27E641E51CA9700265580;
 			remoteInfo = CwlViews_iOS;
+		};
+		C9E4DB3B21624CDB00BD4A66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C93FBC002160FCFF00DFCF0E /* CwlSignal.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = C9A380371EFF923A00BFF2E5;
+			remoteInfo = CwlSignalConcat;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1187,21 +1194,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C9A380451EFF9C2800BFF2E5 /* Invoke CwlPackageBuild/main.swift to build CwlSignalConcat */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Invoke CwlPackageBuild/main.swift to build CwlSignalConcat";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/usr/bin/xcrun --sdk macosx swift $(SRCROOT)/.build/symlinks/CwlUtils/Scripts/CwlPackageBuild/main.swift";
-			shellScript = "
-";
-		};
 		C9A380461EFF9D9F00BFF2E5 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1461,6 +1453,11 @@
 			isa = PBXTargetDependency;
 			target = C9B27E641E51CA9700265580 /* CwlViews_iOS */;
 			targetProxy = C9B705FB20687A9A00B4CD29 /* PBXContainerItemProxy */;
+		};
+		C9E4DB3C21624CDB00BD4A66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CwlSignalConcat;
+			targetProxy = C9E4DB3B21624CDB00BD4A66 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

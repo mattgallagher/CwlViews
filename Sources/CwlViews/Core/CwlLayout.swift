@@ -249,7 +249,7 @@ public struct Layout {
 				first: left,
 				subsequent: [
 					.free(separator),
-					.dependent(.init(entity: right, dimension: .equalTo(priority: priority)))
+					.dependent(.init(entity: right, dimension: .equalTo(ratio: 1.0, priority: priority)))
 				]
 			)))
 		}
@@ -491,14 +491,14 @@ public struct Layout {
 		}
 	}
 
-	fileprivate func twoPointConstraint<First, Second>(firstSource: NSLayoutAnchor<First>, firstTarget: NSLayoutAnchor<First>, secondSource: NSLayoutAnchor<Second>, secondTarget: NSLayoutAnchor<Second>, secondPriority: Dimension.Priority = .userHigh, secondRelationLessThan: Bool? = nil, constraints: inout [NSLayoutConstraint]) {
+	fileprivate func twoPointConstraint<First, Second>(firstSource: NSLayoutAnchor<First>, firstTarget: NSLayoutAnchor<First>, secondSource: NSLayoutAnchor<Second>, secondTarget: NSLayoutAnchor<Second>, secondRelationLessThan: Bool? = nil, constraints: inout [NSLayoutConstraint]) {
 		let first = firstSource.constraint(equalTo: firstTarget)
 		first.priority = .required
 		first.isActive = true
 		constraints.append(first)
-
+		
 		let secondLow = secondSource.constraint(equalTo: secondTarget)
-
+		
 		var secondHigh: NSLayoutConstraint? = nil
 		if secondRelationLessThan == true {
 			secondHigh = secondSource.constraint(lessThanOrEqualTo: secondTarget)
@@ -535,7 +535,7 @@ public struct Layout {
 			case .trailing:
 				twoPointConstraint(firstSource: bounds.bottom, firstTarget: state.containerBounds.bottom, secondSource: bounds.top, secondTarget: state.containerBounds.top, secondRelationLessThan: false, constraints: &state.storage.constraints)
 			case .center:
-				twoPointConstraint(firstSource: bounds.centerY, firstTarget: state.containerBounds.centerY, secondSource: bounds.height, secondTarget: state.containerBounds.height, secondPriority: .userLow, secondRelationLessThan: nil, constraints: &state.storage.constraints)
+				twoPointConstraint(firstSource: bounds.centerY, firstTarget: state.containerBounds.centerY, secondSource: bounds.height, secondTarget: state.containerBounds.height, secondRelationLessThan: true, constraints: &state.storage.constraints)
 			case .fill:
 				twoPointConstraint(firstSource: bounds.top, firstTarget: state.containerBounds.top, secondSource: bounds.bottom, secondTarget: state.containerBounds.bottom, secondRelationLessThan: nil, constraints: &state.storage.constraints)
 			}
@@ -543,7 +543,7 @@ public struct Layout {
 			state.containerBounds.leading = bounds.trailing
 		case .vertical:
 			leading.unscaledConstraintBetween(first: bounds.top, second: state.containerBounds.top, constraints: &state.storage.constraints)
-
+			
 			if let l = length {
 				l.scaledConstraintBetween(first: bounds.height, second: state.containerBounds.height, constraints: &state.storage.constraints)
 			}
@@ -558,7 +558,7 @@ public struct Layout {
 			case .trailing:
 				twoPointConstraint(firstSource: bounds.trailing, firstTarget: state.containerBounds.trailing, secondSource: bounds.leading, secondTarget: state.containerBounds.leading, secondRelationLessThan: false, constraints: &state.storage.constraints)
 			case .center:
-				twoPointConstraint(firstSource: bounds.centerX, firstTarget: state.containerBounds.centerX, secondSource: bounds.width, secondTarget: state.containerBounds.width, secondPriority: .userLow, secondRelationLessThan: nil, constraints: &state.storage.constraints)
+				twoPointConstraint(firstSource: bounds.centerX, firstTarget: state.containerBounds.centerX, secondSource: bounds.width, secondTarget: state.containerBounds.width, secondRelationLessThan: true, constraints: &state.storage.constraints)
 			case .fill:
 				twoPointConstraint(firstSource: bounds.leading, firstTarget: state.containerBounds.leading, secondSource: bounds.trailing, secondTarget: state.containerBounds.trailing, secondRelationLessThan: nil, constraints: &state.storage.constraints)
 			}

@@ -46,7 +46,7 @@ func layoutWithAnimation(_ detailState: DetailViewState) -> Signal<Layout> {
 			show ? .horizontal(align: .center,
 				.view(Label(
 					.textAlignment -- .center,
-					.text -- "Hello there!"
+					.text -- .contentText
 				))
 			) :.horizontal()
 		}
@@ -56,7 +56,7 @@ func layoutWithAnimation(_ detailState: DetailViewState) -> Signal<Layout> {
 		.view(Label(.text -- .localizedStringWithFormat(.detailText, detailState.row))),
 		.space(),
 		.view(Button(
-			.title -- .normal("Toggle"),
+			.title -- .normal(.toggleLabel),
 			.action(.primaryActionTriggered) --> Input().map { _ in () }.bind(to: detailState.showChild)
 		)),
 		.space()
@@ -79,6 +79,8 @@ func layoutWithAnimation(_ detailState: DetailViewState) -> Signal<Layout> {
 }
 
 fileprivate extension String {
-	static let titleText = NSLocalizedString("Row #%@", comment: "")
+	static let contentText = NSLocalizedString("Hello there!", comment: "")
 	static let detailText = NSLocalizedString("Detail view for row #%@", comment: "")
+	static let titleText = NSLocalizedString("Row #%@", comment: "")
+	static let toggleLabel = NSLocalizedString("Toggle", comment: "")
 }

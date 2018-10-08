@@ -313,6 +313,10 @@ extension SignalChannel {
 		return next { $0.buffer(interval: interval, timeshift: timeshift, context: context) }
 	}
 	
+	public func compactOptionals<U>() -> SignalChannel<InputValue, Input, U, Signal<U>> where OutputValue == Optional<U> {
+		return next { $0.compactOptionals() }
+	}
+		
 	public func compactMap<U>(context: Exec = .direct, _ processor: @escaping (OutputValue) throws -> U?) -> SignalChannel<InputValue, Input, U, Signal<U>> {
 		return next { $0.compactMap(context: context, processor) }
 	}
@@ -447,8 +451,12 @@ extension SignalChannel {
 		return next { $0.throttleFirst(trigger) }
 	}
 	
-	public func withLatestFrom<Interface: SignalInterface>(_ sample: Interface) -> SignalChannel<InputValue, Input, (trigger: OutputValue, sample: Interface.OutputValue), Signal<(trigger: OutputValue, sample: Interface.OutputValue)>> {
+	public func withLatestFrom<Interface: SignalInterface>(_ sample: Interface) -> SignalChannel<InputValue, Input, Interface.OutputValue, Signal<Interface.OutputValue>> {
 		return next { $0.withLatestFrom(sample) }
+	}
+	
+	public func withLatestFrom<Interface: SignalInterface, R>(_ sample: Interface, context: Exec = .direct, _ processor: @escaping (OutputValue, Interface.OutputValue) -> R) -> SignalChannel<InputValue, Input, R, Signal<R>> {
+		return next { $0.withLatestFrom(sample, context: context, processor) }
 	}
 	
 	public func skip(_ count: Int) -> SignalChannel<InputValue, Input, OutputValue, Signal<OutputValue>> {

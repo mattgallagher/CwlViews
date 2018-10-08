@@ -147,7 +147,7 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .textInputTraits(let x):
-				return Array(x.value.bindings.lazy.compactMap { trait in
+				return AggregateLifetime(lifetimes: x.value.bindings.lazy.compactMap { trait in
 					switch trait {
 					case .autocapitalizationType(let y): return y.apply(instance, storage) { i, s, v in i.autocapitalizationType = v }
 					case .autocorrectionType(let y): return y.apply(instance, storage) { i, s, v in i.autocorrectionType = v }

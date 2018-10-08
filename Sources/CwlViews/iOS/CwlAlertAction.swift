@@ -89,7 +89,7 @@ public class AlertAction: ConstructingBinder, AlertActionConvertible {
 		
 		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let linkedLifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
-			return Array<Lifetime>([linkedLifetime, handler as Optional<Lifetime>].compactMap { $0 })
+			return AggregateLifetime(lifetimes: [linkedLifetime, handler as Optional<Lifetime>].compactMap { $0 })
 		}
 	}
 

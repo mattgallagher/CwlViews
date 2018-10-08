@@ -111,7 +111,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			if let h = isHidden?.resume() {
 				if let c2 = linkedPreparer.applyBinding(.isHidden(.dynamic(h)), instance: instance, storage: storage) {
-					return lifetime.map { c1 in ArrayOfLifetimes([c2, c1]) } ?? c2
+					return lifetime.map { c1 in AggregateLifetime(lifetimes: [c2, c1]) } ?? c2
 				}
 			}
 			return lifetime

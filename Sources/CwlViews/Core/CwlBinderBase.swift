@@ -71,7 +71,7 @@ public class BaseBinder: BinderChain {
 			switch binding {
 			case .lifetimes(let x):
 				switch x {
-				case .constant(let array): return ArrayOfLifetimes(array)
+				case .constant(let array): return AggregateLifetime(lifetimes: array)
 				case .dynamic(let signal): return signal.continuous().subscribe { r in }
 				}
 			}

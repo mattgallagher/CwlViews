@@ -40,8 +40,6 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case view(Dynamic<ViewConvertible>)
-		@available(iOS, introduced: 7.0, deprecated: 11.0, message: "This property exists to access layout guides prior to iOS 11. On iOS 11 and later, use .layout on the .view")
-		case layout(Dynamic<Layout>)
 		case title(Dynamic<String>)
 		case preferredContentSize(Dynamic<CGSize>)
 		case modalPresentationStyle(Dynamic<UIModalPresentationStyle>)
@@ -52,7 +50,6 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 		case transitioningDelegate(Dynamic<UIViewControllerTransitioningDelegate>)
 		case edgesForExtendedLayout(Dynamic<UIRectEdge>)
 		case extendedLayoutIncludesOpaqueBars(Dynamic<Bool>)
-		case automaticallyAdjustsScrollViewInsets(Dynamic<Bool>)
 		case restorationIdentifier(Dynamic<String?>)
 		case restorationClass(Dynamic<UIViewControllerRestoration.Type?>)
 		case modalPresentationCapturesStatusBarAppearance(Dynamic<Bool>)
@@ -122,7 +119,6 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 						i.view = v.uiView()
 					}
 				} }
-			case .layout(let x): return x.apply(instance, storage) { i, s, v in i.applyLayout(v) }
 			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
 			case .preferredContentSize(let x): return x.apply(instance, storage) { i, s, v in i.preferredContentSize = v }
 			case .modalPresentationStyle(let x): return x.apply(instance, storage) { i, s, v in i.modalPresentationStyle = v }
@@ -133,10 +129,6 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 			case .transitioningDelegate(let x): return x.apply(instance, storage) { i, s, v in i.transitioningDelegate = v }
 			case .edgesForExtendedLayout(let x): return x.apply(instance, storage) { i, s, v in i.edgesForExtendedLayout = v }
 			case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance, storage) { i, s, v in i.extendedLayoutIncludesOpaqueBars = v }
-			case .automaticallyAdjustsScrollViewInsets(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.automaticallyAdjustsScrollViewInsets = v
-				}
 			case .restorationIdentifier(let x): return x.apply(instance, storage) { i, s, v in i.restorationIdentifier = v }
 			case .restorationClass(let x): return x.apply(instance, storage) { i, s, v in i.restorationClass = v }
 			case .modalPresentationCapturesStatusBarAppearance(let x): return x.apply(instance, storage) { i, s, v in i.modalPresentationCapturesStatusBarAppearance = v }
@@ -435,8 +427,6 @@ extension BindingName where Binding: ViewControllerBinding {
 	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .viewControllerBinding(ViewController.Binding.$1(v)) }) }
 	public static var view: BindingName<Dynamic<ViewConvertible>, Binding> { return BindingName<Dynamic<ViewConvertible>, Binding>({ v in .viewControllerBinding(ViewController.Binding.view(v)) }) }
 	public static var navigationItem: BindingName<Constant<NavigationItem>, Binding> { return BindingName<Constant<NavigationItem>, Binding>({ v in .viewControllerBinding(ViewController.Binding.navigationItem(v)) }) }
-	@available(iOS, introduced: 7.0, deprecated: 11.0, message: "This property exists to access layout guides prior to iOS 11. On iOS 11 and later, use .layout on the .view")
-	public static var layout: BindingName<Dynamic<Layout>, Binding> { return BindingName<Dynamic<Layout>, Binding>({ v in .viewControllerBinding(ViewController.Binding.layout(v)) }) }
 	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .viewControllerBinding(ViewController.Binding.title(v)) }) }
 	public static var preferredContentSize: BindingName<Dynamic<CGSize>, Binding> { return BindingName<Dynamic<CGSize>, Binding>({ v in .viewControllerBinding(ViewController.Binding.preferredContentSize(v)) }) }
 	public static var modalPresentationStyle: BindingName<Dynamic<UIModalPresentationStyle>, Binding> { return BindingName<Dynamic<UIModalPresentationStyle>, Binding>({ v in .viewControllerBinding(ViewController.Binding.modalPresentationStyle(v)) }) }
@@ -447,7 +437,6 @@ extension BindingName where Binding: ViewControllerBinding {
 	public static var transitioningDelegate: BindingName<Dynamic<UIViewControllerTransitioningDelegate>, Binding> { return BindingName<Dynamic<UIViewControllerTransitioningDelegate>, Binding>({ v in .viewControllerBinding(ViewController.Binding.transitioningDelegate(v)) }) }
 	public static var edgesForExtendedLayout: BindingName<Dynamic<UIRectEdge>, Binding> { return BindingName<Dynamic<UIRectEdge>, Binding>({ v in .viewControllerBinding(ViewController.Binding.edgesForExtendedLayout(v)) }) }
 	public static var extendedLayoutIncludesOpaqueBars: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .viewControllerBinding(ViewController.Binding.extendedLayoutIncludesOpaqueBars(v)) }) }
-	public static var automaticallyAdjustsScrollViewInsets: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .viewControllerBinding(ViewController.Binding.automaticallyAdjustsScrollViewInsets(v)) }) }
 	public static var restorationIdentifier: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .viewControllerBinding(ViewController.Binding.restorationIdentifier(v)) }) }
 	public static var restorationClass: BindingName<Dynamic<UIViewControllerRestoration.Type?>, Binding> { return BindingName<Dynamic<UIViewControllerRestoration.Type?>, Binding>({ v in .viewControllerBinding(ViewController.Binding.restorationClass(v)) }) }
 	public static var modalPresentationCapturesStatusBarAppearance: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .viewControllerBinding(ViewController.Binding.modalPresentationCapturesStatusBarAppearance(v)) }) }

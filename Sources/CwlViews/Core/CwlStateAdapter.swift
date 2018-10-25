@@ -66,7 +66,7 @@ public struct StateAdapter<RB: StateAdapterBehavior>: StateContainer, SignalInpu
 		case notification(RB.State?, RB.Notification?)
 	}
 	
-	private let channel: SignalChannel<RB.Message, SignalMultiInput<RB.Message>, Content, SignalMulti<Content>>
+	private let channel: SignalChannel<SignalMultiInput<RB.Message>, SignalMulti<Content>>
 	
 	public var input: SignalInput<RB.Message> { return channel.input }
 	public var signal: Signal<RB.Notification> { return channel.signal.compactMap {

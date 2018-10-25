@@ -43,6 +43,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 		case contentOffset(Dynamic<SetOrAnimate<CGPoint>>)
 		case contentSize(Dynamic<CGSize>)
 		case contentInset(Dynamic<UIEdgeInsets>)
+		case contentInsetAdjustmentBehavior(Dynamic<UIScrollView.ContentInsetAdjustmentBehavior>)
 		case isScrollEnabled(Dynamic<Bool>)
 		case isDirectionalLockEnabled(Dynamic<Bool>)
 		case scrollsToTop(Dynamic<Bool>)
@@ -188,6 +189,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 			case .contentOffset(let x): return x.apply(instance, storage) { i, s, v in i.setContentOffset(v.value, animated: v.isAnimated) }
 			case .contentSize(let x): return x.apply(instance, storage) { i, s, v in i.contentSize = v }
 			case .contentInset(let x): return x.apply(instance, storage) { i, s, v in i.contentInset = v }
+			case .contentInsetAdjustmentBehavior(let x): return x.apply(instance, storage) { i, s, v in i.contentInsetAdjustmentBehavior = v }
 			case .isScrollEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isScrollEnabled = v }
 			case .isDirectionalLockEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isDirectionalLockEnabled = v }
 			case .scrollsToTop(let x): return x.apply(instance, storage) { i, s, v in i.scrollsToTop = v }

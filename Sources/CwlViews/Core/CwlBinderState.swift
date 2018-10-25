@@ -22,11 +22,11 @@
 /// - constructed: the output object was constructed and remains cached as long as the state is retained
 /// - pending: the set of parameters for construction 
 /// - consumed: this object is no longer valid
-public enum BinderState<Output, Parameters: BinderParameters> {
+public enum BinderState<Output, Parameters> {
 	case constructed(Output)
 	case pending(Parameters)
 	case consumed
-
+	
 	/// If the state is not `pending`, this will trigger a fatal error. State will be set to `consumed`.
 	///
 	/// - Returns: the parameters of the `pending` state. State will be set to `consumed`.
@@ -73,4 +73,3 @@ public enum BinderState<Output, Parameters: BinderParameters> {
 
 /// The standard parameters for constructing a subclass
 public typealias ConstructingBinderState<Instance, Binding> = BinderState<Instance, BinderSubclassParameters<Instance, Binding>>
-

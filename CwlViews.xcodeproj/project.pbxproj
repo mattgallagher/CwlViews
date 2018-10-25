@@ -129,6 +129,7 @@
 		C9BB0CC0200AF01C0062FB08 /* CwlStackAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */; };
 		C9C868601FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */; };
 		C9C868611FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */; };
+		C9CCD8B12181D75E00443079 /* CwlViews.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C9DF3DDA1FF5B6DB0058E427 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD21FF5B6DA0058E427 /* Document.swift */; };
 		C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */; };
 		C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD51FF5B6DA0058E427 /* main.swift */; };
@@ -285,6 +286,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				C9CCD8B12181D75E00443079 /* CwlViews.framework in Copy frameworks */,
 				C93FBC682161059D00DFCF0E /* CwlSignal.framework in Copy frameworks */,
 				C93FBC6B216105DB00DFCF0E /* CwlUtils.framework in Copy frameworks */,
 			);
@@ -1021,7 +1023,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0820;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Matt Gallagher ( https://www.cocoawithlove.com )";
 				TargetAttributes = {
 					C94853BF1DC4E306009CC145 = {
@@ -1490,8 +1492,8 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1510,8 +1512,8 @@
 				CWL_PRODUCT_NAMES = "";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 4.2;
 				VALIDATE_PRODUCT = YES;

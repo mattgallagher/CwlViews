@@ -68,23 +68,9 @@ public class Application: Binder {
 		case significantTimeChange(SignalInput<Void>)
 		case performFetch(SignalInput<SignalInput<UIBackgroundFetchResult>>)
 		case handleEventsForBackgroundURLSession(SignalInput<Callback<String, ()>>)
-		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case registerUserNotificationSettings(Signal<UIUserNotificationSettings>)
 		case registerForRemoteNotifications(Signal<Bool>)
-		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case didRegisterUserNotifications(SignalInput<UIUserNotificationSettings>)
 		case didRegisterRemoteNotifications(SignalInput<Result<Data>>)
-		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case didReceiveLocalNotification(SignalInput<UILocalNotification>)
 		case didReceiveRemoteNotification(SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>)
-		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case handleLocalNotificationAction(SignalInput<Callback<(String?, UILocalNotification), ()>>)
-		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case handleRemoteNotificationAction(SignalInput<Callback<(String?, [AnyHashable : Any]), ()>>)
-		@available(iOS, introduced: 9.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case handleLocalNotificationResponseInfoAction(SignalInput<Callback<(String?, UILocalNotification, [AnyHashable : Any]), ()>>)
-		@available(iOS, introduced: 9.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		case handleRemoteNotificationResponseInfoAction(SignalInput<Callback<(String?, [AnyHashable : Any], [AnyHashable : Any]), ()>>)
 		case didFailToContinueUserActivity(SignalInput<(String, Error)>)
 		case performAction(SignalInput<Callback<UIApplicationShortcutItem, Bool>>)
 		case handleWatchKitExtensionRequest(SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>)
@@ -176,32 +162,14 @@ public class Application: Binder {
 			case .handleEventsForBackgroundURLSession(let x):
 				let s = #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:))
 				delegate().addSelector(s).handleEventsForBackgroundURLSession = x
-			case .didRegisterUserNotifications(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didRegister:))
-				delegate().addSelector(s).didRegisterUserNotifications = x
 			case .didRegisterRemoteNotifications(let x):
 				let s1 = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
 				let s2 = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
 				delegate().addSelector(s1).didRegisterRemoteNotifications = x
 				delegate().addSelector(s2)
-			case .didReceiveLocalNotification(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didReceive:))
-				delegate().addSelector(s).didReceiveLocalNotification = x
 			case .didReceiveRemoteNotification(let x):
 				let s = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
 				delegate().addSelector(s).didReceiveRemoteNotification = x
-			case .handleLocalNotificationAction(let x):
-				let s = #selector(UIApplicationDelegate.application(_:handleActionWithIdentifier:for:completionHandler:))
-				delegate().addSelector(s).handleLocalNotificationAction = x
-			case .handleRemoteNotificationAction(let x):
-				let s = #selector(UIApplicationDelegate.application(_:handleActionWithIdentifier:forRemoteNotification:completionHandler:))
-				delegate().addSelector(s).handleRemoteNotificationAction = x
-			case .handleLocalNotificationResponseInfoAction(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didReceive:))
-				delegate().addSelector(s).handleLocalNotificationResponseInfoAction = x
-			case .handleRemoteNotificationResponseInfoAction(let x):
-				let s = #selector(UIApplicationDelegate.application(_:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:))
-				delegate().addSelector(s).handleRemoteNotificationResponseInfoAction = x
 			case .didFailToContinueUserActivity(let x):
 				let s = #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:))
 				delegate().addSelector(s).didFailToContinueUserActivity = x
@@ -284,14 +252,6 @@ public class Application: Binder {
 					default: break
 					}
 				}
-			case .registerUserNotificationSettings(let x):
-				return x.apply(instance, storage) { i, s, v in
-					switch i.currentUserNotificationSettings {
-					case .some(let a) where a != v: i.registerUserNotificationSettings(v)
-					case .none: i.registerUserNotificationSettings(v)
-					default: break
-					}
-				}
 			case .didBecomeActive(let x):
 				return Signal.notifications(name: UIApplication.didBecomeActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .willResignActive(let x):
@@ -312,14 +272,8 @@ public class Application: Binder {
 			case .protectedDataDidBecomeAvailable: return nil
 			case .performFetch: return nil
 			case .handleEventsForBackgroundURLSession: return nil
-			case .didRegisterUserNotifications: return nil
 			case .didRegisterRemoteNotifications: return nil
-			case .didReceiveLocalNotification: return nil
 			case .didReceiveRemoteNotification: return nil
-			case .handleLocalNotificationAction: return nil
-			case .handleRemoteNotificationAction: return nil
-			case .handleLocalNotificationResponseInfoAction: return nil
-			case .handleRemoteNotificationResponseInfoAction: return nil
 			case .didFailToContinueUserActivity: return nil
 			case .performAction: return nil
 			case .handleWatchKitExtensionRequest: return nil
@@ -578,23 +532,9 @@ extension BindingName where Binding: ApplicationBinding {
 	public static var significantTimeChange: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .applicationBinding(Application.Binding.significantTimeChange(v)) }) }
 	public static var performFetch: BindingName<SignalInput<SignalInput<UIBackgroundFetchResult>>, Binding> { return BindingName<SignalInput<SignalInput<UIBackgroundFetchResult>>, Binding>({ v in .applicationBinding(Application.Binding.performFetch(v)) }) }
 	public static var handleEventsForBackgroundURLSession: BindingName<SignalInput<Callback<String, ()>>, Binding> { return BindingName<SignalInput<Callback<String, ()>>, Binding>({ v in .applicationBinding(Application.Binding.handleEventsForBackgroundURLSession(v)) }) }
-	@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var registerUserNotificationSettings: BindingName<Signal<UIUserNotificationSettings>, Binding> { return BindingName<Signal<UIUserNotificationSettings>, Binding>({ v in .applicationBinding(Application.Binding.registerUserNotificationSettings(v)) }) }
 	public static var registerForRemoteNotifications: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .applicationBinding(Application.Binding.registerForRemoteNotifications(v)) }) }
-	@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var didRegisterUserNotifications: BindingName<SignalInput<UIUserNotificationSettings>, Binding> { return BindingName<SignalInput<UIUserNotificationSettings>, Binding>({ v in .applicationBinding(Application.Binding.didRegisterUserNotifications(v)) }) }
 	public static var didRegisterRemoteNotifications: BindingName<SignalInput<Result<Data>>, Binding> { return BindingName<SignalInput<Result<Data>>, Binding>({ v in .applicationBinding(Application.Binding.didRegisterRemoteNotifications(v)) }) }
-	@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var didReceiveLocalNotification: BindingName<SignalInput<UILocalNotification>, Binding> { return BindingName<SignalInput<UILocalNotification>, Binding>({ v in .applicationBinding(Application.Binding.didReceiveLocalNotification(v)) }) }
 	public static var didReceiveRemoteNotification: BindingName<SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>, Binding> { return BindingName<SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>, Binding>({ v in .applicationBinding(Application.Binding.didReceiveRemoteNotification(v)) }) }
-	@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var handleLocalNotificationAction: BindingName<SignalInput<Callback<(String?, UILocalNotification), ()>>, Binding> { return BindingName<SignalInput<Callback<(String?, UILocalNotification), ()>>, Binding>({ v in .applicationBinding(Application.Binding.handleLocalNotificationAction(v)) }) }
-	@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var handleRemoteNotificationAction: BindingName<SignalInput<Callback<(String?, [AnyHashable : Any]), ()>>, Binding> { return BindingName<SignalInput<Callback<(String?, [AnyHashable : Any]), ()>>, Binding>({ v in .applicationBinding(Application.Binding.handleRemoteNotificationAction(v)) }) }
-	@available(iOS, introduced: 9.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var handleLocalNotificationResponseInfoAction: BindingName<SignalInput<Callback<(String?, UILocalNotification, [AnyHashable : Any]), ()>>, Binding> { return BindingName<SignalInput<Callback<(String?, UILocalNotification, [AnyHashable : Any]), ()>>, Binding>({ v in .applicationBinding(Application.Binding.handleLocalNotificationResponseInfoAction(v)) }) }
-	@available(iOS, introduced: 9.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-	public static var handleRemoteNotificationResponseInfoAction: BindingName<SignalInput<Callback<(String?, [AnyHashable : Any], [AnyHashable : Any]), ()>>, Binding> { return BindingName<SignalInput<Callback<(String?, [AnyHashable : Any], [AnyHashable : Any]), ()>>, Binding>({ v in .applicationBinding(Application.Binding.handleRemoteNotificationResponseInfoAction(v)) }) }
 	public static var didFailToContinueUserActivity: BindingName<SignalInput<(String, Error)>, Binding> { return BindingName<SignalInput<(String, Error)>, Binding>({ v in .applicationBinding(Application.Binding.didFailToContinueUserActivity(v)) }) }
 	public static var performAction: BindingName<SignalInput<Callback<UIApplicationShortcutItem, Bool>>, Binding> { return BindingName<SignalInput<Callback<UIApplicationShortcutItem, Bool>>, Binding>({ v in .applicationBinding(Application.Binding.performAction(v)) }) }
 	public static var handleWatchKitExtensionRequest: BindingName<SignalInput<Callback<([AnyHashable: Any]?), [AnyHashable: Any]?>>, Binding> { return BindingName<SignalInput<Callback<([AnyHashable: Any]?), [AnyHashable: Any]?>>, Binding>({ v in .applicationBinding(Application.Binding.handleWatchKitExtensionRequest(v)) }) }

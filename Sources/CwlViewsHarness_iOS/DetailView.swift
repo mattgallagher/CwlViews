@@ -34,8 +34,10 @@ struct DetailViewState: StateContainer {
 func detailViewController(_ detailState: DetailViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
 	return ViewController(
 		.title -- .localizedStringWithFormat(.titleText, detailState.row),
-		.layout <-- layoutWithAnimation(detailState),
-		.loadView -- { View(.backgroundColor -- .white) }
+		.loadView -- { View(
+			.backgroundColor -- .white,
+			.layout <-- layoutWithAnimation(detailState)
+		) }
 	)
 }
 

@@ -29,7 +29,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 		case value(Notification)
 	}
 	
-	public let pair: SignalMultiPair<Message, PossibleNotification>
+	public let pair: SignalChannel<SignalMultiInput<Message>, SignalMulti<PossibleNotification>>
 	public var input: SignalInput<Message> { return pair.input }
 	
 	private let context: DispatchQueueContext

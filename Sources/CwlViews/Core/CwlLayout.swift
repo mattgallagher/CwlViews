@@ -94,30 +94,8 @@ public struct MarginEdges: OptionSet {
 		/// Adds the views contained by `layout` in the arrangment described by the layout to `self`.
 		///
 		/// - Parameter layout: a set of views and layout descriptions
-		@available(iOS 11, *)
 		public func applyContentLayout(_ layout: Layout?) {
 			applyLayoutToView(view: self, params: layout.map { (layout: $0, bounds: Layout.Bounds(scrollView: self)) })
-		}
-	}
-	
-	extension UIViewController {
-		/// Adds the views contained by `layout` in the arrangment described by the layout to `self`.
-		///
-		/// NOTE: prior to iOS 11, this is required to handle the UIViewController topLayoutGuide and bottomLayoutGuide.
-		///
-		/// - Parameter layout: a set of views and layout descriptions
-		@available(iOS, introduced: 7.0, deprecated: 11.0, message: "This function exists to layout relative to view controller layout guides prior to iOS 11. On iOS 11 and later, use safe area margins and apply the layout directly to the view")
-		public func applyLayout(_ layout: Layout?) {
-			if let l = layout, l.marginEdges.contains(.topSafeArea) || l.marginEdges.contains(.bottomSafeArea) {
-				let wrapper = Layout(
-					axis: .vertical,
-					align: .fill,
-					entities: [Layout.Entity(.layout(l, size: nil))]
-				)
-				applyLayoutToView(view: self.view, params: (layout: wrapper, bounds: Layout.Bounds(viewController: self, marginEdges: l.marginEdges)))
-			} else {
-				applyLayoutToView(view: self.view, params: layout.map { (layout: $0, bounds: Layout.Bounds(viewController: self, marginEdges: $0.marginEdges)) })
-			}
 		}
 	}
 #endif
@@ -395,7 +373,6 @@ public struct Layout {
 		}
 		
 		#if os(iOS)
-			@available(iOS 11, *)
 			fileprivate init(scrollView: UIScrollView) {
 				leading = scrollView.contentLayoutGuide.leadingAnchor
 				top = scrollView.contentLayoutGuide.topAnchor
@@ -407,50 +384,15 @@ public struct Layout {
 				centerY = scrollView.contentLayoutGuide.centerYAnchor
 			}
 			
-			@available(iOS, introduced: 7.0, deprecated: 11.0)
-			fileprivate init(viewController: UIViewController, marginEdges: MarginEdges) {
-				let view = viewController.view!
-				leading = marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout) ? view.layoutMarginsGuide.leadingAnchor : view.leadingAnchor
-				top = marginEdges.contains(.topSafeArea) ? viewController.topLayoutGuide.bottomAnchor : (marginEdges.contains(.topLayout) ? view.layoutMarginsGuide.topAnchor : view.topAnchor)
-				trailing = marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.trailingAnchor : view.trailingAnchor
-				bottom = marginEdges.contains(.bottomSafeArea) ? viewController.bottomLayoutGuide.topAnchor : (marginEdges.contains(.bottomLayout) ? view.layoutMarginsGuide.bottomAnchor : view.bottomAnchor)
-				width = (marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout)) && (marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout)) ? view.layoutMarginsGuide.widthAnchor : view.widthAnchor
-				height = (marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout)) && (marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout)) ? view.layoutMarginsGuide.heightAnchor : view.heightAnchor
-				centerX = (marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout)) && (marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout)) ? view.layoutMarginsGuide.centerXAnchor : view.centerXAnchor
-				centerY = (marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout)) && (marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout)) ? view.layoutMarginsGuide.centerYAnchor : view.centerYAnchor
-			}
-			
 			fileprivate init(view: Layout.View, marginEdges: MarginEdges) {
-				if #available(iOS 11.0, *) {
-					#if swift(>=4)
-						leading = marginEdges.contains(.leadingSafeArea) ? view.safeAreaLayoutGuide.leadingAnchor : (marginEdges.contains(.leadingLayout) ? view.layoutMarginsGuide.leadingAnchor : view.leadingAnchor)
-						top = marginEdges.contains(.topSafeArea) ? view.safeAreaLayoutGuide.topAnchor : (marginEdges.contains(.topLayout) ? view.layoutMarginsGuide.topAnchor : view.topAnchor)
-						trailing = marginEdges.contains(.trailingSafeArea) ? view.safeAreaLayoutGuide.trailingAnchor : (marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.trailingAnchor : view.trailingAnchor)
-						bottom = marginEdges.contains(.bottomSafeArea) ? view.safeAreaLayoutGuide.bottomAnchor : (marginEdges.contains(.bottomLayout) ? view.layoutMarginsGuide.bottomAnchor : view.bottomAnchor)
-						width = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.widthAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.widthAnchor : view.widthAnchor)
-						height = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.heightAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.heightAnchor : view.heightAnchor)
-						centerX = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.centerXAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.centerXAnchor : view.centerXAnchor)
-						centerY = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.centerYAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.centerYAnchor : view.centerYAnchor)
-					#else
-						leading = marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout) ? view.layoutMarginsGuide.leadingAnchor : view.leadingAnchor
-						top = marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout) ? view.layoutMarginsGuide.topAnchor : view.topAnchor
-						trailing = marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.trailingAnchor : view.trailingAnchor
-						bottom = marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout) ? view.layoutMarginsGuide.bottomAnchor : view.bottomAnchor
-						width = (marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout)) && (marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout)) ? view.layoutMarginsGuide.widthAnchor : view.widthAnchor
-						height = (marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout)) && (marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout)) ? view.layoutMarginsGuide.heightAnchor : view.heightAnchor
-						centerX = (marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout)) && (marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout)) ? view.layoutMarginsGuide.centerXAnchor : view.centerXAnchor
-						centerY = (marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout)) && (marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout)) ? view.layoutMarginsGuide.centerYAnchor : view.centerYAnchor
-					#endif
-				} else {
-					leading = marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout) ? view.layoutMarginsGuide.leadingAnchor : view.leadingAnchor
-					top = marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout) ? view.layoutMarginsGuide.topAnchor : view.topAnchor
-					trailing = marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.trailingAnchor : view.trailingAnchor
-					bottom = marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout) ? view.layoutMarginsGuide.bottomAnchor : view.bottomAnchor
-					width = (marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout)) && (marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout)) ? view.layoutMarginsGuide.widthAnchor : view.widthAnchor
-					height = (marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout)) && (marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout)) ? view.layoutMarginsGuide.heightAnchor : view.heightAnchor
-					centerX = (marginEdges.contains(.leadingSafeArea) || marginEdges.contains(.leadingLayout)) && (marginEdges.contains(.trailingSafeArea) || marginEdges.contains(.trailingLayout)) ? view.layoutMarginsGuide.centerXAnchor : view.centerXAnchor
-					centerY = (marginEdges.contains(.topSafeArea) || marginEdges.contains(.topLayout)) && (marginEdges.contains(.bottomSafeArea) || marginEdges.contains(.bottomLayout)) ? view.layoutMarginsGuide.centerYAnchor : view.centerYAnchor
-				}
+				leading = marginEdges.contains(.leadingSafeArea) ? view.safeAreaLayoutGuide.leadingAnchor : (marginEdges.contains(.leadingLayout) ? view.layoutMarginsGuide.leadingAnchor : view.leadingAnchor)
+				top = marginEdges.contains(.topSafeArea) ? view.safeAreaLayoutGuide.topAnchor : (marginEdges.contains(.topLayout) ? view.layoutMarginsGuide.topAnchor : view.topAnchor)
+				trailing = marginEdges.contains(.trailingSafeArea) ? view.safeAreaLayoutGuide.trailingAnchor : (marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.trailingAnchor : view.trailingAnchor)
+				bottom = marginEdges.contains(.bottomSafeArea) ? view.safeAreaLayoutGuide.bottomAnchor : (marginEdges.contains(.bottomLayout) ? view.layoutMarginsGuide.bottomAnchor : view.bottomAnchor)
+				width = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.widthAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.widthAnchor : view.widthAnchor)
+				height = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.heightAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.heightAnchor : view.heightAnchor)
+				centerX = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.centerXAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.centerXAnchor : view.centerXAnchor)
+				centerY = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.centerYAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.centerYAnchor : view.centerYAnchor)
 			}
 		#else
 			fileprivate init(view: Layout.View, marginEdges: MarginEdges) {
@@ -697,25 +639,13 @@ extension Layout.View {
 //
 extension Layout.Dimension.Priority {
 	#if os(macOS)
-		#if swift(>=4)
-			public static let userLow = NSLayoutConstraint.Priority(rawValue: 156.25)
-			public static let userMid = NSLayoutConstraint.Priority(rawValue: 437.5)
-			public static let userHigh = NSLayoutConstraint.Priority(rawValue: 843.75)
-		#else
-			public static let userLow = NSLayoutPriorityDefaultLow * 0.625
-			public static let userMid = NSLayoutPriorityRequired * 0.4375
-			public static let userHigh = NSLayoutPriorityDefaultHigh * 1.125
-		#endif
+		public static let userLow = NSLayoutConstraint.Priority(rawValue: 156.25)
+		public static let userMid = NSLayoutConstraint.Priority(rawValue: 437.5)
+		public static let userHigh = NSLayoutConstraint.Priority(rawValue: 843.75)
 	#else
-		#if swift(>=4)
-			public static let userLow = UILayoutPriority(rawValue: 156.25)
-			public static let userMid = UILayoutPriority(rawValue: 437.5)
-			public static let userHigh = UILayoutPriority(rawValue: 843.75)
-		#else
-			public static let userLow = UILayoutPriorityDefaultLow * 0.625
-			public static let userMid = UILayoutPriorityRequired * 0.4375
-			public static let userHigh = UILayoutPriorityDefaultHigh * 1.125
-		#endif
+		public static let userLow = UILayoutPriority(rawValue: 156.25)
+		public static let userMid = UILayoutPriority(rawValue: 437.5)
+		public static let userHigh = UILayoutPriority(rawValue: 843.75)
 	#endif
 }
 

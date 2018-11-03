@@ -49,6 +49,8 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 		public static func toolbarItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Inherited.Binding)
 		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case label(Dynamic<String>)
 		case paletteLabel(Dynamic<String>)

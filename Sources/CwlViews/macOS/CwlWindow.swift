@@ -34,8 +34,9 @@ public class Window: ConstructingBinder, WindowConvertible {
 		public typealias EnclosingBinder = Window
 		public typealias Inherited = BaseBinder.Binding
 		public static func windowBinding(_ binding: Window.Binding) -> Window.Binding { return binding }
-		
 		case inheritedBinding(Inherited)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Static styles are applied at construction and are subsequently immutable.
 		case contentView(Constant<View>)

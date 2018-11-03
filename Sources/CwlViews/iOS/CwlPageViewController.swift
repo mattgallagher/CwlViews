@@ -44,7 +44,6 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 		case inheritedBinding(Inherited.Binding)
 		
 		// 0. Static bindings are applied at construction and are subsequently immutable.
-		// e.g. case someProperty(Constant<PropertyType>)
 		case transitionStyle(Constant<UIPageViewController.TransitionStyle>)
 		case navigationOrientation(Constant<UIPageViewController.NavigationOrientation>)
 		case spineLocation(Constant<UIPageViewController.SpineLocation>)
@@ -55,10 +54,8 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 		case isDoubleSided(Dynamic<Bool>)
 
 		// 2. Signal bindings are performed on the object after construction.
-		// e.g. case someFunction(Signal<FunctionParametersAsTuple>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		// e.g. case someAction(SignalInput<CallbackParameters>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case constructPage((PageData) -> ViewControllerConvertible)

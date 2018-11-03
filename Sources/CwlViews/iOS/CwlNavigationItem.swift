@@ -35,6 +35,8 @@ public class NavigationItem: ConstructingBinder, NavigationItemConvertible {
 		public static func navigationItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Inherited.Binding)
 		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case title(Dynamic<String>)
 		case titleView(Dynamic<ViewConvertible?>)

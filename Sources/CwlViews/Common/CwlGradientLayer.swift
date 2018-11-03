@@ -85,7 +85,7 @@ public protocol GradientLayerConvertible: LayerConvertible {
 	func uiGradientLayer() -> GradientLayer.Instance
 }
 extension GradientLayerConvertible {
-	public var cgLayer: Layer.Instance { return uiGradientLayer() }
+	public func caLayer() -> Layer.Instance { return uiGradientLayer() }
 }
 extension GradientLayer.Instance: GradientLayerConvertible {
 	public func uiGradientLayer() -> GradientLayer.Instance { return self }

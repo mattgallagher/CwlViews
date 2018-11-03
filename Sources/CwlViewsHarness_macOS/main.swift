@@ -343,9 +343,9 @@ applicationMain { Application(
 		return .just(Callback(NSError(domain: e.domain, code: e.code, userInfo: userInfo), fatalErrorInput))
 	},
 	.terminate <-- fatalErrorSignal.map { _ in () },
-	.content -- [
-		mainWindow(model: doc),
-		secondWindow(model: doc),
-		thirdWindow()
+	.lifetimes -- [
+		mainWindow(model: doc).nsWindow(),
+		secondWindow(model: doc).nsWindow(),
+		thirdWindow().nsWindow()
 	]
 ) }

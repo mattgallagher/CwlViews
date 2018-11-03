@@ -236,7 +236,6 @@ public class Application: Binder {
 		
 		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .content(let x): return x.apply(instance, storage) { i, s, v in s.terminationReplyHandlers = v.map { $0.terminateRelyHandler() } }
 			case .remoteNotifications(let x): return x.apply(instance, storage) { i, s, v in
 				if v.isEmpty {
 					i.unregisterForRemoteNotifications()
@@ -380,59 +379,13 @@ public class Application: Binder {
 
 	open class Storage: ObjectBinderStorage, NSApplicationDelegate {
 		open var dockMenu: NSMenu?
-		open var terminationReplyHandlers: [ApplicationTerminateReplyHandler] = []
 		
 		open override var inUse: Bool {
-			return super.inUse || dockMenu != nil || !terminationReplyHandlers.isEmpty
+			return super.inUse || dockMenu != nil
 		}
 		
 		open func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
 			return dockMenu
-		}
-		
-		open func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-			return askIfShouldTerminate(sender: sender, excluding: [])
-		}
-		
-		open func applicationWillTerminate(_ notification: Notification) {
-			if let dd = dynamicDelegate as? Delegate, let willTerminate = dd.willTerminate {
-				willTerminate()
-				dynamicDelegate = nil
-			}
-		}
-		
-		private func askIfShouldTerminate(sender: NSApplication, excluding: Set<Int>) -> NSApplication.TerminateReply {
-			for (index, c) in terminationReplyHandlers.enumerated() {
-				if excluding.contains(index) {
-					continue
-				}
-				let reply = c.shouldTerminate()
-				switch reply {
-				case .cancel: return NSApplication.TerminateReply.terminateCancel
-				case .later(let s):
-					var alreadyAsked = excluding
-					alreadyAsked.insert(index)
-					s.subscribeUntilEnd { r in
-						switch r {
-						case .success(let shouldTerminate) where shouldTerminate:
-							switch self.askIfShouldTerminate(sender: sender, excluding: alreadyAsked) {
-							case .terminateNow: sender.reply(toApplicationShouldTerminate: true)
-							case .terminateCancel: sender.reply(toApplicationShouldTerminate: false)
-							default: break
-							}
-						case .success: fallthrough
-						case .failure: sender.reply(toApplicationShouldTerminate: false)
-						}
-					}
-					return NSApplication.TerminateReply.terminateLater
-				case .now: break
-				}
-			}
-			if let dd = dynamicDelegate as? Delegate, let shouldTerminate = dd.shouldTerminate {
-				return shouldTerminate(sender)
-			} else {
-				return NSApplication.TerminateReply.terminateNow
-			}
 		}
 	}
 	
@@ -569,7 +522,6 @@ extension BindingName where Binding: ApplicationBinding {
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	public static var mainMenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.mainMenu(v)) }) }
 	public static var dockMenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.dockMenu(v)) }) }
-	public static var content: BindingName<Dynamic<[AppLifecycle]>, Binding> { return BindingName<Dynamic<[AppLifecycle]>, Binding>({ v in .applicationBinding(Application.Binding.content(v)) }) }
 	public static var applicationIconImage: BindingName<Dynamic<NSImage>, Binding> { return BindingName<Dynamic<NSImage>, Binding>({ v in .applicationBinding(Application.Binding.applicationIconImage(v)) }) }
 	public static var activationPolicy: BindingName<Dynamic<NSApplication.ActivationPolicy>, Binding> { return BindingName<Dynamic<NSApplication.ActivationPolicy>, Binding>({ v in .applicationBinding(Application.Binding.activationPolicy(v)) }) }
 	public static var presentationOptions: BindingName<Dynamic<NSApplication.PresentationOptions>, Binding> { return BindingName<Dynamic<NSApplication.PresentationOptions>, Binding>({ v in .applicationBinding(Application.Binding.presentationOptions(v)) }) }
@@ -649,8 +601,4 @@ public enum ApplicationTerminateReply {
 	case now
 	case cancel
 	case later(Signal<Bool>)
-}
-
-public protocol AppLifetime: Lifetime {
-	func shouldTerminate() -> ApplicationTerminateReply
 }

@@ -19,7 +19,7 @@
 
 /// Implementation for `BinderStorage` that wraps Cocoa objects.
 open class ObjectBinderStorage: NSObject, BinderStorage {
-	fileprivate var lifetimes: [Lifetime]? = nil
+	public private(set) var lifetimes: [Lifetime]? = nil
 	public func setLifetimes(_ lifetimes: [Lifetime]) {
 		assert(self.lifetimes == nil, "Bindings should be set once only")
 		self.lifetimes = lifetimes

@@ -28,7 +28,7 @@ public class Layer: ConstructingBinder, LayerConvertible {
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
-	public var cgLayer: Instance { return instance() }
+	public func caLayer() -> Instance { return instance() }
 	
 	public enum Binding: LayerBinding {
 		public typealias EnclosingBinder = Layer
@@ -157,10 +157,10 @@ extension BindingName where Binding: LayerBinding {
 }
 
 public protocol LayerConvertible {
-	var cgLayer: Layer.Instance { get }
+	func caLayer() -> Layer.Instance
 }
 extension Layer.Instance: LayerConvertible {
-	public var cgLayer: Layer.Instance { return self }
+	public func caLayer() -> Layer.Instance { return self }
 }
 
 public protocol LayerBinding: BackingLayerBinding {

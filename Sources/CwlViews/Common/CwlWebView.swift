@@ -30,7 +30,7 @@ public class WebView: ConstructingBinder, WebViewConvertible {
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
-	public var wkWebView: Instance { return instance() }
+	public func wkWebView() -> Instance { return instance() }
 	
 	public enum Binding: WebViewBinding {
 		public typealias EnclosingBinder = WebView
@@ -544,17 +544,17 @@ extension BindingName where Binding: WebViewBinding {
 }
 
 public protocol WebViewConvertible: ViewConvertible {
-	var wkWebView: WebView.Instance { get }
+	func wkWebView() -> WebView.Instance
 }
 extension WebViewConvertible {
 	#if os(macOS)
-		public func nsView() -> View.Instance { return wkWebView }
+		public func nsView() -> View.Instance { return wkWebView() }
 	#else
-		public func uiView() -> View.Instance { return wkWebView }
+		public func uiView() -> View.Instance { return wkWebView() }
 	#endif
 }
 extension WKWebView: WebViewConvertible {
-	public var wkWebView: WebView.Instance { return self }
+	public func wkWebView() -> WebView.Instance { return self }
 }
 
 public protocol WebViewBinding: ViewBinding {

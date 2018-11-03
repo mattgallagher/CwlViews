@@ -146,7 +146,7 @@ public class BackingLayer: Binder {
 				#endif
 			case .sublayers(let x):
 				return x.apply(instance, storage) { i, s, v in
-					i.sublayers = v.map { $0.cgLayer }
+					i.sublayers = v.map { $0.caLayer() }
 				}
 			case .affineTransform(let x): return x.apply(instance, storage) { i, s, v in i.setAffineTransform(v) }
 			case .anchorPoint(let x): return x.apply(instance, storage) { i, s, v in i.anchorPoint = v }
@@ -209,7 +209,7 @@ public class BackingLayer: Binder {
 				}
 			case .mask(let x):
 				return x.apply(instance, storage) { i, s, v in
-					i.mask = v?.cgLayer
+					i.mask = v?.caLayer()
 				}
 			case .inheritedBinding(let s):
 				return linkedPreparer.applyBinding(s, instance: (), storage: ())

@@ -581,7 +581,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 				}
 			}
 
-			return ArrayOfLifetimes([lifetime, o, k, m, h, v, a].compactMap { $0 })
+			return AggregateLifetime(lifetimes: [lifetime, o, k, m, h, v, a].compactMap { $0 })
 		}
 	}
 
@@ -938,20 +938,8 @@ public struct WindowSize: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral
 	}
 }
 
-extension Window: AppLifetime {
-	public var shouldTerminate: ApplicationTerminateReply {
-		return nsWindow().shouldTerminate()
-	}
+extension NSWindow: Lifetime {
 	public func cancel() {
-		return nsWindow().cancel()
-	}
-}
-
-extension NSWindow: AppLifetime {
-	public var shouldTerminate: ApplicationTerminateReply {
-		return (isVisible && delegate?.windowShouldClose?(self) == false) ? ApplicationTerminateReply.cancel : ApplicationTerminateReply.now
-	}
-	public func cancel() {
-		close()
+		return nsWindow().close()
 	}
 }

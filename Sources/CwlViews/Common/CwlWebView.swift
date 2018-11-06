@@ -281,58 +281,58 @@ public class WebView: ConstructingBinder, WebViewConvertible {
 			case .load(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.load(v.value)
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .loadFile(let x):
 				return x.apply(instance, storage) { i, s, v in
 					if #available(macOS 10.11, *) {
 						let n = i.loadFileURL(v.value.url, allowingReadAccessTo: v.value.allowingReadAccessTo)
-						v.callback?.send(value: n)
+						v.callback.send(value: n)
 					}
 				}
 			case .loadHTMLString(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.loadHTMLString(v.value.string, baseURL: v.value.baseURL)
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .loadData(let x):
 				return x.apply(instance, storage) { i, s, v in
 					if #available(macOS 10.11, *) {
 						let n = i.load(v.value.data, mimeType: v.value.mimeType, characterEncodingName: v.value.characterEncodingName, baseURL: v.value.baseURL)
-						v.callback?.send(value: n)
+						v.callback.send(value: n)
 					}
 				}
 			case .reload(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.reload()
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .reloadFromOrigin(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.reloadFromOrigin()
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .goBack(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.goBack()
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .goForward(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.goForward()
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .goTo(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let n = i.go(to: v.value)
-					v.callback?.send(value: n)
+					v.callback.send(value: n)
 				}
 			case .stopLoading(let x):
 				return x.apply(instance, storage) { i, s, v in i.stopLoading() }
 			case .evaluateJavaScript(let x):
 				return x.apply(instance, storage) { i, s, v in
 					i.evaluateJavaScript(v.value) { (output, error) in
-						v.callback?.send(value: (output, error))
+						v.callback.send(value: (output, error))
 					}
 				}
 				

@@ -162,8 +162,10 @@ extension DerivedPreparer {
 	///   - storage: the storage
 	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`
 	public mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime? {
-		if let i = instance as? EnclosingBinder.Inherited.Instance, let s = storage as? EnclosingBinder.Inherited.Storage {
-			return linkedPreparer.finalizeInstance(i, storage: s)
+		if let i = instance as? EnclosingBinder.Inherited.Instance {
+			if let s = storage as? EnclosingBinder.Inherited.Storage {
+				return linkedPreparer.finalizeInstance(i, storage: s)
+			}
 		}
 		return nil
 	}

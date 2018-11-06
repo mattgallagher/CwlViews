@@ -18,14 +18,10 @@
 //
 
 public func applicationMain(subclass: UIApplication.Type = UIApplication.self, application: @escaping () -> Application) -> Never {
-	Application.Storage.finish = { () -> Void in
-		application().applyBindings(to: UIApplication.shared)
-	}
+	Application.Storage.storedConstruction = Application.Storage.storedBinderConstruction(application)
 	
-	return CommandLine.unsafeArgv.withMemoryRebound(to: Optional<UnsafeMutablePointer<Int8>>.self, capacity: Int(CommandLine.argc)) { argv -> Never in
-		_ = UIApplicationMain(CommandLine.argc, argv, NSStringFromClass(subclass), NSStringFromClass(Application.Storage.self))
-		fatalError("UIApplicationMain completed unexpectedly")
-	}
+	_ = UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(subclass), NSStringFromClass(Application.Storage.self))
+	fatalError("UIApplicationMain completed unexpectedly")
 }
 
 public class Application: Binder {
@@ -48,50 +44,50 @@ public class Application: Binder {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
-		case ignoreInteractionEvents(Dynamic<Bool>)
-		case supportShakeToEdit(Dynamic<Bool>)
-		case isIdleTimerDisabled(Dynamic<Bool>)
-		case shortcutItems(Dynamic<[UIApplicationShortcutItem]?>)
-		case isNetworkActivityIndicatorVisible(Dynamic<Bool>)
-		case applicationIconBadgeNumber(Dynamic<Int>)
-		case window(Dynamic<WindowConvertible?>)
 		case additionalWindows(Dynamic<[WindowConvertible]>)
+		case iconBadgeNumber(Dynamic<Int>)
+		case isIdleTimerDisabled(Dynamic<Bool>)
+		case isNetworkActivityIndicatorVisible(Dynamic<Bool>)
+		case shortcutItems(Dynamic<[UIApplicationShortcutItem]?>)
+		case supportShakeToEdit(Dynamic<Bool>)
+		case window(Dynamic<WindowConvertible?>)
 
 		//	2. Signal bindings are performed on the object after construction.
+		case ignoreInteractionEvents(Signal<Bool>)
+		case registerForRemoteNotifications(Signal<Bool>)
 
 		//	3. Action bindings are triggered by the object after construction.
 		case didBecomeActive(SignalInput<Void>)
-		case willResignActive(SignalInput<Void>)
 		case didEnterBackground(SignalInput<Void>)
-		case willEnterForeground(SignalInput<Void>)
-		case protectedDataWillBecomeUnavailable(SignalInput<Void>)
-		case protectedDataDidBecomeAvailable(SignalInput<Void>)
-		case didReceiveMemoryWarning(SignalInput<Void>)
-		case significantTimeChange(SignalInput<Void>)
-		case performFetch(SignalInput<SignalInput<UIBackgroundFetchResult>>)
-		case handleEventsForBackgroundURLSession(SignalInput<Callback<String, ()>>)
-		case registerForRemoteNotifications(Signal<Bool>)
-		case didRegisterRemoteNotifications(SignalInput<Result<Data>>)
-		case didReceiveRemoteNotification(SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>)
 		case didFailToContinueUserActivity(SignalInput<(String, Error)>)
-		case performAction(SignalInput<Callback<UIApplicationShortcutItem, Bool>>)
+		case didReceiveMemoryWarning(SignalInput<Void>)
+		case didReceiveRemoteNotification(SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>)
+		case didRegisterRemoteNotifications(SignalInput<Result<Data>>)
+		case handleEventsForBackgroundURLSession(SignalInput<Callback<String, ()>>)
 		case handleWatchKitExtensionRequest(SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>)
+		case performAction(SignalInput<Callback<UIApplicationShortcutItem, Bool>>)
+		case performFetch(SignalInput<SignalInput<UIBackgroundFetchResult>>)
+		case protectedDataDidBecomeAvailable(SignalInput<Void>)
+		case protectedDataWillBecomeUnavailable(SignalInput<Void>)
+		case significantTimeChange(SignalInput<Void>)
+		case willEnterForeground(SignalInput<Void>)
+		case willResignActive(SignalInput<Void>)
 
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
-		case willContinueUserActivity((String) -> Bool)
 		case continueUserActivity((Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool)
-		case didUpdate((NSUserActivity) -> Void)
-		case willFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
-		case didFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
-		case willEncodeRestorableState((NSKeyedArchiver) -> Void)
 		case didDecodeRestorableState((NSKeyedUnarchiver) -> Void)
-		case willTerminate(() -> Void)
-		case shouldSaveApplicationState((_ coder: NSCoder) -> Bool)
-		case shouldRestoreApplicationState((_ coder: NSCoder) -> Bool)
-		case viewControllerWithRestorationPath((_ path: [String], _ coder: NSCoder) -> UIViewController)
+		case didFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
+		case didUpdate((NSUserActivity) -> Void)
 		case open((_ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool)
 		case shouldAllowExtensionPointIdentifier((UIApplication.ExtensionPointIdentifier) -> Bool)
 		case shouldRequestHealthAuthorization(() -> Void)
+		case shouldRestoreApplicationState((_ coder: NSCoder) -> Bool)
+		case shouldSaveApplicationState((_ coder: NSCoder) -> Bool)
+		case viewControllerWithRestorationPath((_ path: [String], _ coder: NSCoder) -> UIViewController)
+		case willContinueUserActivity((String) -> Bool)
+		case willEncodeRestorableState((NSKeyedArchiver) -> Void)
+		case willFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
+		case willTerminate(() -> Void)
 	}
 
 	public struct Preparer: StoragePreparer {
@@ -99,13 +95,7 @@ public class Application: Binder {
 		public var linkedPreparer = Inherited.Preparer()
 		
 		public func constructStorage() -> EnclosingBinder.Storage {
-			let storage: Storage
-			if let s = Storage.underConstruction {
-				storage = s
-			} else {
-				storage = Storage()
-			}
-			return storage
+			return Storage.underConstruction!
 		}
 		
 		public init() {
@@ -169,6 +159,21 @@ public class Application: Binder {
 				let s2 = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
 				delegate().addSelector(s1).didRegisterRemoteNotifications = x
 				delegate().addSelector(s2)
+			case .didBecomeActive(let x):
+				let s = #selector(UIApplicationDelegate.applicationDidBecomeActive(_:))
+				delegate().addSelector(s).didBecomeActive = x
+			case .willResignActive(let x):
+				let s = #selector(UIApplicationDelegate.applicationWillResignActive(_:))
+				delegate().addSelector(s).willResignActive = x
+			case .didEnterBackground(let x):
+				let s = #selector(UIApplicationDelegate.applicationDidEnterBackground(_:))
+				delegate().addSelector(s).didEnterBackground = x
+			case .willEnterForeground(let x):
+				let s = #selector(UIApplicationDelegate.applicationWillEnterForeground(_:))
+				delegate().addSelector(s).willEnterForeground = x
+			case .didReceiveMemoryWarning(let x):
+				let s = #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:))
+				delegate().addSelector(s).didReceiveMemoryWarning = x
 			case .didReceiveRemoteNotification(let x):
 				let s = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
 				delegate().addSelector(s).didReceiveRemoteNotification = x
@@ -216,9 +221,7 @@ public class Application: Binder {
 		}
 		
 		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
-			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
-			instance.delegate = storage
+			// NOTE: delegate configuration occurs in Storage.constructStorageAndPrepareInstance due to inability to construct UIApplication using a normal constructor.
 
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
@@ -245,7 +248,7 @@ public class Application: Binder {
 			case .isIdleTimerDisabled(let x): return x.apply(instance, storage) { i, s, v in i.isIdleTimerDisabled = v }
 			case .shortcutItems(let x): return x.apply(instance, storage) { i, s, v in i.shortcutItems = v }
 			case .isNetworkActivityIndicatorVisible(let x): return x.apply(instance, storage) { i, s, v in i.isNetworkActivityIndicatorVisible = v }
-			case .applicationIconBadgeNumber(let x): return x.apply(instance, storage) { i, s, v in i.applicationIconBadgeNumber = v }
+			case .iconBadgeNumber(let x): return x.apply(instance, storage) { i, s, v in i.applicationIconBadgeNumber = v }
 			case .registerForRemoteNotifications(let x):
 				return x.apply(instance, storage) { i, s, v in
 					switch (i.isRegisteredForRemoteNotifications, v) {
@@ -254,16 +257,11 @@ public class Application: Binder {
 					default: break
 					}
 				}
-			case .didBecomeActive(let x):
-				return Signal.notifications(name: UIApplication.didBecomeActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willResignActive(let x):
-				return Signal.notifications(name: UIApplication.willResignActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didEnterBackground(let x):
-				return Signal.notifications(name: UIApplication.didEnterBackgroundNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willEnterForeground(let x):
-				return Signal.notifications(name: UIApplication.willEnterForegroundNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didReceiveMemoryWarning(let x):
-				return Signal.notifications(name: UIApplication.didReceiveMemoryWarningNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+			case .didBecomeActive: return nil
+			case .willResignActive: return nil
+			case .didEnterBackground: return nil
+			case .willEnterForeground: return nil
+			case .didReceiveMemoryWarning: return nil
 			case .significantTimeChange(let x):
 				return Signal.notifications(name: UIApplication.significantTimeChangeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .willFinishLaunching(let x):
@@ -298,29 +296,46 @@ public class Application: Binder {
 	}
 
 	open class Storage: ObjectBinderStorage, UIApplicationDelegate {
-		public static var finish: (() -> Void)? = nil
+		fileprivate static var storedConstruction: (() -> Void)? = nil
 		fileprivate static var underConstruction: Storage? = nil
+		
+		private static func constructStorageAndPrepareInstance(_ prep: Preparer, params: BindingsOnlyParameters<Binding>, i: Instance) -> Storage {
+			let storage = prep.constructStorage()
+			precondition(i.delegate == nil, "Conflicting delegate applied to instance")
+			storage.dynamicDelegate = prep.possibleDelegate
+			i.delegate = storage
+			return storage
+		}
+		
+		public static func storedBinderConstruction(_ construction: @escaping () -> Application) -> () -> Void {
+			return { () -> Void in
+				construction().binderApply(to: UIApplication.shared, additional: nil, storageConstructor: constructStorageAndPrepareInstance, combine: embedStorageIfInUse)
+			}
+		}
+		
+		public static func applyStoredBinderConstructionToGlobalDelegate(_ stored: (() -> Void)) {
+			// Disconnect the delegate since we're about to change behavior
+			let storage = UIApplication.shared.delegate as! Application.Storage
+			underConstruction = storage
+			UIApplication.shared.delegate = nil
+			
+			// Apply the styles to the application and delegate.
+			stored()
+			Storage.underConstruction = nil
+			
+			assert(UIApplication.shared.delegate === storage, "Failed to reconnect delegate")
+		}
 		
 		open var window: UIWindow? = nil
 		open var additionalWindows: [UIWindow] = []
 		
 		open var willFinishLaunching: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
 		public func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-			// Disconnect the delegate since we're about to change behavior
-			UIApplication.shared.delegate = nil
-			
-			// Apply the styles to the application and delegate.
-			if let finish = Storage.finish {
-				Storage.underConstruction = self
-				finish()
-				Storage.underConstruction = nil
-				Storage.finish = nil
-			} else {
-				preconditionFailure("Application bindings must be initialized by calling applicationMain.")
+			// Apply the bindings
+			if let storedConstruction = Storage.storedConstruction {
+				Storage.applyStoredBinderConstructionToGlobalDelegate(storedConstruction)
+				Storage.storedConstruction = nil
 			}
-			
-			assert(UIApplication.shared.delegate === self, "Failed to reconnect delegate")
-			
 			
 			// Apply the view hierarchy
 			window?.makeKeyAndVisible()
@@ -337,6 +352,31 @@ public class Application: Binder {
 	open class Delegate: DynamicDelegate, UIApplicationDelegate {
 		public required override init() {
 			super.init()
+		}
+
+		open var didBecomeActive: SignalInput<Void>?
+		open func applicationDidBecomeActive(_ application: UIApplication) {
+			didBecomeActive!.send(value: ())
+		}
+		
+		open var willResignActive: SignalInput<Void>?
+		open func applicationWillResignActive(_ application: UIApplication) {
+			willResignActive!.send(value: ())
+		}
+		
+		open var didEnterBackground: SignalInput<Void>?
+		open func applicationDidEnterBackground(_ application: UIApplication) {
+			didEnterBackground!.send(value: ())
+		}
+		
+		open var willEnterForeground: SignalInput<Void>?
+		open func applicationWillEnterForeground(_ application: UIApplication) {
+			willEnterForeground!.send(value: ())
+		}
+		
+		open var didReceiveMemoryWarning: SignalInput<Void>?
+		open func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
+			didReceiveMemoryWarning!.send(value: ())
 		}
 		
 		open var didFinishLaunching: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
@@ -516,12 +556,12 @@ extension BindingName where Binding: ApplicationBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .applicationBinding(Application.Binding.$1(v)) }) }
-	public static var ignoreInteractionEvents: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .applicationBinding(Application.Binding.ignoreInteractionEvents(v)) }) }
+	public static var ignoreInteractionEvents: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .applicationBinding(Application.Binding.ignoreInteractionEvents(v)) }) }
 	public static var supportShakeToEdit: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .applicationBinding(Application.Binding.supportShakeToEdit(v)) }) }
 	public static var isIdleTimerDisabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .applicationBinding(Application.Binding.isIdleTimerDisabled(v)) }) }
 	public static var shortcutItems: BindingName<Dynamic<[UIApplicationShortcutItem]?>, Binding> { return BindingName<Dynamic<[UIApplicationShortcutItem]?>, Binding>({ v in .applicationBinding(Application.Binding.shortcutItems(v)) }) }
 	public static var isNetworkActivityIndicatorVisible: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .applicationBinding(Application.Binding.isNetworkActivityIndicatorVisible(v)) }) }
-	public static var applicationIconBadgeNumber: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .applicationBinding(Application.Binding.applicationIconBadgeNumber(v)) }) }
+	public static var iconBadgeNumber: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .applicationBinding(Application.Binding.iconBadgeNumber(v)) }) }
 	public static var window: BindingName<Dynamic<WindowConvertible?>, Binding> { return BindingName<Dynamic<WindowConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.window(v)) }) }
 	public static var additionalWindows: BindingName<Dynamic<[WindowConvertible]>, Binding> { return BindingName<Dynamic<[WindowConvertible]>, Binding>({ v in .applicationBinding(Application.Binding.additionalWindows(v)) }) }
 	public static var didBecomeActive: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .applicationBinding(Application.Binding.didBecomeActive(v)) }) }

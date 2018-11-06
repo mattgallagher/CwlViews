@@ -8,9 +8,9 @@
 
 public struct Callback<Value, CallbackValue> {
 	public let value: Value
-	public let callback: SignalInput<CallbackValue>?
+	public let callback: SignalInput<CallbackValue>
 	
-	public init(_ value: Value, _ callback: SignalInput<CallbackValue>? = nil) {
+	public init(_ value: Value, _ callback: SignalInput<CallbackValue>) {
 		self.value = value
 		self.callback = callback
 	}
@@ -22,6 +22,7 @@ extension Signal {
 	}
 
 	public func ignoreCallback<CallbackValue>() -> Signal<Callback<OutputValue, CallbackValue>> {
-		return map { value in Callback(value, nil) }
+		let (i, _) = Signal<CallbackValue>.create()
+		return map { value in Callback(value, i) }
 	}
 }

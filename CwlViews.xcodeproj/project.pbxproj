@@ -22,6 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		C9086A1721965024006DBD43 /* CwlBindingTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BC218EFA8400396AB0 /* CwlBindingTestHelpers.swift */; };
+		C9086A182196502A006DBD43 /* CwlBackingLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */; };
 		C9111CBC1E361D670029DD2F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A45E1E3476E50088F2AD /* main.swift */; };
 		C9111CBD1E3623470029DD2F /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A4651E34CD900088F2AD /* MainMenu.swift */; };
 		C91307411F66384200174902 /* CwlCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C913073F1F66384200174902 /* CwlCoder.swift */; };
@@ -32,14 +34,14 @@
 		C91CC2D4206F0E45006FFF97 /* CwlConstructingBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2D2206F0E45006FFF97 /* CwlConstructingBinder.swift */; };
 		C91CC2D5206F15C3006FFF97 /* CwlBackingLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948542F1DC6E8AD009CC145 /* CwlBackingLayer.swift */; };
 		C91CC2D6206F15C9006FFF97 /* CwlApplication_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CA94D1E55C82D00AD10E3 /* CwlApplication_iOS.swift */; };
-		C9216978218D55D700396AB0 /* CwlApplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9216977218D55D700396AB0 /* CwlApplicationTests.swift */; };
+		C9216978218D55D700396AB0 /* CwlApplication_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9216977218D55D700396AB0 /* CwlApplication_iOSTests.swift */; };
 		C9216983218D5A6300396AB0 /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
 		C921698D218D5F0200396AB0 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C921698C218D5F0200396AB0 /* main.swift */; };
 		C921698F218D5F0200396AB0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C921698E218D5F0200396AB0 /* ViewController.swift */; };
 		C9216992218D5F0200396AB0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9216990218D5F0200396AB0 /* Main.storyboard */; };
 		C9216994218D5F0200396AB0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9216993218D5F0200396AB0 /* Assets.xcassets */; };
 		C9216997218D5F0200396AB0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9216995218D5F0200396AB0 /* LaunchScreen.storyboard */; };
-		C92169BD218EFA8400396AB0 /* BindingTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BC218EFA8400396AB0 /* BindingTestHelpers.swift */; };
+		C92169BD218EFA8400396AB0 /* CwlBindingTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BC218EFA8400396AB0 /* CwlBindingTestHelpers.swift */; };
 		C92169C0218F083600396AB0 /* CwlBackingLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */; };
 		C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = C925223920957D3400CA39A4 /* CwlSignalCallback.swift */; };
 		C926D0601FF058D4002BF020 /* CwlSetMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */; };
@@ -53,7 +55,7 @@
 		C93FBC6C216105EF00DFCF0E /* CwlUtils.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C93FBC6E2161061600DFCF0E /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; };
 		C945207C205152CE00693C43 /* CwlTabBarController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C945207B205152CE00693C43 /* CwlTabBarController_iOS.swift */; };
-		C94853CF1DC4E306009CC145 /* CwlViews_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94853CE1DC4E306009CC145 /* CwlViews_macOSTests.swift */; };
+		C94853CF1DC4E306009CC145 /* CwlApplication_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */; };
 		C94853F51DC4E4EA009CC145 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C94853F41DC4E4EA009CC145 /* Assets.xcassets */; };
 		C94D2BD62191B36600B6D53B /* CwlApplication_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C981E3401E2E33E2003A5A55 /* CwlApplication_macOS.swift */; };
 		C94D2BD72191B36600B6D53B /* CwlButton_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C952092F1DCB0F02005F478B /* CwlButton_macOS.swift */; };
@@ -81,9 +83,6 @@
 		C94D2BED2191B36600B6D53B /* CwlTreeMutation_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB56941EAC4A49000EC5F4 /* CwlTreeMutation_macOS.swift */; };
 		C94D2BEE2191B36600B6D53B /* CwlView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94854151DC59DFC009CC145 /* CwlView_macOS.swift */; };
 		C94D2BEF2191B36600B6D53B /* CwlWindow_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948540E1DC4E8E1009CC145 /* CwlWindow_macOS.swift */; };
-		C94D2BF72191B94F00B6D53B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94D2BF62191B94F00B6D53B /* AppDelegate.swift */; };
-		C94D2BF92191B94F00B6D53B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C94D2BF82191B94F00B6D53B /* Assets.xcassets */; };
-		C94D2BFC2191B94F00B6D53B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C94D2BFA2191B94F00B6D53B /* MainMenu.xib */; };
 		C94D2C0C2191BD1300B6D53B /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
 		C94D2C0E2191BD2F00B6D53B /* CwlSignal.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C94D2C0F2191BD3500B6D53B /* CwlViews.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -98,6 +97,9 @@
 		C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */; };
 		C9ADA3A51EE3BFE400C29925 /* CwlBinderBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A31EE3BFE400C29925 /* CwlBinderBase.swift */; };
 		C9ADA3A81EE3BFEC00C29925 /* CwlObjectStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A61EE3BFEC00C29925 /* CwlObjectStorage.swift */; };
+		C9B02DF12197A2EB00527843 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B02DF02197A2EB00527843 /* AppDelegate.swift */; };
+		C9B02DF32197A2EC00527843 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9B02DF22197A2EC00527843 /* Assets.xcassets */; };
+		C9B02DF62197A2EC00527843 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = C9B02DF42197A2EC00527843 /* MainMenu.xib */; };
 		C9B27E8A1E51CAD100265580 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9B27E891E51CAD100265580 /* Assets.xcassets */; };
 		C9B27E8D1E51CAD100265580 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */; };
 		C9B27EA91E51D34300265580 /* CwlArrayMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */; };
@@ -203,12 +205,19 @@
 			remoteGlobalIDString = C94D2BC82191A41A00B6D53B;
 			remoteInfo = CwlSignal_tvOSTests;
 		};
-		C94D2C0A2191BB3A00B6D53B /* PBXContainerItemProxy */ = {
+		C9B02DFC2197A38200527843 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = C94D2BF32191B94F00B6D53B;
+			remoteGlobalIDString = C9B02DED2197A2EB00527843;
 			remoteInfo = CwlViews_macOSTestsHarness;
+		};
+		C9B02DFE2197B1E000527843 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9B27E641E51CA9700265580;
+			remoteInfo = CwlViews;
 		};
 		C9B27EA21E51D2E200265580 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -271,7 +280,7 @@
 		C91683FB203FC1BA00B4D40E /* CwlTabBar_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabBar_iOS.swift; sourceTree = "<group>"; };
 		C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBinder.swift; sourceTree = "<group>"; };
 		C91CC2D2206F0E45006FFF97 /* CwlConstructingBinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlConstructingBinder.swift; sourceTree = "<group>"; };
-		C9216977218D55D700396AB0 /* CwlApplicationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlApplicationTests.swift; sourceTree = "<group>"; };
+		C9216977218D55D700396AB0 /* CwlApplication_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlApplication_iOSTests.swift; sourceTree = "<group>"; };
 		C921698A218D5F0200396AB0 /* CwlViews_iOSTestsHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_iOSTestsHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C921698C218D5F0200396AB0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C921698E218D5F0200396AB0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -279,7 +288,7 @@
 		C9216993218D5F0200396AB0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C9216996218D5F0200396AB0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C9216998218D5F0200396AB0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C92169BC218EFA8400396AB0 /* BindingTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BindingTestHelpers.swift; sourceTree = "<group>"; };
+		C92169BC218EFA8400396AB0 /* CwlBindingTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBindingTestHelpers.swift; sourceTree = "<group>"; };
 		C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBackingLayerTests.swift; sourceTree = "<group>"; };
 		C925223920957D3400CA39A4 /* CwlSignalCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSignalCallback.swift; sourceTree = "<group>"; };
 		C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSetMutation.swift; sourceTree = "<group>"; };
@@ -306,7 +315,7 @@
 		C947105D1E3364A300EC50D6 /* CwlMenu_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMenu_macOS.swift; sourceTree = "<group>"; };
 		C94853C41DC4E306009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C94853C91DC4E306009CC145 /* CwlViews_macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViews_macOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C94853CE1DC4E306009CC145 /* CwlViews_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViews_macOSTests.swift; sourceTree = "<group>"; };
+		C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlApplication_macOSTests.swift; sourceTree = "<group>"; };
 		C94853D01DC4E306009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_macOSTestingSandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C94853F41DC4E4EA009CC145 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -314,12 +323,6 @@
 		C948540E1DC4E8E1009CC145 /* CwlWindow_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindow_macOS.swift; sourceTree = "<group>"; };
 		C94854151DC59DFC009CC145 /* CwlView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlView_macOS.swift; sourceTree = "<group>"; };
 		C948542F1DC6E8AD009CC145 /* CwlBackingLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBackingLayer.swift; sourceTree = "<group>"; };
-		C94D2BF42191B94F00B6D53B /* CwlViews_macOSTestsHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_macOSTestsHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C94D2BF62191B94F00B6D53B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		C94D2BF82191B94F00B6D53B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C94D2BFB2191B94F00B6D53B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		C94D2BFD2191B94F00B6D53B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C94D2BFE2191B94F00B6D53B /* CwlViews_macOSTestsHarness.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CwlViews_macOSTestsHarness.entitlements; sourceTree = "<group>"; };
 		C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableView_iOS.swift; sourceTree = "<group>"; };
 		C95193CA1E89140000ED86D4 /* CwlTableViewCell_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableViewCell_iOS.swift; sourceTree = "<group>"; };
 		C952092A1DCB0B5C005F478B /* CwlControl_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlControl_macOS.swift; sourceTree = "<group>"; };
@@ -360,6 +363,12 @@
 		C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLayout.swift; sourceTree = "<group>"; };
 		C9ADA3A31EE3BFE400C29925 /* CwlBinderBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBinderBase.swift; sourceTree = "<group>"; };
 		C9ADA3A61EE3BFEC00C29925 /* CwlObjectStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlObjectStorage.swift; sourceTree = "<group>"; };
+		C9B02DEE2197A2EB00527843 /* CwlViews_macOSTestsHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_macOSTestsHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9B02DF02197A2EB00527843 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		C9B02DF22197A2EC00527843 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C9B02DF52197A2EC00527843 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		C9B02DF72197A2EC00527843 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C9B02DF82197A2EC00527843 /* CwlViews_macOSTestsHarness.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CwlViews_macOSTestsHarness.entitlements; sourceTree = "<group>"; };
 		C9B040871EDBF35B0088A3CC /* CwlViews.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CwlViews.h; sourceTree = "<group>"; };
 		C9B07EE3213A4F5600CDA519 /* install_cwlviews_templates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = install_cwlviews_templates.swift; sourceTree = "<group>"; };
 		C9B27E651E51CA9700265580 /* CwlViews.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlViews.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -434,7 +443,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C94D2BF12191B94F00B6D53B /* Frameworks */ = {
+		C9B02DEB2197A2EB00527843 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -478,7 +487,7 @@
 		C921697D218D56F000396AB0 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				C92169BC218EFA8400396AB0 /* BindingTestHelpers.swift */,
+				C92169BC218EFA8400396AB0 /* CwlBindingTestHelpers.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -553,7 +562,7 @@
 				C94853C91DC4E306009CC145 /* CwlViews_macOSTests.xctest */,
 				C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */,
 				C921698A218D5F0200396AB0 /* CwlViews_iOSTestsHarness.app */,
-				C94D2BF42191B94F00B6D53B /* CwlViews_macOSTestsHarness.app */,
+				C9B02DEE2197A2EB00527843 /* CwlViews_macOSTestsHarness.app */,
 			);
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -574,7 +583,7 @@
 		C94853CD1DC4E306009CC145 /* CwlViews_macOSTests */ = {
 			isa = PBXGroup;
 			children = (
-				C94853CE1DC4E306009CC145 /* CwlViews_macOSTests.swift */,
+				C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */,
 				C94853D01DC4E306009CC145 /* Info.plist */,
 			);
 			path = CwlViews_macOSTests;
@@ -654,18 +663,6 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
-		C94D2BF52191B94F00B6D53B /* CwlViews_macOSTestsHarness */ = {
-			isa = PBXGroup;
-			children = (
-				C94D2BF62191B94F00B6D53B /* AppDelegate.swift */,
-				C94D2BF82191B94F00B6D53B /* Assets.xcassets */,
-				C94D2BFA2191B94F00B6D53B /* MainMenu.xib */,
-				C94D2BFD2191B94F00B6D53B /* Info.plist */,
-				C94D2BFE2191B94F00B6D53B /* CwlViews_macOSTestsHarness.entitlements */,
-			);
-			path = CwlViews_macOSTestsHarness;
-			sourceTree = "<group>";
-		};
 		C98C45162160FB040028B2AC /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
@@ -706,15 +703,27 @@
 				C921698B218D5F0200396AB0 /* CwlViews_iOSTestsHarness */,
 				C94853F11DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox */,
 				C94853CD1DC4E306009CC145 /* CwlViews_macOSTests */,
-				C94D2BF52191B94F00B6D53B /* CwlViews_macOSTestsHarness */,
+				C9B02DEF2197A2EB00527843 /* CwlViews_macOSTestsHarness */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		C9B02DEF2197A2EB00527843 /* CwlViews_macOSTestsHarness */ = {
+			isa = PBXGroup;
+			children = (
+				C9B02DF02197A2EB00527843 /* AppDelegate.swift */,
+				C9B02DF22197A2EC00527843 /* Assets.xcassets */,
+				C9B02DF42197A2EC00527843 /* MainMenu.xib */,
+				C9B02DF72197A2EC00527843 /* Info.plist */,
+				C9B02DF82197A2EC00527843 /* CwlViews_macOSTestsHarness.entitlements */,
+			);
+			path = CwlViews_macOSTestsHarness;
 			sourceTree = "<group>";
 		};
 		C9B27E711E51CA9700265580 /* CwlViews_iOSTests */ = {
 			isa = PBXGroup;
 			children = (
-				C9216977218D55D700396AB0 /* CwlApplicationTests.swift */,
+				C9216977218D55D700396AB0 /* CwlApplication_iOSTests.swift */,
 				C9B27E741E51CA9700265580 /* Info.plist */,
 			);
 			path = CwlViews_iOSTests;
@@ -865,7 +874,8 @@
 			buildRules = (
 			);
 			dependencies = (
-				C94D2C0B2191BB3A00B6D53B /* PBXTargetDependency */,
+				C9B02DFF2197B1E000527843 /* PBXTargetDependency */,
+				C9B02DFD2197A38200527843 /* PBXTargetDependency */,
 			);
 			name = CwlViews_macOSTests;
 			productName = CwlViewsTests;
@@ -890,13 +900,13 @@
 			productReference = C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C94D2BF32191B94F00B6D53B /* CwlViews_macOSTestsHarness */ = {
+		C9B02DED2197A2EB00527843 /* CwlViews_macOSTestsHarness */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C94D2BFF2191B94F00B6D53B /* Build configuration list for PBXNativeTarget "CwlViews_macOSTestsHarness" */;
+			buildConfigurationList = C9B02DF92197A2EC00527843 /* Build configuration list for PBXNativeTarget "CwlViews_macOSTestsHarness" */;
 			buildPhases = (
-				C94D2BF02191B94F00B6D53B /* Sources */,
-				C94D2BF12191B94F00B6D53B /* Frameworks */,
-				C94D2BF22191B94F00B6D53B /* Resources */,
+				C9B02DEA2197A2EB00527843 /* Sources */,
+				C9B02DEB2197A2EB00527843 /* Frameworks */,
+				C9B02DEC2197A2EB00527843 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -904,7 +914,7 @@
 			);
 			name = CwlViews_macOSTestsHarness;
 			productName = CwlViews_macOSTestsHarness;
-			productReference = C94D2BF42191B94F00B6D53B /* CwlViews_macOSTestsHarness.app */;
+			productReference = C9B02DEE2197A2EB00527843 /* CwlViews_macOSTestsHarness.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C9B27E641E51CA9700265580 /* CwlViews */ = {
@@ -996,21 +1006,19 @@
 					};
 					C94853C81DC4E306009CC145 = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = S7YQ892G6G;
 						LastSwiftMigration = 0900;
-						ProvisioningStyle = Automatic;
-						TestTargetID = C94D2BF32191B94F00B6D53B;
+						ProvisioningStyle = Manual;
+						TestTargetID = C9B02DED2197A2EB00527843;
 					};
 					C94853EF1DC4E4EA009CC145 = {
 						CreatedOnToolsVersion = 8.1;
-						ProvisioningStyle = Automatic;
-					};
-					C94D2BF32191B94F00B6D53B = {
-						CreatedOnToolsVersion = 10.1;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					C9A3803F1EFF9C0B00BFF2E5 = {
 						CreatedOnToolsVersion = 9.0;
+					};
+					C9B02DED2197A2EB00527843 = {
+						CreatedOnToolsVersion = 10.1;
 					};
 					C9B27E641E51CA9700265580 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -1060,7 +1068,7 @@
 				C9216989218D5F0200396AB0 /* CwlViews_iOSTestsHarness */,
 				C9B27E7F1E51CAD100265580 /* CwlViews_iOSTestingSandbox */,
 				C94853C81DC4E306009CC145 /* CwlViews_macOSTests */,
-				C94D2BF32191B94F00B6D53B /* CwlViews_macOSTestsHarness */,
+				C9B02DED2197A2EB00527843 /* CwlViews_macOSTestsHarness */,
 				C94853EF1DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox */,
 				C9A3803F1EFF9C0B00BFF2E5 /* CwlViewsConcat */,
 			);
@@ -1124,12 +1132,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C94D2BF22191B94F00B6D53B /* Resources */ = {
+		C9B02DEC2197A2EB00527843 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C94D2BF92191B94F00B6D53B /* Assets.xcassets in Resources */,
-				C94D2BFC2191B94F00B6D53B /* MainMenu.xib in Resources */,
+				C9B02DF32197A2EC00527843 /* Assets.xcassets in Resources */,
+				C9B02DF62197A2EC00527843 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1183,7 +1191,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C94853CF1DC4E306009CC145 /* CwlViews_macOSTests.swift in Sources */,
+				C9086A182196502A006DBD43 /* CwlBackingLayerTests.swift in Sources */,
+				C94853CF1DC4E306009CC145 /* CwlApplication_macOSTests.swift in Sources */,
+				C9086A1721965024006DBD43 /* CwlBindingTestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1196,11 +1206,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C94D2BF02191B94F00B6D53B /* Sources */ = {
+		C9B02DEA2197A2EB00527843 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C94D2BF72191B94F00B6D53B /* AppDelegate.swift in Sources */,
+				C9B02DF12197A2EB00527843 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1309,8 +1319,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C92169C0218F083600396AB0 /* CwlBackingLayerTests.swift in Sources */,
-				C9216978218D55D700396AB0 /* CwlApplicationTests.swift in Sources */,
-				C92169BD218EFA8400396AB0 /* BindingTestHelpers.swift in Sources */,
+				C9216978218D55D700396AB0 /* CwlApplication_iOSTests.swift in Sources */,
+				C92169BD218EFA8400396AB0 /* CwlBindingTestHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1355,10 +1365,15 @@
 			target = C9216989218D5F0200396AB0 /* CwlViews_iOSTestsHarness */;
 			targetProxy = C921699C218D5FB700396AB0 /* PBXContainerItemProxy */;
 		};
-		C94D2C0B2191BB3A00B6D53B /* PBXTargetDependency */ = {
+		C9B02DFD2197A38200527843 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C94D2BF32191B94F00B6D53B /* CwlViews_macOSTestsHarness */;
-			targetProxy = C94D2C0A2191BB3A00B6D53B /* PBXContainerItemProxy */;
+			target = C9B02DED2197A2EB00527843 /* CwlViews_macOSTestsHarness */;
+			targetProxy = C9B02DFC2197A38200527843 /* PBXContainerItemProxy */;
+		};
+		C9B02DFF2197B1E000527843 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9B27E641E51CA9700265580 /* CwlViews */;
+			targetProxy = C9B02DFE2197B1E000527843 /* PBXContainerItemProxy */;
 		};
 		C9B27EA31E51D2E200265580 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1394,10 +1409,10 @@
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
-		C94D2BFA2191B94F00B6D53B /* MainMenu.xib */ = {
+		C9B02DF42197A2EC00527843 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				C94D2BFB2191B94F00B6D53B /* Base */,
+				C9B02DF52197A2EC00527843 /* Base */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -1455,7 +1470,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSMockApplication/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTestsHarness/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -1508,7 +1523,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSMockApplication/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTestsHarness/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -1538,6 +1553,7 @@
 					"$(inherited)",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				SUPPORTED_PLATFORMS = "macosx watchsimulator watchos appletvsimulator appletvos iphonesimulator iphoneos";
@@ -1559,6 +1575,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				SUPPORTED_PLATFORMS = "macosx watchsimulator watchos appletvsimulator appletvos iphonesimulator iphoneos";
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1571,14 +1588,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = Tests/CwlViews_macOSTests/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CwlViews_macOSTestsHarness.app/Contents/MacOS/CwlViews_macOSTestsHarness";
 			};
 			name = Debug;
@@ -1587,14 +1606,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = Tests/CwlViews_macOSTests/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CwlViews_macOSTestsHarness.app/Contents/MacOS/CwlViews_macOSTestsHarness";
 			};
 			name = Release;
@@ -1604,12 +1625,15 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Sources/CwlViewsHarness_macOS/Info.plist;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTestsHarness/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -1620,127 +1644,17 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Sources/CwlViewsHarness_macOS/Info.plist;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTestsHarness/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Release;
-		};
-		C94D2C002191B94F00B6D53B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = CwlViews_macOSTestsHarness/CwlViews_macOSTestsHarness.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = CwlViews_macOSTestsHarness/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-macOSTestsHarness";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SWIFT_VERSION = 4.2;
-			};
-			name = Debug;
-		};
-		C94D2C012191B94F00B6D53B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = CwlViews_macOSTestsHarness/CwlViews_macOSTestsHarness.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = CwlViews_macOSTestsHarness/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-macOSTestsHarness";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};
@@ -1770,6 +1684,111 @@
 			};
 			name = Release;
 		};
+		C9B02DFA2197A2EC00527843 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTestsHarness/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-macOSTestsHarness";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		C9B02DFB2197A2EC00527843 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTestsHarness/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-macOSTestsHarness";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
 		C9B27E771E51CA9700265580 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1782,7 +1801,6 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Sources/CwlViews/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOS";
 				PRODUCT_NAME = CwlViews;
 				SKIP_INSTALL = YES;
@@ -1802,7 +1820,6 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Sources/CwlViews/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOS";
 				PRODUCT_NAME = CwlViews;
 				SKIP_INSTALL = YES;
@@ -1817,7 +1834,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = Tests/CwlViews_iOSTests/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1833,7 +1850,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = Tests/CwlViews_iOSTests/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViews-iOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1853,7 +1870,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = Sources/CwlViewsHarness_iOS/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTestingSandbox/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1874,7 +1891,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = Sources/CwlViewsHarness_iOS/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTestingSandbox/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1898,7 +1915,6 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Sources/CwlViewsTesting/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsTesting-iOS";
 				PRODUCT_NAME = CwlViewsTesting;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1921,7 +1937,6 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Sources/CwlViewsTesting/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsTesting-iOS";
 				PRODUCT_NAME = CwlViewsTesting;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1971,20 +1986,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C94D2BFF2191B94F00B6D53B /* Build configuration list for PBXNativeTarget "CwlViews_macOSTestsHarness" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C94D2C002191B94F00B6D53B /* Debug */,
-				C94D2C012191B94F00B6D53B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		C9A380421EFF9C0B00BFF2E5 /* Build configuration list for PBXAggregateTarget "CwlViewsConcat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C9A380401EFF9C0B00BFF2E5 /* Debug */,
 				C9A380411EFF9C0B00BFF2E5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9B02DF92197A2EC00527843 /* Build configuration list for PBXNativeTarget "CwlViews_macOSTestsHarness" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9B02DFA2197A2EC00527843 /* Debug */,
+				C9B02DFB2197A2EC00527843 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -23,15 +23,6 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C94D2BF32191B94F00B6D53B"
-            BuildableName = "CwlViews_macOSTestsHarness.app"
-            BlueprintName = "CwlViews_macOSTestsHarness"
-            ReferencedContainer = "container:CwlViews.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>

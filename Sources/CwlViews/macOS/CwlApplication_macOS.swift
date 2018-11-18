@@ -47,72 +47,72 @@ public class Application: Binder {
 		//	0. Static styles are applied at construction and are subsequently immutable.
 	
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case mainMenu(Dynamic<MenuConvertible?>)
-		case dockMenu(Dynamic<MenuConvertible?>)
-		case applicationIconImage(Dynamic<NSImage>)
 		case activationPolicy(Dynamic<NSApplication.ActivationPolicy>)
+		case applicationIconImage(Dynamic<NSImage?>)
+		case dockMenu(Dynamic<MenuConvertible?>)
+		case mainMenu(Dynamic<MenuConvertible?>)
+		case menuBarVisible(Dynamic<Bool>)
 		case presentationOptions(Dynamic<NSApplication.PresentationOptions>)
 		case relauchOnLogin(Dynamic<Bool>)
-		case menuBarVisible(Dynamic<Bool>)
 		case remoteNotifications(Dynamic<NSApplication.RemoteNotificationType>)
 		
 		// 2. Signal bindings are performed on the object after construction.
-		case hide(Signal<Void>)
-		case unhide(Signal<Bool>)
-		case deactivate(Signal<Void>)
 		case activate(Signal<Bool>)
-		case hideOtherApplications(Signal<Void>)
-		case unhideAllApplications(Signal<Void>)
 		case arrangeInFront(Signal<Void>)
+		case deactivate(Signal<Void>)
+		case hide(Signal<Void>)
+		case hideOtherApplications(Signal<Void>)
 		case miniaturizeAll(Signal<Void>)
-		case terminate(Signal<Void>)
-		case requestUserAttention(Signal<(NSApplication.RequestUserAttentionType, Signal<Void>)>)
 		case orderFrontCharacterPalette(Signal<Void>)
 		case orderFrontColorPanel(Signal<Void>)
-		case orderFrontStandardAboutPanel(Signal<Dictionary<String, Any>>)
+		case orderFrontStandardAboutPanel(Signal<Dictionary<NSApplication.AboutPanelOptionKey, Any>>)
 		case presentError(Signal<Callback<Error, Bool>>)
+		case requestUserAttention(Signal<(NSApplication.RequestUserAttentionType, Signal<Void>)>)
+		case terminate(Signal<Void>)
+		case unhide(Signal<Bool>)
+		case unhideAllApplications(Signal<Void>)
 		
 		// 3. Action bindings are triggered by the object after construction.
 		case didBecomeActive(SignalInput<Void>)
 		case didChangeOcclusionState(SignalInput<Void>)
 		case didChangeScreenParameters(SignalInput<Void>)
-		case didHide(SignalInput<Void>)
 		case didFailToContinueUserActivity(SignalInput<(userActivityType: String, error: Error)>)
-		case didFinishLaunching(SignalInput<(isDefaultLaunch: Bool, userNotification: NSUserNotification)>)
-		case didFinishRestoringWindows(SignalInput<Void>)
-		case didReceiveRemoteNotification(SignalInput<[String: Any]>)
-		case didResignActive(SignalInput<Void>)
-		case didRegisterForRemoteNotifications(SignalInput<Data>)
 		case didFailToRegisterForRemoteNotifications(SignalInput<Error>)
+		case didFinishLaunching(SignalInput<[AnyHashable: Any]>)
+		case didFinishRestoringWindows(SignalInput<Void>)
+		case didHide(SignalInput<Void>)
+		case didReceiveRemoteNotification(SignalInput<[String: Any]>)
+		case didRegisterForRemoteNotifications(SignalInput<Data>)
+		case didResignActive(SignalInput<Void>)
 		case didUnhide(SignalInput<Void>)
 		case didUpdate(SignalInput<Void>)
 		case willBecomeActive(SignalInput<Void>)
-		case willHide(SignalInput<Void>)
 		case willFinishLaunching(SignalInput<Void>)
+		case willHide(SignalInput<Void>)
 		case willResignActive(SignalInput<Void>)
 		case willUnhide(SignalInput<Void>)
 		case willUpdate(SignalInput<Void>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case shouldTerminate(() -> ApplicationTerminateReply)
-		case shouldTerminateAfterLastWindowClosed(() -> Bool)
-		case shouldHandleReopen((_ hasVisibleWindows: Bool) -> Bool)
-		case continueUserActivity((_ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool)
-		case didUpdateUserActivity((NSUserActivity) -> Void)
 		@available(macOS 10.12, *) case userDidAcceptCloudKitShare((CKShare.Metadata) -> Void)
-		case willPresentError((Error) -> Error)
-		case willContinueUserActivity((_ type: String) -> Bool)
-		case openFileWithoutUI((_ filename: String) -> Bool)
+		case continueUserActivity((_ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool)
+		case didDecodeRestorableState((NSCoder) -> Void)
+		case didUpdateUserActivity((NSUserActivity) -> Void)
 		case openFile((_ filename: String) -> Bool)
 		case openFiles((_ filenames: [String]) -> Void)
-		case printFile((_ filename: String) -> Bool)
-		case printFiles((_ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply)
+		case openFileWithoutUI((_ filename: String) -> Bool)
 		case openTempFile((_ filename: String) -> Bool)
 		case openUntitledFile(() -> Bool)
+		case printFile((_ filename: String) -> Bool)
+		case printFiles((_ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply)
+		case shouldHandleReopen((_ hasVisibleWindows: Bool) -> Bool)
 		case shouldOpenUntitledFile(() -> Bool)
-		case willTerminate(() -> Void)
-		case didDecodeRestorableState((NSCoder) -> Void)
+		case shouldTerminate(() -> ApplicationTerminateReply)
+		case shouldTerminateAfterLastWindowClosed(() -> Bool)
+		case willContinueUserActivity((_ type: String) -> Bool)
 		case willEncodeRestorableState((NSCoder) -> Void)
+		case willPresentError((Error) -> Error)
+		case willTerminate(() -> Void)
 	}
 
 	public struct Preparer: ConstructingPreparer {
@@ -139,6 +139,7 @@ public class Application: Binder {
 				return d
 			}
 		}
+		var dockMenuInUse: Bool = false
 		
 		public mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
@@ -221,6 +222,7 @@ public class Application: Binder {
 				delegate().addSelector(#selector(NSApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
 			case .didFailToRegisterForRemoteNotifications:
 				delegate().addSelector(#selector(NSApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
+			case .dockMenu: dockMenuInUse = true
 			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
 			default: break
 			}
@@ -229,6 +231,7 @@ public class Application: Binder {
 		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
+			storage.dockMenuInUse = dockMenuInUse
 			if storage.inUse {
 				instance.delegate = storage
 			}
@@ -260,9 +263,14 @@ public class Application: Binder {
 				}
 			case .menuBarVisible(let x): return x.apply(instance, storage) { i, s, v in NSMenu.setMenuBarVisible(v) }
 				
-			// Incoming actions <--
 			case .hide(let x): return x.apply(instance, storage) { i, s, v in i.hide(nil) }
-			case .unhide(let x): return x.apply(instance, storage) { i, s, v in i.unhide(nil) }
+			case .unhide(let x): return x.apply(instance, storage) { i, s, v in
+				if v {
+					i.unhide(nil)
+				} else {
+					i.unhideWithoutActivation()
+				}
+			}
 			case .deactivate(let x): return x.apply(instance, storage) { i, s, v in i.deactivate() }
 			case .activate(let x): return x.apply(instance, storage) { i, s, v in i.activate(ignoringOtherApps: v) }
 			case .hideOtherApplications(let x): return x.apply(instance, storage) { i, s, v in i.hideOtherApplications(nil) }
@@ -278,14 +286,13 @@ public class Application: Binder {
 				}
 			case .orderFrontCharacterPalette(let x): return x.apply(instance, storage) { i, s, v in i.orderFrontCharacterPalette(nil) }
 			case .orderFrontColorPanel(let x): return x.apply(instance, storage) { i, s, v in i.orderFrontColorPanel(nil) }
-			case .orderFrontStandardAboutPanel(let x): return x.apply(instance, storage) { i, s, v in i.orderFrontStandardAboutPanel(v) }
+			case .orderFrontStandardAboutPanel(let x): return x.apply(instance, storage) { i, s, v in i.orderFrontStandardAboutPanel(options: v) }
 			case .presentError(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let handled = i.presentError(v.value)
 					_ = v.callback.send(value: handled)
 				}
 				
-			// Outgoing actions -->
 			case .didBecomeActive(let x):
 				return Signal.notifications(name: NSApplication.didBecomeActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .didChangeOcclusionState(let x):
@@ -303,12 +310,7 @@ public class Application: Binder {
 				}
 				return nil
 			case .didFinishLaunching(let x):
-				return Signal.notifications(name: NSApplication.didFinishLaunchingNotification, object: instance).compactMap { n -> (isDefaultLaunch: Bool, userNotification: NSUserNotification)? in
-					if let d = (n.userInfo?[NSApplication.launchIsDefaultUserInfoKey] as? NSNumber)?.boolValue, let n = n.userInfo?[NSApplication.launchUserNotificationUserInfoKey] as? NSUserNotification {
-						return (d, n)
-					}
-					return nil
-					}.cancellableBind(to: x)
+				return Signal.notifications(name: NSApplication.didFinishLaunchingNotification, object: instance).compactMap { n -> [AnyHashable: Any] in n.userInfo ?? [:] }.cancellableBind(to: x)
 			case .didFinishRestoringWindows(let x):
 				return Signal.notifications(name: NSApplication.didFinishRestoringWindowsNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .didReceiveRemoteNotification(let x):
@@ -354,7 +356,6 @@ public class Application: Binder {
 			case .willUpdate(let x):
 				return Signal.notifications(name: NSApplication.willUpdateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 				
-			// Delegates <-->
 			case .shouldTerminate: return nil
 			case .shouldTerminateAfterLastWindowClosed: return nil
 			case .shouldHandleReopen: return nil
@@ -380,10 +381,11 @@ public class Application: Binder {
 	}
 
 	open class Storage: ObjectBinderStorage, NSApplicationDelegate {
+		var dockMenuInUse: Bool = false
 		open var dockMenu: NSMenu?
 		
 		open override var inUse: Bool {
-			return super.inUse || dockMenu != nil
+			return super.inUse || dockMenuInUse
 		}
 		
 		open func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
@@ -497,8 +499,8 @@ public class Application: Binder {
 		}
 		
 		open var didRegisterForRemoteNotifications: ((Data) -> Void)?
-		open func application(_ application: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken token: Data) {
-			didRegisterForRemoteNotifications!(token)
+		open func application(_ application: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+			didRegisterForRemoteNotifications!(deviceToken)
 		}
 		
 		open var didFailToRegisterForRemoteNotifications: ((Error) -> Void)?
@@ -524,7 +526,7 @@ extension BindingName where Binding: ApplicationBinding {
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	public static var mainMenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.mainMenu(v)) }) }
 	public static var dockMenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .applicationBinding(Application.Binding.dockMenu(v)) }) }
-	public static var applicationIconImage: BindingName<Dynamic<NSImage>, Binding> { return BindingName<Dynamic<NSImage>, Binding>({ v in .applicationBinding(Application.Binding.applicationIconImage(v)) }) }
+	public static var applicationIconImage: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .applicationBinding(Application.Binding.applicationIconImage(v)) }) }
 	public static var activationPolicy: BindingName<Dynamic<NSApplication.ActivationPolicy>, Binding> { return BindingName<Dynamic<NSApplication.ActivationPolicy>, Binding>({ v in .applicationBinding(Application.Binding.activationPolicy(v)) }) }
 	public static var presentationOptions: BindingName<Dynamic<NSApplication.PresentationOptions>, Binding> { return BindingName<Dynamic<NSApplication.PresentationOptions>, Binding>({ v in .applicationBinding(Application.Binding.presentationOptions(v)) }) }
 	public static var relauchOnLogin: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .applicationBinding(Application.Binding.relauchOnLogin(v)) }) }
@@ -544,7 +546,7 @@ extension BindingName where Binding: ApplicationBinding {
 	public static var requestUserAttention: BindingName<Signal<(NSApplication.RequestUserAttentionType, Signal<Void>)>, Binding> { return BindingName<Signal<(NSApplication.RequestUserAttentionType, Signal<Void>)>, Binding>({ v in .applicationBinding(Application.Binding.requestUserAttention(v)) }) }
 	public static var orderFrontCharacterPalette: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .applicationBinding(Application.Binding.orderFrontCharacterPalette(v)) }) }
 	public static var orderFrontColorPanel: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .applicationBinding(Application.Binding.orderFrontColorPanel(v)) }) }
-	public static var orderFrontStandardAboutPanel: BindingName<Signal<Dictionary<String, Any>>, Binding> { return BindingName<Signal<Dictionary<String, Any>>, Binding>({ v in .applicationBinding(Application.Binding.orderFrontStandardAboutPanel(v)) }) }
+	public static var orderFrontStandardAboutPanel: BindingName<Signal<Dictionary<NSApplication.AboutPanelOptionKey, Any>>, Binding> { return BindingName<Signal<Dictionary<NSApplication.AboutPanelOptionKey, Any>>, Binding>({ v in .applicationBinding(Application.Binding.orderFrontStandardAboutPanel(v)) }) }
 	public static var presentError: BindingName<Signal<Callback<Error, Bool>>, Binding> { return BindingName<Signal<Callback<Error, Bool>>, Binding>({ v in .applicationBinding(Application.Binding.presentError(v)) }) }
 	
 	// 3. Action bindings are triggered by the object after construction.
@@ -553,7 +555,7 @@ extension BindingName where Binding: ApplicationBinding {
 	public static var didChangeScreenParameters: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .applicationBinding(Application.Binding.didChangeScreenParameters(v)) }) }
 	public static var didHide: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .applicationBinding(Application.Binding.didHide(v)) }) }
 	public static var didFailToContinueUserActivity: BindingName<SignalInput<(userActivityType: String, error: Error)>, Binding> { return BindingName<SignalInput<(userActivityType: String, error: Error)>, Binding>({ v in .applicationBinding(Application.Binding.didFailToContinueUserActivity(v)) }) }
-	public static var didFinishLaunching: BindingName<SignalInput<(isDefaultLaunch: Bool, userNotification: NSUserNotification)>, Binding> { return BindingName<SignalInput<(isDefaultLaunch: Bool, userNotification: NSUserNotification)>, Binding>({ v in .applicationBinding(Application.Binding.didFinishLaunching(v)) }) }
+	public static var didFinishLaunching: BindingName<SignalInput<[AnyHashable: Any]>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]>, Binding>({ v in .applicationBinding(Application.Binding.didFinishLaunching(v)) }) }
 	public static var didFinishRestoringWindows: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .applicationBinding(Application.Binding.didFinishRestoringWindows(v)) }) }
 	public static var didReceiveRemoteNotification: BindingName<SignalInput<[String: Any]>, Binding> { return BindingName<SignalInput<[String: Any]>, Binding>({ v in .applicationBinding(Application.Binding.didReceiveRemoteNotification(v)) }) }
 	public static var didResignActive: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .applicationBinding(Application.Binding.didResignActive(v)) }) }

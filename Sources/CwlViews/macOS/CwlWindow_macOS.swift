@@ -116,7 +116,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 		case zoom(Signal<Bool>)
 		case sheet(Signal<Callback<NSWindow, NSApplication.ModalResponse>>)
 		case criticalSheet(Signal<Callback<NSWindow, NSApplication.ModalResponse>>)
-		case errorSheet(Signal<Callback<Error, Bool>>)
+		case presentError(Signal<Callback<Error, Bool>>)
 		
 		// 3. Action bindings are triggered by the object after construction.
 		case didBecomeKey(SignalInput<Void>)
@@ -408,7 +408,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 				return x.apply(instance, storage) { i, s, v in
 					i.beginCriticalSheet(v.value) { r in _ = v.callback.send(value: r) }
 				}
-			case .errorSheet(let x):
+			case .presentError(let x):
 				return x.apply(instance, storage) { i, s, v in
 					let ptr = Unmanaged.passRetained(v.callback).toOpaque()
 					let sel = #selector(Window.Storage.didPresentError(recovered:contextInfo:))
@@ -726,7 +726,7 @@ extension BindingName where Binding: WindowBinding {
 	public static var zoom: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .windowBinding(Window.Binding.zoom(v)) }) }
 	public static var sheet: BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding> { return BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding>({ v in .windowBinding(Window.Binding.sheet(v)) }) }
 	public static var criticalSheet: BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding> { return BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding>({ v in .windowBinding(Window.Binding.criticalSheet(v)) }) }
-	public static var errorSheet: BindingName<Signal<Callback<Error, Bool>>, Binding> { return BindingName<Signal<Callback<Error, Bool>>, Binding>({ v in .windowBinding(Window.Binding.errorSheet(v)) }) }
+	public static var presentError: BindingName<Signal<Callback<Error, Bool>>, Binding> { return BindingName<Signal<Callback<Error, Bool>>, Binding>({ v in .windowBinding(Window.Binding.presentError(v)) }) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	public static var didBecomeKey: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didBecomeKey(v)) }) }

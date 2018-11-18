@@ -182,7 +182,7 @@ extension BindingName where Binding: ControlBinding {
 	public static var textDidEndEditing: BindingName<(NSText) -> Void, Binding> { return BindingName<(NSText) -> Void, Binding>({ v in .controlBinding(Control.Binding.textDidEndEditing(v)) }) }
 }
 
-extension BindingName where Binding: ControlBinding, Binding.EnclosingBinder: BinderChain {
+extension BindingName where Binding: ControlBinding, Binding.EnclosingBinder: Binder {
 	// Additional helper binding names
 	public static func action<I: SignalInputInterface, Value>(_ keyPath: KeyPath<Binding.EnclosingBinder.Instance, Value>) -> BindingName<I, Binding> where I.InputValue == Value {
 		return BindingName<I, Binding> { (v: I) -> Binding in

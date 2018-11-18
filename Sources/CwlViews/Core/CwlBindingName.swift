@@ -21,7 +21,7 @@ infix operator --: AssignmentPrecedence
 infix operator <--: AssignmentPrecedence
 infix operator -->: AssignmentPrecedence
 
-public struct BindingName<Value, Binding> {
+public struct BindingName<Value, Binding: BaseBinding> {
 	public var constructor: (Value) -> Binding
 	public init(_ constructor: @escaping (Value) -> Binding) {
 		self.constructor = constructor

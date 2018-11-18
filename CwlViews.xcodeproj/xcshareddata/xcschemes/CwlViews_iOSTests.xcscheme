@@ -23,15 +23,6 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C95A77471E4187FB00659DBD"
-            BuildableName = "CwlUtils_iOSTestApp.app"
-            BlueprintName = "CwlUtils_iOSTestApp"
-            ReferencedContainer = "container:Dependencies/CwlSignal/Dependencies/CwlUtils/CwlUtils.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>

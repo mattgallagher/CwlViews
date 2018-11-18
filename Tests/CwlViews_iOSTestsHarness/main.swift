@@ -1,6 +1,6 @@
 import UIKit
 
-public class MockApplication: UIApplication {
+public class ApplicationSubclass: UIApplication {
 	var mockRegisteredForRemoteNotifications: Bool = false
 	public override var isRegisteredForRemoteNotifications: Bool {
 		return mockRegisteredForRemoteNotifications
@@ -15,7 +15,7 @@ public class MockApplication: UIApplication {
 	}
 }
 
-public class MockApplicationDelegate: NSObject, UIApplicationDelegate {
+public class ApplicationSubclassDelegate: NSObject, UIApplicationDelegate {
 }
 
-UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(MockApplication.self), NSStringFromClass(MockApplicationDelegate.self))
+UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(ApplicationSubclass.self), NSStringFromClass(ApplicationSubclassDelegate.self))

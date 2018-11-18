@@ -21,6 +21,11 @@
 public protocol ConstructingBinder: Binder where Output == Instance {
 	/// Build the instance from the parameters in the binder state or return an already constructed instance. If state is `.consumed` this will trigger a fatal error.
 	///
+	/// - Returns: the constructed and configured instance (newly created if state was `.pending` or pre-existing if state was `.constructed`)
+	func instance() -> Instance
+
+	/// Build the instance from the parameters in the binder state or return an already constructed instance. If state is `.consumed` this will trigger a fatal error.
+	///
 	/// - Parameter additional: ad hoc bindings (this is a chance to apply changes to the instance after construction and establish additional behaviors).
 	/// - Returns: the constructed and configured instance (newly created if state was `.pending` or pre-existing if state was `.constructed`)
 	func instance(additional: ((Instance) -> Lifetime?)?) -> Instance
@@ -34,6 +39,18 @@ extension ConstructingBinder where Parameters == BinderSubclassParameters<Instan
 	public func instance(additional: ((Instance) -> Lifetime?)? = nil) -> Instance {
 		return binderConstruct(
 			additional: additional,
+			storageConstructor: { prep, params, i in prep.constructStorage() },
+			instanceConstructor: { prep, params in prep.constructInstance(subclass: params.subclass) },
+			combine: embedStorageIfInUse,
+			output: { i, s in i })
+	}
+
+	/// Build the instance from the parameters in the binder state or return an already constructed instance. If state is `.consumed` this will trigger a fatal error.
+	///
+	/// - Returns: the constructed and configured instance (newly created if state was `.pending` or pre-existing if state was `.constructed`)
+	public func instance() -> Instance {
+		return binderConstruct(
+			additional: nil,
 			storageConstructor: { prep, params, i in prep.constructStorage() },
 			instanceConstructor: { prep, params in prep.constructInstance(subclass: params.subclass) },
 			combine: embedStorageIfInUse,

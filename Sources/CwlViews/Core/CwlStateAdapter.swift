@@ -78,22 +78,22 @@ public struct StateAdapter<RB: StateAdapterBehavior>: StateContainer, SignalInpu
 	} }
 	
 	private init(initialState: Content) {
-		channel = Signal<RB.Message>.multiChannel().reduce(initialState: initialState) { (content: inout Content, message: RB.Message) -> Content in
+		channel = Signal<RB.Message>.multiChannel().reduce(initialState: initialState) { (content: inout Content, message: RB.Message) -> Signal<Content>.Result in
 			switch content {
 			case .none, .notification(.none, _):
 				let (possibleState, notification) = RB.initialize(message: message)
 				if let state = possibleState {
 					content = Content.state(state)
 				}
-				return Content.notification(possibleState, notification)
+				return .success(Content.notification(possibleState, notification))
 			case .state(var s):
 				let n = RB.reducer(state: &s, message: message)
 				content = Content.state(s)
-				return Content.notification(s, n)
+				return .success(Content.notification(s, n))
 			case .notification(.some(var s), _):
 				let n = RB.reducer(state: &s, message: message)
 				content = Content.state(s)
-				return Content.notification(s, n)
+				return .success(Content.notification(s, n))
 			}
 		}
 	}

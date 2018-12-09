@@ -47,15 +47,19 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 		context = DispatchQueueContext(sync: sync)
 		let channel = Signal<Message>.multiChannel()
 		let loopback = channel.input
-		pair = channel.reduce(initialState: .never, context: .custom(context)) { [state, loopback] (cache: inout PossibleNotification, message: Message) -> PossibleNotification in
-			let notification = try reducer(&state.value, message, loopback)
-			if let n = notification {
-				if cacheNotification {
-					cache = .value(n)
+		pair = channel.reduce(initialState: .never, context: .custom(context)) { [state, loopback] (cache: inout PossibleNotification, message: Message) -> Signal<PossibleNotification>.Result in
+			do {
+				let notification = try reducer(&state.value, message, loopback)
+				if let n = notification {
+					if cacheNotification {
+						cache = .value(n)
+					}
+					return .success(.value(n))
 				}
-				return .value(n)
+				return .success(.suppress)
+			} catch {
+				return .failure(.error(error))
 			}
-			return .suppress
 		}
 	}
 	
@@ -106,12 +110,13 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	/// - processor: the function that produces and emits the slice of `State`. The `State` is provided as an `UnsafePointer`, since Swift doesn't have another way to indicate read-only pass-by-reference. The `Notification?` parameter will be `nil` on initial invocation but will never be `nil` again after that point – this distinction allows construction of a specialized slice on initial connection. Output from the function is via the `SignalNext<Processed>` parameter, allowing zero, one or more value outputs or a close, if desired.
 	/// - Returns: the signal output from the `processor`
 	public func filteredSignal<Value, Processed>(initialValue: Value, _ processor: @escaping (inout Value, State, Notification?, SignalNext<Processed>) throws -> Void) -> Signal<Processed> {
-		return pair.signal.transform(initialState: initialValue) { [state] (value: inout Value, incoming: Result<PossibleNotification>, next: SignalNext<Processed>) in
+		return pair.signal.transform(initialState: initialValue) { [state] (value: inout Value, incoming: Signal<PossibleNotification>.Result, next: SignalNext<Processed>) in
 			do {
-				switch try incoming.unwrap() {
-				case .never: try processor(&value, state.value, nil, next)
-				case .suppress: break
-				case .value(let n): try processor(&value, state.value, n, next)
+				switch incoming {
+				case .success(.never): try processor(&value, state.value, nil, next)
+				case .success(.suppress): break
+				case .success(.value(let n)): try processor(&value, state.value, n, next)
+				case .failure(let e): next.send(end: e)
 				}
 			} catch {
 				next.send(error: error)

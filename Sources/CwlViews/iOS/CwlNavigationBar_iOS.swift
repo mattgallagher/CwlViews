@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
+public class NavigationBar: Binder, NavigationBarConvertible {
 	public typealias Instance = UINavigationBar
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 	}
 	public func uiNavigationBar() -> Instance { return instance() }
 	
-	public enum Binding: NavigationBarBinding {
+	enum Binding: NavigationBarBinding {
 		public typealias EnclosingBinder = NavigationBar
 		public static func navigationBarBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -64,7 +64,7 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 		case position((UIBarPositioning) -> UIBarPosition)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = NavigationBar
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -89,29 +89,19 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 			}
 		}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
-			case .shouldPush(let x):
-				let s = #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:))
-				delegate().addSelector(s).shouldPush = x
-			case .shouldPop(let x):
-				let s = #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:))
-				delegate().addSelector(s).shouldPop = x
-			case .position(let x):
-				let s = #selector(UINavigationBarDelegate.position(for:))
-				delegate().addSelector(s).position = x
-			case .didPush(let x):
-				let s = #selector(UINavigationBarDelegate.navigationBar(_:didPush:))
-				delegate().addSelector(s).didPush = x
-			case .didPop(let x):
-				let s = #selector(UINavigationBarDelegate.navigationBar(_:didPop:))
-				delegate().addSelector(s).didPop = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .shouldPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
+			case .shouldPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
+			case .position(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.position(for:)))
+			case .didPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
+			case .didPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			// Don't steal the delegate from the navigation controller
 			if possibleDelegate != nil {
 				precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
@@ -122,11 +112,11 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .backgroundImage(let x):
 				var previous: ScopedValues<PositionAndMetrics, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for conditions in p.pairs {
 							if conditions.value != nil {
@@ -143,7 +133,7 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 				}
 			case .titleVerticalPositionAdjustment(let x):
 				var previous: ScopedValues<UIBarMetrics, CGFloat>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setTitleVerticalPositionAdjustment(0, for: c.0)
@@ -154,16 +144,16 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 						i.setTitleVerticalPositionAdjustment(c.1, for: c.0)
 					}
 				}
-			case .items(let x): return x.apply(instance, storage) { i, s, v in i.setItems(v.value.map { $0.uiNavigationItem() }, animated: v.isAnimated) }
-			case .backIndicatorImage(let x): return x.apply(instance, storage) { i, s, v in i.backIndicatorImage = v }
-			case .backIndicatorTransitionMaskImage(let x): return x.apply(instance, storage) { i, s, v in i.backIndicatorTransitionMaskImage = v }
-			case .barStyle(let x): return x.apply(instance, storage) { i, s, v in i.barStyle = v }
-			case .barTintColor(let x): return x.apply(instance, storage) { i, s, v in i.barTintColor = v }
-			case .shadowImage(let x): return x.apply(instance, storage) { i, s, v in i.shadowImage = v }
-			case .tintColor(let x): return x.apply(instance, storage) { i, s, v in i.tintColor = v }
-			case .isTranslucent(let x): return x.apply(instance, storage) { i, s, v in i.isTranslucent = v }
+			case .items(let x): return x.apply(instance) { i, v in i.setItems(v.value.map { $0.uiNavigationItem() }, animated: v.isAnimated) }
+			case .backIndicatorImage(let x): return x.apply(instance) { i, v in i.backIndicatorImage = v }
+			case .backIndicatorTransitionMaskImage(let x): return x.apply(instance) { i, v in i.backIndicatorTransitionMaskImage = v }
+			case .barStyle(let x): return x.apply(instance) { i, v in i.barStyle = v }
+			case .barTintColor(let x): return x.apply(instance) { i, v in i.barTintColor = v }
+			case .shadowImage(let x): return x.apply(instance) { i, v in i.shadowImage = v }
+			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+			case .isTranslucent(let x): return x.apply(instance) { i, v in i.isTranslucent = v }
 			case .titleTextAttributes(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.titleTextAttributes = v
 				}
 			case .didPush: return nil
@@ -171,7 +161,7 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 			case .shouldPush: return nil
 			case .shouldPop: return nil
 			case .position: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -183,29 +173,24 @@ public class NavigationBar: ConstructingBinder, NavigationBarConvertible {
 			super.init()
 		}
 		
-		open var shouldPop: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool)?
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPop item: UINavigationItem) -> Bool {
-			return shouldPop!(navigationBar, item)
+			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)(navigationBar, item)
 		}
 		
-		open var shouldPush: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool)?
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPush item: UINavigationItem) -> Bool {
-			return shouldPush!(navigationBar, item)
+			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)(navigationBar, item)
 		}
 		
-		open var didPop: SignalInput<UINavigationItem>?
 		open func navigationBar(_ navigationBar: UINavigationBar, didPop item: UINavigationItem) {
-			didPop!.send(value: item)
+			handler(ofType: SignalInput<UINavigationItem>.self).send(value: item)
 		}
 		
-		open var didPush: SignalInput<UINavigationItem>?
 		open func navigationBar(_ navigationBar: UINavigationBar, didPush item: UINavigationItem) {
-			didPush!.send(value: item)
+			handler(ofType: SignalInput<UINavigationItem>.self).send(value: item)
 		}
 		
-		open var position: ((UIBarPositioning) -> UIBarPosition)?
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return position!(bar)
+			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)(bar)
 		}
 	}
 }

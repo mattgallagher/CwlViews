@@ -46,95 +46,65 @@ public enum Dynamic<Value> {
 		}
 	}
 	
-	/// Gets the initial (i.e. used in the constructor) value from the `Dynamic`
-	public func captureValues() -> [Value] {
-		switch self {
-		case .constant(let v): return [v]
-		case .dynamic(let signal): return signal.capture().values
-		}
-	}
-	
-	/// Converts this `Dynamic` into a signal by returning the `.dynamic` signal or returning the `.constant` wrapped in a signal.
-	public func signal() -> Signal<Value> {
-		switch self {
-		case .constant(let v): return Signal<Value>.preclosed(v)
-		case .dynamic(let signal): return signal
-		}
-	}
-	
 	// Gets the subsequent (i.e. after construction) values from the `Dynamic`
-	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I, _ storage: B, _ onError: Value? = nil, handler: @escaping (I, B, Value) -> Void) -> Lifetime? {
+	public func apply<I: AnyObject, B: AnyObject>(_ instance: I, _ storage: B, _ onError: Value? = nil, handler: @escaping (I, B, Value) -> Void) -> Lifetime? {
 		switch self {
 		case .constant(let v):
 			handler(instance, storage, v)
 			return nil
 		case .dynamic(let signal):
-			return signal.subscribe(context: .main) { [weak instance, weak storage] r in
-				guard let i = instance, let s = storage else { return }
-				switch (r, onError) {
-				case (.success(let v), _): handler(i, s, v)
-				case (.failure, .some(let v)): handler(i, s, v)
-				case (.failure, .none): break
-				}
-			}
+			return signal.apply(instance, storage, onError, handler: handler)
+		}
+	}
+	
+	// Gets the subsequent (i.e. after construction) values from the `Dynamic`
+	public func apply<I: AnyObject>(_ instance: I, handler: @escaping (I, Value) -> Void) -> Lifetime? {
+		switch self {
+		case .constant(let v):
+			handler(instance, v)
+			return nil
+		case .dynamic(let signal):
+			return signal.apply(instance, handler: handler)
 		}
 	}
 }
 
 public struct InitialSubsequent<Value> {
-	private var capturedValue: Value?
-	var shouldResend: Bool
-	let subsequent: SignalCapture<Value>?
+	public let initial: Value?
+	public let subsequent: SignalCapture<Value>?
 	
-	init(initial: Value? = nil, shouldResend: Bool = true, subsequent: SignalCapture<Value>? = nil) {
-		self.capturedValue = initial
-		self.shouldResend = shouldResend
+	init<Interface: SignalInterface>(signal: Interface) where Interface.OutputValue == Value {
+		let capture = signal.capture()
+		let values = capture.values
+		self.init(initial: values.last, subsequent: capture)
+	}
+	
+	init(initial: Value? = nil, subsequent: SignalCapture<Value>? = nil) {
+		self.initial = initial
 		self.subsequent = subsequent
-	}
-	
-	public mutating func initial() -> Value? {
-		let c = capturedValue
-		capturedValue = nil
-		shouldResend = false
-		return c
-	}
-
-	public func resume() -> Signal<Value>? {
-		if let s = subsequent {
-			return s.resume(resend: shouldResend)
-		} else if shouldResend, let i = capturedValue {
-			return Signal<Value>.preclosed(i)
-		}
-		return nil
 	}
 }
 
 extension Signal {
-	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I?, _ storage: B?, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
-		return subscribeValues(context: .main) { [weak instance, weak storage] v in
-			guard let i = instance, let s = storage else { return }
-			handler(i, s, v)
+	public func apply<I: AnyObject, B: AnyObject>(_ instance: I, _ storage: B, _ onError: OutputValue? = nil, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
+		return signal.subscribe(context: .main) { [unowned instance, unowned storage] r in
+			switch (r, onError) {
+			case (.success(let v), _): handler(instance, storage, v)
+			case (.failure, .some(let v)): handler(instance, storage, v)
+			case (.failure, .none): break
+			}
 		}
+	}
+
+	public func apply<I: AnyObject>(_ instance: I, handler: @escaping (I, OutputValue) -> Void) -> Lifetime? {
+		return signal.subscribeValues(context: .main) { [unowned instance] v in handler(instance, v) }
 	}
 }
 
 extension SignalCapture {
-	public func apply<I: AnyObject, B: BinderStorage>(_ instance: I, _ storage: B, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
-		return subscribeValues(context: .main) { [weak instance, weak storage] v in
-			guard let i = instance, let s = storage else { return }
-			handler(i, s, v)
-		}
-	}
-}
-
-extension SignalInterface {
-	public func adhocBinding<Subclass: AnyObject>(toType: Subclass.Type, using: @escaping (Subclass, OutputValue) -> Void) -> (AnyObject) -> Lifetime? {
-		return { (instance: AnyObject) -> Lifetime? in
-			return self.signal.subscribeValues(context: .main) { [weak instance] value in
-				if let i = instance as? Subclass {
-					using(i, value)
-				}
-			}
+	public func apply<I: AnyObject, B: AnyObject>(_ instance: I, _ storage: B, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
+		return subscribeValues(context: .main) { [unowned instance, unowned storage] v in
+			handler(instance, storage, v)
 		}
 	}
 }

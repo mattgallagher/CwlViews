@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
+public class TabBarItem: Binder, TabBarItemConvertible {
 	public typealias Instance = UITabBarItem
 	public typealias Inherited = BarItem
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
 	}
 	public func uiTabBarItem() -> Instance { return instance() }
 	
-	public enum Binding: TabBarItemBinding {
+	enum Binding: TabBarItemBinding {
 		public typealias EnclosingBinder = TabBarItem
 		public static func tabBarItemBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case systemItem(Constant<UITabBarItem.SystemItem?>)
@@ -56,7 +56,7 @@ public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TabBarItem
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -85,7 +85,7 @@ public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
 		
 		public init() {}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .systemItem(let x): systemItem = x.value
 			case .selectedImage(let x):
@@ -100,17 +100,17 @@ public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
 			case .inheritedBinding(.title(let x)):
 				title = x.initialSubsequent()
 				titleInitial = title.initial()
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .badgeTextAttributes(let x):
 				if #available(iOS 10.0, *) {
 					var previous: ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>? = nil
-					return x.apply(instance, storage) { i, s, v in
+					return x.apply(instance) { i, v in
 						if let p = previous {
 							for c in p.pairs {
 								i.setBadgeTextAttributes(nil, for: c.0)
@@ -124,20 +124,20 @@ public class TabBarItem: ConstructingBinder, TabBarItemConvertible {
 				} else {
 					return nil
 				}
-			case .titlePositionAdjustment(let x): return x.apply(instance, storage) { i, s, v in i.titlePositionAdjustment = v }
-			case .badgeValue(let x): return x.apply(instance, storage) { i, s, v in i.badgeValue = v }
+			case .titlePositionAdjustment(let x): return x.apply(instance) { i, v in i.titlePositionAdjustment = v }
+			case .badgeValue(let x): return x.apply(instance) { i, v in i.badgeValue = v }
 			case .badgeColor(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(iOS 10.0, *) {
 						i.badgeColor = v
 					}
 				}
 			case .systemItem: return nil
-			case .selectedImage: return selectedImage.resume()?.apply(instance, storage) { i, s, v in i.selectedImage = v }
-			case .inheritedBinding(.tag): return tag.resume()?.apply(instance, storage) { i, s, v in i.tag = v }
-			case .inheritedBinding(.image): return image.resume()?.apply(instance, storage) { i, s, v in i.image = v }
-			case .inheritedBinding(.title): return title.resume()?.apply(instance, storage) { i, s, v in i.title = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .selectedImage: return selectedImage.resume()?.apply(instance) { i, v in i.selectedImage = v }
+			case .inheritedBinding(.tag): return tag.resume()?.apply(instance) { i, v in i.tag = v }
+			case .inheritedBinding(.image): return image.resume()?.apply(instance) { i, v in i.image = v }
+			case .inheritedBinding(.title): return title.resume()?.apply(instance) { i, v in i.title = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class LongPressGestureRecognizer: ConstructingBinder, LongPressGestureRecognizerConvertible {
+public class LongPressGestureRecognizer: Binder, LongPressGestureRecognizerConvertible {
 	public typealias Instance = UILongPressGestureRecognizer
 	public typealias Inherited = GestureRecognizer
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class LongPressGestureRecognizer: ConstructingBinder, LongPressGestureRec
 	}
 	public func uiLongPressGestureRecognizer() -> Instance { return instance() }
 	
-	public enum Binding: LongPressGestureRecognizerBinding {
+	enum Binding: LongPressGestureRecognizerBinding {
 		public typealias EnclosingBinder = LongPressGestureRecognizer
 		public static func longPressGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -52,7 +52,7 @@ public class LongPressGestureRecognizer: ConstructingBinder, LongPressGestureRec
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = LongPressGestureRecognizer
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -61,13 +61,13 @@ public class LongPressGestureRecognizer: ConstructingBinder, LongPressGestureRec
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .minimumPressDuration(let x): return x.apply(instance, storage) { i, s, v in i.minimumPressDuration = v }
-			case .numberOfTouchesRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTouchesRequired = v }
-			case .numberOfTapsRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTapsRequired = v }
-			case .allowableMovement(let x): return x.apply(instance, storage) { i, s, v in i.allowableMovement = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .minimumPressDuration(let x): return x.apply(instance) { i, v in i.minimumPressDuration = v }
+			case .numberOfTouchesRequired(let x): return x.apply(instance) { i, v in i.numberOfTouchesRequired = v }
+			case .numberOfTapsRequired(let x): return x.apply(instance) { i, v in i.numberOfTapsRequired = v }
+			case .allowableMovement(let x): return x.apply(instance) { i, v in i.allowableMovement = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class PanGestureRecognizer: ConstructingBinder, PanGestureRecognizerConvertible {
+public class PanGestureRecognizer: Binder, PanGestureRecognizerConvertible {
 	public typealias Instance = NSPanGestureRecognizer
 	public typealias Inherited = GestureRecognizer
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class PanGestureRecognizer: ConstructingBinder, PanGestureRecognizerConve
 	}
 	public func nsPanGestureRecognizer() -> Instance { return instance() }
 	
-	public enum Binding: PanGestureRecognizerBinding {
+	enum Binding: PanGestureRecognizerBinding {
 		public typealias EnclosingBinder = PanGestureRecognizer
 		public static func panGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -49,7 +49,7 @@ public class PanGestureRecognizer: ConstructingBinder, PanGestureRecognizerConve
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = PanGestureRecognizer
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -58,10 +58,10 @@ public class PanGestureRecognizer: ConstructingBinder, PanGestureRecognizerConve
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .buttonMask(let x): return x.apply(instance, storage) { i, s, v in i.buttonMask = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .buttonMask(let x): return x.apply(instance) { i, v in i.buttonMask = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

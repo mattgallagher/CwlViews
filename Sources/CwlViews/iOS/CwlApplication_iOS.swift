@@ -38,10 +38,10 @@ public class Application: Binder {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
 
-	public enum Binding: ApplicationBinding {
+	enum Binding: ApplicationBinding {
 		public typealias EnclosingBinder = Application
 		public static func applicationBinding(_ binding: Application.Binding) -> Application.Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -92,7 +92,7 @@ public class Application: Binder {
 		case willTerminate(() -> Void)
 	}
 
-	public struct Preparer: StoragePreparer {
+	struct Preparer: StoragePreparer {
 		public typealias EnclosingBinder = Application
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -118,141 +118,91 @@ public class Application: Binder {
 			}
 		}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
-			case .didFinishLaunching(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:))
-				delegate().addSelector(s).didFinishLaunching = x
-			case .willTerminate(let x):
-				let s = #selector(UIApplicationDelegate.applicationWillTerminate(_:))
-				delegate().addSelector(s).willTerminate = x
-			case .protectedDataWillBecomeUnavailable(let x):
-				let s = #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:))
-				delegate().addSelector(s).protectedDataWillBecomeUnavailable = x
-			case .protectedDataDidBecomeAvailable(let x):
-				let s = #selector(UIApplicationDelegate.applicationProtectedDataDidBecomeAvailable(_:))
-				delegate().addSelector(s).protectedDataDidBecomeAvailable = x
-			case .willEncodeRestorableState(let x):
-				let s = #selector(UIApplicationDelegate.application(_:willEncodeRestorableStateWith:))
-				delegate().addSelector(s).willEncodeRestorableState = x
+			case .didFinishLaunching(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)))
+			case .willTerminate(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationWillTerminate(_:)))
+			case .protectedDataWillBecomeUnavailable(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:)))
+			case .protectedDataDidBecomeAvailable(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataDidBecomeAvailable(_:)))
+			case .willEncodeRestorableState(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:willEncodeRestorableStateWith:)))
 				
 				// Automatically enable `shouldSaveApplicationState` if `willEncodeRestorableState` is isEnabled
 				if delegate().shouldSaveApplicationState == nil {
 					let shouldSave = #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:))
 					delegate().addSelector(shouldSave).shouldSaveApplicationState = { _ in return true }
 				}
-			case .didDecodeRestorableState(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didDecodeRestorableStateWith:))
-				delegate().addSelector(s).didDecodeRestorableState = x
+			case .didDecodeRestorableState(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didDecodeRestorableStateWith:)))
 				
 				// Automatically enable `shouldRestoreApplicationState` if `didDecodeRestorableState` is isEnabled
 				if delegate().shouldRestoreApplicationState == nil {
 					let shouldRestore = #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:))
 					delegate().addSelector(shouldRestore).shouldRestoreApplicationState = { _ in return true }
 				}
-			case .performFetch(let x):
-				let s = #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:))
-				delegate().addSelector(s).performFetch = x
-			case .handleEventsForBackgroundURLSession(let x):
-				let s = #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:))
-				delegate().addSelector(s).handleEventsForBackgroundURLSession = x
+			case .performFetch(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:)))
+			case .handleEventsForBackgroundURLSession(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:)))
 			case .didRegisterRemoteNotifications(let x):
 				let s1 = #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:))
 				let s2 = #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:))
 				delegate().addSelector(s1).didRegisterRemoteNotifications = x
 				delegate().addSelector(s2)
-			case .didBecomeActive(let x):
-				let s = #selector(UIApplicationDelegate.applicationDidBecomeActive(_:))
-				delegate().addSelector(s).didBecomeActive = x
-			case .willResignActive(let x):
-				let s = #selector(UIApplicationDelegate.applicationWillResignActive(_:))
-				delegate().addSelector(s).willResignActive = x
-			case .didEnterBackground(let x):
-				let s = #selector(UIApplicationDelegate.applicationDidEnterBackground(_:))
-				delegate().addSelector(s).didEnterBackground = x
-			case .willEnterForeground(let x):
-				let s = #selector(UIApplicationDelegate.applicationWillEnterForeground(_:))
-				delegate().addSelector(s).willEnterForeground = x
-			case .didReceiveMemoryWarning(let x):
-				let s = #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:))
-				delegate().addSelector(s).didReceiveMemoryWarning = x
-			case .didReceiveRemoteNotification(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:))
-				delegate().addSelector(s).didReceiveRemoteNotification = x
-			case .didFailToContinueUserActivity(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:))
-				delegate().addSelector(s).didFailToContinueUserActivity = x
-			case .performAction(let x):
-				let s = #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:))
-				delegate().addSelector(s).performAction = x
-			case .handleWatchKitExtensionRequest(let x):
-				let s = #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:))
-				delegate().addSelector(s).handleWatchKitExtensionRequest = x
-			case .shouldRequestHealthAuthorization(let x):
-				let s = #selector(UIApplicationDelegate.applicationShouldRequestHealthAuthorization(_:))
-				delegate().addSelector(s).shouldRequestHealthAuthorization = x
-			case .willContinueUserActivity(let x):
-				let s = #selector(UIApplicationDelegate.application(_:willContinueUserActivityWithType:))
-				delegate().addSelector(s).willContinueUserActivity = x
-			case .continueUserActivity(let x):
-				let s = #selector(UIApplicationDelegate.application(_:continue:restorationHandler:))
-				delegate().addSelector(s).continueUserActivity = x
-			case .didUpdate(let x):
-				let s = #selector(UIApplicationDelegate.application(_:didUpdate:))
-				delegate().addSelector(s).didUpdate = x
-			case .shouldSaveApplicationState(let x):
-				let s = #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:))
-				delegate().addSelector(s).shouldSaveApplicationState = x
-			case .shouldRestoreApplicationState(let x):
-				let s = #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:))
-				delegate().addSelector(s).shouldRestoreApplicationState = x
-			case .viewControllerWithRestorationPath(let x):
-				let s = #selector(UIApplicationDelegate.application(_:viewControllerWithRestorationIdentifierPath:coder:))
-				delegate().addSelector(s).viewControllerWithRestorationPath = x
+			case .didBecomeActive(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationDidBecomeActive(_:)))
+			case .willResignActive(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationWillResignActive(_:)))
+			case .didEnterBackground(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
+			case .willEnterForeground(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationWillEnterForeground(_:)))
+			case .didReceiveMemoryWarning(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:)))
+			case .didReceiveRemoteNotification(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)))
+			case .didFailToContinueUserActivity(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
+			case .performAction(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:)))
+			case .handleWatchKitExtensionRequest(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:)))
+			case .shouldRequestHealthAuthorization(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationShouldRequestHealthAuthorization(_:)))
+			case .willContinueUserActivity(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:willContinueUserActivityWithType:)))
+			case .continueUserActivity(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:continue:restorationHandler:)))
+			case .didUpdate(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didUpdate:)))
+			case .shouldSaveApplicationState(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:)))
+			case .shouldRestoreApplicationState(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:)))
+			case .viewControllerWithRestorationPath(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:viewControllerWithRestorationIdentifierPath:coder:)))
 			case .open(let x):
 				if #available(iOS 9.0, *) {
 					let s = #selector(UIApplicationDelegate.application(_:open:options:))
 					delegate().addSelector(s).open = x
 				}
-			case .shouldAllowExtensionPointIdentifier(let x):
-				let s = #selector(UIApplicationDelegate.application(_:shouldAllowExtensionPointIdentifier:))
-				delegate().addSelector(s).shouldAllowExtensionPointIdentifier = x
-			case .inheritedBinding(let s): linkedPreparer.prepareBinding(s)
+			case .shouldAllowExtensionPointIdentifier(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:shouldAllowExtensionPointIdentifier:)))
+			case .inheritedBinding(let s): inherited.prepareBinding(s)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			// NOTE: delegate configuration occurs in Storage.constructStorageAndPrepareInstance due to inability to construct UIApplication using a normal constructor.
 
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .additionalWindows(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					s.additionalWindows = v.map { $0.uiWindow() }
 				}
 			case .window(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					s.window = v?.uiWindow()
 				}
 			case .ignoreInteractionEvents(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					switch (i.isIgnoringInteractionEvents, v) {
 					case (false, true): i.beginIgnoringInteractionEvents()
 					case (true, false): i.endIgnoringInteractionEvents()
 					default: break
 					}
 				}
-			case .supportShakeToEdit(let x): return x.apply(instance, storage) { i, s, v in i.applicationSupportsShakeToEdit = v }
-			case .isIdleTimerDisabled(let x): return x.apply(instance, storage) { i, s, v in i.isIdleTimerDisabled = v }
-			case .shortcutItems(let x): return x.apply(instance, storage) { i, s, v in i.shortcutItems = v }
-			case .isNetworkActivityIndicatorVisible(let x): return x.apply(instance, storage) { i, s, v in i.isNetworkActivityIndicatorVisible = v }
-			case .iconBadgeNumber(let x): return x.apply(instance, storage) { i, s, v in i.applicationIconBadgeNumber = v }
+			case .supportShakeToEdit(let x): return x.apply(instance) { i, v in i.applicationSupportsShakeToEdit = v }
+			case .isIdleTimerDisabled(let x): return x.apply(instance) { i, v in i.isIdleTimerDisabled = v }
+			case .shortcutItems(let x): return x.apply(instance) { i, v in i.shortcutItems = v }
+			case .isNetworkActivityIndicatorVisible(let x): return x.apply(instance) { i, v in i.isNetworkActivityIndicatorVisible = v }
+			case .iconBadgeNumber(let x): return x.apply(instance) { i, v in i.applicationIconBadgeNumber = v }
 			case .registerForRemoteNotifications(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					switch (i.isRegisteredForRemoteNotifications, v) {
 					case (false, true): i.registerForRemoteNotifications()
 					case (true, false): i.unregisterForRemoteNotifications()
@@ -265,7 +215,7 @@ public class Application: Binder {
 			case .willEnterForeground: return nil
 			case .didReceiveMemoryWarning: return nil
 			case .significantTimeChange(let x):
-				return Signal.notifications(name: UIApplication.significantTimeChangeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+				return Signal.notifications(n: UIApplication.significantTimeChangeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .willFinishLaunching(let x):
 				storage.willFinishLaunching = x
 				return nil
@@ -292,7 +242,7 @@ public class Application: Binder {
 			case .viewControllerWithRestorationPath: return nil
 			case .open: return nil
 			case .shouldAllowExtensionPointIdentifier: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -356,59 +306,48 @@ public class Application: Binder {
 			super.init()
 		}
 
-		open var didBecomeActive: SignalInput<Void>?
 		open func applicationDidBecomeActive(_ application: UIApplication) {
-			didBecomeActive!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var willResignActive: SignalInput<Void>?
 		open func applicationWillResignActive(_ application: UIApplication) {
-			willResignActive!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var didEnterBackground: SignalInput<Void>?
 		open func applicationDidEnterBackground(_ application: UIApplication) {
-			didEnterBackground!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var willEnterForeground: SignalInput<Void>?
 		open func applicationWillEnterForeground(_ application: UIApplication) {
-			willEnterForeground!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var didReceiveMemoryWarning: SignalInput<Void>?
 		open func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
-			didReceiveMemoryWarning!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var didFinishLaunching: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
 		open func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-			return didFinishLaunching!(launchOptions)
+			return handler(ofType: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool).self)(launchOptions)
 		}
 		
-		open var willTerminate: (() -> Void)?
 		open func applicationWillTerminate(_ application: UIApplication) {
-			return willTerminate!()
+			return handler(ofType: (() -> Void).self)()
 		}
 		
-		open var protectedDataWillBecomeUnavailable: SignalInput<Void>?
 		open func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
-			protectedDataWillBecomeUnavailable!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var protectedDataDidBecomeAvailable: SignalInput<Void>?
 		open func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
-			protectedDataDidBecomeAvailable!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var willEncodeRestorableState: ((NSKeyedArchiver) -> Void)?
 		open func application(_ application: UIApplication, willEncodeRestorableStateWith coder: NSCoder) {
-			return willEncodeRestorableState!(coder as! NSKeyedArchiver)
+			return handler(ofType: ((NSKeyedArchiver) -> Void).self)(coder as! NSKeyedArchiver)
 		}
 		
-		open var didDecodeRestorableState: ((NSKeyedUnarchiver) -> Void)?
 		open func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
-			return didDecodeRestorableState!(coder as! NSKeyedUnarchiver)
+			return handler(ofType: ((NSKeyedUnarchiver) -> Void).self)(coder as! NSKeyedUnarchiver)
 		}
 		
 		open var performFetch: SignalInput<SignalInput<UIBackgroundFetchResult>>?
@@ -436,9 +375,8 @@ public class Application: Binder {
 			(didRegisterUserNotifications as! SignalInput<UIUserNotificationSettings>).send(value: notificationSettings)
 		}
 		
-		open var didRegisterRemoteNotifications: SignalInput<Result<Data>>?
 		open func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-			didRegisterRemoteNotifications!.send(value: Result.success(deviceToken))
+			handler(ofType: SignalInput<Result<Data>>.self).send(value: Result.success(deviceToken))
 		}
 		open func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
 			didRegisterRemoteNotifications!.send(value: Result.failure(error))
@@ -489,9 +427,8 @@ public class Application: Binder {
 			handleRemoteNotificationResponseInfoAction!.send(value: Callback((identifier, userInfo, responseInfo), input))
 		}
 		
-		open var didFailToContinueUserActivity: SignalInput<(String, Error)>?
 		open func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
-			didFailToContinueUserActivity!.send(value: (userActivityType, error))
+			handler(ofType: SignalInput<(String, Error)>.self).send(value: (userActivityType, error))
 		}
 		
 		open var handleWatchKitExtensionRequest: SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>?
@@ -505,9 +442,8 @@ public class Application: Binder {
 			shouldRequestHealthAuthorization!()
 		}
 		
-		open var willContinueUserActivity: ((String) -> Bool)?
 		open func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
-			return willContinueUserActivity!(userActivityType)
+			return handler(ofType: ((String) -> Bool).self)(userActivityType)
 		}
 		
 		open var continueUserActivity: ((Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool)?
@@ -516,34 +452,28 @@ public class Application: Binder {
 			return continueUserActivity!(Callback(userActivity, input))
 		}
 		
-		open var didUpdate: ((NSUserActivity) -> Void)?
 		open func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) {
-			didUpdate!(userActivity)
+			handler(ofType: ((NSUserActivity) -> Void).self)(userActivity)
 		}
 		
-		open var shouldSaveApplicationState: ((NSCoder) -> Bool)?
 		open func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
-			return shouldSaveApplicationState!(coder)
+			return handler(ofType: ((NSCoder) -> Bool).self)(coder)
 		}
 		
-		open var shouldRestoreApplicationState: ((NSCoder) -> Bool)?
 		open func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-			return shouldRestoreApplicationState!(coder)
+			return handler(ofType: ((NSCoder) -> Bool).self)(coder)
 		}
 		
-		open var viewControllerWithRestorationPath: (([String], NSCoder) -> UIViewController?)?
 		open func application(_ application: UIApplication, viewControllerWithRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
-			return viewControllerWithRestorationPath!(identifierComponents, coder)
+			return handler(ofType: (([String], NSCoder) -> UIViewController?).self)(identifierComponents, coder)
 		}
 		
-		open var open: ((URL, [UIApplication.OpenURLOptionsKey: Any]) -> Bool)?
 		open func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-			return open!(url, options)
+			return handler(ofType: ((URL, [UIApplication.OpenURLOptionsKey: Any]) -> Bool).self)(url, options)
 		}
 		
-		open var shouldAllowExtensionPointIdentifier: ((UIApplication.ExtensionPointIdentifier) -> Bool)?
 		open func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
-			return shouldAllowExtensionPointIdentifier!(extensionPointIdentifier)
+			return handler(ofType: ((UIApplication.ExtensionPointIdentifier) -> Bool).self)(extensionPointIdentifier)
 		}
 		
 		open var performAction: SignalInput<Callback<UIApplicationShortcutItem, Bool>>?

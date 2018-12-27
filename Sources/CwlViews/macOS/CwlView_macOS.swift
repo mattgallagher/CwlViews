@@ -19,227 +19,236 @@
 
 #if os(macOS)
 
-public class View: ConstructingBinder, ViewConvertible {
-	public typealias Instance = NSView
-	public typealias Inherited = BaseBinder
-	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
+// MARK: - Binder Part 1: Binder
+public class View: Binder, ViewConvertible {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsView() -> Instance { return instance() }
-	
-	public enum Binding: ViewBinding {
-		public typealias EnclosingBinder = View
-		public static func viewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+}
+
+// MARK: - Binder Part 2: Binding
+public extension View {
+	enum Binding: ViewBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static styles are applied at construction and are subsequently immutable.
 		case layer(Constant<BackingLayer>)
-		case wantsBackingLayer(Constant<Bool>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case layout(Dynamic<Layout?>)
-		case frameRotation(Dynamic<CGFloat>)
-		case layerContentsRedrawPolicy(Dynamic<NSView.LayerContentsRedrawPolicy>)
+		case appearance(Dynamic<NSAppearance?>)
 		case canDrawSubviewsIntoLayer(Dynamic<Bool>)
-		case horizontalContentCompressionResistancePriority(Dynamic<NSLayoutConstraint.Priority>)
-		case verticalContentCompressionResistancePriority(Dynamic<NSLayoutConstraint.Priority>)
-		case horizontalContentHuggingPriority(Dynamic<NSLayoutConstraint.Priority>)
-		case verticalContentHuggingPriority(Dynamic<NSLayoutConstraint.Priority>)
 		case focusRingType(Dynamic<NSFocusRingType>)
+		case frameRotation(Dynamic<CGFloat>)
+		case gestureRecognizers(Dynamic<[GestureRecognizerConvertible]>)
+		case horizontalContentCompressionResistancePriority(Dynamic<NSLayoutConstraint.Priority>)
+		case horizontalContentHuggingPriority(Dynamic<NSLayoutConstraint.Priority>)
+		case identifier(Dynamic<NSUserInterfaceItemIdentifier?>)
 		case isHidden(Dynamic<Bool>)
+		case layerContentsRedrawPolicy(Dynamic<NSView.LayerContentsRedrawPolicy>)
+		case layout(Dynamic<Layout?>)
 		case registeredDragTypes(Dynamic<[NSPasteboard.PasteboardType]>)
 		case tooltip(Dynamic<String>)
+		case verticalContentCompressionResistancePriority(Dynamic<NSLayoutConstraint.Priority>)
+		case verticalContentHuggingPriority(Dynamic<NSLayoutConstraint.Priority>)
+
 		@available(macOS 10.11, *) case pressureConfiguration(Dynamic<NSPressureConfiguration>)
-		case identifier(Dynamic<NSUserInterfaceItemIdentifier?>)
-		case appearance(Dynamic<NSAppearance?>)
-		case hostedLayer(Dynamic<LayerConvertible?>)
-		case gestureRecognizers(Dynamic<[GestureRecognizerConvertible]>)
 		
 		// 2. Signal bindings are performed on the object after construction.
-		case printView(Signal<Void>)
-		case setNeedsDisplayInRect(Signal<NSRect>)
 		case needsDisplay(Signal<Bool>)
+		case printView(Signal<Void>)
 		case scrollRectToVisible(Signal<NSRect>)
+		case setNeedsDisplayInRect(Signal<NSRect>)
 		
 		// 3. Action bindings are triggered by the object after construction.
+		case boundsDidChange(SignalInput<NSRect>)
 		case frameDidChange(SignalInput<NSRect>)
 		case globalFrameDidChange(SignalInput<NSRect>)
-		case boundsDidChange(SignalInput<NSRect>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = View
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension View {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = View.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = NSView
+		public typealias Storage = View.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init(frame: NSRect.zero) }
-		
-		// InitialSubsequent styles and other speciyal handling
-		var hostedLayer = false
-		var wantsBackingLayer = false
-		var backingLayerShadow = false
-		var layerBindings: [BackingLayer.Binding]? = nil
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		public mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .layer(let x):
-				let bindings = x.value.consumeBindings()
-				layerBindings = bindings
-				for s in bindings {
-					switch s {
-					case .shadowColor: fallthrough
-					case .shadowOffset: fallthrough
-					case .shadowOpacity: fallthrough
-					case .shadowPath: fallthrough
-					case .shadowRadius: backingLayerShadow = true
-					default: break
-					}
-				}
-				wantsBackingLayer = true
-			case .wantsBackingLayer(let x): wantsBackingLayer = x.value
-			case .hostedLayer:
-				precondition(wantsBackingLayer == false, "Cannot set backing layer properties on a view *and* provide a hosted layer.")
-				hostedLayer = true
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
-			default: break
-			}
-		}
-		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
-			// Apply captured variables that need to be applied as soon as possible after construction
-			if wantsBackingLayer == true {
-				instance.wantsLayer = true
-				if backingLayerShadow {
-					instance.shadow = NSShadow()
-				}
-			}
 
-			linkedPreparer.prepareInstance(instance, storage: storage)
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .layer:
-				if let l = instance.layer, let bindings = layerBindings {
-					BackingLayer(bindings: bindings).applyBindings(to: l)
-				}
-				return nil
-			case .layout(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.applyLayout(v)
-				}
-			case .frameRotation(let x): return x.apply(instance, storage) { i, s, v in i.frameRotation = v }
-			case .layerContentsRedrawPolicy(let x): return x.apply(instance, storage) { i, s, v in i.layerContentsRedrawPolicy = v }
-			case .canDrawSubviewsIntoLayer(let x): return x.apply(instance, storage) { i, s, v in i.canDrawSubviewsIntoLayer = v }
-			case .horizontalContentCompressionResistancePriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Orientation.horizontal) }
-			case .verticalContentCompressionResistancePriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Orientation.vertical) }
-			case .horizontalContentHuggingPriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.horizontal) }
-			case .verticalContentHuggingPriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.vertical) }
-			case .focusRingType(let x): return x.apply(instance, storage) { i, s, v in i.focusRingType = v }
-			case .isHidden(let x): return x.apply(instance, storage) { i, s, v in i.isHidden = v }
-			case .registeredDragTypes(let x):
-				return x.apply(instance, storage) { i, s, v in
-					if v.isEmpty {
-						i.unregisterDraggedTypes()
-					} else {
-						i.registerForDraggedTypes(v)
-					}
-				}
-			case .tooltip(let x): return x.apply(instance, storage) { i, s, v in i.toolTip = v }
-			case .pressureConfiguration(let x):
-				return x.apply(instance, storage) { i, s, v in
-					if #available(macOS 10.11, *) {
-						i.pressureConfiguration = v
-					}
-				}
-			case .identifier(let x): return x.apply(instance, storage) { i, s, v in i.identifier = v }
-			case .appearance(let x): return x.apply(instance, storage) { i, s, v in i.appearance = v }
-			case .printView(let x): return x.apply(instance, storage) { i, s, v in i.printView(nil) }
-			case .setNeedsDisplayInRect(let x): return x.apply(instance, storage) { i, s, v in i.setNeedsDisplay(v) }
-			case .needsDisplay(let x): return x.apply(instance, storage) { i, s, v in i.needsDisplay = v }
-			case .scrollRectToVisible(let x): return x.apply(instance, storage) { i, s, v in i.scrollToVisible(v) }
-			case .frameDidChange(let x):
-				instance.postsFrameChangedNotifications = true
-				return Signal.notifications(name: NSView.frameDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.frame }.cancellableBind(to: x)
-			case .globalFrameDidChange(let x):
-				instance.postsFrameChangedNotifications = true
-				return Signal.notifications(name: NSView.globalFrameDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.frame }.cancellableBind(to: x)
-			case .boundsDidChange(let x):
-				instance.postsBoundsChangedNotifications = true
-				return Signal.notifications(name: NSView.boundsDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.bounds }.cancellableBind(to: x)
-			case .hostedLayer(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.layer = v?.caLayer()
-					i.wantsLayer = v != nil
-				}
-			case .wantsBackingLayer: return nil
-			case .gestureRecognizers(let x): return x.apply(instance, storage) { i, s, v in i.gestureRecognizers = v.map { $0.nsGestureRecognizer() } }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
+		public var backingLayer: BackingLayer? = nil
+		public var postsFrameChangedNotifications: Bool = false
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension View.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		case .layer(let x): backingLayer = x.value
+		case .boundsDidChange: postsFrameChangedNotifications = true 
+		case .frameDidChange: postsFrameChangedNotifications = true
+		case .globalFrameDidChange: postsFrameChangedNotifications = true
+		default: break
 		}
 	}
+	
+	func prepareInstance(_ instance: Instance, storage: Storage) {
+		inheritedPrepareInstance(instance, storage: storage)
+		if let layer = backingLayer {
+			instance.wantsLayer = true
+			layer.apply(to: instance.layer!)
+		}
+		if postsFrameChangedNotifications {
+			instance.postsFrameChangedNotifications = true
+		}
+	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static styles are applied at construction and are subsequently immutable.
+		case .layer: return nil
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .appearance(let x): return x.apply(instance) { i, v in i.appearance = v }
+		case .canDrawSubviewsIntoLayer(let x): return x.apply(instance) { i, v in i.canDrawSubviewsIntoLayer = v }
+		case .focusRingType(let x): return x.apply(instance) { i, v in i.focusRingType = v }
+		case .frameRotation(let x): return x.apply(instance) { i, v in i.frameRotation = v }
+		case .gestureRecognizers(let x): return x.apply(instance) { i, v in i.gestureRecognizers = v.map { $0.nsGestureRecognizer() } }
+		case .horizontalContentCompressionResistancePriority(let x): return x.apply(instance) { i, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Orientation.horizontal) }
+		case .horizontalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.horizontal) }
+		case .identifier(let x): return x.apply(instance) { i, v in i.identifier = v }
+		case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
+		case .layerContentsRedrawPolicy(let x): return x.apply(instance) { i, v in i.layerContentsRedrawPolicy = v }
+		case .layout(let x): return x.apply(instance) { i, v in i.applyLayout(v) }
+		case .registeredDragTypes(let x):
+			return x.apply(instance) { i, v in
+				if v.isEmpty {
+					i.unregisterDraggedTypes()
+				} else {
+					i.registerForDraggedTypes(v)
+				}
+			}
+		case .tooltip(let x): return x.apply(instance) { i, v in i.toolTip = v }
+		case .verticalContentCompressionResistancePriority(let x): return x.apply(instance) { i, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Orientation.vertical) }
+		case .verticalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.vertical) }
+			
+		case .pressureConfiguration(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.11, *) {
+					i.pressureConfiguration = v
+				}
+			}
+			
+		// 2. Signal bindings are performed on the object after construction.
+		case .needsDisplay(let x): return x.apply(instance) { i, v in i.needsDisplay = v }
+		case .printView(let x): return x.apply(instance) { i, v in i.printView(nil) }
+		case .setNeedsDisplayInRect(let x): return x.apply(instance) { i, v in i.setNeedsDisplay(v) }
+		case .scrollRectToVisible(let x): return x.apply(instance) { i, v in i.scrollToVisible(v) }
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .frameDidChange(let x):
+			instance.postsFrameChangedNotifications = true
+			return Signal.notifications(name: NSView.frameDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.frame }.cancellableBind(to: x)
+		case .globalFrameDidChange(let x):
+			instance.postsFrameChangedNotifications = true
+			return Signal.notifications(name: NSView.globalFrameDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.frame }.cancellableBind(to: x)
+		case .boundsDidChange(let x):
+			instance.postsBoundsChangedNotifications = true
+			return Signal.notifications(name: NSView.boundsDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.bounds }.cancellableBind(to: x)
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
 
+// MARK: - Binder Part 5: Storage and Delegate
+extension View {
 	public typealias Storage = ObjectBinderStorage
 }
 
+// MARK: - Binder Part 6: BindingNames
+extension BindingName where Binding: ViewBinding {
+	public typealias ViewName<V> = BindingName<V, View.Binding, Binding>
+	private typealias B = View.Binding
+	private static func name<V>(_ source: @escaping (V) -> View.Binding) -> ViewName<V> {
+		return ViewName<V>(source: source, downcast: Binding.viewBinding)
+	}
+}
 extension BindingName where Binding: ViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .viewBinding(View.Binding.$1(v)) }) }
-
+	// With:    static var $1: ViewName<$2> { return .name(B.$1) }
+	
 	//	0. Static styles are applied at construction and are subsequently immutable.
-	public static var layer: BindingName<Constant<BackingLayer>, Binding> { return BindingName<Constant<BackingLayer>, Binding>({ v in .viewBinding(View.Binding.layer(v)) }) }
-	public static var wantsBackingLayer: BindingName<Constant<Bool>, Binding> { return BindingName<Constant<Bool>, Binding>({ v in .viewBinding(View.Binding.wantsBackingLayer(v)) }) }
+	static var layer: ViewName<Constant<BackingLayer>> { return .name(B.layer) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var layout: BindingName<Dynamic<Layout?>, Binding> { return BindingName<Dynamic<Layout?>, Binding>({ v in .viewBinding(View.Binding.layout(v)) }) }
-	public static var frameRotation: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .viewBinding(View.Binding.frameRotation(v)) }) }
-	public static var layerContentsRedrawPolicy: BindingName<Dynamic<NSView.LayerContentsRedrawPolicy>, Binding> { return BindingName<Dynamic<NSView.LayerContentsRedrawPolicy>, Binding>({ v in .viewBinding(View.Binding.layerContentsRedrawPolicy(v)) }) }
-	public static var canDrawSubviewsIntoLayer: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .viewBinding(View.Binding.canDrawSubviewsIntoLayer(v)) }) }
-	public static var horizontalContentCompressionResistancePriority: BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding> { return BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding>({ v in .viewBinding(View.Binding.horizontalContentCompressionResistancePriority(v)) }) }
-	public static var verticalContentCompressionResistancePriority: BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding> { return BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding>({ v in .viewBinding(View.Binding.verticalContentCompressionResistancePriority(v)) }) }
-	public static var horizontalContentHuggingPriority: BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding> { return BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding>({ v in .viewBinding(View.Binding.horizontalContentHuggingPriority(v)) }) }
-	public static var verticalContentHuggingPriority: BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding> { return BindingName<Dynamic<NSLayoutConstraint.Priority>, Binding>({ v in .viewBinding(View.Binding.verticalContentHuggingPriority(v)) }) }
-	public static var focusRingType: BindingName<Dynamic<NSFocusRingType>, Binding> { return BindingName<Dynamic<NSFocusRingType>, Binding>({ v in .viewBinding(View.Binding.focusRingType(v)) }) }
-	public static var isHidden: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .viewBinding(View.Binding.isHidden(v)) }) }
-	public static var registeredDragTypes: BindingName<Dynamic<[NSPasteboard.PasteboardType]>, Binding> { return BindingName<Dynamic<[NSPasteboard.PasteboardType]>, Binding>({ v in .viewBinding(View.Binding.registeredDragTypes(v)) }) }
-	public static var tooltip: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .viewBinding(View.Binding.tooltip(v)) }) }
-	@available(macOS 10.11, *) public static var pressureConfiguration: BindingName<Dynamic<NSPressureConfiguration>, Binding> { return BindingName<Dynamic<NSPressureConfiguration>, Binding>({ v in .viewBinding(View.Binding.pressureConfiguration(v)) }) }
-	public static var identifier: BindingName<Dynamic<NSUserInterfaceItemIdentifier?>, Binding> { return BindingName<Dynamic<NSUserInterfaceItemIdentifier?>, Binding>({ v in .viewBinding(View.Binding.identifier(v)) }) }
-	public static var appearance: BindingName<Dynamic<NSAppearance?>, Binding> { return BindingName<Dynamic<NSAppearance?>, Binding>({ v in .viewBinding(View.Binding.appearance(v)) }) }
-	public static var hostedLayer: BindingName<Dynamic<LayerConvertible?>, Binding> { return BindingName<Dynamic<LayerConvertible?>, Binding>({ v in .viewBinding(View.Binding.hostedLayer(v)) }) }
-	public static var gestureRecognizers: BindingName<Dynamic<[GestureRecognizerConvertible]>, Binding> { return BindingName<Dynamic<[GestureRecognizerConvertible]>, Binding>({ v in .viewBinding(View.Binding.gestureRecognizers(v)) }) }
+	static var appearance: ViewName<Dynamic<NSAppearance?>> { return .name(B.appearance) }
+	static var canDrawSubviewsIntoLayer: ViewName<Dynamic<Bool>> { return .name(B.canDrawSubviewsIntoLayer) }
+	static var focusRingType: ViewName<Dynamic<NSFocusRingType>> { return .name(B.focusRingType) }
+	static var frameRotation: ViewName<Dynamic<CGFloat>> { return .name(B.frameRotation) }
+	static var gestureRecognizers: ViewName<Dynamic<[GestureRecognizerConvertible]>> { return .name(B.gestureRecognizers) }
+	static var horizontalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.horizontalContentCompressionResistancePriority) }
+	static var horizontalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.horizontalContentHuggingPriority) }
+	static var identifier: ViewName<Dynamic<NSUserInterfaceItemIdentifier?>> { return .name(B.identifier) }
+	static var isHidden: ViewName<Dynamic<Bool>> { return .name(B.isHidden) }
+	static var layerContentsRedrawPolicy: ViewName<Dynamic<NSView.LayerContentsRedrawPolicy>> { return .name(B.layerContentsRedrawPolicy) }
+	static var layout: ViewName<Dynamic<Layout?>> { return .name(B.layout) }
+	static var registeredDragTypes: ViewName<Dynamic<[NSPasteboard.PasteboardType]>> { return .name(B.registeredDragTypes) }
+	static var tooltip: ViewName<Dynamic<String>> { return .name(B.tooltip) }
+	static var verticalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentCompressionResistancePriority) }
+	static var verticalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentHuggingPriority) }
+	
+	@available(macOS 10.11, *) static var pressureConfiguration: ViewName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var printView: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .viewBinding(View.Binding.printView(v)) }) }
-	public static var setNeedsDisplayInRect: BindingName<Signal<NSRect>, Binding> { return BindingName<Signal<NSRect>, Binding>({ v in .viewBinding(View.Binding.setNeedsDisplayInRect(v)) }) }
-	public static var needsDisplay: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .viewBinding(View.Binding.needsDisplay(v)) }) }
-	public static var scrollRectToVisible: BindingName<Signal<NSRect>, Binding> { return BindingName<Signal<NSRect>, Binding>({ v in .viewBinding(View.Binding.scrollRectToVisible(v)) }) }
+	static var needsDisplay: ViewName<Signal<Bool>> { return .name(B.needsDisplay) }
+	static var printView: ViewName<Signal<Void>> { return .name(B.printView) }
+	static var scrollRectToVisible: ViewName<Signal<NSRect>> { return .name(B.scrollRectToVisible) }
+	static var setNeedsDisplayInRect: ViewName<Signal<NSRect>> { return .name(B.setNeedsDisplayInRect) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var frameDidChange: BindingName<SignalInput<NSRect>, Binding> { return BindingName<SignalInput<NSRect>, Binding>({ v in .viewBinding(View.Binding.frameDidChange(v)) }) }
-	public static var globalFrameDidChange: BindingName<SignalInput<NSRect>, Binding> { return BindingName<SignalInput<NSRect>, Binding>({ v in .viewBinding(View.Binding.globalFrameDidChange(v)) }) }
-	public static var boundsDidChange: BindingName<SignalInput<NSRect>, Binding> { return BindingName<SignalInput<NSRect>, Binding>({ v in .viewBinding(View.Binding.boundsDidChange(v)) }) }
+	static var boundsDidChange: ViewName<SignalInput<NSRect>> { return .name(B.boundsDidChange) }
+	static var frameDidChange: ViewName<SignalInput<NSRect>> { return .name(B.frameDidChange) }
+	static var globalFrameDidChange: ViewName<SignalInput<NSRect>> { return .name(B.globalFrameDidChange) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
-public protocol ViewBinding: BaseBinding {
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
+extension NSView: DefaultConstructable {}
+public extension View {
+	func nsView() -> Layout.View { return instance() }
+}
+
+// MARK: - Binder Part 8: Downcast protocols
+public protocol ViewBinding: BinderBaseBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self
 }
-extension ViewBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension ViewBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return viewBinding(.inheritedBinding(binding))
 	}
 }
+public extension View.Binding {
+	public typealias Preparer = View.Preparer
+	static func viewBinding(_ binding: View.Binding) -> View.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

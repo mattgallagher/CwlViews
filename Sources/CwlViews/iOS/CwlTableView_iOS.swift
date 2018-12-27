@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
+public class TableView<RowData>: Binder, TableViewConvertible {
 	public typealias Instance = UITableView
 	public typealias Inherited = ScrollView
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,11 +32,11 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 	}
 	public func uiTableView() -> Instance { return instance() }
 
-	public enum Binding: TableViewBinding {
+	enum Binding: TableViewBinding {
 		public typealias RowDataType = RowData
 		public typealias EnclosingBinder = TableView
 		public static func tableViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case tableViewStyle(Constant<UITableView.Style>)
@@ -126,7 +126,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 		case willSelectRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TableView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -149,7 +149,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 		var rowsChangedInput: SignalInput<[TableRow<RowData>]>? = nil
 		var cellIdentifier: (TableRow<RowData>) -> String? = { _ in nil }
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .cellIdentifier(let x): cellIdentifier = x
 			case .tableViewStyle(let x): tableViewStyle = x.value
@@ -160,137 +160,69 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 				delegate().addSelector(s1).userDidScrollToRow = x
 				_ = delegate().addSelector(s2)
 				_ = delegate().addSelector(s3)
-			case .accessoryButtonTapped(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:accessoryButtonTappedForRowWith:))
-				delegate().addSelector(s).accessoryButtonTapped = x
-			case .canEditRow(let x):
-				let s = #selector(UITableViewDataSource.tableView(_:canEditRowAt:))
-				delegate().addSelector(s).canEditRow = x
-			case .canFocusRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:canFocusRowAt:))
-				delegate().addSelector(s).canFocusRow = x
-			case .canMoveRow(let x):
-				let s = #selector(UITableViewDataSource.tableView(_:canMoveRowAt:))
-				delegate().addSelector(s).canMoveRow = x
-			case .canPerformAction(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:canPerformAction:forRowAt:withSender:))
-				delegate().addSelector(s).canPerformAction = x
-			case .didDeselectRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didDeselectRowAt:))
-				delegate().addSelector(s).didDeselectRow = x
-			case .didEndDisplayingFooter(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didEndDisplayingFooterView:forSection:))
-				delegate().addSelector(s).didEndDisplayingFooter = x
-			case .didEndDisplayingHeader(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didEndDisplayingHeaderView:forSection:))
-				delegate().addSelector(s).didEndDisplayingHeader = x
-			case .didEndDisplayingRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didEndDisplaying:forRowAt:))
-				delegate().addSelector(s).didEndDisplayingRow = x
-			case .didEndEditingRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didEndEditingRowAt:))
-				delegate().addSelector(s).didEndEditingRow = x
-			case .didHightlightRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didHighlightRowAt:))
-				delegate().addSelector(s).didHightlightRow = x
-			case .commit(let x):
-				let s = #selector(UITableViewDataSource.tableView(_:commit:forRowAt:))
-				delegate().addSelector(s).commit = x
-			case .didSelectRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didSelectRowAt:))
-				delegate().addSelector(s).didSelectRow = x
-			case .didUnhighlightRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didUnhighlightRowAt:))
-				delegate().addSelector(s).didUnhighlightRow = x
-			case .didUpdateFocus(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:didUpdateFocusIn:with:))
-				delegate().addSelector(s).didUpdateFocus = x
-			case .editActionsForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:editActionsForRowAt:))
-				delegate().addSelector(s).editActionsForRow = x
-			case .editingStyleForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:editingStyleForRowAt:))
-				delegate().addSelector(s).editingStyleForRow = x
-			case .estimatedHeightForFooter(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:estimatedHeightForFooterInSection:))
-				delegate().addSelector(s).estimatedHeightForFooter = x
-			case .estimatedHeightForHeader(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:estimatedHeightForHeaderInSection:))
-				delegate().addSelector(s).estimatedHeightForHeader = x
-			case .estimatedHeightForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:estimatedHeightForRowAt:))
-				delegate().addSelector(s).estimatedHeightForRow = x
-			case .footerHeight(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:heightForFooterInSection:))
-				delegate().addSelector(s).footerHeight = x
-			case .footerView(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:viewForFooterInSection:))
-				delegate().addSelector(s).footerView = x
-			case .headerHeight(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:heightForHeaderInSection:))
-				delegate().addSelector(s).headerHeight = x
-			case .headerView(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:viewForHeaderInSection:))
-				delegate().addSelector(s).headerView = x
-			case .heightForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:heightForRowAt:))
-				delegate().addSelector(s).heightForRow = x
-			case .indentationLevelForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:indentationLevelForRowAt:))
-				delegate().addSelector(s).indentationLevelForRow = x
-			case .indexPathForPreferredFocusedView(let x):
-				let s = #selector(UITableViewDelegate.indexPathForPreferredFocusedView(in:))
-				delegate().addSelector(s).indexPathForPreferred = x
-			case .moveRow(let x):
-				let s = #selector(UITableViewDataSource.tableView(_:moveRowAt:to:))
-				delegate().addSelector(s).moveRow = x
-			case .shouldHighlightRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:shouldHighlightRowAt:))
-				delegate().addSelector(s).shouldHighlightRow = x
-			case .shouldIndentWhileEditingRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:shouldIndentWhileEditingRowAt:))
-				delegate().addSelector(s).shouldIndentWhileEditingRow = x
-			case .shouldShowMenuForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:shouldShowMenuForRowAt:))
-				delegate().addSelector(s).shouldShowMenuForRow = x
-			case .shouldUpdateFocus(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:shouldUpdateFocusIn:))
-				delegate().addSelector(s).shouldUpdateFocus = x
-			case .targetIndexPathForMoveFromRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:targetIndexPathForMoveFromRowAt:toProposedIndexPath:))
-				delegate().addSelector(s).targetIndexPathForMoveFromRow = x
-			case .titleForDeleteConfirmationButtonForRow(let x):
-				let s = #selector(UITableViewDelegate.tableView(_:titleForDeleteConfirmationButtonForRowAt:))
-				delegate().addSelector(s).titleForDeleteConfirmationButtonForRow = x
+			case .accessoryButtonTapped(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:accessoryButtonTappedForRowWith:)))
+			case .canEditRow(let x): delegate().addHandler(x, #selector(UITableViewDataSource.tableView(_:canEditRowAt:)))
+			case .canFocusRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:canFocusRowAt:)))
+			case .canMoveRow(let x): delegate().addHandler(x, #selector(UITableViewDataSource.tableView(_:canMoveRowAt:)))
+			case .canPerformAction(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:canPerformAction:forRowAt:withSender:)))
+			case .didDeselectRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didDeselectRowAt:)))
+			case .didEndDisplayingFooter(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didEndDisplayingFooterView:forSection:)))
+			case .didEndDisplayingHeader(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didEndDisplayingHeaderView:forSection:)))
+			case .didEndDisplayingRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didEndDisplaying:forRowAt:)))
+			case .didEndEditingRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didEndEditingRowAt:)))
+			case .didHightlightRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didHighlightRowAt:)))
+			case .commit(let x): delegate().addHandler(x, #selector(UITableViewDataSource.tableView(_:commit:forRowAt:)))
+			case .didSelectRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didSelectRowAt:)))
+			case .didUnhighlightRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didUnhighlightRowAt:)))
+			case .didUpdateFocus(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:didUpdateFocusIn:with:)))
+			case .editActionsForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:editActionsForRowAt:)))
+			case .editingStyleForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:editingStyleForRowAt:)))
+			case .estimatedHeightForFooter(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:estimatedHeightForFooterInSection:)))
+			case .estimatedHeightForHeader(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:estimatedHeightForHeaderInSection:)))
+			case .estimatedHeightForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:estimatedHeightForRowAt:)))
+			case .footerHeight(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:heightForFooterInSection:)))
+			case .footerView(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:viewForFooterInSection:)))
+			case .headerHeight(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:heightForHeaderInSection:)))
+			case .headerView(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:viewForHeaderInSection:)))
+			case .heightForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:heightForRowAt:)))
+			case .indentationLevelForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:indentationLevelForRowAt:)))
+			case .indexPathForPreferredFocusedView(let x): delegate().addHandler(x, #selector(UITableViewDelegate.indexPathForPreferredFocusedView(in:)))
+			case .moveRow(let x): delegate().addHandler(x, #selector(UITableViewDataSource.tableView(_:moveRowAt:to:)))
+			case .shouldHighlightRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:shouldHighlightRowAt:)))
+			case .shouldIndentWhileEditingRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:shouldIndentWhileEditingRowAt:)))
+			case .shouldShowMenuForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:shouldShowMenuForRowAt:)))
+			case .shouldUpdateFocus(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:shouldUpdateFocusIn:)))
+			case .targetIndexPathForMoveFromRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:targetIndexPathForMoveFromRowAt:toProposedIndexPath:)))
+			case .titleForDeleteConfirmationButtonForRow(let x): delegate().addHandler(x, #selector(UITableViewDelegate.tableView(_:titleForDeleteConfirmationButtonForRowAt:)))
 			case .visibleRowsChanged(let x):
 				let s1 = #selector(UITableViewDelegate.tableView(_:willDisplay:forRowAt:))
 				let s2 = #selector(UITableViewDelegate.tableView(_:didEndDisplaying:forRowAt:))
 				delegate().addSelector(s1)
 				delegate().addSelector(s2)
 				rowsChangedInput = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .cellIdentifier: return nil
 			case .tableViewStyle: return nil
-			case .allowsMultipleSelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsMultipleSelection = v }
-			case .allowsMultipleSelectionDuringEditing(let x): return x.apply(instance, storage) { i, s, v in i.allowsMultipleSelectionDuringEditing = v }
-			case .allowsSelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsSelection = v }
-			case .allowsSelectionDuringEditing(let x): return x.apply(instance, storage) { i, s, v in i.allowsSelectionDuringEditing = v }
-			case .backgroundView(let x): return x.apply(instance, storage) { i, s, v in i.backgroundView = v?.uiView() }
-			case .cellLayoutMarginsFollowReadableWidth(let x): return x.apply(instance, storage) { i, s, v in i.cellLayoutMarginsFollowReadableWidth = v }
-			case .deselectRow(let x): return x.apply(instance, storage) { i, s, v in i.deselectRow(at: v.value, animated: v.isAnimated) }
-			case .isEditing(let x): return x.apply(instance, storage) { i, s, v in i.setEditing(v.value, animated: v.isAnimated) }
-			case .estimatedRowHeight(let x): return x.apply(instance, storage) { i, s, v in i.estimatedRowHeight = v }
-			case .estimatedSectionFooterHeight(let x): return x.apply(instance, storage) { i, s, v in i.estimatedSectionFooterHeight = v }
-			case .estimatedSectionHeaderHeight(let x): return x.apply(instance, storage) { i, s, v in i.estimatedSectionHeaderHeight = v }
-			case .remembersLastFocusedIndexPath(let x): return x.apply(instance, storage) { i, s, v in i.remembersLastFocusedIndexPath = v }
-			case .rowHeight(let x): return x.apply(instance, storage) { i, s, v in i.rowHeight = v }
-			case .scrollToNearestSelectedRow(let x): return x.apply(instance, storage) { i, s, v in i.scrollToNearestSelectedRow(at: v.value, animated: v.isAnimated) }
+			case .allowsMultipleSelection(let x): return x.apply(instance) { i, v in i.allowsMultipleSelection = v }
+			case .allowsMultipleSelectionDuringEditing(let x): return x.apply(instance) { i, v in i.allowsMultipleSelectionDuringEditing = v }
+			case .allowsSelection(let x): return x.apply(instance) { i, v in i.allowsSelection = v }
+			case .allowsSelectionDuringEditing(let x): return x.apply(instance) { i, v in i.allowsSelectionDuringEditing = v }
+			case .backgroundView(let x): return x.apply(instance) { i, v in i.backgroundView = v?.uiView() }
+			case .cellLayoutMarginsFollowReadableWidth(let x): return x.apply(instance) { i, v in i.cellLayoutMarginsFollowReadableWidth = v }
+			case .deselectRow(let x): return x.apply(instance) { i, v in i.deselectRow(at: v.value, animated: v.isAnimated) }
+			case .isEditing(let x): return x.apply(instance) { i, v in i.setEditing(v.value, animated: v.isAnimated) }
+			case .estimatedRowHeight(let x): return x.apply(instance) { i, v in i.estimatedRowHeight = v }
+			case .estimatedSectionFooterHeight(let x): return x.apply(instance) { i, v in i.estimatedSectionFooterHeight = v }
+			case .estimatedSectionHeaderHeight(let x): return x.apply(instance) { i, v in i.estimatedSectionHeaderHeight = v }
+			case .remembersLastFocusedIndexPath(let x): return x.apply(instance) { i, v in i.remembersLastFocusedIndexPath = v }
+			case .rowHeight(let x): return x.apply(instance) { i, v in i.rowHeight = v }
+			case .scrollToNearestSelectedRow(let x): return x.apply(instance) { i, v in i.scrollToNearestSelectedRow(at: v.value, animated: v.isAnimated) }
 			case .scrollToRow(let x):
 				// You can't scroll a table view until *after* the number of sections and rows has been read from the data source.
 				// This occurs on didAddToWindow but the easiest way to track it is by waiting for the contentSize to be set (which is set for the first time immediately after the row count is read). This makes assumptions about internal logic of UITableView – if this logic changes in future, scrolls set on load might be lost (not a catastrophic problem).
@@ -304,7 +236,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 				}
 				
 				// Use the output of the pair to apply the effects as normal
-				return pair.signal.apply(instance, storage) { i, s, v in
+				return pair.signal.apply(instance) { i, v in
 					// Remove the key value observing after the first value is received.
 					if let k = kvo {
 						k.invalidate()
@@ -329,21 +261,21 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 					// Finally, perform the scroll
 					i.scrollToRow(at: indexPath, at: v.value.position, animated: v.isAnimated)
 				}
-			case .sectionFooterHeight(let x): return x.apply(instance, storage) { i, s, v in i.sectionFooterHeight = v }
-			case .sectionHeaderHeight(let x): return x.apply(instance, storage) { i, s, v in i.sectionHeaderHeight = v }
-			case .sectionIndexBackgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.sectionIndexBackgroundColor = v }
-			case .sectionIndexColor(let x): return x.apply(instance, storage) { i, s, v in i.sectionIndexColor = v }
-			case .sectionIndexMinimumDisplayRowCount(let x): return x.apply(instance, storage) { i, s, v in i.sectionIndexMinimumDisplayRowCount = v }
-			case .sectionIndexTrackingBackgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.sectionIndexTrackingBackgroundColor = v }
-			case .selectRow(let x): return x.apply(instance, storage) { i, s, v in i.selectRow(at: v.value?.indexPath, animated: v.isAnimated, scrollPosition: v.value?.position ?? .none) }
-			case .separatorColor(let x): return x.apply(instance, storage) { i, s, v in i.separatorColor = v }
-			case .separatorEffect(let x): return x.apply(instance, storage) { i, s, v in i.separatorEffect = v }
-			case .separatorInset(let x): return x.apply(instance, storage) { i, s, v in i.separatorInset = v }
-			case .separatorStyle(let x): return x.apply(instance, storage) { i, s, v in i.separatorStyle = v }
-			case .tableFooterView(let x): return x.apply(instance, storage) { i, s, v	in i.tableFooterView = v?.uiView() }
-			case .tableHeaderView(let x): return x.apply(instance, storage) { i, s, v in i.tableHeaderView = v?.uiView() }
+			case .sectionFooterHeight(let x): return x.apply(instance) { i, v in i.sectionFooterHeight = v }
+			case .sectionHeaderHeight(let x): return x.apply(instance) { i, v in i.sectionHeaderHeight = v }
+			case .sectionIndexBackgroundColor(let x): return x.apply(instance) { i, v in i.sectionIndexBackgroundColor = v }
+			case .sectionIndexColor(let x): return x.apply(instance) { i, v in i.sectionIndexColor = v }
+			case .sectionIndexMinimumDisplayRowCount(let x): return x.apply(instance) { i, v in i.sectionIndexMinimumDisplayRowCount = v }
+			case .sectionIndexTrackingBackgroundColor(let x): return x.apply(instance) { i, v in i.sectionIndexTrackingBackgroundColor = v }
+			case .selectRow(let x): return x.apply(instance) { i, v in i.selectRow(at: v.value?.indexPath, animated: v.isAnimated, scrollPosition: v.value?.position ?? .none) }
+			case .separatorColor(let x): return x.apply(instance) { i, v in i.separatorColor = v }
+			case .separatorEffect(let x): return x.apply(instance) { i, v in i.separatorEffect = v }
+			case .separatorInset(let x): return x.apply(instance) { i, v in i.separatorInset = v }
+			case .separatorStyle(let x): return x.apply(instance) { i, v in i.separatorStyle = v }
+			case .tableFooterView(let x): return x.apply(instance) { i, v	in i.tableFooterView = v?.uiView() }
+			case .tableHeaderView(let x): return x.apply(instance) { i, v in i.tableHeaderView = v?.uiView() }
 			case .selectionDidChange(let x):
-				return Signal.notifications(name: UITableView.selectionDidChangeNotification, object: instance).map { n -> ([TableRow<RowData>])? in
+				return Signal.notifications(n: UITableView.selectionDidChangeNotification, object: instance).map { n -> ([TableRow<RowData>])? in
 					if let tableView = n.object as? UITableView, let selection = tableView.indexPathsForSelectedRows {
 						if let rows = (tableView.delegate as? Storage)?.sections.rows {
 							return selection.map { TableRow<RowData>(indexPath: $0, data: rows.at($0.section)?.rows.at($0.row)) }
@@ -355,12 +287,12 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 					}
 				}.cancellableBind(to: x)
 			case .sectionIndexTitles(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					s.indexTitles = v
 					i.reloadSectionIndexTitles()
 				}
 			case .tableData(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					s.applyTableRowMutation(v, to: i)
 				}
 			case .cellConstructor(let x):
@@ -411,11 +343,11 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			case .willDisplayHeader: return nil
 			case .willDisplayRow: return nil
 			case .willSelectRow: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			storage.rowsChangedInput = rowsChangedInput
 
 			linkedPreparer.prepareInstance(instance, storage: storage)
@@ -585,191 +517,154 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			return UITableViewCell()
 		}
 		
-		open var accessoryButtonTapped: SignalInput<TableRow<RowData>>?
 		open func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
-			accessoryButtonTapped?.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var canEditRow: ((_ tableRowData: TableRow<RowData>) -> Bool)?
 		open func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-			return canEditRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var canFocusRow: ((_ tableRowData: TableRow<RowData>) -> Bool)?
 		open func tableView(_ tableView: UITableView, canFocusRowAt indexPath: IndexPath) -> Bool {
-			return canFocusRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var canMoveRow: ((_ tableRowData: TableRow<RowData>) -> Bool)?
 		open func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-			return canMoveRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var canPerformAction: ((_ action: Selector, _ tableRowData: TableRow<RowData>, _ sender: Any?) -> Bool)?
 		open func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-			return canPerformAction!(action, tableRowData(at: indexPath, in: tableView), sender)
+			return handler(ofType: ((_ action: Selector, _ tableRowData: TableRow<RowData>, _ sender: Any?) -> Bool).self)(action, tableRowData(at: indexPath, in: tableView), sender)
 		}
 		
-		open var didDeselectRow: SignalInput<TableRow<RowData>>?
 		open func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-			didDeselectRow?.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var didEndDisplayingHeader: SignalInput<Int>?
 		open func tableView(_ tableView: UITableView, didEndDisplayingHeaderView view: UIView, forSection section: Int) {
-			didEndDisplayingHeader?.send(value: section)
+			handler(ofType: SignalInput<Int>.self).send(value: section)
 		}
 		
-		open var didEndDisplayingFooter: SignalInput<Int>?
 		open func tableView(_ tableView: UITableView, didEndDisplayingFooterView view: UIView, forSection section: Int) {
-			didEndDisplayingFooter?.send(value: section)
+			handler(ofType: SignalInput<Int>.self).send(value: section)
 		}
 		
-		open var didEndDisplayingRow: SignalInput<TableRow<RowData>>?
 		open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-			didEndDisplayingRow?.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
 			
 			(tableView.delegate as? Storage)?.notifyVisibleRowsChanged(in: tableView)
 		}
 		
-		open var didEndEditingRow: SignalInput<TableRow<RowData>?>?
 		open func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
-			didEndEditingRow?.send(value: indexPath.map { tableRowData(at: $0, in: tableView) })
+			handler(ofType: SignalInput<TableRow<RowData>?>.self).send(value: indexPath.map { tableRowData(at: $0, in: tableView) })
 		}
 		
-		open var didHightlightRow: SignalInput<TableRow<RowData>>?
 		open func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
-			didHightlightRow?.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var didSelectRow: SignalInput<TableRow<RowData>>?
 		open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-			didSelectRow?.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var didUnhighlightRow: SignalInput<TableRow<RowData>>?
 		open func tableView(_ tableView: UITableView, didUnhighlightRowAt indexPath: IndexPath) {
-			didUnhighlightRow?.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var didUpdateFocus: ((UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void)?
 		open func tableView(_ tableView: UITableView, didUpdateFocusIn context: UITableViewFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
-			return didUpdateFocus!(tableView, context, coordinator)
+			return handler(ofType: ((UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void).self)(tableView, context, coordinator)
 		}
 		
-		open var editActionsForRow: ((_ tableRowData: TableRow<RowData>) -> [UITableViewRowAction]?)?
 		open func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-			return editActionsForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> [UITableViewRowAction]?).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var editingStyleForRow: ((_ tableRowData: TableRow<RowData>) -> UITableViewCell.EditingStyle)?
 		open func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
-			return editingStyleForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> UITableViewCell.EditingStyle).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var estimatedHeightForFooter: ((_ section: Int) -> CGFloat)?
 		open func tableView(_ tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
-			return estimatedHeightForFooter!(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
 		}
 		
-		open var estimatedHeightForHeader: ((_ section: Int) -> CGFloat)?
 		open func tableView(_ tableView: UITableView, estimatedHeightForHeaderInSection section: Int) -> CGFloat {
-			return estimatedHeightForHeader!(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
 		}
 		
-		open var estimatedHeightForRow: ((_ tableRowData: TableRow<RowData>) -> CGFloat)?
 		open func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-			return estimatedHeightForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> CGFloat).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var footerHeight: ((_ section: Int) -> CGFloat)?
 		open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-			return footerHeight!(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
 		}
 		
-		open var footerView: ((_ section: Int, _ title: String?) -> ViewConvertible?)?
 		open func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-			return footerView!(section, tableView.dataSource?.tableView?(tableView, titleForFooterInSection: section))?.uiView()
+			return handler(ofType: ((_ section: Int, _ title: String?) -> ViewConvertible?).self)(section, tableView.dataSource?.tableView?(tableView, titleForFooterInSection: section))?.uiView()
 		}
 		
-		open var headerHeight: ((_ section: Int) -> CGFloat)?
 		open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-			return headerHeight!(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
 		}
 		
-		open var headerView: ((_ section: Int, _ title: String?) -> ViewConvertible?)?
 		open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-			return headerView!(section, tableView.dataSource?.tableView?(tableView, titleForHeaderInSection: section))?.uiView()
+			return handler(ofType: ((_ section: Int, _ title: String?) -> ViewConvertible?).self)(section, tableView.dataSource?.tableView?(tableView, titleForHeaderInSection: section))?.uiView()
 		}
 		
-		open var heightForRow: ((_ tableRowData: TableRow<RowData>) -> CGFloat)?
 		open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-			return heightForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> CGFloat).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var indentationLevelForRow: ((_ tableRowData: TableRow<RowData>) -> Int)?
 		open func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-			return indentationLevelForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Int).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var indexPathForPreferred: ((UITableView) -> IndexPath)?
 		open func indexPathForPreferredFocusedView(in tableView: UITableView) -> IndexPath? {
-			return indexPathForPreferred!(tableView)
+			return handler(ofType: ((UITableView) -> IndexPath).self)(tableView)
 		}
 		
-		open var moveRow: SignalInput<(from: TableRow<RowData>, to: IndexPath)>?
 		open func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-			moveRow!.send(value: (from: tableRowData(at: sourceIndexPath, in: tableView), to: destinationIndexPath))
+			handler(ofType: SignalInput<(from: TableRow<RowData>, to: IndexPath)>.self).send(value: (from: tableRowData(at: sourceIndexPath, in: tableView), to: destinationIndexPath))
 		}
 		
-		open var shouldHighlightRow: ((_ tableRowData: TableRow<RowData>) -> Bool)?
 		open func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
-			return shouldHighlightRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var shouldIndentWhileEditingRow: ((_ tableRowData: TableRow<RowData>) -> Bool)?
 		open func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
-			return shouldIndentWhileEditingRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var shouldShowMenuForRow: ((_ tableRowData: TableRow<RowData>) -> Bool)?
 		open func tableView(_ tableView: UITableView, shouldShowMenuForRowAt indexPath: IndexPath) -> Bool {
-			return shouldShowMenuForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var shouldUpdateFocus: ((UITableView, UITableViewFocusUpdateContext) -> Bool)?
 		open func tableView(_ tableView: UITableView, shouldUpdateFocusIn context: UITableViewFocusUpdateContext) -> Bool {
-			return shouldUpdateFocus!(tableView, context)
+			return handler(ofType: ((UITableView, UITableViewFocusUpdateContext) -> Bool).self)(tableView, context)
 		}
 		
-		open var targetIndexPathForMoveFromRow: ((_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath)?
 		open func tableView(_ tableView: UITableView, targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath, toProposedIndexPath proposedDestinationIndexPath: IndexPath) -> IndexPath {
-			return targetIndexPathForMoveFromRow!(tableView, sourceIndexPath, proposedDestinationIndexPath)
+			return handler(ofType: ((_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath).self)(tableView, sourceIndexPath, proposedDestinationIndexPath)
 		}
 		
-		open var titleForDeleteConfirmationButtonForRow: ((_ tableRowData: TableRow<RowData>) -> String?)?
 		open func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-			return titleForDeleteConfirmationButtonForRow!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> String?).self)(tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var willBeginEditingRow: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Void)?
 		open func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
-			willBeginEditingRow!(tableView, tableRowData(at: indexPath, in: tableView))
+			handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Void).self)(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var willDeselectRow: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?)?
 		open func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
-			return willDeselectRow!(tableView, tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?).self)(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var willDisplayFooter: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void)?
 		open func tableView(_ tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
-			willDisplayFooter!(tableView, section, view)
+			handler(ofType: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void).self)(tableView, section, view)
 		}
 		
-		open var willDisplayHeader: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void)?
 		open func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-			willDisplayHeader!(tableView, section, view)
+			handler(ofType: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void).self)(tableView, section, view)
 		}
 		
 		open var willDisplayRow: ((_ tableView: UITableView, _ indexPath: IndexPath, _ cell: UITableViewCell) -> Void)?
@@ -778,14 +673,12 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			(tableView.delegate as? Storage)?.notifyVisibleRowsChanged(in: tableView)
 		}
 		
-		open var willSelectRow: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?)?
 		open func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-			return willSelectRow!(tableView, tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?).self)(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
-		open var commit: SignalInput<(editingStyle: UITableViewCell.EditingStyle, row: TableRow<RowData>)>?
 		open func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-			commit?.send(value: (editingStyle, tableRowData(at: indexPath, in: tableView)))
+			handler(ofType: SignalInput<(editingStyle: UITableViewCell.EditingStyle, row: TableRow<RowData>)>.self).send(value: (editingStyle, tableRowData(at: indexPath, in: tableView)))
 		}
 	}
 }

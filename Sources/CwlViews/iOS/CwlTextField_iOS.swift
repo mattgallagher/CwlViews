@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class TextField: ConstructingBinder, TextFieldConvertible {
+public class TextField: Binder, TextFieldConvertible {
 	public typealias Instance = UITextField
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 	}
 	public func uiTextField() -> Instance { return instance() }
 	
-	public enum Binding: TextFieldBinding {
+	enum Binding: TextFieldBinding {
 		public typealias EnclosingBinder = TextField
 		public static func textFieldBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case textInputTraits(Constant<TextInputTraits>)
@@ -84,7 +84,7 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 		case shouldReturn((_ textField: UITextField) -> Bool)
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TextField
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -109,34 +109,24 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			}
 		}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .didEndEditingWithReason(let x):
 				if #available(iOS 10.0, *) {
 					let s = #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:))
 					delegate().addSelector(s).didEndEditingWithReason = x
 				}
-			case .shouldBeginEditing(let x):
-				let s = #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:))
-				delegate().addSelector(s).shouldBeginEditing = x
-			case .shouldEndEditing(let x):
-				let s = #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:))
-				delegate().addSelector(s).shouldEndEditing = x
-			case .shouldChangeCharacters(let x):
-				let s = #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:))
-				delegate().addSelector(s).shouldChangeCharacters = x
-			case .shouldClear(let x):
-				let s = #selector(UITextFieldDelegate.textFieldShouldClear(_:))
-				delegate().addSelector(s).shouldClear = x
-			case .shouldReturn(let x):
-				let s = #selector(UITextFieldDelegate.textFieldShouldReturn(_:))
-				delegate().addSelector(s).shouldReturn = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
+			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
+			case .shouldChangeCharacters(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
+			case .shouldClear(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
+			case .shouldReturn(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			if storage.inUse {
@@ -146,83 +136,83 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .textInputTraits(let x):
 				return AggregateLifetime(lifetimes: x.value.bindings.lazy.compactMap { trait in
 					switch trait {
-					case .autocapitalizationType(let y): return y.apply(instance, storage) { i, s, v in i.autocapitalizationType = v }
-					case .autocorrectionType(let y): return y.apply(instance, storage) { i, s, v in i.autocorrectionType = v }
-					case .spellCheckingType(let y): return y.apply(instance, storage) { i, s, v in i.spellCheckingType = v }
-					case .enablesReturnKeyAutomatically(let y): return y.apply(instance, storage) { i, s, v in i.enablesReturnKeyAutomatically = v }
-					case .keyboardAppearance(let y): return y.apply(instance, storage) { i, s, v in i.keyboardAppearance = v }
-					case .keyboardType(let y): return y.apply(instance, storage) { i, s, v in i.keyboardType = v }
-					case .returnKeyType(let y): return y.apply(instance, storage) { i, s, v in i.returnKeyType = v }
-					case .isSecureTextEntry(let y): return y.apply(instance, storage) { i, s, v in i.isSecureTextEntry = v }
+					case .autocapitalizationType(let y): return y.apply(instance) { i, v in i.autocapitalizationType = v }
+					case .autocorrectionType(let y): return y.apply(instance) { i, v in i.autocorrectionType = v }
+					case .spellCheckingType(let y): return y.apply(instance) { i, v in i.spellCheckingType = v }
+					case .enablesReturnKeyAutomatically(let y): return y.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
+					case .keyboardAppearance(let y): return y.apply(instance) { i, v in i.keyboardAppearance = v }
+					case .keyboardType(let y): return y.apply(instance) { i, v in i.keyboardType = v }
+					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
+					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
 					case .textContentType(let y):
-						return y.apply(instance, storage) { i, s, v in
+						return y.apply(instance) { i, v in
 							if #available(iOS 10.0, *) {
 								i.textContentType = v
 							}
 						}
 					case .smartDashesType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartDashesType = v
 							}
 						}
 					case .smartQuotesType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartQuotesType = v
 							}
 						}
 					case .smartInsertDeleteType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartInsertDeleteType = v
 							}
 						}
 					}
 				})
-			case .text(let x): return x.apply(instance, storage) { i, s, v in i.text = v }
-			case .attributedText(let x): return x.apply(instance, storage) { i, s, v in i.attributedText = v }
-			case .placeholder(let x): return x.apply(instance, storage) { i, s, v in i.placeholder = v }
-			case .attributedPlaceholder(let x): return x.apply(instance, storage) { i, s, v in i.attributedPlaceholder = v }
-			case .defaultTextAttributes(let x): return x.apply(instance, storage) { i, s, v in i.defaultTextAttributes = v }
-			case .font(let x): return x.apply(instance, storage) { i, s, v in i.font = v }
-			case .textColor(let x): return x.apply(instance, storage) { i, s, v in i.textColor = v }
-			case .textAlignment(let x): return x.apply(instance, storage) { i, s, v in i.textAlignment = v }
-			case .typingAttributes(let x): return x.apply(instance, storage) { i, s, v in i.typingAttributes = v }
-			case .adjustsFontSizeToFitWidth(let x): return x.apply(instance, storage) { i, s, v in i.adjustsFontSizeToFitWidth = v }
-			case .minimumFontSize(let x): return x.apply(instance, storage) { i, s, v in i.minimumFontSize = v }
-			case .clearsOnBeginEditing(let x): return x.apply(instance, storage) { i, s, v in i.clearsOnBeginEditing = v }
-			case .clearsOnInsertion(let x): return x.apply(instance, storage) { i, s, v in i.clearsOnInsertion = v }
-			case .allowsEditingTextAttributes(let x): return x.apply(instance, storage) { i, s, v in i.allowsEditingTextAttributes = v }
-			case .borderStyle(let x): return x.apply(instance, storage) { i, s, v in i.borderStyle = v }
-			case .background(let x): return x.apply(instance, storage) { i, s, v in i.background = v }
-			case .disabledBackground(let x): return x.apply(instance, storage) { i, s, v in i.disabledBackground = v }
-			case .clearButtonMode(let x): return x.apply(instance, storage) { i, s, v in i.clearButtonMode = v }
-			case .leftView(let x): return x.apply(instance, storage) { i, s, v in i.leftView = v?.uiView() }
-			case .leftViewMode(let x): return x.apply(instance, storage) { i, s, v in i.leftViewMode = v }
-			case .rightView(let x): return x.apply(instance, storage) { i, s, v in i.rightView = v?.uiView() }
-			case .rightViewMode(let x): return x.apply(instance, storage) { i, s, v in i.rightViewMode = v }
-			case .inputView(let x): return x.apply(instance, storage) { i, s, v in i.inputView = v?.uiView() }
-			case .inputAccessoryView(let x): return x.apply(instance, storage) { i, s, v in i.inputAccessoryView = v?.uiView() }
-			case .resignFirstResponder(let x): return x.apply(instance, storage) { i, s, v in i.resignFirstResponder() }
+			case .text(let x): return x.apply(instance) { i, v in i.text = v }
+			case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
+			case .placeholder(let x): return x.apply(instance) { i, v in i.placeholder = v }
+			case .attributedPlaceholder(let x): return x.apply(instance) { i, v in i.attributedPlaceholder = v }
+			case .defaultTextAttributes(let x): return x.apply(instance) { i, v in i.defaultTextAttributes = v }
+			case .font(let x): return x.apply(instance) { i, v in i.font = v }
+			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+			case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
+			case .typingAttributes(let x): return x.apply(instance) { i, v in i.typingAttributes = v }
+			case .adjustsFontSizeToFitWidth(let x): return x.apply(instance) { i, v in i.adjustsFontSizeToFitWidth = v }
+			case .minimumFontSize(let x): return x.apply(instance) { i, v in i.minimumFontSize = v }
+			case .clearsOnBeginEditing(let x): return x.apply(instance) { i, v in i.clearsOnBeginEditing = v }
+			case .clearsOnInsertion(let x): return x.apply(instance) { i, v in i.clearsOnInsertion = v }
+			case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
+			case .borderStyle(let x): return x.apply(instance) { i, v in i.borderStyle = v }
+			case .background(let x): return x.apply(instance) { i, v in i.background = v }
+			case .disabledBackground(let x): return x.apply(instance) { i, v in i.disabledBackground = v }
+			case .clearButtonMode(let x): return x.apply(instance) { i, v in i.clearButtonMode = v }
+			case .leftView(let x): return x.apply(instance) { i, v in i.leftView = v?.uiView() }
+			case .leftViewMode(let x): return x.apply(instance) { i, v in i.leftViewMode = v }
+			case .rightView(let x): return x.apply(instance) { i, v in i.rightView = v?.uiView() }
+			case .rightViewMode(let x): return x.apply(instance) { i, v in i.rightViewMode = v }
+			case .inputView(let x): return x.apply(instance) { i, v in i.inputView = v?.uiView() }
+			case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v?.uiView() }
+			case .resignFirstResponder(let x): return x.apply(instance) { i, v in i.resignFirstResponder() }
 			case .didBeginEditing(let x):
 				return Signal
-					.notifications(name: UITextField.textDidBeginEditingNotification, object: instance)
+					.notifications(n: UITextField.textDidBeginEditingNotification, object: instance)
 					.compactMap { notification in return notification.object as? UITextField }
 					.subscribeValues { field in x(field) }
 			case .didEndEditing(let x):
 				return Signal
-					.notifications(name: UITextField.textDidEndEditingNotification, object: instance)
+					.notifications(n: UITextField.textDidEndEditingNotification, object: instance)
 					.compactMap { notification in return notification.object as? UITextField }
 					.subscribeValues { field in x(field) }
 			case .didChange(let x):
 				return Signal
-					.notifications(name: UITextField.textDidChangeNotification, object: instance)
+					.notifications(n: UITextField.textDidChangeNotification, object: instance)
 					.compactMap { notification in return notification.object as? UITextField }
 					.subscribeValues { field in x(field) }
 			case .didEndEditingWithReason: return nil
@@ -231,7 +221,7 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			case .shouldChangeCharacters: return nil
 			case .shouldClear: return nil
 			case .shouldReturn: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -243,29 +233,24 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			super.init()
 		}
 		
-		open var shouldBeginEditing: ((_ textField: UITextField) -> Bool)?
 		open func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-			return shouldBeginEditing!(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
 		}
 		
-		open var shouldEndEditing: ((_ textField: UITextField) -> Bool)?
 		open func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-			return shouldEndEditing!(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
 		}
 		
-		open var shouldChangeCharacters: ((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool)?
 		open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-			return shouldChangeCharacters!(textField, range, string)
+			return handler(ofType: ((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool).self)(textField, range, string)
 		}
 		
-		open var shouldClear: ((_ textField: UITextField) -> Bool)?
 		open func textFieldShouldClear(_ textField: UITextField) -> Bool {
-			return shouldClear!(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
 		}
 		
-		open var shouldReturn: ((_ textField: UITextField) -> Bool)?
 		open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-			return shouldReturn!(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
 		}
 		
 		open var didEndEditingWithReason: Any?

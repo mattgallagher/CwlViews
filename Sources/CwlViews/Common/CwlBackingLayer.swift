@@ -19,23 +19,20 @@
 
 import QuartzCore
 
+// MARK: - Binder Part 1: Binder
 public class BackingLayer: Binder {
-	public typealias Instance = CALayer
-	public typealias Inherited = BaseBinder
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
+	}
+}
 
-	public var state: BinderState<Instance, BindingsOnlyParameters<Binding>>
-	public required init(state: BinderState<Instance, BindingsOnlyParameters<Binding>>) {
-		self.state = state
-	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	
-	public enum Binding: BackingLayerBinding {
-		public typealias EnclosingBinder = BackingLayer
-		public static func backingLayerBinding(_ binding: BackingLayer.Binding) -> BackingLayer.Binding { return binding }
+// MARK: - Binder Part 2: Binding
+public extension BackingLayer {
+	enum Binding: BackingLayerBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
-		case inheritedBinding(Inherited.Binding)
+		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case actions(Dynamic<[String: SignalInput<[AnyHashable: Any]?>?]>)
@@ -81,21 +78,14 @@ public class BackingLayer: Binder {
 		case transform(Dynamic<CATransform3D>)
 		case zPosition(Dynamic<CGFloat>)
 		
-		#if os(macOS)
-			case autoresizingMask(Dynamic<CAAutoresizingMask>)
-			case backgroundFilters(Dynamic<[CIFilter]?>)
-			case compositingFilter(Dynamic<CIFilter?>)
-			case filters(Dynamic<[CIFilter]?>)
-		#else
-			@available(*, unavailable)
-			case autoresizingMask(())
-			@available(*, unavailable)
-			case backgroundFilters(())
-			@available(*, unavailable)
-			case compositingFilter(())
-			@available(*, unavailable)
-			case filters(())
-		#endif
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case autoresizingMask(Dynamic<CAAutoresizingMask>)
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case backgroundFilters(Dynamic<[CIFilter]?>)
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case compositingFilter(Dynamic<CIFilter?>)
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case filters(Dynamic<[CIFilter]?>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		case addAnimation(Signal<AnimationForKey>)
@@ -109,119 +99,140 @@ public class BackingLayer: Binder {
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
-	public struct Preparer: StoragePreparer {
-		public typealias EnclosingBinder = BackingLayer
-		public var linkedPreparer = EnclosingBinder.Inherited.Preparer()
+
+	#if os(macOS)
+		typealias CAAutoresizingMask = QuartzCore.CAAutoresizingMask
+		typealias CIFilter = QuartzCore.CIFilter
+	#else
+		typealias CAAutoresizingMask = ()
+		typealias CIFilter = ()
+	#endif
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension BackingLayer {
+	struct Preparer: BinderEmbedder {
+		public typealias Binding = BackingLayer.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = CALayer
+		public typealias Storage = BackingLayer.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .autoresizingMask(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.autoresizingMask = v }
-				#else
-					return nil
-				#endif
-			case .backgroundFilters(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.backgroundFilters = v }
-				#else
-					return nil
-				#endif
-			case .compositingFilter(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.compositingFilter = v }
-				#else
-					return nil
-				#endif
-			case .filters(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.filters = v }
-				#else
-					return nil
-				#endif
-			case .sublayers(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.sublayers = v.map { $0.caLayer() }
-				}
-			case .affineTransform(let x): return x.apply(instance, storage) { i, s, v in i.setAffineTransform(v) }
-			case .anchorPoint(let x): return x.apply(instance, storage) { i, s, v in i.anchorPoint = v }
-			case .anchorPointZ(let x): return x.apply(instance, storage) { i, s, v in i.anchorPointZ = v }
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .borderColor(let x): return x.apply(instance, storage) { i, s, v in i.borderColor = v }
-			case .borderWidth(let x): return x.apply(instance, storage) { i, s, v in i.borderWidth = v }
-			case .bounds(let x): return x.apply(instance, storage) { i, s, v in i.bounds = v }
-			case .contents(let x): return x.apply(instance, storage) { i, s, v in i.contents = v }
-			case .contentsCenter(let x): return x.apply(instance, storage) { i, s, v in i.contentsCenter = v }
-			case .contentsGravity(let x): return x.apply(instance, storage) { i, s, v in i.contentsGravity = v }
-			case .contentsRect(let x): return x.apply(instance, storage) { i, s, v in i.contentsRect = v }
-			case .contentsScale(let x): return x.apply(instance, storage) { i, s, v in i.contentsScale = v }
-			case .cornerRadius(let x): return x.apply(instance, storage) { i, s, v in i.cornerRadius = v }
-			case .isDoubleSided(let x): return x.apply(instance, storage) { i, s, v in i.isDoubleSided = v }
-			case .drawsAsynchronously(let x): return x.apply(instance, storage) { i, s, v in i.drawsAsynchronously = v }
-			case .edgeAntialiasingMask(let x): return x.apply(instance, storage) { i, s, v in i.edgeAntialiasingMask = v }
-			case .frame(let x): return x.apply(instance, storage) { i, s, v in i.frame = v }
-			case .isGeometryFlipped(let x): return x.apply(instance, storage) { i, s, v in i.isGeometryFlipped = v }
-			case .isHidden(let x): return x.apply(instance, storage) { i, s, v in i.isHidden = v }
-			case .magnificationFilter(let x): return x.apply(instance, storage) { i, s, v in i.magnificationFilter = v }
-			case .masksToBounds(let x): return x.apply(instance, storage) { i, s, v in i.masksToBounds = v }
-			case .minificationFilter(let x): return x.apply(instance, storage) { i, s, v in i.minificationFilter = v }
-			case .minificationFilterBias(let x): return x.apply(instance, storage) { i, s, v in i.minificationFilterBias = v }
-			case .name(let x): return x.apply(instance, storage) { i, s, v in i.name = v }
-			case .needsDisplayOnBoundsChange(let x): return x.apply(instance, storage) { i, s, v in i.needsDisplayOnBoundsChange = v }
-			case .opacity(let x): return x.apply(instance, storage) { i, s, v in i.opacity = v }
-			case .isOpaque(let x): return x.apply(instance, storage) { i, s, v in i.isOpaque = v }
-			case .position(let x): return x.apply(instance, storage) { i, s, v in i.position = v }
-			case .rasterizationScale(let x): return x.apply(instance, storage) { i, s, v in i.rasterizationScale = v }
-			case .shadowColor(let x): return x.apply(instance, storage) { i, s, v in i.shadowColor = v }
-			case .shadowOffset(let x): return x.apply(instance, storage) { i, s, v in i.shadowOffset = v }
-			case .shadowOpacity(let x): return x.apply(instance, storage) { i, s, v in i.shadowOpacity = v }
-			case .shadowPath(let x): return x.apply(instance, storage) { i, s, v in i.shadowPath = v }
-			case .shadowRadius(let x): return x.apply(instance, storage) { i, s, v in i.shadowRadius = v }
-			case .shouldRasterize(let x): return x.apply(instance, storage) { i, s, v in i.shouldRasterize = v }
-			case .style(let x): return x.apply(instance, storage) { i, s, v in i.style = v }
-			case .sublayerTransform(let x): return x.apply(instance, storage) { i, s, v in i.sublayerTransform = v }
-			case .transform(let x): return x.apply(instance, storage) { i, s, v in i.transform = v }
-			case .zPosition(let x): return x.apply(instance, storage) { i, s, v in i.zPosition = v }
-			case .addAnimation(let x): return x.apply(instance, storage) { i, s, v in i.add(v.animation, forKey: v.key) }
-			case .needsDisplay(let x): return x.apply(instance, storage) { i, s, v in i.setNeedsDisplay() }
-			case .needsDisplayInRect(let x): return x.apply(instance, storage) { i, s, v in i.setNeedsDisplay(v) }
-			case .removeAllAnimations(let x): return x.apply(instance, storage) { i, s, v in i.removeAllAnimations() }
-			case .removeAnimationForKey(let x): return x.apply(instance, storage) { i, s, v in i.removeAnimation(forKey: v) }
-			case .scrollRectToVisible(let x): return x.apply(instance, storage) { i, s, v in i.scrollRectToVisible(v) }
-			case .actions(let x):
-				return x.apply(instance, storage) { i, s, v in
-					var actions = i.actions ?? [String: CAAction]()
-					for (key, input) in v {
-						if let i = input {
-							actions[key] = storage
-							storage.layerActions[key] = i
-						} else {
-							actions[key] = NSNull()
-							storage.layerActions.removeValue(forKey: key)
-						}
-					}
-					i.actions = actions
-				}
-			case .mask(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.mask = v?.caLayer()
-				}
-			case .inheritedBinding(let s):
-				return linkedPreparer.applyBinding(s, instance: (), storage: ())
-			}
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
-	
-	open class Storage: ObjectBinderStorage, CAAction {
-		open override var inUse: Bool {
-			return super.inUse || !layerActions.isEmpty
-		}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension BackingLayer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .actions(let x):
+			return x.apply(instance, storage) { i, s, v in
+				var actions = i.actions ?? [String: CAAction]()
+				for (key, input) in v {
+					if let i = input {
+						actions[key] = storage
+						storage.layerActions[key] = i
+					} else {
+						actions[key] = NSNull()
+						storage.layerActions.removeValue(forKey: key)
+					}
+				}
+				i.actions = actions
+			}
+		case .affineTransform(let x): return x.apply(instance) { i, v in i.setAffineTransform(v) }
+		case .anchorPoint(let x): return x.apply(instance) { i, v in i.anchorPoint = v }
+		case .anchorPointZ(let x): return x.apply(instance) { i, v in i.anchorPointZ = v }
+		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+		case .borderColor(let x): return x.apply(instance) { i, v in i.borderColor = v }
+		case .borderWidth(let x): return x.apply(instance) { i, v in i.borderWidth = v }
+		case .bounds(let x): return x.apply(instance) { i, v in i.bounds = v }
+		case .contents(let x): return x.apply(instance) { i, v in i.contents = v }
+		case .contentsCenter(let x): return x.apply(instance) { i, v in i.contentsCenter = v }
+		case .contentsGravity(let x): return x.apply(instance) { i, v in i.contentsGravity = v }
+		case .contentsRect(let x): return x.apply(instance) { i, v in i.contentsRect = v }
+		case .contentsScale(let x): return x.apply(instance) { i, v in i.contentsScale = v }
+		case .cornerRadius(let x): return x.apply(instance) { i, v in i.cornerRadius = v }
+		case .drawsAsynchronously(let x): return x.apply(instance) { i, v in i.drawsAsynchronously = v }
+		case .edgeAntialiasingMask(let x): return x.apply(instance) { i, v in i.edgeAntialiasingMask = v }
+		case .frame(let x): return x.apply(instance) { i, v in i.frame = v }
+		case .isDoubleSided(let x): return x.apply(instance) { i, v in i.isDoubleSided = v }
+		case .isGeometryFlipped(let x): return x.apply(instance) { i, v in i.isGeometryFlipped = v }
+		case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
+		case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
+		case .magnificationFilter(let x): return x.apply(instance) { i, v in i.magnificationFilter = v }
+		case .mask(let x): return x.apply(instance) { i, v in i.mask = v?.caLayer() }
+		case .masksToBounds(let x): return x.apply(instance) { i, v in i.masksToBounds = v }
+		case .minificationFilter(let x): return x.apply(instance) { i, v in i.minificationFilter = v }
+		case .minificationFilterBias(let x): return x.apply(instance) { i, v in i.minificationFilterBias = v }
+		case .name(let x): return x.apply(instance) { i,v in i.name = v }
+		case .needsDisplayOnBoundsChange(let x): return x.apply(instance) { i, v in i.needsDisplayOnBoundsChange = v }
+		case .opacity(let x): return x.apply(instance) { i, v in i.opacity = v }
+		case .position(let x): return x.apply(instance) { i, v in i.position = v }
+		case .rasterizationScale(let x): return x.apply(instance) { i, v in i.rasterizationScale = v }
+		case .shadowColor(let x): return x.apply(instance) { i, v in i.shadowColor = v }
+		case .shadowOffset(let x): return x.apply(instance) { i, v in i.shadowOffset = v }
+		case .shadowOpacity(let x): return x.apply(instance) { i, v in i.shadowOpacity = v }
+		case .shadowPath(let x): return x.apply(instance) { i, v in i.shadowPath = v }
+		case .shadowRadius(let x): return x.apply(instance) { i, v in i.shadowRadius = v }
+		case .shouldRasterize(let x): return x.apply(instance) { i, v in i.shouldRasterize = v }
+		case .style(let x): return x.apply(instance) { i,v in i.style = v }
+		case .sublayers(let x): return x.apply(instance) { i, v in i.sublayers = v.map { $0.caLayer() } }
+		case .sublayerTransform(let x): return x.apply(instance) { i, v in i.sublayerTransform = v }
+		case .transform(let x): return x.apply(instance) { i, v in i.transform = v }
+		case .zPosition(let x): return x.apply(instance) { i, v in i.zPosition = v }
+		
+		case .autoresizingMask(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.autoresizingMask = v }
+			#else
+				return nil
+			#endif
+		case .backgroundFilters(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.backgroundFilters = v }
+			#else
+				return nil
+			#endif
+		case .compositingFilter(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.compositingFilter = v }
+			#else
+				return nil
+			#endif
+		case .filters(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.filters = v }
+			#else
+				return nil
+			#endif
+
+		//	2. Signal bindings are performed on the object after construction.
+		case .addAnimation(let x): return x.apply(instance) { i, v in i.add(v.animation, forKey: v.key) }
+		case .needsDisplay(let x): return x.apply(instance) { i, v in i.setNeedsDisplay() }
+		case .needsDisplayInRect(let x): return x.apply(instance) { i, v in i.setNeedsDisplay(v) }
+		case .removeAllAnimations(let x): return x.apply(instance) { i, v in i.removeAllAnimations() }
+		case .removeAnimationForKey(let x): return x.apply(instance) { i, v in i.removeAnimation(forKey: v) }
+		case .scrollRectToVisible(let x): return x.apply(instance) { i, v in i.scrollRectToVisible(v) }
+			
+		//	3. Action bindings are triggered by the object after construction.
+			
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension BackingLayer {
+	open class Storage: ObjectBinderStorage, CAAction {
 		// LayerBinderStorage implementation
 		open var layerActions = [String: SignalInput<[AnyHashable: Any]?>]()
 		@objc open func run(forKey event: String, object anObject: Any, arguments dict: [AnyHashable: Any]?) {
@@ -230,76 +241,106 @@ public class BackingLayer: Binder {
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: BackingLayerBinding {
+	public typealias BackingLayerName<V> = BindingName<V, BackingLayer.Binding, Binding>
+	private typealias B = BackingLayer.Binding
+	private static func name<V>(_ source: @escaping (V) -> BackingLayer.Binding) -> BackingLayerName<V> {
+		return BackingLayerName<V>(source: source, downcast: Binding.backingLayerBinding)
+	}
+}
+public extension BindingName where Binding: BackingLayerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.$1(v)) }) }
-	public static var affineTransform: BindingName<Dynamic<CGAffineTransform>, Binding> { return BindingName<Dynamic<CGAffineTransform>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.affineTransform(v)) }) }
-	public static var anchorPoint: BindingName<Dynamic<CGPoint>, Binding> { return BindingName<Dynamic<CGPoint>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.anchorPoint(v)) }) }
-	public static var anchorPointZ: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.anchorPointZ(v)) }) }
-	public static var actions: BindingName<Dynamic<[String: SignalInput<[AnyHashable: Any]?>?]>, Binding> { return BindingName<Dynamic<[String: SignalInput<[AnyHashable: Any]?>?]>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.actions(v)) }) }
-	public static var backgroundColor: BindingName<Dynamic<CGColor?>, Binding> { return BindingName<Dynamic<CGColor?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.backgroundColor(v)) }) }
-	public static var borderColor: BindingName<Dynamic<CGColor?>, Binding> { return BindingName<Dynamic<CGColor?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.borderColor(v)) }) }
-	public static var borderWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.borderWidth(v)) }) }
-	public static var bounds: BindingName<Dynamic<CGRect>, Binding> { return BindingName<Dynamic<CGRect>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.bounds(v)) }) }
-	public static var contents: BindingName<Dynamic<Any?>, Binding> { return BindingName<Dynamic<Any?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.contents(v)) }) }
-	public static var contentsCenter: BindingName<Dynamic<CGRect>, Binding> { return BindingName<Dynamic<CGRect>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.contentsCenter(v)) }) }
-	public static var contentsGravity: BindingName<Dynamic<CALayerContentsGravity>, Binding> { return BindingName<Dynamic<CALayerContentsGravity>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.contentsGravity(v)) }) }
-	public static var contentsRect: BindingName<Dynamic<CGRect>, Binding> { return BindingName<Dynamic<CGRect>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.contentsRect(v)) }) }
-	public static var contentsScale: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.contentsScale(v)) }) }
-	public static var cornerRadius: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.cornerRadius(v)) }) }
-	public static var isDoubleSided: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.isDoubleSided(v)) }) }
-	public static var drawsAsynchronously: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.drawsAsynchronously(v)) }) }
-	public static var edgeAntialiasingMask: BindingName<Dynamic<CAEdgeAntialiasingMask>, Binding> { return BindingName<Dynamic<CAEdgeAntialiasingMask>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.edgeAntialiasingMask(v)) }) }
-	public static var frame: BindingName<Dynamic<CGRect>, Binding> { return BindingName<Dynamic<CGRect>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.frame(v)) }) }
-	public static var isGeometryFlipped: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.isGeometryFlipped(v)) }) }
-	public static var isHidden: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.isHidden(v)) }) }
-	public static var magnificationFilter: BindingName<Dynamic<CALayerContentsFilter>, Binding> { return BindingName<Dynamic<CALayerContentsFilter>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.magnificationFilter(v)) }) }
-	public static var masksToBounds: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.masksToBounds(v)) }) }
-	public static var minificationFilter: BindingName<Dynamic<CALayerContentsFilter>, Binding> { return BindingName<Dynamic<CALayerContentsFilter>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.minificationFilter(v)) }) }
-	public static var minificationFilterBias: BindingName<Dynamic<Float>, Binding> { return BindingName<Dynamic<Float>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.minificationFilterBias(v)) }) }
-	public static var name: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.name(v)) }) }
-	public static var needsDisplayOnBoundsChange: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.needsDisplayOnBoundsChange(v)) }) }
-	public static var opacity: BindingName<Dynamic<Float>, Binding> { return BindingName<Dynamic<Float>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.opacity(v)) }) }
-	public static var isOpaque: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.isOpaque(v)) }) }
-	public static var position: BindingName<Dynamic<CGPoint>, Binding> { return BindingName<Dynamic<CGPoint>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.position(v)) }) }
-	public static var rasterizationScale: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.rasterizationScale(v)) }) }
-	public static var shadowColor: BindingName<Dynamic<CGColor?>, Binding> { return BindingName<Dynamic<CGColor?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.shadowColor(v)) }) }
-	public static var shadowOffset: BindingName<Dynamic<CGSize>, Binding> { return BindingName<Dynamic<CGSize>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.shadowOffset(v)) }) }
-	public static var shadowOpacity: BindingName<Dynamic<Float>, Binding> { return BindingName<Dynamic<Float>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.shadowOpacity(v)) }) }
-	public static var shadowPath: BindingName<Dynamic<CGPath?>, Binding> { return BindingName<Dynamic<CGPath?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.shadowPath(v)) }) }
-	public static var shadowRadius: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.shadowRadius(v)) }) }
-	public static var shouldRasterize: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.shouldRasterize(v)) }) }
-	public static var style: BindingName<Dynamic<[AnyHashable: Any]>, Binding> { return BindingName<Dynamic<[AnyHashable: Any]>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.style(v)) }) }
-	public static var sublayerTransform: BindingName<Dynamic<CATransform3D>, Binding> { return BindingName<Dynamic<CATransform3D>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.sublayerTransform(v)) }) }
-	public static var transform: BindingName<Dynamic<CATransform3D>, Binding> { return BindingName<Dynamic<CATransform3D>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.transform(v)) }) }
-	public static var zPosition: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.zPosition(v)) }) }
-	public static var mask: BindingName<Dynamic<LayerConvertible?>, Binding> { return BindingName<Dynamic<LayerConvertible?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.mask(v)) }) }
-	public static var sublayers: BindingName<Dynamic<[LayerConvertible]>, Binding> { return BindingName<Dynamic<[LayerConvertible]>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.sublayers(v)) }) }
-	#if os(macOS)
-		public static var autoresizingMask: BindingName<Dynamic<CAAutoresizingMask>, Binding> { return BindingName<Dynamic<CAAutoresizingMask>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.autoresizingMask(v)) }) }
-		public static var backgroundFilters: BindingName<Dynamic<[CIFilter]?>, Binding> { return BindingName<Dynamic<[CIFilter]?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.backgroundFilters(v)) }) }
-		public static var compositingFilter: BindingName<Dynamic<CIFilter?>, Binding> { return BindingName<Dynamic<CIFilter?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.compositingFilter(v)) }) }
-		public static var filters: BindingName<Dynamic<[CIFilter]?>, Binding> { return BindingName<Dynamic<[CIFilter]?>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.filters(v)) }) }
-	#endif
-	public static var addAnimation: BindingName<Signal<AnimationForKey>, Binding> { return BindingName<Signal<AnimationForKey>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.addAnimation(v)) }) }
-	public static var needsDisplay: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.needsDisplay(v)) }) }
-	public static var needsDisplayInRect: BindingName<Signal<CGRect>, Binding> { return BindingName<Signal<CGRect>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.needsDisplayInRect(v)) }) }
-	public static var removeAllAnimations: BindingName<Signal<String>, Binding> { return BindingName<Signal<String>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.removeAllAnimations(v)) }) }
-	public static var removeAnimationForKey: BindingName<Signal<String>, Binding> { return BindingName<Signal<String>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.removeAnimationForKey(v)) }) }
-	public static var scrollRectToVisible: BindingName<Signal<CGRect>, Binding> { return BindingName<Signal<CGRect>, Binding>({ v in .backingLayerBinding(BackingLayer.Binding.scrollRectToVisible(v)) }) }
+	// With:    static var $1: BackingLayerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var actions: BackingLayerName<Dynamic<[String: SignalInput<[AnyHashable: Any]?>?]>> { return .name(B.actions) }
+	static var affineTransform: BackingLayerName<Dynamic<CGAffineTransform>> { return .name(B.affineTransform) }
+	static var anchorPoint: BackingLayerName<Dynamic<CGPoint>> { return .name(B.anchorPoint) }
+	static var anchorPointZ: BackingLayerName<Dynamic<CGFloat>> { return .name(B.anchorPointZ) }
+	static var backgroundColor: BackingLayerName<Dynamic<CGColor?>> { return .name(B.backgroundColor) }
+	static var borderColor: BackingLayerName<Dynamic<CGColor?>> { return .name(B.borderColor) }
+	static var borderWidth: BackingLayerName<Dynamic<CGFloat>> { return .name(B.borderWidth) }
+	static var bounds: BackingLayerName<Dynamic<CGRect>> { return .name(B.bounds) }
+	static var contents: BackingLayerName<Dynamic<Any?>> { return .name(B.contents) }
+	static var contentsCenter: BackingLayerName<Dynamic<CGRect>> { return .name(B.contentsCenter) }
+	static var contentsGravity: BackingLayerName<Dynamic<CALayerContentsGravity>> { return .name(B.contentsGravity) }
+	static var contentsRect: BackingLayerName<Dynamic<CGRect>> { return .name(B.contentsRect) }
+	static var contentsScale: BackingLayerName<Dynamic<CGFloat>> { return .name(B.contentsScale) }
+	static var cornerRadius: BackingLayerName<Dynamic<CGFloat>> { return .name(B.cornerRadius) }
+	static var drawsAsynchronously: BackingLayerName<Dynamic<Bool>> { return .name(B.drawsAsynchronously) }
+	static var edgeAntialiasingMask: BackingLayerName<Dynamic<CAEdgeAntialiasingMask>> { return .name(B.edgeAntialiasingMask) }
+	static var frame: BackingLayerName<Dynamic<CGRect>> { return .name(B.frame) }
+	static var isDoubleSided: BackingLayerName<Dynamic<Bool>> { return .name(B.isDoubleSided) }
+	static var isGeometryFlipped: BackingLayerName<Dynamic<Bool>> { return .name(B.isGeometryFlipped) }
+	static var isHidden: BackingLayerName<Dynamic<Bool>> { return .name(B.isHidden) }
+	static var isOpaque: BackingLayerName<Dynamic<Bool>> { return .name(B.isOpaque) }
+	static var magnificationFilter: BackingLayerName<Dynamic<CALayerContentsFilter>> { return .name(B.magnificationFilter) }
+	static var mask: BackingLayerName<Dynamic<LayerConvertible?>> { return .name(B.mask) }
+	static var masksToBounds: BackingLayerName<Dynamic<Bool>> { return .name(B.masksToBounds) }
+	static var minificationFilter: BackingLayerName<Dynamic<CALayerContentsFilter>> { return .name(B.minificationFilter) }
+	static var minificationFilterBias: BackingLayerName<Dynamic<Float>> { return .name(B.minificationFilterBias) }
+	static var name: BackingLayerName<Dynamic<String>> { return .name(B.name) }
+	static var needsDisplayOnBoundsChange: BackingLayerName<Dynamic<Bool>> { return .name(B.needsDisplayOnBoundsChange) }
+	static var opacity: BackingLayerName<Dynamic<Float>> { return .name(B.opacity) }
+	static var position: BackingLayerName<Dynamic<CGPoint>> { return .name(B.position) }
+	static var rasterizationScale: BackingLayerName<Dynamic<CGFloat>> { return .name(B.rasterizationScale) }
+	static var shadowColor: BackingLayerName<Dynamic<CGColor?>> { return .name(B.shadowColor) }
+	static var shadowOffset: BackingLayerName<Dynamic<CGSize>> { return .name(B.shadowOffset) }
+	static var shadowOpacity: BackingLayerName<Dynamic<Float>> { return .name(B.shadowOpacity) }
+	static var shadowPath: BackingLayerName<Dynamic<CGPath?>> { return .name(B.shadowPath) }
+	static var shadowRadius: BackingLayerName<Dynamic<CGFloat>> { return .name(B.shadowRadius) }
+	static var shouldRasterize: BackingLayerName<Dynamic<Bool>> { return .name(B.shouldRasterize) }
+	static var style: BackingLayerName<Dynamic<[AnyHashable: Any]>> { return .name(B.style) }
+	static var sublayers: BackingLayerName<Dynamic<[LayerConvertible]>> { return .name(B.sublayers) }
+	static var sublayerTransform: BackingLayerName<Dynamic<CATransform3D>> { return .name(B.sublayerTransform) }
+	static var transform: BackingLayerName<Dynamic<CATransform3D>> { return .name(B.transform) }
+	static var zPosition: BackingLayerName<Dynamic<CGFloat>> { return .name(B.zPosition) }
+	
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var autoresizingMask: BackingLayerName<Dynamic<BackingLayer.CAAutoresizingMask>> { return .name(B.autoresizingMask) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var backgroundFilters: BackingLayerName<Dynamic<[BackingLayer.CIFilter]?>> { return .name(B.backgroundFilters) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var compositingFilter: BackingLayerName<Dynamic<BackingLayer.CIFilter?>> { return .name(B.compositingFilter) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var filters: BackingLayerName<Dynamic<[BackingLayer.CIFilter]?>> { return .name(B.filters) }
+	
+	//	2. Signal bindings are performed on the object after construction.
+	static var addAnimation: BackingLayerName<Signal<AnimationForKey>> { return .name(B.addAnimation) }
+	static var needsDisplay: BackingLayerName<Signal<Void>> { return .name(B.needsDisplay) }
+	static var needsDisplayInRect: BackingLayerName<Signal<CGRect>> { return .name(B.needsDisplayInRect) }
+	static var removeAllAnimations: BackingLayerName<Signal<String>> { return .name(B.removeAllAnimations) }
+	static var removeAnimationForKey: BackingLayerName<Signal<String>> { return .name(B.removeAnimationForKey) }
+	static var scrollRectToVisible: BackingLayerName<Signal<CGRect>> { return .name(B.scrollRectToVisible) }
+	
+	//	3. Action bindings are triggered by the object after construction.
+	
+	//	4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
-public protocol BackingLayerBinding: BaseBinding {
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
+
+// MARK: - Binder Part 8: Downcast protocols
+public protocol BackingLayerBinding: BinderBaseBinding {
 	static func backingLayerBinding(_ binding: BackingLayer.Binding) -> Self
 }
-
-extension BackingLayerBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension BackingLayerBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return backingLayerBinding(.inheritedBinding(binding))
 	}
 }
+public extension BackingLayer.Binding {
+	public typealias Preparer = BackingLayer.Preparer
+	static func backingLayerBinding(_ binding: BackingLayer.Binding) -> BackingLayer.Binding {
+		return binding
+	}
+}
 
+// MARK: - Binder Part 9: Other supporting types
 public struct AnimationForKey {
 	public let animation: CAAnimation
 	public let key: String?

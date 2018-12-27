@@ -17,72 +17,56 @@
 //  OF THIS SOFTWARE.
 //
 
-public class StackView: ConstructingBinder, StackViewConvertible {
-#if os(macOS)
-	public typealias NSUIView = NSView
-	public typealias NSUIStackView = NSStackView
-	public typealias NSUIStackViewDistribution = NSStackView.Gravity
-	public typealias NSUIStackViewAlignment = NSLayoutConstraint.Attribute
-	public typealias NSUIUserInterfaceLayoutOrientation = NSUserInterfaceLayoutOrientation
-	public typealias NSUILayoutPriority = NSLayoutConstraint.Priority
-#else
-	public typealias NSUIView = UIView
-	public typealias NSUIStackView = UIStackView
-	public typealias NSUIStackViewDistribution = UIStackView.Distribution
-	public typealias NSUIStackViewAlignment = UIStackView.Alignment
-	public typealias NSUIUserInterfaceLayoutOrientation = NSLayoutConstraint.Axis
-	public typealias NSUILayoutPriority = UILayoutPriority
-#endif
-
-	public typealias Instance = NSUIStackView
-	public typealias Inherited = View
-	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
-	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-
+// MARK: - Binder Part 1: Binder
+public class StackView: Binder, StackViewConvertible {
 	#if os(macOS)
-		public func nsStackView() -> Instance { return instance() }
+		public typealias NSUIView = NSView
+		public typealias NSUIStackView = NSStackView
+		public typealias NSUIStackViewDistribution = NSStackView.Distribution
+		public typealias NSUIStackViewAlignment = NSLayoutConstraint.Attribute
+		public typealias NSUIUserInterfaceLayoutOrientation = NSUserInterfaceLayoutOrientation
+		public typealias NSUILayoutPriority = NSLayoutConstraint.Priority
 	#else
-		public func uiStackView() -> Instance { return instance() }
+		public typealias NSUIView = UIView
+		public typealias NSUIStackView = UIStackView
+		public typealias NSUIStackViewDistribution = UIStackView.Distribution
+		public typealias NSUIStackViewAlignment = UIStackView.Alignment
+		public typealias NSUIUserInterfaceLayoutOrientation = NSLayoutConstraint.Axis
+		public typealias NSUILayoutPriority = UILayoutPriority
 	#endif
-	
-	public enum Binding: StackViewBinding {
-		public typealias EnclosingBinder = StackView
-		public static func stackViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
+	}
+}
+
+// MARK: - Binder Part 2: Binding
+public extension StackView {
+	enum Binding: StackViewBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case alignment(Dynamic<NSUIStackViewAlignment>)
-		case spacing(Dynamic<CGFloat>)
-		case distribution(Dynamic<NSUIStackViewDistribution>)
+		case arrangedSubviews(Dynamic<[ViewConvertible]>)
 		case axis(Dynamic<NSUIUserInterfaceLayoutOrientation>)
-		case views(Dynamic<[ViewConvertible]>)
-		#if os(macOS)
-			case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
-			case verticalClippingResistance(Dynamic<NSUILayoutPriority>)
-			case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
-			case verticalHuggingPriority(Dynamic<NSUILayoutPriority>)
-			case edgeInsets(Dynamic<NSEdgeInsets>)
-			@available(*, unavailable)
-			case isLayoutMarginsRelativeArrangement(())
-		#else
-			case isLayoutMarginsRelativeArrangement(Dynamic<Bool>)
-			@available(*, unavailable)
-			case edgeInsets(())
-			@available(*, unavailable)
-			case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
-			@available(*, unavailable)
-			case verticalClippingResistance(Dynamic<NSUILayoutPriority>)
-			@available(*, unavailable)
-			case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
-			@available(*, unavailable)
-			case verticalHuggingPriority(Dynamic<NSUILayoutPriority>)
-		#endif
+		case distribution(Dynamic<NSUIStackViewDistribution>)
+		case spacing(Dynamic<CGFloat>)
+		
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case edgeInsets(Dynamic<NSEdgeInsets>)
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
+		@available(macOS, unavailable) @available(iOS 11, *)
+		case isLayoutMarginsRelativeArrangement(())
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case verticalClippingResistance(Dynamic<NSUILayoutPriority>)
+		@available(macOS 10.13, *) @available(iOS, unavailable)
+		case verticalHuggingPriority(Dynamic<NSUILayoutPriority>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
@@ -90,95 +74,102 @@ public class StackView: ConstructingBinder, StackViewConvertible {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = StackView
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension StackView {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = StackView.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = NSUIStackView
+		public typealias Storage = StackView.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .alignment(let x): return x.apply(instance, storage) { i, s, v in i.alignment = v }
-			case .spacing(let x): return x.apply(instance, storage) { i, s, v in i.spacing = v }
-			case .distribution(let x):
-				return x.apply(instance, storage) { i, s, v in
-					#if os(macOS)
-						s.gravity = v
-						if #available(macOS 10.11, *) {
-							i.setViews(i.arrangedSubviews, in: s.gravity)
-						} else {
-							i.setViews(i.subviews, in: s.gravity)
-						}
-					#else
-						i.distribution = v
-					#endif
-				}
-			case .axis(let x):
-				return x.apply(instance, storage) { i, s, v in
-					#if os(macOS)
-						i.orientation = v
-					#else
-						i.axis = v
-					#endif
-				}
-			case .horizontalClippingResistance(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.setClippingResistancePriority(v, for: .horizontal) }
-				#else
-					return nil
-				#endif
-			case .verticalClippingResistance(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.setClippingResistancePriority(v, for: .vertical) }
-				#else
-					return nil
-				#endif
-			case .horizontalHuggingPriority(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.setHuggingPriority(v, for: .horizontal) }
-				#else
-					return nil
-				#endif
-			case .verticalHuggingPriority(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.setHuggingPriority(v, for: .vertical) }
-				#else
-					return nil
-				#endif
-			case .views(let x):
-				return x.apply(instance, storage) { i, s, v in
-					#if os(macOS)
-						i.setViews(v.map { $0.nsView() }, in: s.gravity)
-					#else
-						for view in i.arrangedSubviews {
-							view.removeFromSuperview()
-						}
-						for view in v {
-							i.addArrangedSubview(view.uiView())
-						}
-					#endif
-				}
-			case .edgeInsets(let x):
-				#if os(macOS)
-					return x.apply(instance, storage) { i, s, v in i.edgeInsets = v }
-				#else
-					return nil
-				#endif
-			case .isLayoutMarginsRelativeArrangement(let x):
-				#if os(macOS)
-					return nil
-				#else
-					return x.apply(instance, storage) { i, s, v in i.isLayoutMarginsRelativeArrangement = v }
-				#endif
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
+}
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension StackView.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .alignment(let x): return x.apply(instance) { i, v in i.alignment = v }
+		case .axis(let x):
+			return x.apply(instance) { i, v in
+				#if os(macOS)
+					i.orientation = v
+				#else
+					i.axis = v
+				#endif
+			}
+		case .arrangedSubviews(let x):
+			return x.apply(instance) { i, v in
+				i.arrangedSubviews.forEach { $0.removeFromSuperview() }
+				#if os(macOS)
+					v.forEach { i.addArrangedSubview($0.nsView()) }
+				#else
+					v.forEach { i.addArrangedSubview($0.uiView()) }
+				#endif
+			}
+		case .distribution(let x): return x.apply(instance) { i, v in i.distribution = v }
+		case .spacing(let x): return x.apply(instance) { i, v in i.spacing = v }
+
+		case .edgeInsets(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.edgeInsets = v }
+			#else
+				return nil
+			#endif
+		case .horizontalClippingResistance(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.setClippingResistancePriority(v, for: .horizontal) }
+			#else
+				return nil
+			#endif
+		case .horizontalHuggingPriority(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.setHuggingPriority(v, for: .horizontal) }
+			#else
+				return nil
+			#endif
+		case .isLayoutMarginsRelativeArrangement(let x):
+			#if os(macOS)
+				return nil
+			#else
+				return x.apply(instance) { i, v in i.isLayoutMarginsRelativeArrangement = v }
+			#endif
+		case .verticalClippingResistance(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.setClippingResistancePriority(v, for: .vertical) }
+			#else
+				return nil
+			#endif
+		case .verticalHuggingPriority(let x):
+			#if os(macOS)
+				return x.apply(instance) { i, v in i.setHuggingPriority(v, for: .vertical) }
+			#else
+				return nil
+			#endif
+		
+		// 2. Signal bindings are performed on the object after construction.
+		
+		// 3. Action bindings are triggered by the object after construction.
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension StackView {
 	#if os(macOS)
 		open class Storage: View.Storage {
 			open var gravity: NSStackView.Gravity = .center
@@ -188,54 +179,91 @@ public class StackView: ConstructingBinder, StackViewConvertible {
 	#endif
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: StackViewBinding {
+	public typealias StackViewName<V> = BindingName<V, StackView.Binding, Binding>
+	private typealias B = StackView.Binding
+	private static func name<V>(_ source: @escaping (V) -> StackView.Binding) -> StackViewName<V> {
+		return StackViewName<V>(source: source, downcast: Binding.stackViewBinding)
+	}
+}
+public extension BindingName where Binding: StackViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .stackViewBinding(StackView.Binding.$1(v)) }) }
-	public static var alignment: BindingName<Dynamic<StackView.NSUIStackViewAlignment>, Binding> { return BindingName<Dynamic<StackView.NSUIStackViewAlignment>, Binding>({ v in .stackViewBinding(StackView.Binding.alignment(v)) }) }
-	public static var spacing: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .stackViewBinding(StackView.Binding.spacing(v)) }) }
-	public static var distribution: BindingName<Dynamic<StackView.NSUIStackViewDistribution>, Binding> { return BindingName<Dynamic<StackView.NSUIStackViewDistribution>, Binding>({ v in .stackViewBinding(StackView.Binding.distribution(v)) }) }
-	public static var axis: BindingName<Dynamic<StackView.NSUIUserInterfaceLayoutOrientation>, Binding> { return BindingName<Dynamic<StackView.NSUIUserInterfaceLayoutOrientation>, Binding>({ v in .stackViewBinding(StackView.Binding.axis(v)) }) }
-	public static var views: BindingName<Dynamic<[ViewConvertible]>, Binding> { return BindingName<Dynamic<[ViewConvertible]>, Binding>({ v in .stackViewBinding(StackView.Binding.views(v)) }) }
-	#if os(macOS)
-		public static var horizontalClippingResistance: BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding> { return BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding>({ v in .stackViewBinding(StackView.Binding.horizontalClippingResistance(v)) }) }
-		public static var verticalClippingResistance: BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding> { return BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding>({ v in .stackViewBinding(StackView.Binding.verticalClippingResistance(v)) }) }
-		public static var horizontalHuggingPriority: BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding> { return BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding>({ v in .stackViewBinding(StackView.Binding.horizontalHuggingPriority(v)) }) }
-		public static var verticalHuggingPriority: BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding> { return BindingName<Dynamic<StackView.NSUILayoutPriority>, Binding>({ v in .stackViewBinding(StackView.Binding.verticalHuggingPriority(v)) }) }
-		public static var edgeInsets: BindingName<Dynamic<NSEdgeInsets>, Binding> { return BindingName<Dynamic<NSEdgeInsets>, Binding>({ v in .stackViewBinding(StackView.Binding.edgeInsets(v)) }) }
-		@available(*, unavailable)
-		public static var isLayoutMarginsRelativeArrangement: BindingName<(), Binding> { return BindingName<(), Binding>({ v in .baseBinding(.lifetimes(.constant([]))) }) }
-	#endif
+	// With:    static var $1: StackViewName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var alignment: StackViewName<Dynamic<StackView.NSUIStackViewAlignment>> { return .name(B.alignment) }
+	static var arrangedSubviews: StackViewName<Dynamic<[ViewConvertible]>> { return .name(B.arrangedSubviews) }
+	static var axis: StackViewName<Dynamic<StackView.NSUIUserInterfaceLayoutOrientation>> { return .name(B.axis) }
+	static var distribution: StackViewName<Dynamic<StackView.NSUIStackViewDistribution>> { return .name(B.distribution) }
+	static var spacing: StackViewName<Dynamic<CGFloat>> { return .name(B.spacing) }
+	
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var edgeInsets: StackViewName<Dynamic<NSEdgeInsets>> { return .name(B.edgeInsets) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalClippingResistance) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalHuggingPriority) }
+	@available(macOS, unavailable) @available(iOS 11, *)
+	static var isLayoutMarginsRelativeArrangement: StackViewName<()> { return .name(B.isLayoutMarginsRelativeArrangement) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var verticalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalClippingResistance) }
+	@available(macOS 10.13, *) @available(iOS, unavailable)
+	static var verticalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalHuggingPriority) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 #if os(macOS)
 	public protocol StackViewConvertible: ViewConvertible {
 		func nsStackView() -> StackView.Instance
 	}
-	extension StackViewConvertible {
-		public func nsView() -> View.Instance { return nsStackView() }
+	public extension StackViewConvertible {
+		func nsView() -> View.Instance { return nsStackView() }
 	}
-	extension StackView.Instance: StackViewConvertible {
+	extension NSStackView: StackViewConvertible {
 		public func nsStackView() -> StackView.Instance { return self }
+	}
+	public extension StackView {
+		func nsStackView() -> StackView.Instance { return instance() }
 	}
 #else
 	public protocol StackViewConvertible: ViewConvertible {
 		func uiStackView() -> StackView.Instance
 	}
-	extension StackViewConvertible {
-		public func uiView() -> View.Instance { return uiStackView() }
+	public extension StackViewConvertible {
+		func uiView() -> View.Instance { return uiStackView() }
 	}
-	extension StackView.Instance: StackViewConvertible {
+	extension UIStackView: StackViewConvertible {
 		public func uiStackView() -> StackView.Instance { return self }
+	}
+	public extension StackView {
+		func uiStackView() -> StackView.Instance { return instance() }
 	}
 #endif
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol StackViewBinding: ViewBinding {
 	static func stackViewBinding(_ binding: StackView.Binding) -> Self
 }
-
-extension StackViewBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension StackViewBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return stackViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension StackView.Binding {
+	public typealias Preparer = StackView.Preparer
+	static func stackViewBinding(_ binding: StackView.Binding) -> StackView.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types

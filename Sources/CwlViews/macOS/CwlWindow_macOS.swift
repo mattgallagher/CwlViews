@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class Window: ConstructingBinder, WindowConvertible {
+public class Window: Binder, WindowConvertible {
 	public typealias Instance = NSWindow
 	public typealias Inherited = BaseBinder
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,7 +32,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 	}
 	public func nsWindow() -> Instance { return instance() }
 	
-	public enum Binding: WindowBinding {
+	enum Binding: WindowBinding {
 		public typealias EnclosingBinder = Window
 		public typealias Inherited = BaseBinder.Binding
 		public static func windowBinding(_ binding: Window.Binding) -> Window.Binding { return binding }
@@ -160,7 +160,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 		case willUseStandardFrame((NSWindow, NSRect) -> NSRect)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Window
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -234,7 +234,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 		
 		public static var defaultWindowSize: NSSize { return NSSize(width: 400, height: 400) }
 
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .deferCreation(let x): deferCreation = x.value
 			case .backingType(let x):
@@ -258,36 +258,20 @@ public class Window: ConstructingBinder, WindowConvertible {
 			case .styleMask(let x):
 				styleMask = x.initialSubsequent()
 				styleMaskInitial = styleMask.initial()
-			case .willResize(let x):
-				let s = #selector(NSWindowDelegate.windowWillResize(_:to:))
-				delegate().addSelector(s).willResize = x
-			case .willUseStandardFrame(let x):
-				let s = #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:))
-				delegate().addSelector(s).willUseStandardFrame = x
-			case .shouldZoom(let x):
-				let s = #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:))
-				delegate().addSelector(s).shouldZoom = x
-			case .willUseFullScreenContentSize(let x):
-				let s = #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:))
-				delegate().addSelector(s).willUseFullScreenContentSize = x
-			case .willUseFullScreenPresentationOptions(let x):
-				let s = #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:))
-				delegate().addSelector(s).willUseFullScreenPresentationOptions = x
-			case .shouldClose(let x):
-				let s = #selector(NSWindowDelegate.windowShouldClose(_:))
-				delegate().addSelector(s).shouldClose = x
-			case .shouldPopUpDocumentPathMenu(let x):
-				let s = #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:))
-				delegate().addSelector(s).shouldPopUpDocumentPathMenu = x
-			case .willResizeForVersionBrowser(let x):
-				let s = #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:))
-				delegate().addSelector(s).willResizeForVersionBrowser = x
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
+			case .willResize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
+			case .willUseStandardFrame(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
+			case .shouldZoom(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
+			case .willUseFullScreenContentSize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
+			case .willUseFullScreenPresentationOptions(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
+			case .shouldClose(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
+			case .shouldPopUpDocumentPathMenu(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
+			case .willResizeForVersionBrowser(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
+			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 			default: break
 			}
 		}
 
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			if storage.inUse {
@@ -297,65 +281,65 @@ public class Window: ConstructingBinder, WindowConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .contentView(let x):
 				if let cv = instance.contentView {
 					x.value.applyBindings(to: cv)
 				}
 				return nil
-			case .backingType: return backingType.resume()?.apply(instance, storage) { i, s, v in i.backingType = v }
+			case .backingType: return backingType.resume()?.apply(instance) { i, v in i.backingType = v }
 			case .frameHorizontal: return nil
 			case .frameVertical: return nil
-			case .contentWidth: return contentWidth.resume()?.apply(instance, storage) { i, s, v in i.setContentSize(v.applyWidthToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
-			case .contentHeight: return contentHeight.resume()?.apply(instance, storage) { i, s, v in i.setContentSize(v.applyHeightToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
+			case .contentWidth: return contentWidth.resume()?.apply(instance) { i, v in i.setContentSize(v.applyWidthToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
+			case .contentHeight: return contentHeight.resume()?.apply(instance) { i, v in i.setContentSize(v.applyHeightToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
 			case .deferCreation:
 				return nil
 			case .key: return nil
-			case .level(let x): return x.apply(instance, storage) { i, s, v in i.level = v }
+			case .level(let x): return x.apply(instance) { i, v in i.level = v }
 			case .main: return nil
 			case .order: return nil
 			case .screen:
-				return screen.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in
+				return screen.subsequent.flatMap { $0.apply(instance) { i, v in
 					let r = i.constrainFrameRect(i.frame, to:v)
 					i.setFrameOrigin(r.origin)
 				} }
-			case .styleMask: return styleMask.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.styleMask = v } }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
+			case .styleMask: return styleMask.subsequent.flatMap { $0.apply(instance) { i, v in i.styleMask = v } }
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
 			case .frameAutosaveName: return nil
-			case .alphaValue(let x): return x.apply(instance, storage) { i, s, v in i.alphaValue = v }
-			case .colorSpace(let x): return x.apply(instance, storage) { i, s, v in i.colorSpace = v }
-			case .canHide(let x): return x.apply(instance, storage) { i, s, v in i.canHide = v }
-			case .hidesOnDeactivate(let x): return x.apply(instance, storage) { i, s, v in i.hidesOnDeactivate = v }
-			case .collectionBehavior(let x): return x.apply(instance, storage) { i, s, v in i.collectionBehavior = v }
-			case .isOpaque(let x): return x.apply(instance, storage) { i, s, v in i.isOpaque = v }
+			case .alphaValue(let x): return x.apply(instance) { i, v in i.alphaValue = v }
+			case .colorSpace(let x): return x.apply(instance) { i, v in i.colorSpace = v }
+			case .canHide(let x): return x.apply(instance) { i, v in i.canHide = v }
+			case .hidesOnDeactivate(let x): return x.apply(instance) { i, v in i.hidesOnDeactivate = v }
+			case .collectionBehavior(let x): return x.apply(instance) { i, v in i.collectionBehavior = v }
+			case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
 				
-			case .contentMinSize(let x): return x.apply(instance, storage) { i, s, v in i.contentMinSize = v }
-			case .contentMaxSize(let x): return x.apply(instance, storage) { i, s, v in i.contentMaxSize = v }
+			case .contentMinSize(let x): return x.apply(instance) { i, v in i.contentMinSize = v }
+			case .contentMaxSize(let x): return x.apply(instance) { i, v in i.contentMaxSize = v }
 			case .minFullScreenContentSize(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.minFullScreenContentSize = v
 					}
 				}
 			case .maxFullScreenContentSize(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.maxFullScreenContentSize = v
 					}
 				}
-			case .contentAspectRatio(let x): return x.apply(instance, storage) { i, s, v in i.contentAspectRatio = v }
-			case .contentResizeIncrements(let x): return x.apply(instance, storage) { i, s, v in i.contentResizeIncrements = v }
+			case .contentAspectRatio(let x): return x.apply(instance) { i, v in i.contentAspectRatio = v }
+			case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
 				
 				
-			case .hasShadow(let x): return x.apply(instance, storage) { i, s, v in i.hasShadow = v }
-			case .preventsApplicationTerminationWhenModal(let x): return x.apply(instance, storage) { i, s, v in i.preventsApplicationTerminationWhenModal = v }
-			case .canBecomeVisibleWithoutLogin(let x): return x.apply(instance, storage) { i, s, v in i.canBecomeVisibleWithoutLogin = v }
-			case .sharingType(let x): return x.apply(instance, storage) { i, s, v in i.sharingType = v }
-			case .preferredBackingLocation(let x): return x.apply(instance, storage) { i, s, v in i.preferredBackingLocation = v }
-			case .isOneShot(let x): return x.apply(instance, storage) { i, s, v in i.isOneShot = v }
+			case .hasShadow(let x): return x.apply(instance) { i, v in i.hasShadow = v }
+			case .preventsApplicationTerminationWhenModal(let x): return x.apply(instance) { i, v in i.preventsApplicationTerminationWhenModal = v }
+			case .canBecomeVisibleWithoutLogin(let x): return x.apply(instance) { i, v in i.canBecomeVisibleWithoutLogin = v }
+			case .sharingType(let x): return x.apply(instance) { i, v in i.sharingType = v }
+			case .preferredBackingLocation(let x): return x.apply(instance) { i, v in i.preferredBackingLocation = v }
+			case .isOneShot(let x): return x.apply(instance) { i, v in i.isOneShot = v }
 			case .depthLimit(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let v = v {
 						i.depthLimit = v
 					} else {
@@ -363,7 +347,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 					}
 				}
 			case .resizeStyle(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					switch v {
 					case .increment(let s):
 						i.resizeIncrements = s
@@ -371,27 +355,27 @@ public class Window: ConstructingBinder, WindowConvertible {
 						i.contentAspectRatio = s
 					}
 				}
-			case .preservesContentDuringLiveResize(let x): return x.apply(instance, storage) { i, s, v in i.preservesContentDuringLiveResize = v }
-			case .isExcludedFromWindowsMenu(let x): return x.apply(instance, storage) { i, s, v in i.isExcludedFromWindowsMenu = v }
-			case .allowsToolTipsWhenApplicationIsInactive(let x): return x.apply(instance, storage) { i, s, v in i.allowsToolTipsWhenApplicationIsInactive = v }
-			case .autorecalculatesKeyViewLoop(let x): return x.apply(instance, storage) { i, s, v in i.autorecalculatesKeyViewLoop = v }
-			case .acceptsMouseMovedEvents(let x): return x.apply(instance, storage) { i, s, v in i.acceptsMouseMovedEvents = v }
-			case .ignoresMouseEvents(let x): return x.apply(instance, storage) { i, s, v in i.ignoresMouseEvents = v }
-			case .isRestorable(let x): return x.apply(instance, storage) { i, s, v in i.isRestorable = v }
+			case .preservesContentDuringLiveResize(let x): return x.apply(instance) { i, v in i.preservesContentDuringLiveResize = v }
+			case .isExcludedFromWindowsMenu(let x): return x.apply(instance) { i, v in i.isExcludedFromWindowsMenu = v }
+			case .allowsToolTipsWhenApplicationIsInactive(let x): return x.apply(instance) { i, v in i.allowsToolTipsWhenApplicationIsInactive = v }
+			case .autorecalculatesKeyViewLoop(let x): return x.apply(instance) { i, v in i.autorecalculatesKeyViewLoop = v }
+			case .acceptsMouseMovedEvents(let x): return x.apply(instance) { i, v in i.acceptsMouseMovedEvents = v }
+			case .ignoresMouseEvents(let x): return x.apply(instance) { i, v in i.ignoresMouseEvents = v }
+			case .isRestorable(let x): return x.apply(instance) { i, v in i.isRestorable = v }
 			case .restorationClass(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.restorationClass = v
 				}
-			case .isAutodisplay(let x): return x.apply(instance, storage) { i, s, v in i.isAutodisplay = v }
-			case .allowsConcurrentViewDrawing(let x): return x.apply(instance, storage) { i, s, v in i.allowsConcurrentViewDrawing = v }
-			case .animationBehavior(let x): return x.apply(instance, storage) { i, s, v in i.animationBehavior = v }
-			case .isDocumentEdited(let x): return x.apply(instance, storage) { i, s, v in i.isDocumentEdited = v }
-			case .representedURL(let x): return x.apply(instance, storage) { i, s, v in i.representedURL = v }
-			case .displaysWhenScreenProfileChanges(let x): return x.apply(instance, storage) { i, s, v in i.displaysWhenScreenProfileChanges = v }
-			case .isMovableByWindowBackground(let x): return x.apply(instance, storage) { i, s, v in i.isMovableByWindowBackground = v }
-			case .isMovable(let x): return x.apply(instance, storage) { i, s, v in i.isMovable = v }
-			case .miniwindowImage(let x): return x.apply(instance, storage) { i, s, v in i.miniwindowImage = v }
-			case .miniwindowTitle(let x): return x.apply(instance, storage) { i, s, v in i.miniwindowTitle = v }
+			case .isAutodisplay(let x): return x.apply(instance) { i, v in i.isAutodisplay = v }
+			case .allowsConcurrentViewDrawing(let x): return x.apply(instance) { i, v in i.allowsConcurrentViewDrawing = v }
+			case .animationBehavior(let x): return x.apply(instance) { i, v in i.animationBehavior = v }
+			case .isDocumentEdited(let x): return x.apply(instance) { i, v in i.isDocumentEdited = v }
+			case .representedURL(let x): return x.apply(instance) { i, v in i.representedURL = v }
+			case .displaysWhenScreenProfileChanges(let x): return x.apply(instance) { i, v in i.displaysWhenScreenProfileChanges = v }
+			case .isMovableByWindowBackground(let x): return x.apply(instance) { i, v in i.isMovableByWindowBackground = v }
+			case .isMovable(let x): return x.apply(instance) { i, v in i.isMovable = v }
+			case .miniwindowImage(let x): return x.apply(instance) { i, v in i.miniwindowImage = v }
+			case .miniwindowTitle(let x): return x.apply(instance) { i, v in i.miniwindowTitle = v }
 			case .willResize: return nil
 			case .willUseStandardFrame: return nil
 			case .shouldZoom: return nil
@@ -401,21 +385,21 @@ public class Window: ConstructingBinder, WindowConvertible {
 			case .shouldPopUpDocumentPathMenu: return nil
 			case .willResizeForVersionBrowser: return nil
 			case .sheet(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.beginSheet(v.value) { r in _ = v.callback.send(value: r) }
 				}
 			case .criticalSheet(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.beginCriticalSheet(v.value) { r in _ = v.callback.send(value: r) }
 				}
 			case .presentError(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					let ptr = Unmanaged.passRetained(v.callback).toOpaque()
 					let sel = #selector(Window.Storage.didPresentError(recovered:contextInfo:))
 					i.presentError(v.value, modalFor: i, delegate: s, didPresent: sel, contextInfo: ptr)
 				}
 			case .close(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					switch v {
 					case .dismiss:
 						if i.isSheet {
@@ -444,20 +428,20 @@ public class Window: ConstructingBinder, WindowConvertible {
 					}
 				}
 			case .zoom(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if v {
 						i.performZoom(nil)
 					} else {
 						i.zoom(nil)
 					}
 				}
-			case .toggleFullScreen(let x): return x.apply(instance, storage) { i, s, v in i.toggleFullScreen(nil) }
-			case .toggleToolbarShown(let x): return x.apply(instance, storage) { i, s, v in i.toggleToolbarShown(nil) }
-			case .invalidateShadow(let x): return x.apply(instance, storage) { i, s, v in i.invalidateShadow() }
-			case .runToolbarCustomizationPalette(let x): return x.apply(instance, storage) { i, s, v in i.runToolbarCustomizationPalette(nil) }
-			case .recalculateKeyViewLoop(let x): return x.apply(instance, storage) { i, s, v in i.recalculateKeyViewLoop() }
+			case .toggleFullScreen(let x): return x.apply(instance) { i, v in i.toggleFullScreen(nil) }
+			case .toggleToolbarShown(let x): return x.apply(instance) { i, v in i.toggleToolbarShown(nil) }
+			case .invalidateShadow(let x): return x.apply(instance) { i, v in i.invalidateShadow() }
+			case .runToolbarCustomizationPalette(let x): return x.apply(instance) { i, v in i.runToolbarCustomizationPalette(nil) }
+			case .recalculateKeyViewLoop(let x): return x.apply(instance) { i, v in i.recalculateKeyViewLoop() }
 			case .display(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if v {
 						i.displayIfNeeded()
 					} else {
@@ -465,17 +449,17 @@ public class Window: ConstructingBinder, WindowConvertible {
 					}
 				}
 			case .miniaturize(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if v {
 						i.performMiniaturize(nil)
 					} else {
 						i.miniaturize(nil)
 					}
 				}
-			case .deminiaturize(let x): return x.apply(instance, storage) { i, s, v in i.deminiaturize(nil) }
-			case .printWindow(let x): return x.apply(instance, storage) { i, s, v in i.printWindow(nil) }
-			case .selectNextKeyView(let x): return x.apply(instance, storage) { i, s, v in i.selectNextKeyView(nil) }
-			case .selectPreviousKeyView(let x): return x.apply(instance, storage) { i, s, v in i.selectPreviousKeyView(nil) }
+			case .deminiaturize(let x): return x.apply(instance) { i, v in i.deminiaturize(nil) }
+			case .printWindow(let x): return x.apply(instance) { i, v in i.printWindow(nil) }
+			case .selectNextKeyView(let x): return x.apply(instance) { i, v in i.selectNextKeyView(nil) }
+			case .selectPreviousKeyView(let x): return x.apply(instance) { i, v in i.selectPreviousKeyView(nil) }
 			case .didBecomeKey(let x):
 				return Signal.notifications(name: NSWindow.didBecomeKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .didBecomeMain(let x):
@@ -538,20 +522,20 @@ public class Window: ConstructingBinder, WindowConvertible {
 				return Signal.notifications(name: NSWindow.willEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 			case .willExitVersionBrowser(let x):
 				return Signal.notifications(name: NSWindow.willExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .toolbar(let x): return x.apply(instance, storage) { i, s, v in i.toolbar = v.nsToolbar() }
+			case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
 			case .inheritedBinding(let s):
-				return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+				return inherited.applyBinding(s, instance: instance, storage: storage)
 			}
 		}
 
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			
 			// Apply frame placement
 			instance.layoutIfNeeded()
-			let h = frameHorizontal?.apply(instance, storage) { i, s, v in i.setFrameOrigin(v.applyFrameHorizontal(i.screen, frameRect: i.frame)) }
-			let v = frameVertical?.apply(instance, storage) { i, s, v in i.setFrameOrigin(v.applyFrameVertical(i.screen, frameRect: i.frame)) }
-			let a = frameAutosaveName?.apply(instance, storage) { i, s, v in i.setFrameAutosaveName(v) }
+			let h = frameHorizontal?.apply(instance) { i, v in i.setFrameOrigin(v.applyFrameHorizontal(i.screen, frameRect: i.frame)) }
+			let v = frameVertical?.apply(instance) { i, v in i.setFrameOrigin(v.applyFrameVertical(i.screen, frameRect: i.frame)) }
+			let a = frameAutosaveName?.apply(instance) { i, v in i.setFrameAutosaveName(v) }
 			
 			var captureOrder = order?.initialSubsequent()
 			var captureKey = key?.initialSubsequent()
@@ -568,15 +552,15 @@ public class Window: ConstructingBinder, WindowConvertible {
 				instance.makeMain()
 			}
 
-			let o = captureOrder?.resume()?.apply(instance, storage) { i, s, v in v.applyToWindow(i) }
-			let k = captureKey?.resume()?.apply(instance, storage) { i, s, v in
+			let o = captureOrder?.resume()?.apply(instance) { i, v in v.applyToWindow(i) }
+			let k = captureKey?.resume()?.apply(instance) { i, v in
 				if v {
 					i.makeKey()
 				} else {
 					i.resignKey()
 				}
 			}
-			let m = captureMain?.resume()?.apply(instance, storage) { i, s, v in
+			let m = captureMain?.resume()?.apply(instance) { i, v in
 				if v {
 					i.makeMain()
 				} else {
@@ -601,44 +585,36 @@ public class Window: ConstructingBinder, WindowConvertible {
 			super.init()
 		}
 		
-		open var willResize: ((NSWindow, NSSize) -> NSSize)?
 		open func windowWillResize(_ window: NSWindow, to toSize: NSSize) -> NSSize {
-			return willResize!(window, toSize)
+			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)(window, toSize)
 		}
 		
-		open var willUseStandardFrame: ((NSWindow, NSRect) -> NSRect)?
 		open func windowWillUseStandardFrame(_ window: NSWindow, defaultFrame: NSRect) -> NSRect {
-			return willUseStandardFrame!(window, defaultFrame)
+			return handler(ofType: ((NSWindow, NSRect) -> NSRect).self)(window, defaultFrame)
 		}
 		
-		open var shouldZoom: ((NSWindow, NSRect) -> Bool)?
 		open func windowShouldZoom(_ window: NSWindow, toFrame: NSRect) -> Bool {
-			return shouldZoom!(window, toFrame)
+			return handler(ofType: ((NSWindow, NSRect) -> Bool).self)(window, toFrame)
 		}
 		
-		open var willUseFullScreenContentSize: ((NSWindow, NSSize) -> NSSize)?
 		open func window(_ window: NSWindow, willUseFullScreenContentSize param: NSSize) -> NSSize {
-			return willUseFullScreenContentSize!(window, param)
+			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)(window, param)
 		}
 		
-		open var willUseFullScreenPresentationOptions: ((NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions)?
 		open func window(_ window: NSWindow, willUseFullScreenPresentationOptions param: NSApplication.PresentationOptions) -> NSApplication.PresentationOptions {
-			return willUseFullScreenPresentationOptions!(window, param)
+			return handler(ofType: ((NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions).self)(window, param)
 		}
 		
-		open var shouldClose: ((NSWindow) -> Bool)?
 		open func windowShouldClose(_ window: NSWindow) -> Bool {
-			return shouldClose!(window)
+			return handler(ofType: ((NSWindow) -> Bool).self)(window)
 		}
 		
-		open var shouldPopUpDocumentPathMenu: ((NSWindow, NSMenu) -> Bool)?
 		open func window(_ window: NSWindow, shouldPopUpDocumentPathMenu param: NSMenu) -> Bool {
-			return shouldPopUpDocumentPathMenu!(window, param)
+			return handler(ofType: ((NSWindow, NSMenu) -> Bool).self)(window, param)
 		}
 		
-		open var willResizeForVersionBrowser: ((_ window: NSWindow, _ maxPreferredSize: NSSize, _ maxAllowedSize: NSSize) -> NSSize)?
 		open func window(_ window: NSWindow, willResizeForVersionBrowserWithMaxPreferredSize: NSSize, maxAllowedSize: NSSize) -> NSSize {
-			return willResizeForVersionBrowser!(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
+			return handler(ofType: ((_ window: NSWindow, _ maxPreferredSize: NSSize, _ maxAllowedSize: NSSize) -> NSSize).self)(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
 		}
 	}
 }

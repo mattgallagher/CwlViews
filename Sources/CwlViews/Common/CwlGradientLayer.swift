@@ -17,23 +17,20 @@
 //  OF THIS SOFTWARE.
 //
 
-public class GradientLayer: ConstructingBinder, GradientLayerConvertible {
-	public typealias Instance = CAGradientLayer
-	public typealias Inherited = Layer
-	
-	public var state: BinderState<Instance, BinderSubclassParameters<Instance, Binding>>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
+// MARK: - Binder Part 1: Binder
+public class GradientLayer: Binder, GradientLayerConvertible {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiGradientLayer() -> Instance { return instance() }
+}
 
-	public enum Binding: GradientLayerBinding {
-		public typealias EnclosingBinder = GradientLayer
-		public static func gradientLayerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+// MARK: - Binder Part 2: Binding
+public extension GradientLayer {
+	enum Binding: GradientLayerBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case colors(Dynamic<[CGColor]>)
@@ -47,56 +44,109 @@ public class GradientLayer: ConstructingBinder, GradientLayerConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = GradientLayer
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
-		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .colors(let x): return x.apply(instance, storage) { i, s, v in i.colors = v }
-			case .locations(let x): return x.apply(instance, storage) { i, s, v in i.locations = v.map { NSNumber(value: Double($0)) } }
-			case .endPoint(let x): return x.apply(instance, storage) { i, s, v in i.endPoint = v }
-			case .startPoint(let x): return x.apply(instance, storage) { i, s, v in i.startPoint = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
-		}
-	}
-
-	public typealias Storage = Layer.Storage
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension GradientLayer {
+	struct Preparer: BinderDelegateDerived {
+		public typealias Instance = CAGradientLayer
+		public typealias Binding = GradientLayer.Binding
+		public typealias Storage = GradientLayer.Storage
+		
+		public var inherited: Layer.Preparer
+		public init(delegateClass: Delegate.Type) {
+			inherited = Layer.Preparer(delegateClass: delegateClass)
+		}
+		public func inheritedBinding(from: Binding) -> Layer.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension GradientLayer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .colors(let x): return x.apply(instance) { i, v in i.colors = v }
+		case .locations(let x): return x.apply(instance) { i, v in i.locations = v.map { NSNumber(value: Double($0)) } }
+		case .endPoint(let x): return x.apply(instance) { i, v in i.endPoint = v }
+		case .startPoint(let x): return x.apply(instance) { i, v in i.startPoint = v }
+
+		// 2. Signal bindings are performed on the object after construction.
+
+		// 3. Action bindings are triggered by the object after construction.
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension GradientLayer {
+	public typealias Storage = Layer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
+extension BindingName where Binding: GradientLayerBinding {
+	public typealias GradientLayerName<V> = BindingName<V, GradientLayer.Binding, Binding>
+	private typealias B = GradientLayer.Binding
+	private static func name<V>(_ source: @escaping (V) -> GradientLayer.Binding) -> GradientLayerName<V> {
+		return GradientLayerName<V>(source: source, downcast: Binding.gradientLayerBinding)
+	}
+}
 extension BindingName where Binding: GradientLayerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .gradientLayerBinding(GradientLayer.Binding.$1(v)) }) }
-	public static var colors: BindingName<Dynamic<[CGColor]>, Binding> { return BindingName<Dynamic<[CGColor]>, Binding>({ v in .gradientLayerBinding(GradientLayer.Binding.colors(v)) }) }
-	public static var locations: BindingName<Dynamic<[CGFloat]>, Binding> { return BindingName<Dynamic<[CGFloat]>, Binding>({ v in .gradientLayerBinding(GradientLayer.Binding.locations(v)) }) }
-	public static var endPoint: BindingName<Dynamic<CGPoint>, Binding> { return BindingName<Dynamic<CGPoint>, Binding>({ v in .gradientLayerBinding(GradientLayer.Binding.endPoint(v)) }) }
-	public static var startPoint: BindingName<Dynamic<CGPoint>, Binding> { return BindingName<Dynamic<CGPoint>, Binding>({ v in .gradientLayerBinding(GradientLayer.Binding.startPoint(v)) }) }
+	// With:    static var $1: GradientLayerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var colors: GradientLayerName<Dynamic<[CGColor]>> { return .name(B.colors) }
+	static var locations: GradientLayerName<Dynamic<[CGFloat]>> { return .name(B.locations) }
+	static var endPoint: GradientLayerName<Dynamic<CGPoint>> { return .name(B.endPoint) }
+	static var startPoint: GradientLayerName<Dynamic<CGPoint>> { return .name(B.startPoint) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol GradientLayerConvertible: LayerConvertible {
-	func uiGradientLayer() -> GradientLayer.Instance
+	func caGradientLayer() -> GradientLayer.Instance
 }
-extension GradientLayerConvertible {
-	public func caLayer() -> Layer.Instance { return uiGradientLayer() }
+public extension GradientLayerConvertible {
+	func caLayer() -> Layer.Instance { return caGradientLayer() }
 }
-extension GradientLayer.Instance: GradientLayerConvertible {
-	public func uiGradientLayer() -> GradientLayer.Instance { return self }
+extension CAGradientLayer: GradientLayerConvertible {
+	public func caGradientLayer() -> GradientLayer.Instance { return self }
+}
+public extension GradientLayer {
+	func caGradientLayer() -> GradientLayer.Instance { return instance() }
 }
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol GradientLayerBinding: LayerBinding {
 	static func gradientLayerBinding(_ binding: GradientLayer.Binding) -> Self
 }
-
-extension GradientLayerBinding {
-	public static func layerBinding(_ binding: Layer.Binding) -> Self {
+public extension GradientLayerBinding {
+	static func layerBinding(_ binding: Layer.Binding) -> Self {
 		return gradientLayerBinding(.inheritedBinding(binding))
 	}
 }
+public extension GradientLayer.Binding {
+	public typealias Preparer = GradientLayer.Preparer
+	static func gradientLayerBinding(_ binding: GradientLayer.Binding) -> GradientLayer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types

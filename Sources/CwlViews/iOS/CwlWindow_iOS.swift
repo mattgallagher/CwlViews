@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class Window: ConstructingBinder, WindowConvertible {
+public class Window: Binder, WindowConvertible {
 	public typealias Instance = UIWindow
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class Window: ConstructingBinder, WindowConvertible {
 	}
 	public func uiWindow() -> Instance { return instance() }
 	
-	public enum Binding: WindowBinding {
+	enum Binding: WindowBinding {
 		public typealias EnclosingBinder = Window
 		public static func windowBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -63,7 +63,7 @@ public class Window: ConstructingBinder, WindowConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Window
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -74,47 +74,47 @@ public class Window: ConstructingBinder, WindowConvertible {
 
 		public var isHidden: InitialSubsequent<Bool>? = nil
 		
-		public mutating func prepareBinding(_ binding: Window.Binding) {
+		mutating func prepareBinding(_ binding: Window.Binding) {
 			switch binding {
 			case .inheritedBinding(.isHidden(let x)): isHidden = x.initialSubsequent()
-			case .inheritedBinding(let s): linkedPreparer.prepareBinding(s)
+			case .inheritedBinding(let s): inherited.prepareBinding(s)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .frame(let x): return x.apply(instance, storage) { i, s, v in i.frame = v }
+			case .frame(let x): return x.apply(instance) { i, v in i.frame = v }
 			case .rootViewController(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					let rootViewController = v.uiViewController()
 					i.rootViewController = rootViewController
 					if rootViewController.restorationIdentifier == nil {
 						rootViewController.restorationIdentifier = "cwlviews.root"
 					}
 				}
-			case .windowLevel(let x): return x.apply(instance, storage) { i, s, v in i.windowLevel = v }
-			case .screen(let x): return x.apply(instance, storage) { i, s, v in i.screen = v }
-			case .makeKey(let x): return x.apply(instance, storage) { i, s, v in i.makeKey() }
-			case .didBecomeVisible(let x): return Signal.notifications(name: UIWindow.didBecomeVisibleNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .didBecomeHidden(let x): return Signal.notifications(name: UIWindow.didBecomeHiddenNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .didBecomeKey(let x): return Signal.notifications(name: UIWindow.didBecomeKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .didResignKey(let x): return Signal.notifications(name: UIWindow.didResignKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .keyboardWillShow(let x): return Signal.notifications(name: UIResponder.keyboardWillShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardDidShow(let x): return Signal.notifications(name: UIResponder.keyboardDidShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardWillHide(let x): return Signal.notifications(name: UIResponder.keyboardWillHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardDidHide(let x): return Signal.notifications(name: UIResponder.keyboardDidHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardWillChangeFrame(let x): return Signal.notifications(name: UIResponder.keyboardWillChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardDidChangeFrame(let x): return Signal.notifications(name: UIResponder.keyboardDidChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+			case .windowLevel(let x): return x.apply(instance) { i, v in i.windowLevel = v }
+			case .screen(let x): return x.apply(instance) { i, v in i.screen = v }
+			case .makeKey(let x): return x.apply(instance) { i, v in i.makeKey() }
+			case .didBecomeVisible(let x): return Signal.notifications(n: UIWindow.didBecomeVisibleNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+			case .didBecomeHidden(let x): return Signal.notifications(n: UIWindow.didBecomeHiddenNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+			case .didBecomeKey(let x): return Signal.notifications(n: UIWindow.didBecomeKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+			case .didResignKey(let x): return Signal.notifications(n: UIWindow.didResignKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+			case .keyboardWillShow(let x): return Signal.notifications(n: UIResponder.keyboardWillShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+			case .keyboardDidShow(let x): return Signal.notifications(n: UIResponder.keyboardDidShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+			case .keyboardWillHide(let x): return Signal.notifications(n: UIResponder.keyboardWillHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+			case .keyboardDidHide(let x): return Signal.notifications(n: UIResponder.keyboardDidHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+			case .keyboardWillChangeFrame(let x): return Signal.notifications(n: UIResponder.keyboardWillChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+			case .keyboardDidChangeFrame(let x): return Signal.notifications(n: UIResponder.keyboardDidChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
 			case .inheritedBinding(.isHidden): return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: View.Storage) -> Lifetime? {
+		public func finalizeInstance(_ instance: Instance, storage: View.Storage) -> Lifetime? {
 			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			if let h = isHidden?.resume() {
-				if let c2 = linkedPreparer.applyBinding(.isHidden(.dynamic(h)), instance: instance, storage: storage) {
+				if let c2 = inherited.applyBinding(.isHidden(.dynamic(h)), instance: instance, storage: storage) {
 					return lifetime.map { c1 in AggregateLifetime(lifetimes: [c2, c1]) } ?? c2
 				}
 			}

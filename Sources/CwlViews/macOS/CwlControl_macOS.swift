@@ -19,23 +19,18 @@
 
 #if os(macOS)
 
-public class Control: ConstructingBinder, ControlConvertible {
-	public typealias Instance = NSControl
-	public typealias Inherited = View
-	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
+// MARK: - Binder Part 1: Binder
+public class Control: Binder, ControlConvertible {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsControl() -> Instance { return instance() }
-	
-	public enum Binding: ControlBinding {
-		public typealias EnclosingBinder = Control
-		public static func controlBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+}
+
+// MARK: - Binder Part 2: Binding
+public extension Control {
+	enum Binding: ControlBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -65,172 +60,193 @@ public class Control: ConstructingBinder, ControlConvertible {
 		
 		//	2. Signal bindings are performed on the object after construction.
 		case abortEditing(Signal<Void>)
-		case validateEditing(Signal<Void>)
 		case performClick(Signal<Void>)
 		case sizeToFit(Signal<Void>)
+		case validateEditing(Signal<Void>)
 		
 		//	3. Action bindings are triggered by the object after construction.
 		case action(TargetAction)
 		
-		// See also: stringA
-		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
-		case textDidChange((NSText) -> Void)
 		case textDidBeginEditing((NSText) -> Void)
+		case textDidChange((NSText) -> Void)
 		case textDidEndEditing((NSText) -> Void)
 	}
-	
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = Control
-		public var linkedPreparer = Inherited.Preparer()
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension Control {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = Control.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = NSControl
+		public typealias Storage = Control.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .alignment(let x): return x.apply(instance, storage) { i, s, v in i.alignment = v }
-			case .allowsExpansionToolTips(let x): return x.apply(instance, storage) { i, s, v in i.allowsExpansionToolTips = v }
-			case .baseWritingDirection(let x): return x.apply(instance, storage) { i, s, v in i.baseWritingDirection = v }
-			case .isContinuous(let x): return x.apply(instance, storage) { i, s, v in i.isContinuous = v }
-			case .isEnabled(let x): return x.apply(instance, storage, false) { i, s, v in i.isEnabled = v }
-			case .font(let x): return x.apply(instance, storage) { i, s, v in i.font = v }
-			case .formatter(let x): return x.apply(instance, storage) { i, s, v in i.formatter = v }
-			case .isHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.isHighlighted = v }
-			case .ignoresMultiClick(let x): return x.apply(instance, storage) { i, s, v in i.ignoresMultiClick = v }
-			case .lineBreakMode(let x): return x.apply(instance, storage) { i, s, v in i.lineBreakMode = v }
-			case .refusesFirstResponder(let x): return x.apply(instance, storage) { i, s, v in i.refusesFirstResponder = v }
-			case .size(let x): return x.apply(instance, storage) { i, s, v in i.controlSize = v }
-			case .tag(let x): return x.apply(instance, storage) { i, s, v in i.tag = v }
-			case .usesSingleLineMode(let x): return x.apply(instance, storage) { i, s, v in i.usesSingleLineMode = v }
-			case .sendActionOn(let x): return x.apply(instance, storage) { i, s, v in _ = i.sendAction(on: v) }
-			case .doubleValue(let x): return x.apply(instance, storage) { i, s, v in i.doubleValue = v }
-			case .floatValue(let x): return x.apply(instance, storage) { i, s, v in i.floatValue = v }
-			case .intValue(let x): return x.apply(instance, storage) { i, s, v in i.intValue = v }
-			case .integerValue(let x): return x.apply(instance, storage) { i, s, v in i.integerValue = v }
-			case .objectValue(let x): return x.apply(instance, storage) { i, s, v in i.objectValue = v }
-			case .stringValue(let x): return x.apply(instance, storage) { i, s, v in i.stringValue = v }
-			case .attributedStringValue(let x): return x.apply(instance, storage) { i, s, v in i.attributedStringValue = v }
-			case .abortEditing(let x): return x.apply(instance, storage) { i, s, v in i.abortEditing() }
-			case .validateEditing(let x): return x.apply(instance, storage) { i, s, v in i.validateEditing() }
-			case .performClick(let x): return x.apply(instance, storage) { i, s, v in i.performClick(nil) }
-			case .sizeToFit(let x): return x.apply(instance, storage) { i, s, v in i.sizeToFit() }
-			case .textDidChange(let x):
-				return Signal.notifications(name: NSControl.textDidChangeNotification, object: instance).compactMap { n in
-					return n.userInfo?["NSFieldEditor"] as? NSText
-				}.subscribeValues { x($0) }
-			case .textDidBeginEditing(let x):
-				return Signal.notifications(name: NSControl.textDidBeginEditingNotification, object: instance).compactMap { n in
-					return n.userInfo?["NSFieldEditor"] as? NSText
-				}.subscribeValues { x($0) }
-			case .textDidEndEditing(let x):
-				return Signal.notifications(name: NSControl.textDidEndEditingNotification, object: instance).compactMap { n in
-					return n.userInfo?["NSFieldEditor"] as? NSText
-				}.subscribeValues { x($0) }
-			case .action(let x): return x.apply(instance: instance, constructTarget: SignalActionTarget.init, processor: { sender in sender as! Instance })
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
-	
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension Control.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .alignment(let x): return x.apply(instance) { i, v in i.alignment = v }
+		case .allowsExpansionToolTips(let x): return x.apply(instance) { i, v in i.allowsExpansionToolTips = v }
+		case .attributedStringValue(let x): return x.apply(instance) { i, v in i.attributedStringValue = v }
+		case .baseWritingDirection(let x): return x.apply(instance) { i, v in i.baseWritingDirection = v }
+		case .doubleValue(let x): return x.apply(instance) { i, v in i.doubleValue = v }
+		case .floatValue(let x): return x.apply(instance) { i, v in i.floatValue = v }
+		case .font(let x): return x.apply(instance) { i, v in i.font = v }
+		case .formatter(let x): return x.apply(instance) { i, v in i.formatter = v }
+		case .ignoresMultiClick(let x): return x.apply(instance) { i, v in i.ignoresMultiClick = v }
+		case .integerValue(let x): return x.apply(instance) { i, v in i.integerValue = v }
+		case .intValue(let x): return x.apply(instance) { i, v in i.intValue = v }
+		case .isContinuous(let x): return x.apply(instance) { i, v in i.isContinuous = v }
+		case .isEnabled(let x): return x.apply(instance, storage, false) { i, s, v in i.isEnabled = v }
+		case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
+		case .lineBreakMode(let x): return x.apply(instance) { i, v in i.lineBreakMode = v }
+		case .objectValue(let x): return x.apply(instance) { i, v in i.objectValue = v }
+		case .refusesFirstResponder(let x): return x.apply(instance) { i, v in i.refusesFirstResponder = v }
+		case .sendActionOn(let x): return x.apply(instance) { i, v in _ = i.sendAction(on: v) }
+		case .size(let x): return x.apply(instance) { i, v in i.controlSize = v }
+		case .stringValue(let x): return x.apply(instance) { i, v in i.stringValue = v }
+		case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
+		case .usesSingleLineMode(let x): return x.apply(instance) { i, v in i.usesSingleLineMode = v }
+			
+		//	2. Signal bindings are performed on the object after construction.
+		case .abortEditing(let x): return x.apply(instance) { i, v in i.abortEditing() }
+		case .performClick(let x): return x.apply(instance) { i, v in i.performClick(nil) }
+		case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
+		case .validateEditing(let x): return x.apply(instance) { i, v in i.validateEditing() }
+			
+		//	3. Action bindings are triggered by the object after construction.
+		case .action(let x): return x.apply(to: instance, constructTarget: SignalActionTarget.init)
+			
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
+		case .textDidBeginEditing(let x):
+			return Signal.notifications(name: NSControl.textDidBeginEditingNotification, object: instance).compactMap { n in
+				return n.userInfo?["NSFieldEditor"] as? NSText
+			}.subscribeValues { x($0) }
+		case .textDidChange(let x):
+			return Signal.notifications(name: NSControl.textDidChangeNotification, object: instance).compactMap { n in
+				return n.userInfo?["NSFieldEditor"] as? NSText
+			}.subscribeValues { x($0) }
+		case .textDidEndEditing(let x):
+			return Signal.notifications(name: NSControl.textDidEndEditingNotification, object: instance).compactMap { n in
+				return n.userInfo?["NSFieldEditor"] as? NSText
+			}.subscribeValues { x($0) }
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension Control {
 	public typealias Storage = View.Storage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ControlBinding {
+	public typealias ControlName<V> = BindingName<V, Control.Binding, Binding>
+	private typealias B = Control.Binding
+	private static func name<V>(_ source: @escaping (V) -> Control.Binding) -> ControlName<V> {
+		return ControlName<V>(source: source, downcast: Binding.controlBinding)
+	}
+}
+public extension BindingName where Binding: ControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .controlBinding(Control.Binding.$1(v)) }) }
-
+	// With:    static var $1: ControlName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	public static var alignment: BindingName<Dynamic<NSTextAlignment>, Binding> { return BindingName<Dynamic<NSTextAlignment>, Binding>({ v in .controlBinding(Control.Binding.alignment(v)) }) }
-	public static var allowsExpansionToolTips: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.allowsExpansionToolTips(v)) }) }
-	public static var baseWritingDirection: BindingName<Dynamic<NSWritingDirection>, Binding> { return BindingName<Dynamic<NSWritingDirection>, Binding>({ v in .controlBinding(Control.Binding.baseWritingDirection(v)) }) }
-	public static var isContinuous: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.isContinuous(v)) }) }
-	public static var isEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.isEnabled(v)) }) }
-	public static var font: BindingName<Dynamic<NSFont>, Binding> { return BindingName<Dynamic<NSFont>, Binding>({ v in .controlBinding(Control.Binding.font(v)) }) }
-	public static var formatter: BindingName<Dynamic<Foundation.Formatter?>, Binding> { return BindingName<Dynamic<Foundation.Formatter?>, Binding>({ v in .controlBinding(Control.Binding.formatter(v)) }) }
-	public static var isHighlighted: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.isHighlighted(v)) }) }
-	public static var ignoresMultiClick: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.ignoresMultiClick(v)) }) }
-	public static var lineBreakMode: BindingName<Dynamic<NSLineBreakMode>, Binding> { return BindingName<Dynamic<NSLineBreakMode>, Binding>({ v in .controlBinding(Control.Binding.lineBreakMode(v)) }) }
-	public static var refusesFirstResponder: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.refusesFirstResponder(v)) }) }
-	public static var size: BindingName<Dynamic<NSControl.ControlSize>, Binding> { return BindingName<Dynamic<NSControl.ControlSize>, Binding>({ v in .controlBinding(Control.Binding.size(v)) }) }
-	public static var tag: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .controlBinding(Control.Binding.tag(v)) }) }
-	public static var usesSingleLineMode: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.usesSingleLineMode(v)) }) }
-	public static var doubleValue: BindingName<Dynamic<Double>, Binding> { return BindingName<Dynamic<Double>, Binding>({ v in .controlBinding(Control.Binding.doubleValue(v)) }) }
-	public static var floatValue: BindingName<Dynamic<Float>, Binding> { return BindingName<Dynamic<Float>, Binding>({ v in .controlBinding(Control.Binding.floatValue(v)) }) }
-	public static var intValue: BindingName<Dynamic<Int32>, Binding> { return BindingName<Dynamic<Int32>, Binding>({ v in .controlBinding(Control.Binding.intValue(v)) }) }
-	public static var integerValue: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .controlBinding(Control.Binding.integerValue(v)) }) }
-	public static var objectValue: BindingName<Dynamic<Any>, Binding> { return BindingName<Dynamic<Any>, Binding>({ v in .controlBinding(Control.Binding.objectValue(v)) }) }
-	public static var stringValue: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .controlBinding(Control.Binding.stringValue(v)) }) }
-	public static var attributedStringValue: BindingName<Dynamic<NSAttributedString>, Binding> { return BindingName<Dynamic<NSAttributedString>, Binding>({ v in .controlBinding(Control.Binding.attributedStringValue(v)) }) }
-	public static var sendActionOn: BindingName<Dynamic<NSEvent.EventTypeMask>, Binding> { return BindingName<Dynamic<NSEvent.EventTypeMask>, Binding>({ v in .controlBinding(Control.Binding.sendActionOn(v)) }) }
+	static var alignment: ControlName<Dynamic<NSTextAlignment>> { return .name(B.alignment) }
+	static var allowsExpansionToolTips: ControlName<Dynamic<Bool>> { return .name(B.allowsExpansionToolTips) }
+	static var baseWritingDirection: ControlName<Dynamic<NSWritingDirection>> { return .name(B.baseWritingDirection) }
+	static var isContinuous: ControlName<Dynamic<Bool>> { return .name(B.isContinuous) }
+	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var font: ControlName<Dynamic<NSFont>> { return .name(B.font) }
+	static var formatter: ControlName<Dynamic<Foundation.Formatter?>> { return .name(B.formatter) }
+	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(B.isHighlighted) }
+	static var ignoresMultiClick: ControlName<Dynamic<Bool>> { return .name(B.ignoresMultiClick) }
+	static var lineBreakMode: ControlName<Dynamic<NSLineBreakMode>> { return .name(B.lineBreakMode) }
+	static var refusesFirstResponder: ControlName<Dynamic<Bool>> { return .name(B.refusesFirstResponder) }
+	static var size: ControlName<Dynamic<NSControl.ControlSize>> { return .name(B.size) }
+	static var tag: ControlName<Dynamic<Int>> { return .name(B.tag) }
+	static var usesSingleLineMode: ControlName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
+	static var doubleValue: ControlName<Dynamic<Double>> { return .name(B.doubleValue) }
+	static var floatValue: ControlName<Dynamic<Float>> { return .name(B.floatValue) }
+	static var intValue: ControlName<Dynamic<Int32>> { return .name(B.intValue) }
+	static var integerValue: ControlName<Dynamic<Int>> { return .name(B.integerValue) }
+	static var objectValue: ControlName<Dynamic<Any>> { return .name(B.objectValue) }
+	static var stringValue: ControlName<Dynamic<String>> { return .name(B.stringValue) }
+	static var attributedStringValue: ControlName<Dynamic<NSAttributedString>> { return .name(B.attributedStringValue) }
+	static var sendActionOn: ControlName<Dynamic<NSEvent.EventTypeMask>> { return .name(B.sendActionOn) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	public static var abortEditing: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .controlBinding(Control.Binding.abortEditing(v)) }) }
-	public static var validateEditing: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .controlBinding(Control.Binding.validateEditing(v)) }) }
-	public static var performClick: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .controlBinding(Control.Binding.performClick(v)) }) }
-	public static var sizeToFit: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .controlBinding(Control.Binding.sizeToFit(v)) }) }
+	static var abortEditing: ControlName<Signal<Void>> { return .name(B.abortEditing) }
+	static var performClick: ControlName<Signal<Void>> { return .name(B.performClick) }
+	static var sizeToFit: ControlName<Signal<Void>> { return .name(B.sizeToFit) }
+	static var validateEditing: ControlName<Signal<Void>> { return .name(B.validateEditing) }
 	
 	//	3. Action bindings are triggered by the object after construction.
-	public static var action: BindingName<TargetAction, Binding> { return BindingName<TargetAction, Binding>({ v in .controlBinding(Control.Binding.action(v)) }) }
+	static var action: ControlName<TargetAction> { return .name(B.action) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var textDidChange: BindingName<(NSText) -> Void, Binding> { return BindingName<(NSText) -> Void, Binding>({ v in .controlBinding(Control.Binding.textDidChange(v)) }) }
-	public static var textDidBeginEditing: BindingName<(NSText) -> Void, Binding> { return BindingName<(NSText) -> Void, Binding>({ v in .controlBinding(Control.Binding.textDidBeginEditing(v)) }) }
-	public static var textDidEndEditing: BindingName<(NSText) -> Void, Binding> { return BindingName<(NSText) -> Void, Binding>({ v in .controlBinding(Control.Binding.textDidEndEditing(v)) }) }
-}
+	static var textDidBeginEditing: ControlName<(NSText) -> Void> { return .name(B.textDidBeginEditing) }
+	static var textDidChange: ControlName<(NSText) -> Void> { return .name(B.textDidChange) }
+	static var textDidEndEditing: ControlName<(NSText) -> Void> { return .name(B.textDidEndEditing) }
 
-extension BindingName where Binding: ControlBinding, Binding.EnclosingBinder: Binder {
-	// Additional helper binding names
-	public static func action<I: SignalInputInterface, Value>(_ keyPath: KeyPath<Binding.EnclosingBinder.Instance, Value>) -> BindingName<I, Binding> where I.InputValue == Value {
-		return BindingName<I, Binding> { (v: I) -> Binding in
-			Binding.controlBinding(
-				Control.Binding.action(
-					TargetAction.singleTarget(
-						Input<Any?>()
-							.map { c -> Value in (c as! Binding.EnclosingBinder.Instance)[keyPath: keyPath] }
-							.bind(to: v.input)
-					)
-				)
-			)
-		}
+	// Composite binding names
+	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
+		return Binding.keyPathActionName(keyPath, Control.Binding.action, Binding.controlBinding)
 	}
-}
-extension BindingName where Binding: ControlBinding {
-	// Additional helper binding names
-	public static var stringChanged: BindingName<SignalInput<String>, Binding> {
-		return BindingName<SignalInput<String>, Binding> { (v: SignalInput<String>) -> Binding in
-			Binding.controlBinding(
-				Control.Binding.textDidChange { text in
-					_ = v.input.send(text.string)
-				}
-			)
-		}
+	public static var stringChanged: ControlName<SignalInput<String>> {
+		return Binding.compositeName(
+			source: { input in { text in _ = input.send(value: text.string) } },
+			translate: Control.Binding.textDidChange,
+			downcast: Binding.controlBinding
+		)
 	}
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol ControlConvertible: ViewConvertible {
 	func nsControl() -> Control.Instance
 }
 extension ControlConvertible {
 	public func nsView() -> View.Instance { return nsControl() }
 }
-extension Control.Instance: ControlConvertible {
+extension NSControl: ControlConvertible, TargetActionSender {
 	public func nsControl() -> Control.Instance { return self }
 }
+public extension Control {
+	func nsControl() -> Control.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol ControlBinding: ViewBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self
 }
-
-extension ControlBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension ControlBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return controlBinding(.inheritedBinding(binding))
 	}
 }
-
-extension NSControl: TargetActionSender {}
+public extension Control.Binding {
+	public typealias Preparer = Control.Preparer
+	static func controlBinding(_ binding: Control.Binding) -> Control.Binding {
+		return binding
+	}
+}
 
 #endif

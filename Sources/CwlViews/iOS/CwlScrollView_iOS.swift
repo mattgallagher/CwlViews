@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class ScrollView: ConstructingBinder, ScrollViewConvertible {
+public class ScrollView: Binder, ScrollViewConvertible {
 	public typealias Instance = UIScrollView
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 	}
 	public func uiScrollView() -> Instance { return instance() }
 	
-	public enum Binding: ScrollViewBinding {
+	enum Binding: ScrollViewBinding {
 		public typealias EnclosingBinder = ScrollView
 		public static func scrollViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case panGestureRecognizerStyles(Constant<PanGestureRecognizer>)
@@ -90,7 +90,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 		case viewForZooming((_ scrollView: UIScrollView) -> UIView?)
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = ScrollView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -115,7 +115,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 			}
 		}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .userDidScroll(let x):
 				let s1 = #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:))
@@ -124,51 +124,25 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 				delegate().addSelector(s1).userDidScroll = x
 				_ = delegate().addSelector(s2)
 				_ = delegate().addSelector(s3)
-			case .didScroll(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidScroll(_:))
-				delegate().addSelector(s).didScroll = x
-			case .didZoom(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidZoom(_:))
-				delegate().addSelector(s).didZoom = x
-			case .willBeginDragging(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewWillBeginDragging(_:))
-				delegate().addSelector(s).willBeginDragging = x
-			case .didEndDragging(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:))
-				delegate().addSelector(s).didEndDragging = x
-			case .didScrollToTop(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:))
-				delegate().addSelector(s).didScrollToTop = x
-			case .willBeginDecelerating(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewWillBeginDecelerating(_:))
-				delegate().addSelector(s).willBeginDecelerating = x
-			case .didEndDecelerating(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:))
-				delegate().addSelector(s).didEndDecelerating = x
-			case .willBeginZooming(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewWillBeginZooming(_:with:))
-				delegate().addSelector(s).willBeginZooming = x
-			case .didEndZooming(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidEndZooming(_:with:atScale:))
-				delegate().addSelector(s).didEndZooming = x
-			case .didEndScrollingAnimation(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewDidEndScrollingAnimation(_:))
-				delegate().addSelector(s).didEndScrollingAnimation = x
-			case .willEndDragging(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewWillEndDragging(_:withVelocity:targetContentOffset:))
-				delegate().addSelector(s).willEndDragging = x
-			case .shouldScrollToTop(let x):
-				let s = #selector(UIScrollViewDelegate.scrollViewShouldScrollToTop(_:))
-				delegate().addSelector(s).shouldScrollToTop = x
-			case .viewForZooming(let x):
-				let s = #selector(UIScrollViewDelegate.viewForZooming(in:))
-				delegate().addSelector(s).forZooming = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .didScroll(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)))
+			case .didZoom(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidZoom(_:)))
+			case .willBeginDragging(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDragging(_:)))
+			case .didEndDragging(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
+			case .didScrollToTop(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:)))
+			case .willBeginDecelerating(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDecelerating(_:)))
+			case .didEndDecelerating(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:)))
+			case .willBeginZooming(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginZooming(_:with:)))
+			case .didEndZooming(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndZooming(_:with:atScale:)))
+			case .didEndScrollingAnimation(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndScrollingAnimation(_:)))
+			case .willEndDragging(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)))
+			case .shouldScrollToTop(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewShouldScrollToTop(_:)))
+			case .viewForZooming(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.viewForZooming(in:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			if storage.inUse {
@@ -178,7 +152,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .panGestureRecognizerStyles(let x):
 				x.value.applyBindings(to: instance.panGestureRecognizer)
@@ -188,37 +162,37 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 					x.value.applyBindings(to: pgr)
 				}
 				return nil
-			case .contentOffset(let x): return x.apply(instance, storage) { i, s, v in i.setContentOffset(v.value, animated: v.isAnimated) }
-			case .contentSize(let x): return x.apply(instance, storage) { i, s, v in i.contentSize = v }
-			case .contentInset(let x): return x.apply(instance, storage) { i, s, v in i.contentInset = v }
-			case .contentInsetAdjustmentBehavior(let x): return x.apply(instance, storage) { i, s, v in i.contentInsetAdjustmentBehavior = v }
-			case .isScrollEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isScrollEnabled = v }
-			case .isDirectionalLockEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isDirectionalLockEnabled = v }
-			case .scrollsToTop(let x): return x.apply(instance, storage) { i, s, v in i.scrollsToTop = v }
-			case .isPagingEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isPagingEnabled = v }
-			case .bounces(let x): return x.apply(instance, storage) { i, s, v in i.bounces = v }
-			case .alwaysBounceVertical(let x): return x.apply(instance, storage) { i, s, v in i.alwaysBounceVertical = v }
-			case .alwaysBounceHorizontal(let x): return x.apply(instance, storage) { i, s, v in i.alwaysBounceHorizontal = v }
-			case .canCancelContentTouches(let x): return x.apply(instance, storage) { i, s, v in i.canCancelContentTouches = v }
-			case .delaysContentTouches(let x): return x.apply(instance, storage) { i, s, v in i.delaysContentTouches = v }
-			case .decelerationRate(let x): return x.apply(instance, storage) { i, s, v in i.decelerationRate = v }
-			case .indicatorStyle(let x): return x.apply(instance, storage) { i, s, v in i.indicatorStyle = v }
-			case .scrollIndicatorInsets(let x): return x.apply(instance, storage) { i, s, v in i.scrollIndicatorInsets = v }
-			case .showsHorizontalScrollIndicator(let x): return x.apply(instance, storage) { i, s, v in i.showsHorizontalScrollIndicator = v }
-			case .showsVerticalScrollIndicator(let x): return x.apply(instance, storage) { i, s, v in i.showsVerticalScrollIndicator = v }
-			case .zoomScale(let x): return x.apply(instance, storage) { i, s, v in i.zoomScale = v }
-			case .maximumZoomScale(let x): return x.apply(instance, storage) { i, s, v in i.maximumZoomScale = v }
-			case .minimumZoomScale(let x): return x.apply(instance, storage) { i, s, v in i.minimumZoomScale = v }
-			case .bouncesZoom(let x): return x.apply(instance, storage) { i, s, v in i.bouncesZoom = v }
+			case .contentOffset(let x): return x.apply(instance) { i, v in i.setContentOffset(v.value, animated: v.isAnimated) }
+			case .contentSize(let x): return x.apply(instance) { i, v in i.contentSize = v }
+			case .contentInset(let x): return x.apply(instance) { i, v in i.contentInset = v }
+			case .contentInsetAdjustmentBehavior(let x): return x.apply(instance) { i, v in i.contentInsetAdjustmentBehavior = v }
+			case .isScrollEnabled(let x): return x.apply(instance) { i, v in i.isScrollEnabled = v }
+			case .isDirectionalLockEnabled(let x): return x.apply(instance) { i, v in i.isDirectionalLockEnabled = v }
+			case .scrollsToTop(let x): return x.apply(instance) { i, v in i.scrollsToTop = v }
+			case .isPagingEnabled(let x): return x.apply(instance) { i, v in i.isPagingEnabled = v }
+			case .bounces(let x): return x.apply(instance) { i, v in i.bounces = v }
+			case .alwaysBounceVertical(let x): return x.apply(instance) { i, v in i.alwaysBounceVertical = v }
+			case .alwaysBounceHorizontal(let x): return x.apply(instance) { i, v in i.alwaysBounceHorizontal = v }
+			case .canCancelContentTouches(let x): return x.apply(instance) { i, v in i.canCancelContentTouches = v }
+			case .delaysContentTouches(let x): return x.apply(instance) { i, v in i.delaysContentTouches = v }
+			case .decelerationRate(let x): return x.apply(instance) { i, v in i.decelerationRate = v }
+			case .indicatorStyle(let x): return x.apply(instance) { i, v in i.indicatorStyle = v }
+			case .scrollIndicatorInsets(let x): return x.apply(instance) { i, v in i.scrollIndicatorInsets = v }
+			case .showsHorizontalScrollIndicator(let x): return x.apply(instance) { i, v in i.showsHorizontalScrollIndicator = v }
+			case .showsVerticalScrollIndicator(let x): return x.apply(instance) { i, v in i.showsVerticalScrollIndicator = v }
+			case .zoomScale(let x): return x.apply(instance) { i, v in i.zoomScale = v }
+			case .maximumZoomScale(let x): return x.apply(instance) { i, v in i.maximumZoomScale = v }
+			case .minimumZoomScale(let x): return x.apply(instance) { i, v in i.minimumZoomScale = v }
+			case .bouncesZoom(let x): return x.apply(instance) { i, v in i.bouncesZoom = v }
 			case .refreshControl(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(iOS 10.0, *) {
 						i.refreshControl = v
 					}
 				}
-			case .scrollRectToVisible(let x): return x.apply(instance, storage) { i, s, v in i.scrollRectToVisible(v.rect, animated: v.animated) }
-			case .zoom(let x): return x.apply(instance, storage) { i, s, v in i.zoom(to: v.rect, animated: v.animated) }
-			case .flashScrollIndicators(let x): return x.apply(instance, storage) { i, s, v in i.flashScrollIndicators() }
+			case .scrollRectToVisible(let x): return x.apply(instance) { i, v in i.scrollRectToVisible(v.rect, animated: v.animated) }
+			case .zoom(let x): return x.apply(instance) { i, v in i.zoom(to: v.rect, animated: v.animated) }
+			case .flashScrollIndicators(let x): return x.apply(instance) { i, v in i.flashScrollIndicators() }
 			case .userDidScroll: return nil
 			case .didScroll: return nil
 			case .didZoom: return nil
@@ -233,7 +207,7 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 			case .willEndDragging: return nil
 			case .shouldScrollToTop: return nil
 			case .viewForZooming: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -302,19 +276,16 @@ public class ScrollView: ConstructingBinder, ScrollViewConvertible {
 			didEndScrollingAnimation!.send(value: scrollView.contentOffset)
 		}
 		
-		open var willEndDragging: ((_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>) -> Void)?
 		open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-			willEndDragging!(scrollView, velocity, targetContentOffset)
+			handler(ofType: ((_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>) -> Void).self)(scrollView, velocity, targetContentOffset)
 		}
 		
-		open var shouldScrollToTop: ((_ scrollView: UIScrollView) -> Bool)?
 		open func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
-			return shouldScrollToTop!(scrollView)
+			return handler(ofType: ((_ scrollView: UIScrollView) -> Bool).self)(scrollView)
 		}
 		
-		open var forZooming: ((_ scrollView: UIScrollView) -> UIView?)?
 		open func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-			return forZooming!(scrollView)
+			return handler(ofType: ((_ scrollView: UIScrollView) -> UIView?).self)(scrollView)
 		}
 	}
 }

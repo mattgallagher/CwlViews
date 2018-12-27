@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class Button: ConstructingBinder, ButtonConvertible {
+public class Button: Binder, ButtonConvertible {
 	public typealias Instance = UIButton
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class Button: ConstructingBinder, ButtonConvertible {
 	}
 	public func uiButton() -> Instance { return instance() }
 	
-	public enum Binding: ButtonBinding {
+	enum Binding: ButtonBinding {
 		public typealias EnclosingBinder = Button
 		public static func buttonBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case type(Constant<UIButton.ButtonType>)
@@ -64,7 +64,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Button
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -77,15 +77,15 @@ public class Button: ConstructingBinder, ButtonConvertible {
 		
 		public init() {}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .type(let x): type = x.value
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .titleLabel(let x):
 				if let tl = instance.titleLabel {
@@ -100,7 +100,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 			case .type: return nil
 			case .title(let x):
 				var previous: ScopedValues<UIControl.State, String?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setTitle(nil, for: c.0)
@@ -113,7 +113,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 				}
 			case .titleColor(let x):
 				var previous: ScopedValues<UIControl.State, UIColor?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setTitleColor(nil, for: c.0)
@@ -126,7 +126,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 				}
 			case .titleShadowColor(let x):
 				var previous: ScopedValues<UIControl.State, UIColor?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setTitleShadowColor(nil, for: c.0)
@@ -139,7 +139,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 				}
 			case .attributedTitle(let x):
 				var previous: ScopedValues<UIControl.State, NSAttributedString?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setAttributedTitle(nil, for: c.0)
@@ -152,7 +152,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 				}
 			case .backgroundImage(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setBackgroundImage(nil, for: c.0)
@@ -165,7 +165,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 				}
 			case .image(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setImage(nil, for: c.0)
@@ -176,13 +176,13 @@ public class Button: ConstructingBinder, ButtonConvertible {
 						i.setImage(c.1, for: c.0)
 					}
 				}
-			case .adjustsImageWhenHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.adjustsImageWhenHighlighted = v }
-			case .adjustsImageWhenDisabled(let x): return x.apply(instance, storage) { i, s, v in i.adjustsImageWhenDisabled = v }
-			case .showsTouchWhenHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.showsTouchWhenHighlighted = v }
-			case .contentEdgeInsets(let x): return x.apply(instance, storage) { i, s, v in i.contentEdgeInsets = v }
-			case .titleEdgeInsets(let x): return x.apply(instance, storage) { i, s, v in i.titleEdgeInsets = v }
-			case .imageEdgeInsets(let x): return x.apply(instance, storage) { i, s, v in i.imageEdgeInsets = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .adjustsImageWhenHighlighted(let x): return x.apply(instance) { i, v in i.adjustsImageWhenHighlighted = v }
+			case .adjustsImageWhenDisabled(let x): return x.apply(instance) { i, v in i.adjustsImageWhenDisabled = v }
+			case .showsTouchWhenHighlighted(let x): return x.apply(instance) { i, v in i.showsTouchWhenHighlighted = v }
+			case .contentEdgeInsets(let x): return x.apply(instance) { i, v in i.contentEdgeInsets = v }
+			case .titleEdgeInsets(let x): return x.apply(instance) { i, v in i.titleEdgeInsets = v }
+			case .imageEdgeInsets(let x): return x.apply(instance) { i, v in i.imageEdgeInsets = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

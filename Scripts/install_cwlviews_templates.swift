@@ -206,11 +206,11 @@ func binderContent() -> String {
 
 		import CwlViews
 
-		public class ___VARIABLE_basename___: ConstructingBinder, ___VARIABLE_basename___Convertible {
+		public class ___VARIABLE_basename___: Binder, ___VARIABLE_basename___Convertible {
 			public typealias Instance = ___VARIABLE_constructedType___
 			public typealias Inherited = ___VARIABLE_linkedBasename___
 			
-			public var state: ConstructingBinderState<Instance, Binding>
+			public var state: BinderState<Instance, Binding>
 			public required init(subclass: Instance.Type = Instance.self, bindings: [Binding]) {
 				state = .pending(BinderSubclassParameters(subclass: subclass, bindings: bindings))
 			}
@@ -219,10 +219,10 @@ func binderContent() -> String {
 			}
 			public func ui___VARIABLE_basename___() -> Instance { return instance() }
 			
-			public enum Binding: ___VARIABLE_basename___Binding {
+			enum Binding: ___VARIABLE_basename___Binding {
 				public typealias EnclosingBinder = ___VARIABLE_basename___
 				public static func ___VARIABLE_lowercaseBasename___Binding(_ binding: Binding) -> Binding { return binding }
-				case inheritedBinding(Inherited.Binding)
+				case inheritedBinding(Preparer.Inherited.Binding)
 				
 				// 0. Static bindings are applied at construction and are subsequently immutable.
 				// e.g. case someProperty(Constant<PropertyType>)
@@ -240,7 +240,7 @@ func binderContent() -> String {
 				// e.g. case someDelegateFunction((Param) -> Result))
 			}
 
-			public struct Preparer: ConstructingPreparer {
+			struct Preparer: BinderConstructor {
 				public typealias EnclosingBinder = ___VARIABLE_basename___
 				public var linkedPreparer = Inherited.Preparer()
 
@@ -249,10 +249,10 @@ func binderContent() -> String {
 
 				public init() {}
 
-				public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
+				func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
 					switch binding {
 					// e.g. case .someProperty(let x): return x.apply(instance, storage) { inst, stor, val in inst.someProperty = val }
-					case .inheritedBinding(let b): return linkedPreparer.applyBinding(b, instance: instance, storage: storage)
+					case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 					}
 				}
 			}

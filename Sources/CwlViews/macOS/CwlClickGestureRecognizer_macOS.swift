@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class ClickGestureRecognizer: ConstructingBinder, ClickGestureRecognizerConvertible {
+public class ClickGestureRecognizer: Binder, ClickGestureRecognizerConvertible {
 	public typealias Instance = NSClickGestureRecognizer
 	public typealias Inherited = GestureRecognizer
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class ClickGestureRecognizer: ConstructingBinder, ClickGestureRecognizerC
 	}
 	public func nsClickGestureRecognizer() -> Instance { return instance() }
 	
-	public enum Binding: ClickGestureRecognizerBinding {
+	enum Binding: ClickGestureRecognizerBinding {
 		public typealias EnclosingBinder = ClickGestureRecognizer
 		public static func clickGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -50,7 +50,7 @@ public class ClickGestureRecognizer: ConstructingBinder, ClickGestureRecognizerC
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = ClickGestureRecognizer
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -59,11 +59,11 @@ public class ClickGestureRecognizer: ConstructingBinder, ClickGestureRecognizerC
 		
 		public init() {}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .buttonMask(let x): return x.apply(instance, storage) { i, s, v in i.buttonMask = v }
-			case .numberOfClicksRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfClicksRequired = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .buttonMask(let x): return x.apply(instance) { i, v in i.buttonMask = v }
+			case .numberOfClicksRequired(let x): return x.apply(instance) { i, v in i.numberOfClicksRequired = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

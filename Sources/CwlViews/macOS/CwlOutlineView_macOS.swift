@@ -19,7 +19,7 @@
 
 #if os(macOS)
 
-public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
+public class OutlineView<NodeData>: Binder, OutlineViewConvertible {
 	public static func scrollEmbedded(subclass: NSOutlineView.Type = NSOutlineView.self, _ bindings: Binding...) -> ScrollView {
 		return ScrollView(
 			.borderType -- .bezelBorder,
@@ -35,8 +35,8 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 	public typealias Instance = NSOutlineView
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -44,11 +44,11 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 	}
 	public func nsOutlineView() -> Instance { return instance() }
 
-	public enum Binding: OutlineViewBinding {
+	enum Binding: OutlineViewBinding {
 		public typealias NodeDataType = NodeData
 		public typealias EnclosingBinder = OutlineView
 		public static func outlineViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -149,7 +149,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 		case validateDrop((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedTreePath: TreePath<NodeData>?, _ proposedChildIndex: Int) -> NSDragOperation)
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = OutlineView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -176,7 +176,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 		
 		var outlineColumn: NSUserInterfaceItemIdentifier? = nil
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .didDragTableColumn(let x):
 				let s = #selector(NSOutlineViewDelegate.outlineView(_:didDrag:))
@@ -187,45 +187,19 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			case .mouseDownInHeaderOfTableColumn(let x):
 				let s = #selector(NSOutlineViewDelegate.outlineView(_:mouseDownInHeaderOf:))
 				delegate().addSelector(s).mouseDownInHeaderOfTableColumn = { tc in x.send(value: tc.identifier) }
-			case .rowView(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:rowViewForItem:))
-				delegate().addSelector(s).rowView = x
-			case .heightOfRow(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:heightOfRowByItem:))
-				delegate().addSelector(s).heightOfRow = x
-			case .sortDescriptorsDidChange(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:sortDescriptorsDidChange:))
-				delegate().addSelector(s).sortDescriptorsDidChange = x
-			case .shouldExpand(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:shouldExpandItem:))
-				delegate().addSelector(s).shouldExpand = x
-			case .shouldCollapse(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:shouldCollapseItem:))
-				delegate().addSelector(s).shouldCollapse = x
-			case .typeSelectString(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:typeSelectStringFor:item:))
-				delegate().addSelector(s).typeSelectString = x
-			case .nextTypeSelectMatch(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:nextTypeSelectMatchFromItem:toItem:for:))
-				delegate().addSelector(s).nextTypeSelectMatch = x
-			case .shouldTypeSelectForEvent(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:shouldTypeSelectFor:withCurrentSearch:))
-				delegate().addSelector(s).shouldTypeSelectForEvent = x
-			case .shouldSelectTableColumn(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:shouldSelect:))
-				delegate().addSelector(s).shouldSelectTableColumn = x
-			case .shouldSelectTreePath(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:shouldSelectItem:))
-				delegate().addSelector(s).shouldSelectTreePath = x
-			case .selectionIndexesForProposedSelection(let x):
-				let s = #selector(NSOutlineViewDelegate.outlineView(_:selectionIndexesForProposedSelection:))
-				delegate().addSelector(s).selectionIndexesForProposedSelection = x
-			case .selectionShouldChange(let x):
-				let s = #selector(NSOutlineViewDelegate.selectionShouldChange(in:))
-				delegate().addSelector(s).selectionShouldChange = x
-			case .acceptDrop(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:acceptDrop:item:childIndex:))
-				delegate().addSelector(s).acceptDrop = x
+			case .rowView(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:rowViewForItem:)))
+			case .heightOfRow(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:heightOfRowByItem:)))
+			case .sortDescriptorsDidChange(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:sortDescriptorsDidChange:)))
+			case .shouldExpand(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldExpandItem:)))
+			case .shouldCollapse(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldCollapseItem:)))
+			case .typeSelectString(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:typeSelectStringFor:item:)))
+			case .nextTypeSelectMatch(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:nextTypeSelectMatchFromItem:toItem:for:)))
+			case .shouldTypeSelectForEvent(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldTypeSelectFor:withCurrentSearch:)))
+			case .shouldSelectTableColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldSelect:)))
+			case .shouldSelectTreePath(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldSelectItem:)))
+			case .selectionIndexesForProposedSelection(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:selectionIndexesForProposedSelection:)))
+			case .selectionShouldChange(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.selectionShouldChange(in:)))
+			case .acceptDrop(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:acceptDrop:item:childIndex:)))
 			case .shouldReorderColumn(let x):
 				let s = #selector(NSOutlineViewDelegate.outlineView(_:shouldReorderColumn:toColumn:))
 				delegate().addSelector(s).shouldReorderColumn = { (instance, sourceIndex, targetIndex) -> Bool in
@@ -242,30 +216,18 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 					}
 					return 0
 				}
-			case .draggingSessionEnded(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:draggingSession:endedAt:operation:))
-				delegate().addSelector(s).draggingSessionEnded = x
-			case .indexPathForPersistentObject(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:itemForPersistentObject:))
-				delegate().addSelector(s).indexPathForPersistentObject = x
-			case .persistentObjectForTreePath(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:persistentObjectForItem:))
-				delegate().addSelector(s).persistentObjectForTreePath = x
-			case .pasteboardWriter(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:pasteboardWriterForItem:))
-				delegate().addSelector(s).pasteboardWriter = x
-			case .updateDraggingItems(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:updateDraggingItemsForDrag:))
-				delegate().addSelector(s).updateDraggingItems = x
-			case .validateDrop(let x):
-				let s = #selector(NSOutlineViewDataSource.outlineView(_:validateDrop:proposedItem:proposedChildIndex:))
-				delegate().addSelector(s).validateDrop = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .draggingSessionEnded(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:draggingSession:endedAt:operation:)))
+			case .indexPathForPersistentObject(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:itemForPersistentObject:)))
+			case .persistentObjectForTreePath(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:persistentObjectForItem:)))
+			case .pasteboardWriter(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:pasteboardWriterForItem:)))
+			case .updateDraggingItems(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:updateDraggingItemsForDrag:)))
+			case .validateDrop(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:validateDrop:proposedItem:proposedChildIndex:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil && instance.dataSource == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			instance.delegate = storage
@@ -274,115 +236,115 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .allowsColumnReordering(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnReordering = v }
-			case .allowsColumnResizing(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnResizing = v }
-			case .allowsMultipleSelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsMultipleSelection = v }
-			case .allowsEmptySelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsEmptySelection = v }
-			case .allowsColumnSelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnSelection = v }
-			case .intercellSpacing(let x): return x.apply(instance, storage) { i, s, v in i.intercellSpacing = v }
-			case .rowHeight(let x): return x.apply(instance, storage) { i, s, v in i.rowHeight = v }
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance, storage) { i, s, v in i.usesAlternatingRowBackgroundColors = v }
-			case .selectionHighlightStyle(let x): return x.apply(instance, storage) { i, s, v in i.selectionHighlightStyle = v }
-			case .gridColor(let x): return x.apply(instance, storage) { i, s, v in i.gridColor = v }
-			case .gridStyleMask(let x): return x.apply(instance, storage) { i, s, v in i.gridStyleMask = v }
-			case .rowSizeStyle(let x): return x.apply(instance, storage) { i, s, v in i.rowSizeStyle = v }
-			case .allowsTypeSelect(let x): return x.apply(instance, storage) { i, s, v in i.allowsTypeSelect = v }
-			case .floatsGroupRows(let x): return x.apply(instance, storage) { i, s, v in i.floatsGroupRows = v }
-			case .columnAutoresizingStyle(let x): return x.apply(instance, storage) { i, s, v in i.columnAutoresizingStyle = v }
-			case .autosaveName(let x): return x.apply(instance, storage) { i, s, v in i.autosaveName = v }
-			case .autosaveTableColumns(let x): return x.apply(instance, storage) { i, s, v in i.autosaveTableColumns = v }
-			case .verticalMotionCanBeginDrag(let x): return x.apply(instance, storage) { i, s, v in i.verticalMotionCanBeginDrag = v }
-			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance, storage) { i, s, v in i.draggingDestinationFeedbackStyle = v }
-			case .headerView(let x): return x.apply(instance, storage) { i, s, v in i.headerView = v?.nsTableHeaderView() }
-			case .cornerView(let x): return x.apply(instance, storage) { i, s, v in i.cornerView = v?.nsView() }
-			case .columns(let x): return x.apply(instance, storage) { i, s, v in s.applyColumns(v.map { $0.construct() }, to: i) }
+			case .allowsColumnReordering(let x): return x.apply(instance) { i, v in i.allowsColumnReordering = v }
+			case .allowsColumnResizing(let x): return x.apply(instance) { i, v in i.allowsColumnResizing = v }
+			case .allowsMultipleSelection(let x): return x.apply(instance) { i, v in i.allowsMultipleSelection = v }
+			case .allowsEmptySelection(let x): return x.apply(instance) { i, v in i.allowsEmptySelection = v }
+			case .allowsColumnSelection(let x): return x.apply(instance) { i, v in i.allowsColumnSelection = v }
+			case .intercellSpacing(let x): return x.apply(instance) { i, v in i.intercellSpacing = v }
+			case .rowHeight(let x): return x.apply(instance) { i, v in i.rowHeight = v }
+			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+			case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance) { i, v in i.usesAlternatingRowBackgroundColors = v }
+			case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
+			case .gridColor(let x): return x.apply(instance) { i, v in i.gridColor = v }
+			case .gridStyleMask(let x): return x.apply(instance) { i, v in i.gridStyleMask = v }
+			case .rowSizeStyle(let x): return x.apply(instance) { i, v in i.rowSizeStyle = v }
+			case .allowsTypeSelect(let x): return x.apply(instance) { i, v in i.allowsTypeSelect = v }
+			case .floatsGroupRows(let x): return x.apply(instance) { i, v in i.floatsGroupRows = v }
+			case .columnAutoresizingStyle(let x): return x.apply(instance) { i, v in i.columnAutoresizingStyle = v }
+			case .autosaveName(let x): return x.apply(instance) { i, v in i.autosaveName = v }
+			case .autosaveTableColumns(let x): return x.apply(instance) { i, v in i.autosaveTableColumns = v }
+			case .verticalMotionCanBeginDrag(let x): return x.apply(instance) { i, v in i.verticalMotionCanBeginDrag = v }
+			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance) { i, v in i.draggingDestinationFeedbackStyle = v }
+			case .headerView(let x): return x.apply(instance) { i, v in i.headerView = v?.nsTableHeaderView() }
+			case .cornerView(let x): return x.apply(instance) { i, v in i.cornerView = v?.nsView() }
+			case .columns(let x): return x.apply(instance) { i, v in s.applyColumns(v.map { $0.construct() }, to: i) }
 			case .stronglyReferencesItems(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.12, *) {
 						i.stronglyReferencesItems = v
 					}
 				}
-			case .outlineTableColumnIdentifier(let x): return x.apply(instance, storage) { i, s, v in s.outlineColumnIdentifier = v }
-			case .autoresizesOutlineColumn(let x): return x.apply(instance, storage) { i, s, v in i.autoresizesOutlineColumn = v }
-			case .indentationPerLevel(let x): return x.apply(instance, storage) { i, s, v in i.indentationPerLevel = v }
-			case .indentationMarkerFollowsCell(let x): return x.apply(instance, storage) { i, s, v in i.indentationMarkerFollowsCell = v }
-			case .autosaveExpandedItems(let x): return x.apply(instance, storage) { i, s, v in i.autosaveExpandedItems = v }
-			case .userInterfaceLayoutDirection(let x): return x.apply(instance, storage) { i, s, v in i.userInterfaceLayoutDirection = v }
-			case .treeData(let x): return x.apply(instance, storage) { i, s, v in s.applyTableRowMutation(v, to: i) }
+			case .outlineTableColumnIdentifier(let x): return x.apply(instance) { i, v in s.outlineColumnIdentifier = v }
+			case .autoresizesOutlineColumn(let x): return x.apply(instance) { i, v in i.autoresizesOutlineColumn = v }
+			case .indentationPerLevel(let x): return x.apply(instance) { i, v in i.indentationPerLevel = v }
+			case .indentationMarkerFollowsCell(let x): return x.apply(instance) { i, v in i.indentationMarkerFollowsCell = v }
+			case .autosaveExpandedItems(let x): return x.apply(instance) { i, v in i.autosaveExpandedItems = v }
+			case .userInterfaceLayoutDirection(let x): return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
+			case .treeData(let x): return x.apply(instance) { i, v in s.applyTableRowMutation(v, to: i) }
 			case .highlightColumn(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.highlightedTableColumn = v.flatMap { (identifier: NSUserInterfaceItemIdentifier) -> NSTableColumn? in
 						return i.tableColumns.first(where: { $0.identifier == identifier })
 					}
 				}
 			case .selectColumns(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					let indexes = v.identifiers.compactMap { identifier in i.tableColumns.enumerated().first(where: { $0.element.identifier == identifier })?.offset }
 					let indexSet = IndexSet(indexes)
 					i.selectColumnIndexes(indexSet, byExtendingSelection: v.byExtendingSelection)
 				}
 			case .selectTreePaths(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					let indexes = v.treePaths.compactMap { s.row(forTreePath: $0, in: i) }
 					i.selectRowIndexes(IndexSet(indexes), byExtendingSelection: v.byExtendingSelection)
 				}
 			case .deselectColumn(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let index = i.tableColumns.enumerated().first(where: { $0.element.identifier == v })?.offset {
 						i.deselectColumn(index)
 					}
 				}
 			case .deselectTreePath(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let row: Int = s.row(forTreePath: v, in: i) {
 						i.deselectRow(row)
 					}
 				}
-			case .selectAll(let x): return x.apply(instance, storage) { i, s, v in i.selectAll(nil) }
-			case .deselectAll(let x): return x.apply(instance, storage) { i, s, v in i.deselectAll(nil) }
-			case .sizeLastColumnToFit(let x): return x.apply(instance, storage) { i, s, v in i.sizeLastColumnToFit() }
-			case .sizeToFit(let x): return x.apply(instance, storage) { i, s, v in i.sizeToFit() }
+			case .selectAll(let x): return x.apply(instance) { i, v in i.selectAll(nil) }
+			case .deselectAll(let x): return x.apply(instance) { i, v in i.deselectAll(nil) }
+			case .sizeLastColumnToFit(let x): return x.apply(instance) { i, v in i.sizeLastColumnToFit() }
+			case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
 			case .scrollTreePathToVisible(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let row: Int = s.row(forTreePath: v, in: i) {
 						i.scrollRowToVisible(row)
 					}
 				}
 			case .scrollColumnToVisible(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let index = i.tableColumns.enumerated().first(where: { $0.element.identifier == v })?.offset {
 						i.scrollColumnToVisible(index)
 					}
 				}
 			case .moveColumn(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let index = i.tableColumns.enumerated().first(where: { $0.element.identifier == v.identifier })?.offset {
 						i.moveColumn(index, toColumn: v.toIndex)
 					}
 				}
 			case .hideRowActions(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.rowActionsVisible = false
 					}
 				}
 			case .hideRows(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.hideRows(at: v.indexes, withAnimation: v.withAnimation)
 					}
 				}
 			case .unhideRows(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.unhideRows(at: v.indexes, withAnimation: v.withAnimation)
 					}
 				}
 			case .expandTreePath(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let treePath = v.treePath, let item = s.item(forTreePath: treePath, in: i) {
 						i.expandItem(item, expandChildren: v.expandChildren)
 					} else {
@@ -390,7 +352,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 					}
 				}
 			case .collapseTreePath(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let treePath = v.treePath, let item = s.item(forTreePath: treePath, in: i) {
 						i.collapseItem(item, collapseChildren: v.collapseChildren)
 					} else {
@@ -398,7 +360,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 					}
 				}
 			case .setDropTreePath(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let treePath = v.treePath, let item = s.item(forTreePath: treePath, in: i) {
 						i.setDropItem(item, dropChildIndex: v.dropChildIndex)
 					} else {
@@ -541,7 +503,7 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			case .pasteboardWriter: return nil
 			case .updateDraggingItems: return nil
 			case .validateDrop: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -744,19 +706,16 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return outlineView.delegate as? Storage
 		}
 		
-		open var didDragTableColumn: ((NSTableColumn) -> Void)?
 		open func outlineView(_ outlineView: NSOutlineView, didDrag tableColumn: NSTableColumn) {
-			didDragTableColumn!(tableColumn)
+			handler(ofType: ((NSTableColumn) -> Void).self)(tableColumn)
 		}
 		
-		open var didClickTableColumn: ((NSTableColumn) -> Void)?
 		open func outlineView(_ outlineView: NSOutlineView, didClick tableColumn: NSTableColumn) {
-			didClickTableColumn!(tableColumn)
+			handler(ofType: ((NSTableColumn) -> Void).self)(tableColumn)
 		}
 		
-		open var mouseDownInHeaderOfTableColumn: ((NSTableColumn) -> Void)?
 		open func outlineView(_ outlineView: NSOutlineView, mouseDownInHeaderOf tableColumn: NSTableColumn) {
-			mouseDownInHeaderOfTableColumn!(tableColumn)
+			handler(ofType: ((NSTableColumn) -> Void).self)(tableColumn)
 		}
 		
 		open var rowView: ((_ treePath: TreePath<NodeData>) -> TableRowViewConvertible?)?
@@ -775,19 +734,16 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return outlineView.rowHeight
 		}
 		
-		open var shouldReorderColumn: ((_ outlineView: NSOutlineView, _ sourceIndex: Int, _ targetIndex: Int) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, shouldReorderColumn columnIndex: Int, toColumn newColumnIndex: Int) -> Bool {
-			return shouldReorderColumn!(outlineView, columnIndex, newColumnIndex)
+			return handler(ofType: ((_ outlineView: NSOutlineView, _ sourceIndex: Int, _ targetIndex: Int) -> Bool).self)(outlineView, columnIndex, newColumnIndex)
 		}
 		
-		open var sizeToFitWidthOfColumn: ((_ outlineView: NSOutlineView, _ column: Int) -> CGFloat)?
 		open func outlineView(_ outlineView: NSOutlineView, sizeToFitWidthOfColumn column: Int) -> CGFloat {
-			return sizeToFitWidthOfColumn!(outlineView, column)
+			return handler(ofType: ((_ outlineView: NSOutlineView, _ column: Int) -> CGFloat).self)(outlineView, column)
 		}
 		
-		open var shouldTypeSelectForEvent: ((_ outlineView: NSOutlineView, _ event: NSEvent, _ searchString: String?) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, shouldTypeSelectFor event: NSEvent, withCurrentSearch searchString: String?) -> Bool {
-			return shouldTypeSelectForEvent!(outlineView, event, searchString)
+			return handler(ofType: ((_ outlineView: NSOutlineView, _ event: NSEvent, _ searchString: String?) -> Bool).self)(outlineView, event, searchString)
 		}
 		
 		open var typeSelectString: ((_ outlineView: NSOutlineView, _ tableColumn: NSTableColumn?, _ treePath: TreePath<NodeData>) -> String?)?
@@ -808,9 +764,8 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return nil
 		}
 		
-		open var shouldSelectTableColumn: ((_ outlineView: NSOutlineView, _ tableColumn: NSTableColumn?) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, shouldSelect tableColumn: NSTableColumn?) -> Bool {
-			return shouldSelectTableColumn!(outlineView, tableColumn)
+			return handler(ofType: ((_ outlineView: NSOutlineView, _ tableColumn: NSTableColumn?) -> Bool).self)(outlineView, tableColumn)
 		}
 		
 		open var selectionIndexesForProposedSelection: ((_ proposedSelectionIndexes: Set<TreePath<NodeData>>) -> Set<TreePath<NodeData>>)?
@@ -839,9 +794,8 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return false
 		}
 		
-		open var selectionShouldChange: ((_ outlineView: NSOutlineView) -> Bool)?
 		open func selectionShouldChange(in outlineView: NSOutlineView) -> Bool {
-			return selectionShouldChange!(outlineView)
+			return handler(ofType: ((_ outlineView: NSOutlineView) -> Bool).self)(outlineView)
 		}
 		
 		open var shouldExpand: ((_ treePath: TreePath<NodeData>) -> Bool)?
@@ -872,14 +826,12 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return acceptDrop!(outlineView, info, nil, index)
 		}
 		
-		open var sortDescriptorsDidChange: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>?
 		open func outlineView(_ outlineView: NSOutlineView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
-			sortDescriptorsDidChange!.send(value: (new: outlineView.sortDescriptors, old: oldDescriptors))
+			handler(ofType: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>.self).send(value: (new: outlineView.sortDescriptors, old: oldDescriptors))
 		}
 		
-		open var draggingSessionEnded: ((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void)?
 		open func outlineView(_ outlineView: NSOutlineView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-			return draggingSessionEnded!(outlineView, session, screenPoint, operation)
+			return handler(ofType: ((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void).self)(outlineView, session, screenPoint, operation)
 		}
 		
 		open var draggingSessionWillBegin: ((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [TreePath<NodeData>]) -> Void)?
@@ -896,9 +848,8 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return false
 		}
 		
-		open var indexPathForPersistentObject: ((_ persistentObject: Any) -> IndexPath?)?
 		open func outlineView(_ outlineView: NSOutlineView, itemForPersistentObject object: Any) -> Any? {
-			return indexPathForPersistentObject!(object).flatMap { storage(for: outlineView)?.item(forIndexPath: $0, in: outlineView) }
+			return handler(ofType: ((_ persistentObject: Any) -> IndexPath?).self)(object).flatMap { storage(for: outlineView)?.item(forIndexPath: $0, in: outlineView) }
 		}
 		
 		open var persistentObjectForTreePath: ((_ treePath: TreePath<NodeData>) -> Any?)?
@@ -917,9 +868,8 @@ public class OutlineView<NodeData>: ConstructingBinder, OutlineViewConvertible {
 			return nil
 		}
 		
-		open var updateDraggingItems: ((_ outlineView: NSOutlineView, _ forDrag: NSDraggingInfo) -> Void)?
 		open func outlineView(_ outlineView: NSOutlineView, updateDraggingItemsForDrag draggingInfo: NSDraggingInfo) {
-			updateDraggingItems!(outlineView, draggingInfo)
+			handler(ofType: ((_ outlineView: NSOutlineView, _ forDrag: NSDraggingInfo) -> Void).self)(outlineView, draggingInfo)
 		}
 		
 		open var validateDrop: ((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedTreePath: TreePath<NodeData>?, _ proposedChildIndex: Int) -> NSDragOperation)?

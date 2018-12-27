@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class ScreenEdgePanGestureRecognizer: ConstructingBinder, ScreenEdgePanGestureRecognizerConvertible {
+public class ScreenEdgePanGestureRecognizer: Binder, ScreenEdgePanGestureRecognizerConvertible {
 	public typealias Instance = UIScreenEdgePanGestureRecognizer
 	public typealias Inherited = GestureRecognizer
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class ScreenEdgePanGestureRecognizer: ConstructingBinder, ScreenEdgePanGe
 	}
 	public func uiScreenEdgePanGestureRecognizer() -> Instance { return instance() }
 	
-	public enum Binding: ScreenEdgePanGestureRecognizerBinding {
+	enum Binding: ScreenEdgePanGestureRecognizerBinding {
 		public typealias EnclosingBinder = ScreenEdgePanGestureRecognizer
 		public static func screenEdgePanGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -54,14 +54,14 @@ public class ScreenEdgePanGestureRecognizer: ConstructingBinder, ScreenEdgePanGe
 			// With:    public static var $1: Name<$2> { return Name<$2>(Binding.$1) }
 			public static var edges: Name<Dynamic<UIRectEdge>> { return Name<Dynamic<UIRectEdge>>(Binding.edges) }
 			
-			let constructor: (Value) -> Binding
-			init(_ constructor: @escaping (Value) -> Binding) {
-				self.constructor = constructor
+			let binding: (Value) -> Binding
+			init(_ binding: @escaping (Value) -> Binding) {
+				self.binding = binding
 			}
 		}
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = ScreenEdgePanGestureRecognizer
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -70,10 +70,10 @@ public class ScreenEdgePanGestureRecognizer: ConstructingBinder, ScreenEdgePanGe
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .edges(let x): return x.apply(instance, storage) { i, s, v in i.edges = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .edges(let x): return x.apply(instance) { i, v in i.edges = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

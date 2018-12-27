@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class NavigationController: ConstructingBinder, NavigationControllerConvertible {
+public class NavigationController: Binder, NavigationControllerConvertible {
 	public typealias Instance = UINavigationController
 	public typealias Inherited = ViewController
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 	}
 	public func uiNavigationController() -> Instance { return instance() }
 	
-	public enum Binding: NavigationControllerBinding {
+	enum Binding: NavigationControllerBinding {
 		public typealias EnclosingBinder = NavigationController
 		public static func navigationControllerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case navigationBar(Constant<NavigationBar>)
@@ -63,7 +63,7 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 		case interactionController((_ navigationController: UINavigationController, _ animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = NavigationController
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -90,28 +90,24 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 		
 		var popSignal: SignalInput<Int>? = nil
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .poppedToCount(let x): popSignal = x
 			case .supportedInterfaceOrientations:
 				delegate().addSelector(#selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
 			case .preferredInterfaceOrientation:
 				delegate().addSelector(#selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
-			case .animationController(let x):
-				let s = #selector(UINavigationControllerDelegate.navigationController(_:animationControllerFor:from:to:))
-				delegate().addSelector(s).animationController = x
-			case .interactionController(let x):
-				let s = #selector(UINavigationControllerDelegate.navigationController(_:interactionControllerFor:))
-				delegate().addSelector(s).interactionController = x
+			case .animationController(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:animationControllerFor:from:to:)))
+			case .interactionController(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:interactionControllerFor:)))
 			case .willShow:
 				let s = #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:))
 				delegate().addSelector(s)
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: UINavigationController, storage: Storage) {
+		public func prepareInstance(_ instance: UINavigationController, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			instance.delegate = storage
@@ -119,13 +115,13 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .navigationBar(let x):
 				x.value.applyBindings(to: instance.navigationBar)
 				return nil
 			case .stack(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					switch v {
 					case .push(let e):
 						s.expectedStackCount += 1
@@ -141,12 +137,12 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 						i.setViewControllers(newStack.map { $0.uiViewController() }, animated: false)
 					}
 				}
-			case .isNavigationBarHidden(let x): return x.apply(instance, storage) { i, s, v in i.setNavigationBarHidden(v.value, animated: v.isAnimated) }
-			case .isToolbarHidden(let x): return x.apply(instance, storage) { i, s, v in i.setToolbarHidden(v.value, animated: v.isAnimated) }
-			case .hidesBarsOnTap(let x): return x.apply(instance, storage) { i, s, v in i.hidesBarsOnTap = v }
-			case .hidesBarsOnSwipe(let x): return x.apply(instance, storage) { i, s, v in i.hidesBarsOnSwipe = v }
-			case .hidesBarsWhenVerticallyCompact(let x): return x.apply(instance, storage) { i, s, v in i.hidesBarsWhenVerticallyCompact = v }
-			case .hidesBarsWhenKeyboardAppears(let x): return x.apply(instance, storage) { i, s, v in i.hidesBarsWhenKeyboardAppears = v }
+			case .isNavigationBarHidden(let x): return x.apply(instance) { i, v in i.setNavigationBarHidden(v.value, animated: v.isAnimated) }
+			case .isToolbarHidden(let x): return x.apply(instance) { i, v in i.setToolbarHidden(v.value, animated: v.isAnimated) }
+			case .hidesBarsOnTap(let x): return x.apply(instance) { i, v in i.hidesBarsOnTap = v }
+			case .hidesBarsOnSwipe(let x): return x.apply(instance) { i, v in i.hidesBarsOnSwipe = v }
+			case .hidesBarsWhenVerticallyCompact(let x): return x.apply(instance) { i, v in i.hidesBarsWhenVerticallyCompact = v }
+			case .hidesBarsWhenKeyboardAppears(let x): return x.apply(instance) { i, v in i.hidesBarsWhenKeyboardAppears = v }
 			case .supportedInterfaceOrientations: return nil
 			case .preferredInterfaceOrientation: return nil
 			case .didShow(let x):
@@ -156,7 +152,7 @@ public class NavigationController: ConstructingBinder, NavigationControllerConve
 			case .animationController: return nil
 			case .interactionController: return nil
 			case .poppedToCount: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

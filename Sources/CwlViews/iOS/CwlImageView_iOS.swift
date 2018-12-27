@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class ImageView: ConstructingBinder, ImageViewConvertible {
+public class ImageView: Binder, ImageViewConvertible {
 	public typealias Instance = UIImageView
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class ImageView: ConstructingBinder, ImageViewConvertible {
 	}
 	public func uiImageView() -> Instance { return instance() }
 	
-	public enum Binding: ImageViewBinding {
+	enum Binding: ImageViewBinding {
 		public typealias EnclosingBinder = ImageView
 		public static func imageViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -56,7 +56,7 @@ public class ImageView: ConstructingBinder, ImageViewConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = ImageView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -72,7 +72,7 @@ public class ImageView: ConstructingBinder, ImageViewConvertible {
 		
 		public init() {}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .image(let x):
 				image = x.initialSubsequent()
@@ -80,29 +80,29 @@ public class ImageView: ConstructingBinder, ImageViewConvertible {
 			case .highlightedImage(let x):
 				highlightedImage = x.initialSubsequent()
 				initialHighlightedImage = highlightedImage.initial()
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .image: return image.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.image = v } }
-			case .highlightedImage: return highlightedImage.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.highlightedImage = v } }
-			case .animationImages(let x): return x.apply(instance, storage) { i, s, v in i.animationImages = v }
-			case .highlightedAnimationImages(let x): return x.apply(instance, storage) { i, s, v in i.highlightedAnimationImages = v }
-			case .animationDuration(let x): return x.apply(instance, storage) { i, s, v in i.animationDuration = v }
-			case .animationRepeatCount(let x): return x.apply(instance, storage) { i, s, v in i.animationRepeatCount = v }
-			case .isHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.isHighlighted = v }
+			case .image: return image.subsequent.flatMap { $0.apply(instance) { i, v in i.image = v } }
+			case .highlightedImage: return highlightedImage.subsequent.flatMap { $0.apply(instance) { i, v in i.highlightedImage = v } }
+			case .animationImages(let x): return x.apply(instance) { i, v in i.animationImages = v }
+			case .highlightedAnimationImages(let x): return x.apply(instance) { i, v in i.highlightedAnimationImages = v }
+			case .animationDuration(let x): return x.apply(instance) { i, v in i.animationDuration = v }
+			case .animationRepeatCount(let x): return x.apply(instance) { i, v in i.animationRepeatCount = v }
+			case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
 			case .animating(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if v && !i.isAnimating {
 						i.startAnimating()
 					} else if !v && i.isAnimating {
 						i.stopAnimating()
 					}
 				}
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

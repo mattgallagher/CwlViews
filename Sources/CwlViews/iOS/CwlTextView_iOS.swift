@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class TextView: ConstructingBinder, TextViewConvertible {
+public class TextView: Binder, TextViewConvertible {
 	public typealias Instance = UITextView
 	public typealias Inherited = ScrollView
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 	}
 	public func uiTextView() -> Instance { return instance() }
 	
-	public enum Binding: TextViewBinding {
+	enum Binding: TextViewBinding {
 		public typealias EnclosingBinder = TextView
 		public static func textViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case textInputTraits(Constant<TextInputTraits>)
@@ -77,7 +77,7 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 		case shouldInteractWithURL((UITextView, URL, NSRange, UITextItemInteraction) -> Bool)
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TextView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -94,29 +94,15 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 		var possibleDelegate: Delegate? { return linkedPreparer.possibleDelegate as? Delegate }
 		mutating func delegate() -> Delegate { return linkedPreparer.delegate() as! Delegate }
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
-			case .shouldBeginEditing(let x):
-				let s = #selector(UITextViewDelegate.textViewShouldBeginEditing(_:))
-				delegate().addSelector(s).shouldBeginEditing = x
-			case .shouldEndEditing(let x):
-				let s = #selector(UITextViewDelegate.textViewShouldEndEditing(_:))
-				delegate().addSelector(s).shouldEndEditing = x
-			case .didBeginEditing(let x):
-				let s = #selector(UITextViewDelegate.textViewDidBeginEditing(_:))
-				delegate().addSelector(s).didBeginEditing = x
-			case .didEndEditing(let x):
-				let s = #selector(UITextViewDelegate.textViewDidEndEditing(_:))
-				delegate().addSelector(s).didEndEditing = x
-			case .shouldChangeText(let x):
-				let s = #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:))
-				delegate().addSelector(s).shouldChangeText = x
-			case .didChange(let x):
-				let s = #selector(UITextViewDelegate.textViewDidChange(_:))
-				delegate().addSelector(s).didChange = x
-			case .didChangeSelection(let x):
-				let s = #selector(UITextViewDelegate.textViewDidChangeSelection(_:))
-				delegate().addSelector(s).didChangeSelection = x
+			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
+			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
+			case .didBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
+			case .didEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
+			case .shouldChangeText(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
+			case .didChange(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
+			case .didChangeSelection(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
 			case .shouldInteractWithAttachment(let x):
 				if #available(iOS 10.0, *) {
 					let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?)
@@ -127,67 +113,67 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 					let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?)
 					delegate().addSelector(s).shouldInteractWithAttachment = x
 				}
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
+			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .textInputTraits(let x):
 				return AggregateLifetime(lifetimes: x.value.bindings.lazy.compactMap { trait in
 					switch trait {
-					case .autocapitalizationType(let y): return y.apply(instance, storage) { i, s, v in i.autocapitalizationType = v }
-					case .autocorrectionType(let y): return y.apply(instance, storage) { i, s, v in i.autocorrectionType = v }
-					case .spellCheckingType(let y): return y.apply(instance, storage) { i, s, v in i.spellCheckingType = v }
-					case .enablesReturnKeyAutomatically(let y): return y.apply(instance, storage) { i, s, v in i.enablesReturnKeyAutomatically = v }
-					case .keyboardAppearance(let y): return y.apply(instance, storage) { i, s, v in i.keyboardAppearance = v }
-					case .keyboardType(let y): return y.apply(instance, storage) { i, s, v in i.keyboardType = v }
-					case .returnKeyType(let y): return y.apply(instance, storage) { i, s, v in i.returnKeyType = v }
-					case .isSecureTextEntry(let y): return y.apply(instance, storage) { i, s, v in i.isSecureTextEntry = v }
+					case .autocapitalizationType(let y): return y.apply(instance) { i, v in i.autocapitalizationType = v }
+					case .autocorrectionType(let y): return y.apply(instance) { i, v in i.autocorrectionType = v }
+					case .spellCheckingType(let y): return y.apply(instance) { i, v in i.spellCheckingType = v }
+					case .enablesReturnKeyAutomatically(let y): return y.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
+					case .keyboardAppearance(let y): return y.apply(instance) { i, v in i.keyboardAppearance = v }
+					case .keyboardType(let y): return y.apply(instance) { i, v in i.keyboardType = v }
+					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
+					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
 					case .textContentType(let y):
-						return y.apply(instance, storage) { i, s, v in
+						return y.apply(instance) { i, v in
 							if #available(iOS 10.0, *) {
 								i.textContentType = v
 							}
 						}
 					case .smartDashesType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartDashesType = v
 							}
 						}
 					case .smartQuotesType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartQuotesType = v
 							}
 						}
 					case .smartInsertDeleteType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartInsertDeleteType = v
 							}
 						}
 					}
 				})
-			case .text(let x): return x.apply(instance, storage) { i, s, v in i.text = v }
-			case .attributedText(let x): return x.apply(instance, storage) { i, s, v in i.attributedText = v }
-			case .font(let x): return x.apply(instance, storage) { i, s, v in i.font = v }
-			case .textColor(let x): return x.apply(instance, storage) { i, s, v in i.textColor = v }
-			case .isEditable(let x): return x.apply(instance, storage) { i, s, v in i.isEditable = v }
-			case .allowsEditingTextAttributes(let x): return x.apply(instance, storage) { i, s, v in i.allowsEditingTextAttributes = v }
-			case .dataDetectorTypes(let x): return x.apply(instance, storage) { i, s, v in i.dataDetectorTypes = v }
-			case .textAlignment(let x): return x.apply(instance, storage) { i, s, v in i.textAlignment = v }
-			case .typingAttributes(let x): return x.apply(instance, storage) { i, s, v in i.typingAttributes = v }
-			case .linkTextAttributes(let x): return x.apply(instance, storage) { i, s, v in i.linkTextAttributes = v }
-			case .textContainerInset(let x): return x.apply(instance, storage) { i, s, v in i.textContainerInset = v }
-			case .selectedRange(let x): return x.apply(instance, storage) { i, s, v in i.selectedRange = v }
-			case .clearsOnInsertion(let x): return x.apply(instance, storage) { i, s, v in i.clearsOnInsertion = v }
-			case .isSelectable(let x): return x.apply(instance, storage) { i, s, v in i.isSelectable = v }
-			case .inputView(let x): return x.apply(instance, storage) { i, s, v in i.inputView = v?.uiView() }
-			case .inputAccessoryView(let x): return x.apply(instance, storage) { i, s, v in i.inputAccessoryView = v?.uiView() }
-			case .scrollRangeToVisible(let x): return x.apply(instance, storage) { i, s, v in i.scrollRangeToVisible(v) }
+			case .text(let x): return x.apply(instance) { i, v in i.text = v }
+			case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
+			case .font(let x): return x.apply(instance) { i, v in i.font = v }
+			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+			case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
+			case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
+			case .dataDetectorTypes(let x): return x.apply(instance) { i, v in i.dataDetectorTypes = v }
+			case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
+			case .typingAttributes(let x): return x.apply(instance) { i, v in i.typingAttributes = v }
+			case .linkTextAttributes(let x): return x.apply(instance) { i, v in i.linkTextAttributes = v }
+			case .textContainerInset(let x): return x.apply(instance) { i, v in i.textContainerInset = v }
+			case .selectedRange(let x): return x.apply(instance) { i, v in i.selectedRange = v }
+			case .clearsOnInsertion(let x): return x.apply(instance) { i, v in i.clearsOnInsertion = v }
+			case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
+			case .inputView(let x): return x.apply(instance) { i, v in i.inputView = v?.uiView() }
+			case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v?.uiView() }
+			case .scrollRangeToVisible(let x): return x.apply(instance) { i, v in i.scrollRangeToVisible(v) }
 			case .shouldBeginEditing: return nil
 			case .didBeginEditing: return nil
 			case .shouldEndEditing: return nil
@@ -197,7 +183,7 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 			case .didChangeSelection: return nil
 			case .shouldInteractWithAttachment: return nil
 			case .shouldInteractWithURL: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -209,39 +195,32 @@ public class TextView: ConstructingBinder, TextViewConvertible {
 			super.init()
 		}
 		
-		open var shouldBeginEditing: ((UITextView) -> Bool)?
 		open func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
-			return shouldBeginEditing!(textView)
+			return handler(ofType: ((UITextView) -> Bool).self)(textView)
 		}
 		
-		open var shouldEndEditing: ((UITextView) -> Bool)?
 		open func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
-			return shouldEndEditing!(textView)
+			return handler(ofType: ((UITextView) -> Bool).self)(textView)
 		}
 		
-		open var didBeginEditing: SignalInput<UITextView>?
 		open func textViewDidBeginEditing(_ textView: UITextView) {
-			didBeginEditing!.send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
 		}
 		
-		open var didEndEditing: SignalInput<UITextView>?
 		open func textViewDidEndEditing(_ textView: UITextView) {
-			didEndEditing!.send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
 		}
 		
-		open var shouldChangeText: ((UITextView, NSRange, String) -> Bool)?
 		open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return shouldChangeText!(textView, range, text)
+			return handler(ofType: ((UITextView, NSRange, String) -> Bool).self)(textView, range, text)
 		}
 		
-		open var didChange: SignalInput<UITextView>?
 		open func textViewDidChange(_ textView: UITextView) {
-			didChange!.send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
 		}
 		
-		open var didChangeSelection: SignalInput<UITextView>?
 		open func textViewDidChangeSelection(_ textView: UITextView) {
-			didChangeSelection!.send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
 		}
 		
 		open var shouldInteractWithAttachment: Any?

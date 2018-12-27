@@ -46,10 +46,10 @@ public class Toolbar: Binder, ToolbarConvertible {
 	}
 	public func nsToolbar() -> Instance { return instance() }
 	
-	public enum Binding: ToolbarBinding {
+	enum Binding: ToolbarBinding {
 		public typealias EnclosingBinder = Toolbar
 		public static func toolbarBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static styles are applied at construction and are subsequently immutable.
 		case itemDescriptions(Constant<[ToolbarItemDescription]>)
@@ -74,7 +74,7 @@ public class Toolbar: Binder, ToolbarConvertible {
 		case willAddItem(SignalInput<Void>)
 	}
 
-	public struct Preparer: StoragePreparer {
+	struct Preparer: StoragePreparer {
 		public typealias EnclosingBinder = Toolbar
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -83,7 +83,7 @@ public class Toolbar: Binder, ToolbarConvertible {
 		
 		public init() {}
 
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			// Toolbar delegate is mandatory
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			instance.delegate = storage
@@ -91,25 +91,25 @@ public class Toolbar: Binder, ToolbarConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .displayMode(let x): return x.apply(instance, storage) { i, s, v in i.displayMode = v }
-			case .showsBaselineSeparator(let x): return x.apply(instance, storage) { i, s, v in i.showsBaselineSeparator = v }
-			case .allowsUserCustomization(let x): return x.apply(instance, storage) { i, s, v in i.allowsUserCustomization = v }
-			case .allowsExtensionItems(let x): return x.apply(instance, storage) { i, s, v in i.allowsExtensionItems = v }
-			case .sizeMode(let x): return x.apply(instance, storage) { i, s, v in i.sizeMode = v }
-			case .selectedItemIdentifier(let x): return x.apply(instance, storage) { i, s, v in i.selectedItemIdentifier = v }
-			case .isVisible(let x): return x.apply(instance, storage) { i, s, v in i.isVisible = v }
-			case .autosavesConfiguration(let x): return x.apply(instance, storage) { i, s, v in i.autosavesConfiguration = v }
+			case .displayMode(let x): return x.apply(instance) { i, v in i.displayMode = v }
+			case .showsBaselineSeparator(let x): return x.apply(instance) { i, v in i.showsBaselineSeparator = v }
+			case .allowsUserCustomization(let x): return x.apply(instance) { i, v in i.allowsUserCustomization = v }
+			case .allowsExtensionItems(let x): return x.apply(instance) { i, v in i.allowsExtensionItems = v }
+			case .sizeMode(let x): return x.apply(instance) { i, v in i.sizeMode = v }
+			case .selectedItemIdentifier(let x): return x.apply(instance) { i, v in i.selectedItemIdentifier = v }
+			case .isVisible(let x): return x.apply(instance) { i, v in i.isVisible = v }
+			case .autosavesConfiguration(let x): return x.apply(instance) { i, v in i.autosavesConfiguration = v }
 			case .itemDescriptions(let x):
 				storage.itemDescriptions = x.value
 				return nil
-			case .runCustomizationPalette(let x): return x.apply(instance, storage) { i, s, v in i.runCustomizationPalette(nil) }
+			case .runCustomizationPalette(let x): return x.apply(instance) { i, v in i.runCustomizationPalette(nil) }
 			case .didRemoveItem(let x):
 				return Signal.notifications(name: NSToolbar.didRemoveItemNotification, object: instance).map { _ in () }.cancellableBind(to: x)
 			case .willAddItem(let x):
 				return Signal.notifications(name: NSToolbar.willAddItemNotification, object: instance).map { _ in () }.cancellableBind(to: x)
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

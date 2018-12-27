@@ -19,7 +19,7 @@
 
 #if os(macOS)
 
-public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
+public class TableView<RowData>: Binder, TableViewConvertible {
 	public static func scrollEmbedded(subclass: NSTableView.Type = NSTableView.self, _ bindings: Binding...) -> ScrollView {
 		return ScrollView(
 			.borderType -- .bezelBorder,
@@ -35,8 +35,8 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 	public typealias Instance = NSTableView
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -44,11 +44,11 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 	}
 	public func nsTableView() -> NSTableView { return instance() }
 
-	public enum Binding: TableViewBinding {
+	enum Binding: TableViewBinding {
 		public typealias RowDataType = RowData
 		public typealias EnclosingBinder = TableView
 		public static func tableViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -133,7 +133,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 		case draggingSessionEnded((_ tableView: NSTableView, _ session: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TableView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -158,7 +158,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			}
 		}
 
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .didDragTableColumn(let x):
 				let s = #selector(NSTableViewDelegate.tableView(_:didDrag:))
@@ -169,9 +169,7 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			case .mouseDownInHeaderOfTableColumn(let x):
 				let s = #selector(NSTableViewDelegate.tableView(_:mouseDownInHeaderOf:))
 				delegate().addSelector(s).mouseDownInHeaderOfTableColumn = { tc in x.send(value: tc.identifier) }
-			case .rowView(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:rowViewForRow:))
-				delegate().addSelector(s).rowViewForRow = x
+			case .rowView(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:rowViewForRow:)))
 			case .rowActionsForRow(let x):
 				if #available(macOS 10.11, *) {
 					let s = #selector(NSTableViewDelegate.tableView(_:rowActionsForRow:edge:))
@@ -193,62 +191,32 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 					}
 					return 0
 				}
-			case .shouldTypeSelectForEvent(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:shouldTypeSelectFor:withCurrentSearch:))
-				delegate().addSelector(s).shouldTypeSelectForEvent = x
-			case .typeSelectString(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:typeSelectStringFor:row:))
-				delegate().addSelector(s).typeSelectString = x
-			case .nextTypeSelectMatch(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:nextTypeSelectMatchFromRow:toRow:for:))
-				delegate().addSelector(s).nextTypeSelectMatch = x
-			case .heightOfRow(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:heightOfRow:))
-				delegate().addSelector(s).heightOfRow = x
-			case .shouldSelectTableColumn(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:shouldSelect:))
-				delegate().addSelector(s).shouldSelectTableColumn = x
+			case .shouldTypeSelectForEvent(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldTypeSelectFor:withCurrentSearch:)))
+			case .typeSelectString(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:typeSelectStringFor:row:)))
+			case .nextTypeSelectMatch(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:nextTypeSelectMatchFromRow:toRow:for:)))
+			case .heightOfRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:heightOfRow:)))
+			case .shouldSelectTableColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldSelect:)))
 			case .selectionIndexesForProposedSelection(let x):
 				let s = #selector(NSTableViewDelegate.tableView(_:selectionIndexesForProposedSelection:))
 				delegate().addSelector(s).selectionIndexesForProposedSelection = { instance, indexes in
 					return x(instance, IndexSet(indexes.map { $0 }))
 				}
-			case .shouldSelectRow(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:shouldSelectRow:))
-				delegate().addSelector(s).shouldSelectRow = x
-			case .selectionShouldChange(let x):
-				let s = #selector(NSTableViewDelegate.selectionShouldChange(in:))
-				delegate().addSelector(s).selectionShouldChange = x
-			case .isGroupRow(let x):
-				let s = #selector(NSTableViewDelegate.tableView(_:isGroupRow:))
-				delegate().addSelector(s).isGroupRow = x
-			case .sortDescriptorsDidChange(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:sortDescriptorsDidChange:))
-				delegate().addSelector(s).sortDescriptorsDidChange = x
-			case .pasteboardWriter(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:pasteboardWriterForRow:))
-				delegate().addSelector(s).pasteboardWriter = x
-			case .acceptDrop(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:acceptDrop:row:dropOperation:))
-				delegate().addSelector(s).acceptDrop = x
-			case .validateDrop(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:validateDrop:proposedRow:proposedDropOperation:))
-				delegate().addSelector(s).validateDrop = x
-			case .draggingSessionWillBegin(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:draggingSession:willBeginAt:forRowIndexes:))
-				delegate().addSelector(s).draggingSessionWillBegin = x
-			case .updateDraggingItems(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:updateDraggingItemsForDrag:))
-				delegate().addSelector(s).updateDraggingItems = x
-			case .draggingSessionEnded(let x):
-				let s = #selector(NSTableViewDataSource.tableView(_:draggingSession:endedAt:operation:))
-				delegate().addSelector(s).draggingSessionEnded = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .shouldSelectRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldSelectRow:)))
+			case .selectionShouldChange(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.selectionShouldChange(in:)))
+			case .isGroupRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:isGroupRow:)))
+			case .sortDescriptorsDidChange(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:sortDescriptorsDidChange:)))
+			case .pasteboardWriter(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:pasteboardWriterForRow:)))
+			case .acceptDrop(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:acceptDrop:row:dropOperation:)))
+			case .validateDrop(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:validateDrop:proposedRow:proposedDropOperation:)))
+			case .draggingSessionWillBegin(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:draggingSession:willBeginAt:forRowIndexes:)))
+			case .updateDraggingItems(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:updateDraggingItemsForDrag:)))
+			case .draggingSessionEnded(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:draggingSession:endedAt:operation:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			// TableView delegate is mandatory
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
@@ -258,81 +226,81 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .allowsColumnReordering(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnReordering = v }
-			case .allowsColumnResizing(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnResizing = v }
-			case .allowsMultipleSelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsMultipleSelection = v }
-			case .allowsEmptySelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsEmptySelection = v }
-			case .allowsColumnSelection(let x): return x.apply(instance, storage) { i, s, v in i.allowsColumnSelection = v }
-			case .intercellSpacing(let x): return x.apply(instance, storage) { i, s, v in i.intercellSpacing = v }
-			case .rowHeight(let x): return x.apply(instance, storage) { i, s, v in i.rowHeight = v }
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance, storage) { i, s, v in i.usesAlternatingRowBackgroundColors = v }
-			case .selectionHighlightStyle(let x): return x.apply(instance, storage) { i, s, v in i.selectionHighlightStyle = v }
-			case .gridColor(let x): return x.apply(instance, storage) { i, s, v in i.gridColor = v }
-			case .gridStyleMask(let x): return x.apply(instance, storage) { i, s, v in i.gridStyleMask = v }
-			case .rowSizeStyle(let x): return x.apply(instance, storage) { i, s, v in i.rowSizeStyle = v }
-			case .allowsTypeSelect(let x): return x.apply(instance, storage) { i, s, v in i.allowsTypeSelect = v }
-			case .floatsGroupRows(let x): return x.apply(instance, storage) { i, s, v in i.floatsGroupRows = v }
-			case .columnAutoresizingStyle(let x): return x.apply(instance, storage) { i, s, v in i.columnAutoresizingStyle = v }
-			case .autosaveName(let x): return x.apply(instance, storage) { i, s, v in i.autosaveName = v }
-			case .autosaveTableColumns(let x): return x.apply(instance, storage) { i, s, v in i.autosaveTableColumns = v }
-			case .verticalMotionCanBeginDrag(let x): return x.apply(instance, storage) { i, s, v in i.verticalMotionCanBeginDrag = v }
-			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance, storage) { i, s, v in i.draggingDestinationFeedbackStyle = v }
-			case .userInterfaceLayoutDirection(let x): return x.apply(instance, storage) { i, s, v in i.userInterfaceLayoutDirection = v }
+			case .allowsColumnReordering(let x): return x.apply(instance) { i, v in i.allowsColumnReordering = v }
+			case .allowsColumnResizing(let x): return x.apply(instance) { i, v in i.allowsColumnResizing = v }
+			case .allowsMultipleSelection(let x): return x.apply(instance) { i, v in i.allowsMultipleSelection = v }
+			case .allowsEmptySelection(let x): return x.apply(instance) { i, v in i.allowsEmptySelection = v }
+			case .allowsColumnSelection(let x): return x.apply(instance) { i, v in i.allowsColumnSelection = v }
+			case .intercellSpacing(let x): return x.apply(instance) { i, v in i.intercellSpacing = v }
+			case .rowHeight(let x): return x.apply(instance) { i, v in i.rowHeight = v }
+			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+			case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance) { i, v in i.usesAlternatingRowBackgroundColors = v }
+			case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
+			case .gridColor(let x): return x.apply(instance) { i, v in i.gridColor = v }
+			case .gridStyleMask(let x): return x.apply(instance) { i, v in i.gridStyleMask = v }
+			case .rowSizeStyle(let x): return x.apply(instance) { i, v in i.rowSizeStyle = v }
+			case .allowsTypeSelect(let x): return x.apply(instance) { i, v in i.allowsTypeSelect = v }
+			case .floatsGroupRows(let x): return x.apply(instance) { i, v in i.floatsGroupRows = v }
+			case .columnAutoresizingStyle(let x): return x.apply(instance) { i, v in i.columnAutoresizingStyle = v }
+			case .autosaveName(let x): return x.apply(instance) { i, v in i.autosaveName = v }
+			case .autosaveTableColumns(let x): return x.apply(instance) { i, v in i.autosaveTableColumns = v }
+			case .verticalMotionCanBeginDrag(let x): return x.apply(instance) { i, v in i.verticalMotionCanBeginDrag = v }
+			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance) { i, v in i.draggingDestinationFeedbackStyle = v }
+			case .userInterfaceLayoutDirection(let x): return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
 				
 			// Action behavior implementions:
-			case .highlightColumn(let x): return x.apply(instance, storage) { i, s, v in
+			case .highlightColumn(let x): return x.apply(instance) { i, v in
 				i.highlightedTableColumn = v.flatMap { (identifier: NSUserInterfaceItemIdentifier) -> NSTableColumn? in
 					return i.tableColumns.first(where: { $0.identifier == identifier })
 				}
 				}
 			case .selectColumns(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					let indexes = v.identifiers.compactMap { identifier in i.tableColumns.enumerated().first(where: { $0.element.identifier == identifier })?.offset }
 					let indexSet = IndexSet(indexes)
 					i.selectColumnIndexes(indexSet, byExtendingSelection: v.byExtendingSelection)
 				}
-			case .selectRows(let x): return x.apply(instance, storage) { i, s, v in i.selectRowIndexes(v.indexes, byExtendingSelection: v.byExtendingSelection) }
+			case .selectRows(let x): return x.apply(instance) { i, v in i.selectRowIndexes(v.indexes, byExtendingSelection: v.byExtendingSelection) }
 			case .deselectColumn(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let index = i.tableColumns.enumerated().first(where: { $0.element.identifier == v })?.offset {
 						i.deselectColumn(index)
 					}
 				}
-			case .deselectRow(let x): return x.apply(instance, storage) { i, s, v in i.deselectRow(v) }
-			case .selectAll(let x): return x.apply(instance, storage) { i, s, v in i.selectAll(nil) }
-			case .deselectAll(let x): return x.apply(instance, storage) { i, s, v in i.deselectAll(nil) }
-			case .sizeLastColumnToFit(let x): return x.apply(instance, storage) { i, s, v in i.sizeLastColumnToFit() }
-			case .sizeToFit(let x): return x.apply(instance, storage) { i, s, v in i.sizeToFit() }
-			case .scrollRowToVisible(let x): return x.apply(instance, storage) { i, s, v in i.scrollRowToVisible(v) }
+			case .deselectRow(let x): return x.apply(instance) { i, v in i.deselectRow(v) }
+			case .selectAll(let x): return x.apply(instance) { i, v in i.selectAll(nil) }
+			case .deselectAll(let x): return x.apply(instance) { i, v in i.deselectAll(nil) }
+			case .sizeLastColumnToFit(let x): return x.apply(instance) { i, v in i.sizeLastColumnToFit() }
+			case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
+			case .scrollRowToVisible(let x): return x.apply(instance) { i, v in i.scrollRowToVisible(v) }
 			case .scrollColumnToVisible(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let index = i.tableColumns.enumerated().first(where: { $0.element.identifier == v })?.offset {
 						i.scrollColumnToVisible(index)
 					}
 				}
 			case .moveColumn(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let index = i.tableColumns.enumerated().first(where: { $0.element.identifier == v.identifier })?.offset {
 						i.moveColumn(index, toColumn: v.toIndex)
 					}
 				}
 			case .hideRowActions(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.rowActionsVisible = false
 					}
 				}
 			case .hideRows(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.hideRows(at: v.indexes, withAnimation: v.withAnimation)
 					}
 				}
 			case .unhideRows(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.unhideRows(at: v.indexes, withAnimation: v.withAnimation)
 					}
@@ -437,11 +405,11 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			case .updateDraggingItems: return nil
 			case .draggingSessionEnded: return nil
 				
-			case .columns(let x): return x.apply(instance, storage) { i, s, v in s.updateColumns(v.map { $0.construct() }, in: i) }
-			case .headerView(let x): return x.apply(instance, storage) { i, s, v in i.headerView = v?.nsTableHeaderView() }
-			case .cornerView(let x): return x.apply(instance, storage) { i, s, v in i.cornerView = v?.nsView() }
-			case .rows(let x): return x.apply(instance, storage) { i, s, v in s.applyTableRowMutation(v, in: i) }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .columns(let x): return x.apply(instance) { i, v in s.updateColumns(v.map { $0.construct() }, in: i) }
+			case .headerView(let x): return x.apply(instance) { i, v in i.headerView = v?.nsTableHeaderView() }
+			case .cornerView(let x): return x.apply(instance) { i, v in i.cornerView = v?.nsView() }
+			case .rows(let x): return x.apply(instance) { i, v in s.applyTableRowMutation(v, in: i) }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -592,39 +560,32 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			return tableView.delegate as? Storage
 		}
 		
-		open var didDragTableColumn: ((NSTableColumn) -> Void)?
 		open func tableView(_ tableView: NSTableView, didDrag tableColumn: NSTableColumn) {
-			didDragTableColumn!(tableColumn)
+			handler(ofType: ((NSTableColumn) -> Void).self)(tableColumn)
 		}
 
-		open var didClickTableColumn: ((NSTableColumn) -> Void)?
 		open func tableView(_ tableView: NSTableView, didClick tableColumn: NSTableColumn) {
-			didClickTableColumn!(tableColumn)
+			handler(ofType: ((NSTableColumn) -> Void).self)(tableColumn)
 		}
 
-		open var mouseDownInHeaderOfTableColumn: ((NSTableColumn) -> Void)?
 		open func tableView(_ tableView: NSTableView, mouseDownInHeaderOf tableColumn: NSTableColumn) {
-			mouseDownInHeaderOfTableColumn!(tableColumn)
+			handler(ofType: ((NSTableColumn) -> Void).self)(tableColumn)
 		}
 
-		open var rowViewForRow: ((Int, RowData?) -> TableRowViewConvertible?)?
 		open func tableView(_ tableView: NSTableView, rowViewForRow rowIndex: Int) -> NSTableRowView? {
-			return rowViewForRow!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))?.nsTableRowView()
+			return handler(ofType: ((Int, RowData?) -> TableRowViewConvertible?).self)(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))?.nsTableRowView()
 		}
 
-		open var shouldReorderColumn: ((_ tableView: NSTableView, _ sourceIndex: Int, _ targetIndex: Int) -> Bool)?
 		open func tableView(_ tableView: NSTableView, shouldReorderColumn columnIndex: Int, toColumn newColumnIndex: Int) -> Bool {
-			return shouldReorderColumn!(tableView, columnIndex, newColumnIndex)
+			return handler(ofType: ((_ tableView: NSTableView, _ sourceIndex: Int, _ targetIndex: Int) -> Bool).self)(tableView, columnIndex, newColumnIndex)
 		}
 
-		open var sizeToFitWidthOfColumn: ((_ tableView: NSTableView, _ column: Int) -> CGFloat)?
 		open func tableView(_ tableView: NSTableView, sizeToFitWidthOfColumn column: Int) -> CGFloat {
-			return sizeToFitWidthOfColumn!(tableView, column)
+			return handler(ofType: ((_ tableView: NSTableView, _ column: Int) -> CGFloat).self)(tableView, column)
 		}
 
-		open var shouldTypeSelectForEvent: ((_ tableView: NSTableView, _ event: NSEvent, _ searchString: String?) -> Bool)?
 		open func tableView(_ tableView: NSTableView, shouldTypeSelectFor event: NSEvent, withCurrentSearch searchString: String?) -> Bool {
-			return shouldTypeSelectForEvent!(tableView, event, searchString)
+			return handler(ofType: ((_ tableView: NSTableView, _ event: NSEvent, _ searchString: String?) -> Bool).self)(tableView, event, searchString)
 		}
 
 		open var typeSelectString: ((TableCell<RowData>) -> String?)?
@@ -633,74 +594,60 @@ public class TableView<RowData>: ConstructingBinder, TableViewConvertible {
 			return typeSelectString!(TableCell(row: row, column: tc, tableView: tableView))
 		}
 
-		open var nextTypeSelectMatch: ((_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int)?
 		open func tableView(_ tableView: NSTableView, nextTypeSelectMatchFromRow startRow: Int, toRow endRow: Int, for searchString: String) -> Int {
-			return nextTypeSelectMatch!(tableView, startRow, endRow, searchString)
+			return handler(ofType: ((_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int).self)(tableView, startRow, endRow, searchString)
 		}
 
-		open var heightOfRow: ((_ row: Int, _ data: RowData?) -> CGFloat)?
 		open func tableView(_ tableView: NSTableView, heightOfRow rowIndex: Int) -> CGFloat {
-			return heightOfRow!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return handler(ofType: ((_ row: Int, _ data: RowData?) -> CGFloat).self)(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
-		open var shouldSelectTableColumn: ((_ tableView: NSTableView, _ tableColumn: NSTableColumn?) -> Bool)?
 		open func tableView(_ tableView: NSTableView, shouldSelect tableColumn: NSTableColumn?) -> Bool {
-			return shouldSelectTableColumn!(tableView, tableColumn)
+			return handler(ofType: ((_ tableView: NSTableView, _ tableColumn: NSTableColumn?) -> Bool).self)(tableView, tableColumn)
 		}
 
-		open var selectionIndexesForProposedSelection: ((_ tableView: NSTableView, _ proposedSelectionIndexes: IndexSet) -> IndexSet)?
 		open func tableView(_ tableView: NSTableView, selectionIndexesForProposedSelection proposedSelectionIndexes: IndexSet) -> IndexSet {
-			return selectionIndexesForProposedSelection!(tableView, proposedSelectionIndexes)
+			return handler(ofType: ((_ tableView: NSTableView, _ proposedSelectionIndexes: IndexSet) -> IndexSet).self)(tableView, proposedSelectionIndexes)
 		}
 
-		open var shouldSelectRow: ((_ row: Int, _ data: RowData?) -> Bool)?
 		open func tableView(_ tableView: NSTableView, shouldSelectRow rowIndex: Int) -> Bool {
-			return shouldSelectRow!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return handler(ofType: ((_ row: Int, _ data: RowData?) -> Bool).self)(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
-		open var selectionShouldChange: ((_ tableView: NSTableView) -> Bool)?
 		open func selectionShouldChange(in tableView: NSTableView) -> Bool {
-			return selectionShouldChange!(tableView)
+			return handler(ofType: ((_ tableView: NSTableView) -> Bool).self)(tableView)
 		}
 
-		open var isGroupRow: ((_ row: Int, _ data: RowData?) -> Bool)?
 		open func tableView(_ tableView: NSTableView, isGroupRow rowIndex: Int) -> Bool {
-			return isGroupRow!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return handler(ofType: ((_ row: Int, _ data: RowData?) -> Bool).self)(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
-		open var sortDescriptorsDidChange: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>?
 		open func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
-			sortDescriptorsDidChange!.send(value: (new: tableView.sortDescriptors, old: oldDescriptors))
+			handler(ofType: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>.self).send(value: (new: tableView.sortDescriptors, old: oldDescriptors))
 		}
 
-		open var pasteboardWriter: ((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> NSPasteboardWriting?)?
 		open func tableView(_ tableView: NSTableView, pasteboardWriterForRow rowIndex: Int) -> NSPasteboardWriting? {
-			return pasteboardWriter!(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return handler(ofType: ((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> NSPasteboardWriting?).self)(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
-		open var acceptDrop: ((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> Bool)?
 		open func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row rowIndex: Int, dropOperation: NSTableView.DropOperation) -> Bool {
-			return acceptDrop!(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return handler(ofType: ((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> Bool).self)(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
-		open var validateDrop: ((_ tableView: NSTableView, _ info: NSDraggingInfo, _ row: Int, _ dropOperation: NSTableView.DropOperation) -> NSDragOperation)?
 		open func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableView.DropOperation) -> NSDragOperation {
-			return validateDrop!(tableView, info, row, dropOperation)
+			return handler(ofType: ((_ tableView: NSTableView, _ info: NSDraggingInfo, _ row: Int, _ dropOperation: NSTableView.DropOperation) -> NSDragOperation).self)(tableView, info, row, dropOperation)
 		}
 
-		open var draggingSessionWillBegin: ((_ tableView: NSTableView, _ session: NSDraggingSession, _ screenPoint: NSPoint, _ rowIndexes: IndexSet) -> Void)?
 		open func tableView(_ tableView: NSTableView, draggingSession session: NSDraggingSession, willBeginAt screenPoint: NSPoint, forRowIndexes rowIndexes: IndexSet) {
-			return draggingSessionWillBegin!(tableView, session, screenPoint, rowIndexes)
+			return handler(ofType: ((_ tableView: NSTableView, _ session: NSDraggingSession, _ screenPoint: NSPoint, _ rowIndexes: IndexSet) -> Void).self)(tableView, session, screenPoint, rowIndexes)
 		}
 
-		open var updateDraggingItems: ((_ tableView: NSTableView, _ draggingInfo: NSDraggingInfo) -> Void)?
 		open func tableView(_ tableView: NSTableView, updateDraggingItemsForDrag draggingInfo: NSDraggingInfo) {
-			return updateDraggingItems!(tableView, draggingInfo)
+			return handler(ofType: ((_ tableView: NSTableView, _ draggingInfo: NSDraggingInfo) -> Void).self)(tableView, draggingInfo)
 		}
 
-		open var draggingSessionEnded: ((_ tableView: NSTableView, _ session: NSDraggingSession, _ screenPoint: NSPoint, _ operation: NSDragOperation) -> Void)?
 		open func tableView(_ tableView: NSTableView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-			return draggingSessionEnded!(tableView, session, screenPoint, operation)
+			return handler(ofType: ((_ tableView: NSTableView, _ session: NSDraggingSession, _ screenPoint: NSPoint, _ operation: NSDragOperation) -> Void).self)(tableView, session, screenPoint, operation)
 		}
 
 		open var rowActionsForRow: Any?

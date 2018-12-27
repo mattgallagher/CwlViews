@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
+public class BarButtonItem: Binder, BarButtonItemConvertible {
 	public typealias Instance = UIBarButtonItem
 	public typealias Inherited = BarItem
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 	}
 	public func uiBarButtonItem() -> Instance { return instance() }
 	
-	public enum Binding: BarButtonItemBinding {
+	enum Binding: BarButtonItemBinding {
 		public typealias EnclosingBinder = BarButtonItem
 		public static func barButtonItemBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case barButtonSystemItem(Constant<UIBarButtonItem.SystemItem>)
@@ -60,7 +60,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = BarButtonItem
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -93,7 +93,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 		
 		public init() {}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .barButtonSystemItem(let x): systemItem = x.value
 			case .customView(let x):
@@ -111,17 +111,17 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 			case .inheritedBinding(.title(let x)):
 				title = x.initialSubsequent()
 				titleInitial = title.initial()
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .barButtonSystemItem: return nil
 			case .backgroundImage(let x):
 				var previous: ScopedValues<StateStyleAndMetrics, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for conditions in p.pairs {
 							if conditions.value != nil {
@@ -138,7 +138,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 				}
 			case .backButtonBackgroundImage(let x):
 				var previous: ScopedValues<StateAndMetrics, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for conditions in p.pairs {
 							if conditions.value != nil {
@@ -155,7 +155,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 				}
 			case .backButtonTitlePositionAdjustment(let x):
 				var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setBackButtonTitlePositionAdjustment(UIOffset(), for: c.scope)
@@ -168,7 +168,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 				}
 			case .backgroundVerticalPositionAdjustment(let x):
 				var previous: ScopedValues<UIBarMetrics, CGFloat>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setBackgroundVerticalPositionAdjustment(0, for: c.scope)
@@ -181,7 +181,7 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 				}
 			case .titlePositionAdjustment(let x):
 				var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setTitlePositionAdjustment(UIOffset(), for: c.scope)
@@ -193,18 +193,18 @@ public class BarButtonItem: ConstructingBinder, BarButtonItemConvertible {
 					}
 				}
 			case .itemStyle:
-				return itemStyle.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.style = v } }
-			case .possibleTitles(let x): return x.apply(instance, storage) { i, s, v in i.possibleTitles = v }
-			case .width(let x): return x.apply(instance, storage) { i, s, v in i.width = v }
+				return itemStyle.subsequent.flatMap { $0.apply(instance) { i, v in i.style = v } }
+			case .possibleTitles(let x): return x.apply(instance) { i, v in i.possibleTitles = v }
+			case .width(let x): return x.apply(instance) { i, v in i.width = v }
 			case .customView:
-				return customView.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.customView = v?.uiView() } }
-			case .tintColor(let x): return x.apply(instance, storage) { i, s, v in i.tintColor = v }
+				return customView.subsequent.flatMap { $0.apply(instance) { i, v in i.customView = v?.uiView() } }
+			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
 			case .action(let x): return x.apply(instance: instance, constructTarget: SignalActionTarget.init, processor: { sender in () })
 				
-			case .inheritedBinding(.image): return image.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.image = v } }
-			case .inheritedBinding(.landscapeImagePhone): return landscapeImagePhone.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.landscapeImagePhone = v } }
-			case .inheritedBinding(.title): return title.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in i.title = v } }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(.image): return image.subsequent.flatMap { $0.apply(instance) { i, v in i.image = v } }
+			case .inheritedBinding(.landscapeImagePhone): return landscapeImagePhone.subsequent.flatMap { $0.apply(instance) { i, v in i.landscapeImagePhone = v } }
+			case .inheritedBinding(.title): return title.subsequent.flatMap { $0.apply(instance) { i, v in i.title = v } }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

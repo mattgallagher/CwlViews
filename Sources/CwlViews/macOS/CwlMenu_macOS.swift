@@ -19,299 +19,281 @@
 
 #if os(macOS)
 
-public class Menu: ConstructingBinder, MenuConvertible {
-	public typealias Instance = NSMenu
-	public typealias Inherited = BaseBinder
-	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
+// MARK: - Binder Part 1: Binder
+public class Menu: Binder, MenuConvertible {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsMenu() -> Instance { return instance() }
-	
-	public enum Binding: MenuBinding {
-		public typealias EnclosingBinder = Menu
-		public static func menuBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+}
+
+// MARK: - Binder Part 2: Binding
+public extension Menu {
+	enum Binding: MenuBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case systemName(Constant<SystemMenu>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case items(Dynamic<[MenuItemConvertible]>)
-		case title(Dynamic<String>)
-		case autoenablesItems(Dynamic<Bool>)
-		case minimumWidth(Dynamic<CGFloat>)
-		case font(Dynamic<NSFont>)
 		case allowsContextMenuPlugIns(Dynamic<Bool>)
+		case autoenablesItems(Dynamic<Bool>)
+		case font(Dynamic<NSFont>)
+		case items(Dynamic<[MenuItemConvertible]>)
+		case minimumWidth(Dynamic<CGFloat>)
 		case showsStateColumn(Dynamic<Bool>)
+		case title(Dynamic<String>)
 		@available(macOS 10.11, *) case userInterfaceLayoutDirection(Dynamic<NSUserInterfaceLayoutDirection>)
 
 		// 2. Signal bindings are performed on the object after construction.
-		case popUpContextMenu(Signal<(with: NSEvent, for: NSView)>)
-		case popUp(Signal<(item: Int, at: NSPoint, in: NSView?)>)
-		case performAction(Signal<Int>)
 		case cancelTracking(Signal<Void>)
 		case cancelTrackingWithoutAnimation(Signal<Void>)
+		case performAction(Signal<Int>)
+		case popUp(Signal<(item: Int, at: NSPoint, in: NSView?)>)
+		case popUpContextMenu(Signal<(with: NSEvent, for: NSView)>)
 		
 		// 3. Action bindings are triggered by the object after construction.
-		case willOpen(SignalInput<Void>)
-		case didClose(SignalInput<Void>)
 		case didBeginTracking(SignalInput<Void>)
+		case didClose(SignalInput<Void>)
 		case didEndTracking(SignalInput<Void>)
-		case willHighlight(SignalInput<Int?>)
-		case willSendAction(SignalInput<Int>)
 		case didSendAction(SignalInput<Int>)
+		case willHighlight(SignalInput<Int?>)
+		case willOpen(SignalInput<Void>)
+		case willSendAction(SignalInput<Int>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case confinementRect((_ menu: NSMenu, _ screen: NSScreen?) -> NSRect)
 	}
+}
 
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = Menu
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension Menu {
+	struct Preparer: BinderDelegateConstructor {
+		public typealias Binding = Menu.Binding
+		public typealias Delegate = Menu.Delegate
+		public typealias Inherited = BinderBase
+		public typealias Instance = NSMenu
+		public typealias Storage = Menu.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			let x: NSMenu
-			if let sn = systemName {
-				let name = sn.rawValue
-				let codingProxy = MenuCodingProxy(name: name)
-				let data = NSMutableData()
-				let archiver = NSKeyedArchiver(forWritingWith: data)
-				archiver.setClassName(NSStringFromClass(NSMenu.self), for: MenuCodingProxy.self)
-				archiver.outputFormat = .binary
-				archiver.encode(codingProxy, forKey: NSKeyedArchiveRootObjectKey)
-				archiver.finishEncoding()
-				
-				x = NSKeyedUnarchiver.unarchiveObject(with: data as Data) as? NSMenu ?? NSMenu()
-			} else {
-				x = subclass.init()
-			}
-			return x
-		}
-		
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var possibleDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				possibleDelegate = d
-				return d
-			}
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
 		public var systemName: SystemMenu?
-		
-		public mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .systemName(let x): systemName = x.value
-			case .willOpen:
-				delegate().addSelector(#selector(NSMenuDelegate.menuWillOpen(_:)))
-			case .didClose:
-				delegate().addSelector(#selector(NSMenuDelegate.menuDidClose(_:)))
-			case .confinementRect(let x):
-				let s = #selector(NSMenuDelegate.confinementRect(for:on:))
-				delegate().addSelector(s).confinement = x
-			case .willHighlight:
-				delegate().addSelector(#selector(NSMenuDelegate.menu(_:willHighlight:)))
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
-			default: break
-			}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension Menu.Preparer {
+	func constructInstance(type: Menu.Preparer.Instance.Type, parameters: Menu.Preparer.Parameters, storage: StackView.Storage) -> Menu.Preparer.Instance {
+		let x: NSMenu
+		if let sn = systemName {
+			let name = sn.rawValue
+			let codingProxy = MenuCodingProxy(name: name)
+			let data = NSMutableData()
+			let archiver = NSKeyedArchiver(forWritingWith: data)
+			archiver.setClassName(NSStringFromClass(type), for: MenuCodingProxy.self)
+			archiver.outputFormat = .binary
+			archiver.encode(codingProxy, forKey: NSKeyedArchiveRootObjectKey)
+			archiver.finishEncoding()
+			
+			x = NSKeyedUnarchiver.unarchiveObject(with: data as Data) as? NSMenu ?? NSMenu()
+		} else {
+			x = type.init()
 		}
-
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
-			// Don't steal the delegate from system menus
-			if possibleDelegate != nil {
-				precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-				storage.dynamicDelegate = possibleDelegate
-				instance.delegate = storage
-			}
-
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .systemName: return nil
-			case .willOpen(let x):
-				if let d = possibleDelegate {
-					let (input, signal) = Signal<Void>.create()
-					d.willOpen = { input.send(value: ()) }
-					return signal.cancellableBind(to: x)
-				}
-				return nil
-			case .didClose(let x):
-				if let d = possibleDelegate {
-					let (input, signal) = Signal<Void>.create()
-					d.didClose = { input.send(value: ()) }
-					return signal.cancellableBind(to: x)
-				}
-				return nil
-			case .willHighlight(let x):
-				if let d = possibleDelegate {
-					let (input, signal) = Signal<Int?>.create()
-					d.willHighlight = { menu, isHighlighted in
-						if let h = isHighlighted {
-							for (index, item) in menu.items.enumerated() {
-								if h == item {
-									input.send(value: index)
-									return
-								}
-							}
-						}
-						input.send(value: nil)
-					}
-					return signal.cancellableBind(to: x)
-				}
-				return nil
-			case .items(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.removeAllItems()
-					v.forEach { i.addItem($0.nsMenuItem()) }
-				}
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .autoenablesItems(let x): return x.apply(instance, storage) { i, s, v in i.autoenablesItems = v }
-			case .minimumWidth(let x): return x.apply(instance, storage) { i, s, v in i.minimumWidth = v }
-			case .font(let x): return x.apply(instance, storage) { i, s, v in i.font = v }
-			case .allowsContextMenuPlugIns(let x): return x.apply(instance, storage) { i, s, v in i.allowsContextMenuPlugIns = v }
-			case .showsStateColumn(let x): return x.apply(instance, storage) { i, s, v in i.showsStateColumn = v }
-			case .userInterfaceLayoutDirection(let x):
-				if #available(macOS 10.11, *) {
-					return x.apply(instance, storage) { i, s, v in i.userInterfaceLayoutDirection = v }
-				}
-				return nil
-			case .popUpContextMenu(let x): return x.apply(instance, storage) { i, s, v in NSMenu.popUpContextMenu(i, with: v.with, for: v.for) }
-			case .popUp(let x):
-				return x.apply(instance, storage) { i, s, v in
-					let item = v.item >= 0 ? (i.items.at(v.item) ?? i.items.last) : i.items.first
-					i.popUp(positioning: item, at: v.at, in: v.in)
-				}
-			case .performAction(let x):
-				return x.apply(instance, storage) { i, s, v in
-					i.performActionForItem(at: v)
-				}
-			case .cancelTracking(let x): return x.apply(instance, storage) { i, s, v in i.cancelTracking() }
-			case .cancelTrackingWithoutAnimation(let x): return x.apply(instance, storage) { i, s, v in i.cancelTrackingWithoutAnimation() }
-			case .didBeginTracking(let x):
-				return Signal.notifications(name: NSMenu.didBeginTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didEndTracking(let x):
-				return Signal.notifications(name: NSMenu.didEndTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willSendAction(let x):
-				return Signal.notifications(name: NSMenu.willSendActionNotification, object: instance).compactMap { n -> Int? in
-					if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.index(where: { i in i == menuItem }) {
-						return index
-					}
-					return nil
-					}.cancellableBind(to: x)
-			case .didSendAction(let x):
-				return Signal.notifications(name: NSMenu.didSendActionNotification, object: instance).compactMap { n -> Int? in
-					if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.index(where: { i in i == menuItem }) {
-						return index
-					}
-					return nil
-				}.cancellableBind(to: x)
-			case .confinementRect:
-				return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
+		return x
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		case .systemName(let x): systemName = x.value
+		case .didClose(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menuDidClose(_:)))
+		case .willHighlight(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menu(_:willHighlight:)))
+		case .willOpen(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menuWillOpen(_:)))
+		case .confinementRect(let x): delegate().addHandler(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
+		default: break
 		}
 	}
 
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .systemName: return nil
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .allowsContextMenuPlugIns(let x): return x.apply(instance) { i, v in i.allowsContextMenuPlugIns = v }
+		case .autoenablesItems(let x): return x.apply(instance) { i, v in i.autoenablesItems = v }
+		case .font(let x): return x.apply(instance) { i, v in i.font = v }
+		case .items(let x):
+			return x.apply(instance) { i, v in
+				i.removeAllItems()
+				v.forEach { i.addItem($0.nsMenuItem()) }
+			}
+		case .minimumWidth(let x): return x.apply(instance) { i, v in i.minimumWidth = v }
+		case .showsStateColumn(let x): return x.apply(instance) { i, v in i.showsStateColumn = v }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+			
+		case .userInterfaceLayoutDirection(let x):
+			if #available(macOS 10.11, *) {
+				return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
+			}
+			return nil
+		
+		// 2. Signal bindings are performed on the object after construction.
+		case .cancelTracking(let x): return x.apply(instance) { i, v in i.cancelTracking() }
+		case .cancelTrackingWithoutAnimation(let x): return x.apply(instance) { i, v in i.cancelTrackingWithoutAnimation() }
+		case .performAction(let x): return x.apply(instance) { i, v in i.performActionForItem(at: v) }
+		case .popUp(let x):
+			return x.apply(instance) { i, v in
+				let item = v.item >= 0 ? (i.items.at(v.item) ?? i.items.last) : i.items.first
+				i.popUp(positioning: item, at: v.at, in: v.in)
+			}
+		case .popUpContextMenu(let x): return x.apply(instance) { i, v in NSMenu.popUpContextMenu(i, with: v.with, for: v.for) }
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .didBeginTracking(let x):
+			return Signal.notifications(name: NSMenu.didBeginTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didClose: return nil
+		case .didEndTracking(let x):
+			return Signal.notifications(name: NSMenu.didEndTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didSendAction(let x):
+			return Signal.notifications(name: NSMenu.didSendActionNotification, object: instance).compactMap { n -> Int? in
+				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.index(where: { i in i == menuItem }) {
+					return index
+				}
+				return nil
+				}.cancellableBind(to: x)
+		case .willHighlight: return nil
+		case .willOpen: return nil
+		case .willSendAction(let x):
+			return Signal.notifications(name: NSMenu.willSendActionNotification, object: instance).compactMap { n -> Int? in
+				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.index(of: menuItem) {
+					return index
+				}
+				return nil
+			}.cancellableBind(to: x)
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .confinementRect: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension Menu {
 	open class Storage: ObjectBinderStorage, NSMenuDelegate {}
 
 	open class Delegate: DynamicDelegate, NSMenuDelegate {
-		public required override init() {
-			super.init()
-		}
-		
-		open var willOpen: (() -> Void)?
 		open func menuWillOpen(_ menu: NSMenu) {
-			return willOpen!()
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var didClose: (() -> Void)?
 		open func menuDidClose(_ menu: NSMenu) {
-			return didClose!()
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var confinement: ((NSMenu, NSScreen?) -> NSRect)?
 		open func confinementRect(for menu: NSMenu, on screen: NSScreen?) -> NSRect {
-			return confinement!(menu, screen)
+			return handler(ofType: ((NSMenu, NSScreen?) -> NSRect).self)(menu, screen)
 		}
 		
-		open var willHighlight: ((NSMenu, NSMenuItem?) -> Void)?
-		open func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {
-			return willHighlight!(menu, item)
+		open func menu(_ menu: NSMenu, willHighlight: NSMenuItem?) {
+			let input = handler(ofType: SignalInput<Int?>.self)
+			if let h = willHighlight {
+				for (index, item) in menu.items.enumerated() {
+					if h == item {
+						input.send(value: index)
+						return
+					}
+				}
+			}
+			input.send(value: nil)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: MenuBinding {
+	public typealias MenuName<V> = BindingName<V, Menu.Binding, Binding>
+	private typealias B = Menu.Binding
+	private static func name<V>(_ source: @escaping (V) -> Menu.Binding) -> MenuName<V> {
+		return MenuName<V>(source: source, downcast: Binding.menuBinding)
+	}
+}
+public extension BindingName where Binding: MenuBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .menuBinding(Menu.Binding.$1(v)) }) }
-
+	// With:    static var $1: MenuName<$2> { return .name(B.$1) }
+	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	public static var systemName: BindingName<Constant<SystemMenu>, Binding> { return BindingName<Constant<SystemMenu>, Binding>({ v in .menuBinding(Menu.Binding.systemName(v)) }) }
+	static var systemName: MenuName<Constant<SystemMenu>> { return .name(B.systemName) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var items: BindingName<Dynamic<[MenuItemConvertible]>, Binding> { return BindingName<Dynamic<[MenuItemConvertible]>, Binding>({ v in .menuBinding(Menu.Binding.items(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .menuBinding(Menu.Binding.title(v)) }) }
-	public static var autoenablesItems: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .menuBinding(Menu.Binding.autoenablesItems(v)) }) }
-	public static var minimumWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .menuBinding(Menu.Binding.minimumWidth(v)) }) }
-	public static var font: BindingName<Dynamic<NSFont>, Binding> { return BindingName<Dynamic<NSFont>, Binding>({ v in .menuBinding(Menu.Binding.font(v)) }) }
-	public static var allowsContextMenuPlugIns: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .menuBinding(Menu.Binding.allowsContextMenuPlugIns(v)) }) }
-	public static var showsStateColumn: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .menuBinding(Menu.Binding.showsStateColumn(v)) }) }
-	@available(macOS 10.11, *) public static var userInterfaceLayoutDirection: BindingName<Dynamic<NSUserInterfaceLayoutDirection>, Binding> { return BindingName<Dynamic<NSUserInterfaceLayoutDirection>, Binding>({ v in .menuBinding(Menu.Binding.userInterfaceLayoutDirection(v)) }) }
-
+	static var items: MenuName<Dynamic<[MenuItemConvertible]>> { return .name(B.items) }
+	static var title: MenuName<Dynamic<String>> { return .name(B.title) }
+	static var autoenablesItems: MenuName<Dynamic<Bool>> { return .name(B.autoenablesItems) }
+	static var minimumWidth: MenuName<Dynamic<CGFloat>> { return .name(B.minimumWidth) }
+	static var font: MenuName<Dynamic<NSFont>> { return .name(B.font) }
+	static var allowsContextMenuPlugIns: MenuName<Dynamic<Bool>> { return .name(B.allowsContextMenuPlugIns) }
+	static var showsStateColumn: MenuName<Dynamic<Bool>> { return .name(B.showsStateColumn) }
+	@available(macOS 10.11, *) static var userInterfaceLayoutDirection: MenuName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var popUpContextMenu: BindingName<Signal<(with: NSEvent, for: NSView)>, Binding> { return BindingName<Signal<(with: NSEvent, for: NSView)>, Binding>({ v in .menuBinding(Menu.Binding.popUpContextMenu(v)) }) }
-	public static var popUp: BindingName<Signal<(item: Int, at: NSPoint, in: NSView?)>, Binding> { return BindingName<Signal<(item: Int, at: NSPoint, in: NSView?)>, Binding>({ v in .menuBinding(Menu.Binding.popUp(v)) }) }
-	public static var performAction: BindingName<Signal<Int>, Binding> { return BindingName<Signal<Int>, Binding>({ v in .menuBinding(Menu.Binding.performAction(v)) }) }
-	public static var cancelTracking: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .menuBinding(Menu.Binding.cancelTracking(v)) }) }
-	public static var cancelTrackingWithoutAnimation: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .menuBinding(Menu.Binding.cancelTrackingWithoutAnimation(v)) }) }
+	static var popUpContextMenu: MenuName<Signal<(with: NSEvent, for: NSView)>> { return .name(B.popUpContextMenu) }
+	static var popUp: MenuName<Signal<(item: Int, at: NSPoint, in: NSView?)>> { return .name(B.popUp) }
+	static var performAction: MenuName<Signal<Int>> { return .name(B.performAction) }
+	static var cancelTracking: MenuName<Signal<Void>> { return .name(B.cancelTracking) }
+	static var cancelTrackingWithoutAnimation: MenuName<Signal<Void>> { return .name(B.cancelTrackingWithoutAnimation) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var willOpen: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .menuBinding(Menu.Binding.willOpen(v)) }) }
-	public static var didClose: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .menuBinding(Menu.Binding.didClose(v)) }) }
-	public static var didBeginTracking: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .menuBinding(Menu.Binding.didBeginTracking(v)) }) }
-	public static var didEndTracking: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .menuBinding(Menu.Binding.didEndTracking(v)) }) }
-	public static var willHighlight: BindingName<SignalInput<Int?>, Binding> { return BindingName<SignalInput<Int?>, Binding>({ v in .menuBinding(Menu.Binding.willHighlight(v)) }) }
-	public static var willSendAction: BindingName<SignalInput<Int>, Binding> { return BindingName<SignalInput<Int>, Binding>({ v in .menuBinding(Menu.Binding.willSendAction(v)) }) }
-	public static var didSendAction: BindingName<SignalInput<Int>, Binding> { return BindingName<SignalInput<Int>, Binding>({ v in .menuBinding(Menu.Binding.didSendAction(v)) }) }
-
+	static var willOpen: MenuName<SignalInput<Void>> { return .name(B.willOpen) }
+	static var didClose: MenuName<SignalInput<Void>> { return .name(B.didClose) }
+	static var didBeginTracking: MenuName<SignalInput<Void>> { return .name(B.didBeginTracking) }
+	static var didEndTracking: MenuName<SignalInput<Void>> { return .name(B.didEndTracking) }
+	static var willHighlight: MenuName<SignalInput<Int?>> { return .name(B.willHighlight) }
+	static var willSendAction: MenuName<SignalInput<Int>> { return .name(B.willSendAction) }
+	static var didSendAction: MenuName<SignalInput<Int>> { return .name(B.didSendAction) }
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var confinementRect: BindingName<(_ menu: NSMenu, _ screen: NSScreen?) -> NSRect, Binding> { return BindingName<(_ menu: NSMenu, _ screen: NSScreen?) -> NSRect, Binding>({ v in .menuBinding(Menu.Binding.confinementRect(v)) }) }
+	static var confinementRect: MenuName<(_ menu: NSMenu, _ screen: NSScreen?) -> NSRect> { return .name(B.confinementRect) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol MenuConvertible {
 	func nsMenu() -> Menu.Instance
 }
-extension Menu.Instance: MenuConvertible {
+extension NSMenu: MenuConvertible, HasDelegate, DefaultConstructable {
 	public func nsMenu() -> Menu.Instance { return self }
 }
+public extension Menu {
+	func nsMenu() -> Menu.Instance { return instance() }
+}
 
-public protocol MenuBinding: BaseBinding {
+// MARK: - Binder Part 8: Downcast protocols
+public protocol MenuBinding: BinderBaseBinding {
 	static func menuBinding(_ binding: Menu.Binding) -> Self
 }
-extension MenuBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension MenuBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return menuBinding(.inheritedBinding(binding))
 	}
 }
+public extension Menu.Binding {
+	public typealias Preparer = Menu.Preparer
+	static func menuBinding(_ binding: Menu.Binding) -> Menu.Binding {
+		return binding
+	}
+}
 
+// MARK: - Binder Part 9: Other supporting types
 public enum SystemMenu: String {
 	case apple = "NSAppleMenu"
 	case font = "NSFontMenu"

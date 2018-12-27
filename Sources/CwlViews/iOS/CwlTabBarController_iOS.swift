@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, TabBarControllerConvertible {
+public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControllerConvertible {
 	public typealias Instance = UITabBarController
 	public typealias Inherited = ViewController
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,11 +32,11 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 	}
 	public func uiTabBarController() -> Instance { return instance() }
 	
-	public enum Binding: TabBarControllerBinding {
+	enum Binding: TabBarControllerBinding {
 		public typealias ItemIdentifierType = ItemIdentifier
 		public typealias EnclosingBinder = TabBarController
 		public static func tabBarControllerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case tabBar(Constant<TabBar<ItemIdentifier>>)
@@ -63,7 +63,7 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 		case animationControllerForTransition((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TabBarController
 		public var linkedPreparer = Inherited.Preparer()
 
@@ -90,42 +90,24 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 		
 		var tabConstructor: ((ItemIdentifier) -> ViewControllerConvertible)?
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .tabConstructor(let x): tabConstructor = x
-			case .shouldSelect(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:shouldSelect:))
-				delegate().addSelector(s).shouldSelect = x
-			case .supportedInterfaceOrientations(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarControllerSupportedInterfaceOrientations(_:))
-				delegate().addSelector(s).supportedInterfaceOrientations = x
-			case .preferredInterfaceOrientationForPresentation(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarControllerPreferredInterfaceOrientationForPresentation(_:))
-				delegate().addSelector(s).preferredInterfaceOrientationForPresentation = x
-			case .interactionControllerForAnimation(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:interactionControllerFor:))
-				delegate().addSelector(s).interactionControllerForAnimation = x
-			case .animationControllerForTransition(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:animationControllerForTransitionFrom:to:))
-				delegate().addSelector(s).animationControllerForTransition = x
-			case .willBeginCustomizing(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:willBeginCustomizing:))
-				delegate().addSelector(s).willBeginCustomizing = x
-			case .willEndCustomizing(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:willEndCustomizing:changed:))
-				delegate().addSelector(s).willEndCustomizing = x
-			case .didEndCustomizing(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:didEndCustomizing:changed:))
-				delegate().addSelector(s).didEndCustomizing = x
-			case .didSelect(let x):
-				let s = #selector(UITabBarControllerDelegate.tabBarController(_:didSelect:))
-				delegate().addSelector(s).didSelect = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .shouldSelect(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:shouldSelect:)))
+			case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerSupportedInterfaceOrientations(_:)))
+			case .preferredInterfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerPreferredInterfaceOrientationForPresentation(_:)))
+			case .interactionControllerForAnimation(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:interactionControllerFor:)))
+			case .animationControllerForTransition(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:animationControllerForTransitionFrom:to:)))
+			case .willBeginCustomizing(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willBeginCustomizing:)))
+			case .willEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willEndCustomizing:changed:)))
+			case .didEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didEndCustomizing:changed:)))
+			case .didSelect(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didSelect:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 
 			storage.dynamicDelegate = possibleDelegate
@@ -138,7 +120,7 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .tabBar(let x):
 				x.value.applyBindings(to: instance.tabBar)
@@ -168,7 +150,7 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 			case .preferredInterfaceOrientationForPresentation: return nil
 			case .interactionControllerForAnimation: return nil
 			case .animationControllerForTransition: return nil
-			case .inheritedBinding(let b): return linkedPreparer.applyBinding(b, instance: instance, storage: storage)
+			case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -188,8 +170,8 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 			if let existing = allItems[identifier] {
 				return existing.uiViewController()
 			}
-			if let constructor = tabConstructor {
-				let new = constructor(identifier)
+			if let binding = tabConstructor {
+				let new = binding(identifier)
 				allItems[identifier] = new
 				return new.uiViewController()
 			}
@@ -245,24 +227,20 @@ public class TabBarController<ItemIdentifier: Hashable>: ConstructingBinder, Tab
 			return false
 		}
 		
-		open var supportedInterfaceOrientations: (() -> UIInterfaceOrientationMask)?
 		open func tabBarControllerSupportedInterfaceOrientations(_ tabBarController: UITabBarController) -> UIInterfaceOrientationMask {
-			return supportedInterfaceOrientations!()
+			return handler(ofType: (() -> UIInterfaceOrientationMask).self)()
 		}
 		
-		open var preferredInterfaceOrientationForPresentation: (() -> UIInterfaceOrientation)?
 		open func tabBarControllerPreferredInterfaceOrientationForPresentation(_ tabBarController: UITabBarController) -> UIInterfaceOrientation {
-			return preferredInterfaceOrientationForPresentation!()
+			return handler(ofType: (() -> UIInterfaceOrientation).self)()
 		}
 		
-		open var interactionControllerForAnimation: ((UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?)?
 		open func tabBarController(_ tabBarController: UITabBarController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-			return interactionControllerForAnimation!(animationController)
+			return handler(ofType: ((UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)(animationController)
 		}
 		
-		open var animationControllerForTransition: ((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?)?
 		open func tabBarController(_ tabBarController: UITabBarController, animationControllerForTransitionFrom fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-			return animationControllerForTransition!(fromVC, toVC)
+			return handler(ofType: ((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)(fromVC, toVC)
 		}
 	}
 }

@@ -20,12 +20,12 @@
 
 #if os(iOS)
 
-public class SearchBar: ConstructingBinder, SearchBarConvertible {
+public class SearchBar: Binder, SearchBarConvertible {
 	public typealias Instance = UISearchBar
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -33,10 +33,10 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 	}
 	public func uiSearchBar() -> Instance { return instance() }
 	
-	public enum Binding: SearchBarBinding {
+	enum Binding: SearchBarBinding {
 		public typealias EnclosingBinder = SearchBar
 		public static func searchBarBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case textInputTraits(Constant<TextInputTraits>)
@@ -84,7 +84,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 		case position((UIBarPositioning) -> UIBarPosition)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = SearchBar
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -109,50 +109,26 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 			}
 		}
 
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
-			case .didChange(let x):
-				let s = #selector(UISearchBarDelegate.searchBar(_:textDidChange:))
-				delegate().addSelector(s).didChange = x
-			case .didBeginEditing(let x):
-				let s = #selector(UISearchBarDelegate.searchBarTextDidBeginEditing(_:))
-				delegate().addSelector(s).didBeginEditing = x
-			case .didEndEditing(let x):
-				let s = #selector(UISearchBarDelegate.searchBarTextDidEndEditing(_:))
-				delegate().addSelector(s).didEndEditing = x
-			case .bookmarkButtonClicked(let x):
-				let s = #selector(UISearchBarDelegate.searchBarBookmarkButtonClicked(_:))
-				delegate().addSelector(s).bookmarkButtonClicked = x
-			case .cancelButtonClicked(let x):
-				let s = #selector(UISearchBarDelegate.searchBarCancelButtonClicked(_:))
-				delegate().addSelector(s).cancelButtonClicked = x
-			case .searchButtonClicked(let x):
-				let s = #selector(UISearchBarDelegate.searchBarSearchButtonClicked(_:))
-				delegate().addSelector(s).searchButtonClicked = x
-			case .resultsListButtonClicked(let x):
-				let s = #selector(UISearchBarDelegate.searchBarResultsListButtonClicked(_:))
-				delegate().addSelector(s).resultsListButtonClicked = x
-			case .selectedScopeButtonIndexDidChange(let x):
-				let s = #selector(UISearchBarDelegate.searchBar(_:selectedScopeButtonIndexDidChange:))
-				delegate().addSelector(s).selectedScopeButtonIndexDidChange = x
-			case .shouldChangeText(let x):
-				let s = #selector(UISearchBarDelegate.searchBar(_:shouldChangeTextIn:replacementText:))
-				delegate().addSelector(s).shouldChangeText = x
-			case .shouldBeginEditing(let x):
-				let s = #selector(UISearchBarDelegate.searchBarShouldBeginEditing(_:))
-				delegate().addSelector(s).shouldBeginEditing = x
-			case .shouldEndEditing(let x):
-				let s = #selector(UISearchBarDelegate.searchBarShouldEndEditing(_:))
-				delegate().addSelector(s).shouldEndEditing = x
-			case .position(let x):
-				let s = #selector(UISearchBarDelegate.position(for:))
-				delegate().addSelector(s).position = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .didChange(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBar(_:textDidChange:)))
+			case .didBeginEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarTextDidBeginEditing(_:)))
+			case .didEndEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarTextDidEndEditing(_:)))
+			case .bookmarkButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarBookmarkButtonClicked(_:)))
+			case .cancelButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarCancelButtonClicked(_:)))
+			case .searchButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarSearchButtonClicked(_:)))
+			case .resultsListButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarResultsListButtonClicked(_:)))
+			case .selectedScopeButtonIndexDidChange(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBar(_:selectedScopeButtonIndexDidChange:)))
+			case .shouldChangeText(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBar(_:shouldChangeTextIn:replacementText:)))
+			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarShouldBeginEditing(_:)))
+			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarShouldEndEditing(_:)))
+			case .position(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.position(for:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			if storage.inUse {
@@ -162,64 +138,64 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .textInputTraits(let x):
 				return AggregateLifetime(lifetimes: x.value.bindings.lazy.compactMap { trait in
 					switch trait {
-					case .autocapitalizationType(let y): return y.apply(instance, storage) { i, s, v in i.autocapitalizationType = v }
-					case .autocorrectionType(let y): return y.apply(instance, storage) { i, s, v in i.autocorrectionType = v }
-					case .spellCheckingType(let y): return y.apply(instance, storage) { i, s, v in i.spellCheckingType = v }
-					case .enablesReturnKeyAutomatically(let y): return y.apply(instance, storage) { i, s, v in i.enablesReturnKeyAutomatically = v }
-					case .keyboardAppearance(let y): return y.apply(instance, storage) { i, s, v in i.keyboardAppearance = v }
-					case .keyboardType(let y): return y.apply(instance, storage) { i, s, v in i.keyboardType = v }
-					case .returnKeyType(let y): return y.apply(instance, storage) { i, s, v in i.returnKeyType = v }
-					case .isSecureTextEntry(let y): return y.apply(instance, storage) { i, s, v in i.isSecureTextEntry = v }
+					case .autocapitalizationType(let y): return y.apply(instance) { i, v in i.autocapitalizationType = v }
+					case .autocorrectionType(let y): return y.apply(instance) { i, v in i.autocorrectionType = v }
+					case .spellCheckingType(let y): return y.apply(instance) { i, v in i.spellCheckingType = v }
+					case .enablesReturnKeyAutomatically(let y): return y.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
+					case .keyboardAppearance(let y): return y.apply(instance) { i, v in i.keyboardAppearance = v }
+					case .keyboardType(let y): return y.apply(instance) { i, v in i.keyboardType = v }
+					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
+					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
 					case .textContentType(let y):
-						return y.apply(instance, storage) { i, s, v in
+						return y.apply(instance) { i, v in
 							if #available(iOS 10.0, *) {
 								i.textContentType = v
 							}
 						}
 					case .smartDashesType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartDashesType = v
 							}
 						}
 					case .smartQuotesType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartQuotesType = v
 							}
 						}
 					case .smartInsertDeleteType(let x):
-						return x.apply(instance, storage) { i, s, v in
+						return x.apply(instance) { i, v in
 							if #available(iOS 11.0, *) {
 								i.smartInsertDeleteType = v
 							}
 						}
 					}
 				})
-			case .placeholder(let x): return x.apply(instance, storage) { i, s, v in i.placeholder = v }
-			case .prompt(let x): return x.apply(instance, storage) { i, s, v in i.prompt = v }
-			case .text(let x): return x.apply(instance, storage) { i, s, v in i.text = v }
-			case .barStyle(let x): return x.apply(instance, storage) { i, s, v in i.barStyle = v }
-			case .tintColor(let x): return x.apply(instance, storage) { i, s, v in i.tintColor = v }
-			case .isTranslucent(let x): return x.apply(instance, storage) { i, s, v in i.isTranslucent = v }
-			case .showsBookmarkButton(let x): return x.apply(instance, storage) { i, s, v in i.showsBookmarkButton = v }
-			case .showsSearchResultsButton(let x): return x.apply(instance, storage) { i, s, v in i.showsSearchResultsButton = v }
-			case .showCancelButton(let x): return x.apply(instance, storage) { i, s, v in i.setShowsCancelButton(v.value, animated: v.isAnimated) }
-			case .scopeButtonTitles(let x): return x.apply(instance, storage) { i, s, v in i.scopeButtonTitles = v }
-			case .selectedScopeButtonIndex(let x): return x.apply(instance, storage) { i, s, v in i.selectedScopeButtonIndex = v }
-			case .showsScopeBar(let x): return x.apply(instance, storage) { i, s, v in i.showsScopeBar = v }
-			case .inputAccessoryView(let x): return x.apply(instance, storage) { i, s, v in i.inputAccessoryView = v }
-			case .searchFieldBackgroundPositionAdjustment(let x): return x.apply(instance, storage) { i, s, v in i.searchFieldBackgroundPositionAdjustment = v }
-			case .searchTextPositionAdjustment(let x): return x.apply(instance, storage) { i, s, v in i.searchTextPositionAdjustment = v }
+			case .placeholder(let x): return x.apply(instance) { i, v in i.placeholder = v }
+			case .prompt(let x): return x.apply(instance) { i, v in i.prompt = v }
+			case .text(let x): return x.apply(instance) { i, v in i.text = v }
+			case .barStyle(let x): return x.apply(instance) { i, v in i.barStyle = v }
+			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+			case .isTranslucent(let x): return x.apply(instance) { i, v in i.isTranslucent = v }
+			case .showsBookmarkButton(let x): return x.apply(instance) { i, v in i.showsBookmarkButton = v }
+			case .showsSearchResultsButton(let x): return x.apply(instance) { i, v in i.showsSearchResultsButton = v }
+			case .showCancelButton(let x): return x.apply(instance) { i, v in i.setShowsCancelButton(v.value, animated: v.isAnimated) }
+			case .scopeButtonTitles(let x): return x.apply(instance) { i, v in i.scopeButtonTitles = v }
+			case .selectedScopeButtonIndex(let x): return x.apply(instance) { i, v in i.selectedScopeButtonIndex = v }
+			case .showsScopeBar(let x): return x.apply(instance) { i, v in i.showsScopeBar = v }
+			case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v }
+			case .searchFieldBackgroundPositionAdjustment(let x): return x.apply(instance) { i, v in i.searchFieldBackgroundPositionAdjustment = v }
+			case .searchTextPositionAdjustment(let x): return x.apply(instance) { i, v in i.searchTextPositionAdjustment = v }
 			
 			case .backgroundImage(let x):
 				var previous: ScopedValues<PositionAndMetrics, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for conditions in p.pairs {
 							if conditions.value != nil {
@@ -236,7 +212,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 				}
 			case .image(let x):
 				var previous: ScopedValues<IconAndControlState, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for conditions in p.pairs {
 							if conditions.value != nil {
@@ -253,7 +229,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 				}
 			case .positionAdjustment(let x):
 				var previous: ScopedValues<UISearchBar.Icon, UIOffset>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setPositionAdjustment(UIOffset(), for: c.0)
@@ -266,7 +242,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 				}
 			case .scopeBarButtonBackgroundImage(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setScopeBarButtonBackgroundImage(nil, for: c.0)
@@ -279,7 +255,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 				}
 			case .scopeBarButtonDividerImage(let x):
 				var previous: ScopedValues<LeftRightControlState, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v -> Void in
+				return x.apply(instance) { i, v -> Void in
 					if let p = previous {
 						for conditions in p.pairs {
 							i.setScopeBarButtonDividerImage(nil, forLeftSegmentState: conditions.scope.left, rightSegmentState: conditions.scope.right)
@@ -292,7 +268,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 				}
 			case .scopeBarButtonTitleTextAttributes(let x):
 				var previous: ScopedValues<UIControl.State, [NSAttributedString.Key: Any]?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setScopeBarButtonTitleTextAttributes(nil, for: c.0)
@@ -305,7 +281,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 				}
 			case .searchFieldBackgroundImage(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setScopeBarButtonBackgroundImage(nil, for: c.0)
@@ -328,7 +304,7 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 			case .shouldBeginEditing: return nil
 			case .shouldEndEditing: return nil
 			case .position: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -340,64 +316,52 @@ public class SearchBar: ConstructingBinder, SearchBarConvertible {
 			super.init()
 		}
 		
-		open var didChange: SignalInput<String>?
 		open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-			didChange!.send(value: searchText)
+			handler(ofType: SignalInput<String>.self).send(value: searchText)
 		}
 		
-		open var didBeginEditing: SignalInput<Void>?
 		open func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-			didBeginEditing!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var didEndEditing: SignalInput<Void>?
 		open func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-			didEndEditing!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var bookmarkButtonClicked: SignalInput<Void>?
 		open func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
-			bookmarkButtonClicked!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var cancelButtonClicked: SignalInput<Void>?
 		open func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-			cancelButtonClicked!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var searchButtonClicked: SignalInput<String>?
 		open func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-			searchButtonClicked!.send(value: searchBar.text ?? "")
+			handler(ofType: SignalInput<String>.self).send(value: searchBar.text ?? "")
 		}
 		
-		open var resultsListButtonClicked: SignalInput<Void>?
 		open func searchBarResultsListButtonClicked(_ searchBar: UISearchBar) {
-			resultsListButtonClicked!.send(value: ())
+			handler(ofType: SignalInput<Void>.self).send(value: ())
 		}
 		
-		open var selectedScopeButtonIndexDidChange: SignalInput<Int>?
 		open func searchBarSelectedScopeButtonIndexDidChange(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-			selectedScopeButtonIndexDidChange!.send(value: selectedScope)
+			handler(ofType: SignalInput<Int>.self).send(value: selectedScope)
 		}
 		
-		open var shouldBeginEditing: ((_ searchBar: UISearchBar) -> Bool)?
 		open func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-			return shouldBeginEditing!(searchBar)
+			return handler(ofType: ((_ searchBar: UISearchBar) -> Bool).self)(searchBar)
 		}
 		
-		open var shouldEndEditing: ((_ searchBar: UISearchBar) -> Bool)?
 		open func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
-			return shouldEndEditing!(searchBar)
+			return handler(ofType: ((_ searchBar: UISearchBar) -> Bool).self)(searchBar)
 		}
 		
-		open var shouldChangeText: ((_ range: NSRange, _ replacementString: String) -> Bool)?
 		open func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return shouldChangeText!(range, text)
+			return handler(ofType: ((_ range: NSRange, _ replacementString: String) -> Bool).self)(range, text)
 		}
 		
-		open var position: ((UIBarPositioning) -> UIBarPosition)?
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return position!(bar)
+			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)(bar)
 		}
 	}
 }

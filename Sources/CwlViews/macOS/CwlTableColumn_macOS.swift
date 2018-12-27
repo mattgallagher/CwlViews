@@ -33,7 +33,7 @@ public class TableColumn<RowData>: Binder {
 	public init(subclass: Instance.Type = Instance.self, identifier: NSUserInterfaceItemIdentifier, _ bindings: Binding...) {
 		state = .pending(BinderAdditionalParameters(subclass: subclass, additional: identifier, bindings: bindings))
 	}
-	public func applyBindings(to instance: Instance) {
+	func applyBindings(to instance: Instance) {
 		binderApply(
 			to: instance,
 			additional: nil,
@@ -52,11 +52,11 @@ public class TableColumn<RowData>: Binder {
 		if case .inheritedBinding(let s) = binding { return s } else { return nil }
 	}
 	
-	public enum Binding: TableColumnBinding {
+	enum Binding: TableColumnBinding {
 		public typealias RowDataType = RowData
 		public typealias EnclosingBinder = TableColumn
 		public static func tableColumnBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -84,29 +84,29 @@ public class TableColumn<RowData>: Binder {
 		case cellIdentifierForRow((RowData?) -> NSUserInterfaceItemIdentifier)
 	}
 
-	public struct Preparer: DerivedPreparer {
+	struct Preparer: DerivedPreparer {
 		public typealias EnclosingBinder = TableColumn
 		public var linkedPreparer = Inherited.Preparer()
 
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .width(let x): return x.apply(instance, storage) { i, s, v in i.width = v }
-			case .minWidth(let x): return x.apply(instance, storage) { i, s, v in i.minWidth = v }
-			case .maxWidth(let x): return x.apply(instance, storage) { i, s, v in i.maxWidth = v }
-			case .resizingMask(let x): return x.apply(instance, storage) { i, s, v in i.resizingMask = v }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .headerCell(let x): return x.apply(instance, storage) { i, s, v in i.headerCell = v }
-			case .isEditable(let x): return x.apply(instance, storage) { i, s, v in i.isEditable = v }
-			case .sortDescriptorPrototype(let x): return x.apply(instance, storage) { i, s, v in i.sortDescriptorPrototype = v }
-			case .isHidden(let x): return x.apply(instance, storage) { i, s, v in i.isHidden = v }
-			case .headerToolTip(let x): return x.apply(instance, storage) { i, s, v in i.headerToolTip = v }
+			case .width(let x): return x.apply(instance) { i, v in i.width = v }
+			case .minWidth(let x): return x.apply(instance) { i, v in i.minWidth = v }
+			case .maxWidth(let x): return x.apply(instance) { i, v in i.maxWidth = v }
+			case .resizingMask(let x): return x.apply(instance) { i, v in i.resizingMask = v }
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
+			case .headerCell(let x): return x.apply(instance) { i, v in i.headerCell = v }
+			case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
+			case .sortDescriptorPrototype(let x): return x.apply(instance) { i, v in i.sortDescriptorPrototype = v }
+			case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
+			case .headerToolTip(let x): return x.apply(instance) { i, v in i.headerToolTip = v }
 			case .sortFunction(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					s.sortFunction = v
 				}
-			case .sizeToFit(let x): return x.apply(instance, storage) { i, s, v in i.sizeToFit() }
+			case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
 			case .cellConstructor(let x):
 				storage.cellConstructor = x
 				return nil
@@ -116,7 +116,7 @@ public class TableColumn<RowData>: Binder {
 			case .cellIdentifierForRow(let x):
 				storage.cellIdentifier = x
 				return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

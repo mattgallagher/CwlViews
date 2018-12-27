@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class PageViewController<PageData>: ConstructingBinder, PageViewControllerConvertible {
+public class PageViewController<PageData>: Binder, PageViewControllerConvertible {
 	public typealias Instance = UIPageViewController
 	public typealias Inherited = ViewController
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,12 +32,12 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 	}
 	public func uiPageViewController() -> Instance { return instance() }
 	
-	public enum Binding: PageViewControllerBinding {
+	enum Binding: PageViewControllerBinding {
 		public typealias PageDataType = PageData
 		
 		public typealias EnclosingBinder = PageViewController
 		public static func pageViewControllerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		// 0. Static bindings are applied at construction and are subsequently immutable.
 		case transitionStyle(Constant<UIPageViewController.TransitionStyle>)
@@ -62,7 +62,7 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 		case interfaceOrientationForPresentation(() -> UIInterfaceOrientation)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = PageViewController
 		public var linkedPreparer = Inherited.Preparer()
 
@@ -93,34 +93,24 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 		var pageSpacing = CGFloat(0)
 		var pageConstructor: ((PageData) -> ViewControllerConvertible)?
 		
-		public mutating func prepareBinding(_ binding: PageViewController<PageData>.Binding) {
+		mutating func prepareBinding(_ binding: PageViewController<PageData>.Binding) {
 			switch binding {
 			case .constructPage(let x): pageConstructor = x
 			case .transitionStyle(let x): transitionStyle = x.value
 			case .navigationOrientation(let x): navigationOrientation = x.value
 			case .spineLocation(let x): spineLocation = x.value
 			case .pageSpacing(let x): pageSpacing = x.value
-			case .inheritedBinding(let x): return linkedPreparer.prepareBinding(x)
-			case .willTransitionTo(let x):
-				let s = #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:))
-				delegate().addSelector(s).willTransitionTo = x
-			case .didFinishAnimating(let x):
-				let s = #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:))
-				delegate().addSelector(s).didFinishAnimating = x
-			case .spineLocationFor(let x):
-				let s = #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:))
-				delegate().addSelector(s).spineLocationFor = x
-			case .supportedInterfaceOrientations(let x):
-				let s = #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:))
-				delegate().addSelector(s).supportedInterfaceOrientations = x
-			case .interfaceOrientationForPresentation(let x):
-				let s = #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:))
-				delegate().addSelector(s).interfaceOrientationForPresentation = x
+			case .inheritedBinding(let x): return inherited.prepareBinding(x)
+			case .willTransitionTo(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
+			case .didFinishAnimating(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
+			case .spineLocationFor(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
+			case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
+			case .interfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .pageData(let x):
 				return x.apply(instance, storage) { inst, stor, val in
@@ -132,7 +122,7 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 			case .navigationOrientation: return nil
 			case .spineLocation: return nil
 			case .pageSpacing: return nil
-			case .inheritedBinding(let b): return linkedPreparer.applyBinding(b, instance: instance, storage: storage)
+			case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 			case .willTransitionTo: return nil
 			case .didFinishAnimating: return nil
 			case .spineLocationFor: return nil
@@ -170,7 +160,7 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 		}
 		
 		open func viewController(at: Int) -> UIViewController? {
-			guard let constructor = pageConstructor, pageData.indices.contains(at) else { return nil }
+			guard let binding = pageConstructor, pageData.indices.contains(at) else { return nil }
 			var i = 0
 			var match: UIViewController? = nil
 			while i < activeViewControllers.count {
@@ -187,7 +177,7 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 			if let m = match {
 				return m
 			}
-			let vc = constructor(pageData[at]).uiViewController()
+			let vc = binding(pageData[at]).uiViewController()
 			activeViewControllers.append((at, Weak(vc)))
 			return vc
 		}
@@ -215,29 +205,24 @@ public class PageViewController<PageData>: ConstructingBinder, PageViewControlle
 			super.init()
 		}
 		
-		open var willTransitionTo: (([UIViewController]) -> Void)?
 		open func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
-			willTransitionTo!(pendingViewControllers)
+			handler(ofType: (([UIViewController]) -> Void).self)(pendingViewControllers)
 		}
 		
-		open var didFinishAnimating: ((Bool, [UIViewController], Bool) -> Void)?
 		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-			didFinishAnimating!(finished, previousViewControllers, completed)
+			handler(ofType: ((Bool, [UIViewController], Bool) -> Void).self)(finished, previousViewControllers, completed)
 		}
 		
-		open var spineLocationFor: ((UIInterfaceOrientation) -> UIPageViewController.SpineLocation)?
 		open func pageViewController(_ pageViewController: UIPageViewController, spineLocationFor orientation: UIInterfaceOrientation) -> UIPageViewController.SpineLocation {
-			return spineLocationFor!(orientation)
+			return handler(ofType: ((UIInterfaceOrientation) -> UIPageViewController.SpineLocation).self)(orientation)
 		}
 		
-		open var supportedInterfaceOrientations: (() -> UIInterfaceOrientationMask)?
 		open func pageViewControllerSupportedInterfaceOrientations(_ pageViewController: UIPageViewController) -> UIInterfaceOrientationMask {
-			return supportedInterfaceOrientations!()
+			return handler(ofType: (() -> UIInterfaceOrientationMask).self)()
 		}
 		
-		open var interfaceOrientationForPresentation: (() -> UIInterfaceOrientation)?
 		open func pageViewControllerPreferredInterfaceOrientationForPresentation(_ pageViewController: UIPageViewController) -> UIInterfaceOrientation {
-			return interfaceOrientationForPresentation!()
+			return handler(ofType: (() -> UIInterfaceOrientation).self)()
 		}
 	}
 }

@@ -19,32 +19,27 @@
 
 #if os(macOS)
 
-public class ClipView: ConstructingBinder, ClipViewConvertible {
-	public typealias Instance = NSClipView
-	public typealias Inherited = View
-	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
+// MARK: - Binder Part 1: Binder
+public class ClipView: Binder, ClipViewConvertible {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsClipView() -> Instance { return instance() }
-	
-	public enum Binding: ClipViewBinding {
-		public typealias EnclosingBinder = ClipView
-		public static func clipViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+}
+
+// MARK: - Binder Part 2: Binding
+public extension ClipView {
+	enum Binding: ClipViewBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case copiesOnScroll(Dynamic<Bool>)
-		case documentView(Dynamic<ViewConvertible?>)
-		case documentCursor(Dynamic<NSCursor?>)
-		case drawsBackground(Dynamic<Bool>)
 		case backgroundColor(Dynamic<NSColor>)
+		case copiesOnScroll(Dynamic<Bool>)
+		case documentCursor(Dynamic<NSCursor?>)
+		case documentView(Dynamic<ViewConvertible?>)
+		case drawsBackground(Dynamic<Bool>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case scrollTo(Signal<CGPoint>)
@@ -53,68 +48,101 @@ public class ClipView: ConstructingBinder, ClipViewConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = ClipView
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension ClipView {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = ClipView.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = NSClipView
+		public typealias Storage = ClipView.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-
+		public var inherited = Inherited()
 		public init() {}
-		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .copiesOnScroll(let x): return x.apply(instance, storage) { i, s, v in i.copiesOnScroll = v }
-			case .documentView(let x): return x.apply(instance, storage) { i, s, v in i.documentView = v?.nsView() }
-			case .documentCursor(let x): return x.apply(instance, storage) { i, s, v in i.documentCursor = v }
-			case .drawsBackground(let x): return x.apply(instance, storage) { i, s, v in i.drawsBackground = v }
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .scrollTo(let x): return x.apply(instance, storage) { i, s, v in i.scroll(to: v) }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
+}
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension ClipView.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .copiesOnScroll(let x): return x.apply(instance) { i, v in i.copiesOnScroll = v }
+		case .documentView(let x): return x.apply(instance) { i, v in i.documentView = v?.nsView() }
+		case .documentCursor(let x): return x.apply(instance) { i, v in i.documentCursor = v }
+		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
+		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+		case .scrollTo(let x): return x.apply(instance) { i, v in i.scroll(to: v) }
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension ClipView {
 	public typealias Storage = View.Storage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ClipViewBinding {
+	public typealias ClipViewName<V> = BindingName<V, ClipView.Binding, Binding>
+	private typealias B = ClipView.Binding
+	private static func name<V>(_ source: @escaping (V) -> ClipView.Binding) -> ClipViewName<V> {
+		return ClipViewName<V>(source: source, downcast: Binding.clipViewBinding)
+	}
+}
+public extension BindingName where Binding: ClipViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .clipViewBinding(ClipView.Binding.$1(v)) }) }
-
+	// With:    static var $1: ClipViewName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var copiesOnScroll: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .clipViewBinding(ClipView.Binding.copiesOnScroll(v)) }) }
-	public static var documentView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .clipViewBinding(ClipView.Binding.documentView(v)) }) }
-	public static var documentCursor: BindingName<Dynamic<NSCursor?>, Binding> { return BindingName<Dynamic<NSCursor?>, Binding>({ v in .clipViewBinding(ClipView.Binding.documentCursor(v)) }) }
-	public static var drawsBackground: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .clipViewBinding(ClipView.Binding.drawsBackground(v)) }) }
-	public static var backgroundColor: BindingName<Dynamic<NSColor>, Binding> { return BindingName<Dynamic<NSColor>, Binding>({ v in .clipViewBinding(ClipView.Binding.backgroundColor(v)) }) }
-
+	static var backgroundColor: ClipViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
+	static var copiesOnScroll: ClipViewName<Dynamic<Bool>> { return .name(B.copiesOnScroll) }
+	static var documentCursor: ClipViewName<Dynamic<NSCursor?>> { return .name(B.documentCursor) }
+	static var documentView: ClipViewName<Dynamic<ViewConvertible?>> { return .name(B.documentView) }
+	static var drawsBackground: ClipViewName<Dynamic<Bool>> { return .name(B.drawsBackground) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var scrollTo: BindingName<Signal<CGPoint>, Binding> { return BindingName<Signal<CGPoint>, Binding>({ v in .clipViewBinding(ClipView.Binding.scrollTo(v)) }) }
-
+	static var scrollTo: ClipViewName<Signal<CGPoint>> { return .name(B.scrollTo) }
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol ClipViewConvertible: ViewConvertible {
 	func nsClipView() -> ClipView.Instance
 }
 extension ClipViewConvertible {
 	public func nsView() -> View.Instance { return nsClipView() }
 }
-extension ClipView.Instance: ClipViewConvertible {
+extension NSClipView: ClipViewConvertible {
 	public func nsClipView() -> ClipView.Instance { return self }
 }
+public extension ClipView {
+	func nsClipView() -> ClipView.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol ClipViewBinding: ViewBinding {
 	static func clipViewBinding(_ binding: ClipView.Binding) -> Self
 }
-extension ClipViewBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension ClipViewBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return clipViewBinding(.inheritedBinding(binding))
+	}
+}
+public extension ClipView.Binding {
+	public typealias Preparer = ClipView.Preparer
+	static func clipViewBinding(_ binding: ClipView.Binding) -> ClipView.Binding {
+		return binding
 	}
 }
 

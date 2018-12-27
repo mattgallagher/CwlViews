@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class PopUpButton: ConstructingBinder, PopUpButtonConvertible {
+public class PopUpButton: Binder, PopUpButtonConvertible {
 	public typealias Instance = NSPopUpButton
 	public typealias Inherited = Button
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class PopUpButton: ConstructingBinder, PopUpButtonConvertible {
 	}
 	public func nsPopUpButton() -> Instance { return instance() }
 	
-	public enum Binding: PopUpButtonBinding {
+	enum Binding: PopUpButtonBinding {
 		public typealias EnclosingBinder = PopUpButton
 		public static func popUpButtonBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -54,7 +54,7 @@ public class PopUpButton: ConstructingBinder, PopUpButtonConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = PopUpButton
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -68,30 +68,30 @@ public class PopUpButton: ConstructingBinder, PopUpButtonConvertible {
 
 		public init() {}
 
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .pullsDown(let x):
 				pullsDown = x.initialSubsequent()
 				pullsDownInitial = pullsDown.initial()
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .pullsDown: return pullsDown.resume()?.apply(instance, storage) { i, s, v in i.pullsDown = v }
-			case .autoenablesItems(let x): return x.apply(instance, storage) { i, s, v in i.autoenablesItems = v }
+			case .pullsDown: return pullsDown.resume()?.apply(instance) { i, v in i.pullsDown = v }
+			case .autoenablesItems(let x): return x.apply(instance) { i, v in i.autoenablesItems = v }
 			case .menu(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.menu = v.0
 					i.selectItem(at: v.selectedIndex)
 				}
-			case .preferredEdge(let x): return x.apply(instance, storage) { i, s, v in i.preferredEdge = v }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
+			case .preferredEdge(let x): return x.apply(instance) { i, v in i.preferredEdge = v }
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
 			case .willPopUp(let x):
 				return Signal.notifications(name: NSPopUpButton.willPopUpNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

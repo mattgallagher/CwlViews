@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class SwipeGestureRecognizer: ConstructingBinder, SwipeGestureRecognizerConvertible {
+public class SwipeGestureRecognizer: Binder, SwipeGestureRecognizerConvertible {
 	public typealias Instance = UISwipeGestureRecognizer
 	public typealias Inherited = GestureRecognizer
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class SwipeGestureRecognizer: ConstructingBinder, SwipeGestureRecognizerC
 	}
 	public func uiSwipeGestureRecognizer() -> Instance { return instance() }
 	
-	public enum Binding: SwipeGestureRecognizerBinding {
+	enum Binding: SwipeGestureRecognizerBinding {
 		public typealias EnclosingBinder = SwipeGestureRecognizer
 		public static func swipeGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -50,7 +50,7 @@ public class SwipeGestureRecognizer: ConstructingBinder, SwipeGestureRecognizerC
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = SwipeGestureRecognizer
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -59,11 +59,11 @@ public class SwipeGestureRecognizer: ConstructingBinder, SwipeGestureRecognizerC
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .direction(let x): return x.apply(instance, storage) { i, s, v in i.direction = v }
-			case .numberOfTouchesRequired(let x): return x.apply(instance, storage) { i, s, v in i.numberOfTouchesRequired = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .direction(let x): return x.apply(instance) { i, v in i.direction = v }
+			case .numberOfTouchesRequired(let x): return x.apply(instance) { i, v in i.numberOfTouchesRequired = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

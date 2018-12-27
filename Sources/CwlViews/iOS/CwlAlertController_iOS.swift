@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class AlertController: ConstructingBinder, AlertControllerConvertible {
+public class AlertController: Binder, AlertControllerConvertible {
 	public typealias Instance = UIAlertController
 	public typealias Inherited = ViewController
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class AlertController: ConstructingBinder, AlertControllerConvertible {
 	}
 	public func uiAlertController() -> Instance { return instance() }
 	
-	public enum Binding: AlertControllerBinding {
+	enum Binding: AlertControllerBinding {
 		public typealias EnclosingBinder = AlertController
 		public static func alertControllerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case preferredStyle(Constant<UIAlertController.Style>)
@@ -53,7 +53,7 @@ public class AlertController: ConstructingBinder, AlertControllerConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = AlertController
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -70,7 +70,7 @@ public class AlertController: ConstructingBinder, AlertControllerConvertible {
 		
 		public init() {}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .preferredStyle(let x): preferredStyle = x.value
 			case .message(let x):
@@ -79,12 +79,12 @@ public class AlertController: ConstructingBinder, AlertControllerConvertible {
 			case .inheritedBinding(.title(let x)):
 				title = x.initialSubsequent()
 				initialTitle = title.initial()
-			case .inheritedBinding(let s): return linkedPreparer.prepareBinding(s)
+			case .inheritedBinding(let s): return inherited.prepareBinding(s)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .preferredStyle: return nil
 			case .actions(let x):
@@ -99,12 +99,12 @@ public class AlertController: ConstructingBinder, AlertControllerConvertible {
 					}
 				}
 				return nil
-			case .message(let x): return x.apply(instance, storage) { i, s, v in i.message = v }
+			case .message(let x): return x.apply(instance) { i, v in i.message = v }
 			case .preferredActionIndex(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					i.preferredAction = v.map { i.actions[$0] }
 				}
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

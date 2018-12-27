@@ -17,24 +17,34 @@
 //  OF THIS SOFTWARE.
 //
 
-/// A preparer interprets a set of bindings and applies them to an instance.
-public protocol BinderPreparer {
-	associatedtype EnclosingBinder: BinderChain
-
-	// A preparer must be default constructible (the bindings are the parameters)
+public protocol DefaultConstructable {
 	init()
+}
+
+/// A preparer interprets a set of bindings and applies them to an instance.
+public protocol BinderPreparer: DefaultConstructable {
+	associatedtype Instance
+	associatedtype Output = Instance
+	associatedtype Parameters = Void
+	associatedtype Binding
+	associatedtype Storage
+	associatedtype Inherited: BinderPreparer
+
+	var inherited: Inherited { get set }
+	
+	func inheritedBinding(from: Binding) -> Inherited.Binding?
 	
 	/// A first scan of the bindings. Information about bindings present may be recorded during this time.
 	///
 	/// - Parameter binding: the binding to apply
-	mutating func prepareBinding(_ binding: EnclosingBinder.Binding)
+	mutating func prepareBinding(_ binding: Binding)
 	
 	/// Bindings which need to be applied before others can be applied at this special early stage
 	///
 	/// - Parameters:
 	///   - instance: the instance
 	///   - storage: the storage
-	mutating func prepareInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage)
+	func prepareInstance(_ instance: Instance, storage: Storage)
 	
 	/// Apply typical bindings.
 	///
@@ -43,7 +53,7 @@ public protocol BinderPreparer {
 	///   - instance: the instance
 	///   - storage: the storage
 	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`.
-	func applyBinding(_ binding: EnclosingBinder.Binding, instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime?
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime?
 	
 	/// Bindings which need to be applied after others can be applied at this last stage.
 	///
@@ -51,82 +61,52 @@ public protocol BinderPreparer {
 	///   - instance: the instance
 	///   - storage: the storage
 	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`
-	mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime?
-}
-
-/// Preparers are normally linked together in a chain, mimicking the chain of Binders, so Bindings from the linked Binder can be applied to current instance.
-public protocol DerivedPreparer: BinderPreparer where EnclosingBinder: Binder {
-	/// Inherited bindings will be applied by the inherited preparer
-	var linkedPreparer: EnclosingBinder.Inherited.Preparer { get set }
+	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime?
 }
 
 /// Preparers usually default construct the `Storage` except in specific cases where the storage needs a reference to the instance.
-public protocol StoragePreparer: DerivedPreparer {
+public protocol BinderApplyable: BinderPreparer {
 	/// Constructs the `Storage`
 	///
 	/// - Returns: the storage
-	func constructStorage() -> EnclosingBinder.Storage
+	func constructStorage(parameters: Parameters) -> Storage
+	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Output
+}
+
+public extension BinderApplyable where Storage: DefaultConstructable {
+	func constructStorage(parameters: Parameters) -> Storage {
+		return Storage()
+	}
 }
 
 /// Preparers usually construct the `Instance` from a subclass type except in specific cases where additional non-binding parameters are required for instance construction.
-public protocol ConstructingPreparer: StoragePreparer {
+public protocol BinderConstructor: BinderApplyable {
 	/// Constructs the `Instance`
 	///
 	/// - Parameter subclass: subclass of the instance type to use for construction
 	/// - Returns: the instance
-	func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance
+	func constructInstance(type: Instance.Type, parameters: Parameters, storage: Storage) -> Instance
 }
 
-extension DerivedPreparer {
-	/// Invokes `prepareBinding` once with each element of the `bindings`
-	///
-	/// - Parameter bindings: prepareBinding will be invoked with each element
-	public mutating func prepareBindings( _ bindings: [EnclosingBinder.Binding]) {
-		for b in bindings {
-			prepareBinding(b)
-		}
+public extension BinderConstructor where Instance: DefaultConstructable {
+	func constructInstance(type: Instance.Type, parameters: Parameters, storage: Storage) -> Instance {
+		return type.init()
 	}
-	
-	/// The default prepare workflow – in either `Binder.binderConstruct` or `Binder.binderApply` is, in order: `prepareBindings` (`constructInstance` for `Binder.binderConstruct`), `constructStorage` and then this function.
-	///
-	/// - Parameters:
-	///   - bindings: from the binder parameters
-	///   - instance: the constructed or apply instance
-	///   - storage: the constructed storage
-	///   - additional: any ad hoc bindings
-	///   - combine: link the instance, storage and lifetimes together
-	public mutating func applyBindings(_ bindings: [EnclosingBinder.Binding], instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage, additional: ((EnclosingBinder.Instance) -> Lifetime?)?, combine: (EnclosingBinder.Instance, EnclosingBinder.Storage, [Lifetime]) -> Void) {
-		// Prepare.
-		prepareInstance(instance, storage: storage)
-		
-		// Apply styles that need to be applied after construction
-		var lifetimes = [Lifetime]()
-		for b in bindings {
-			if let c = applyBinding(b, instance: instance, storage: storage) {
-				lifetimes.append(c)
-			}
-		}
-		
-		// Finalize the instance
-		if let c = finalizeInstance(instance, storage: storage) {
-			lifetimes.append(c)
-		}
-		
-		// Append adhoc bindings, if any
-		if let a = additional, let c = a(instance) {
-			lifetimes.append(c)
-		}
-		
-		// Combine the instance and binder
-		combine(instance, storage, lifetimes)
-	}
+}
 
+extension BinderPreparer {
 	/// A first scan of the bindings. Information about bindings present may be recorded during this time.
 	///
 	/// - Parameter binding: the binding to apply
-	public mutating func prepareBinding(_ binding: EnclosingBinder.Binding) {
-		if let ls = EnclosingBinder.bindingToInherited(binding) {
-			linkedPreparer.prepareBinding(ls)
+	public mutating func prepareBinding(_ binding: Binding) {
+		if let ls = inheritedBinding(from: binding) {
+			inherited.prepareBinding(ls)
+		}
+	}
+	
+	public func inheritedPrepareInstance(_ instance: Instance, storage: Storage) {
+		if let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage {
+			inherited.prepareInstance(i, storage: s)
 		}
 	}
 	
@@ -135,10 +115,8 @@ extension DerivedPreparer {
 	/// - Parameters:
 	///   - instance: the instance
 	///   - storage: the storage
-	public mutating func prepareInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) {
-		if let i = instance as? EnclosingBinder.Inherited.Instance, let s = storage as? EnclosingBinder.Inherited.Storage {
-			linkedPreparer.prepareInstance(i, storage: s)
-		}
+	public func prepareInstance(_ instance: Instance, storage: Storage) {
+		inheritedPrepareInstance(instance, storage: storage)
 	}
 
 	/// Apply typical bindings.
@@ -148,9 +126,16 @@ extension DerivedPreparer {
 	///   - instance: the instance
 	///   - storage: the storage
 	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`.
-	public func applyBinding(_ binding: EnclosingBinder.Binding, instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime? {
-		if let ls = EnclosingBinder.bindingToInherited(binding), let i = instance as? EnclosingBinder.Inherited.Instance, let s = storage as? EnclosingBinder.Inherited.Storage {
-			return linkedPreparer.applyBinding(ls, instance: i, storage: s)
+	public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		if let ls = inheritedBinding(from: binding), let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage {
+			return inherited.applyBinding(ls, instance: i, storage: s)
+		}
+		return nil
+	}
+	
+	public func inheritedFinalizedInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		if let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage {
+			return inherited.finalizeInstance(i, storage: s)
 		}
 		return nil
 	}
@@ -161,12 +146,19 @@ extension DerivedPreparer {
 	///   - instance: the instance
 	///   - storage: the storage
 	/// - Returns: If maintaining bindings requires ongoing lifetime management, these lifetimes are maintained by returning instances of `Lifetime`
-	public mutating func finalizeInstance(_ instance: EnclosingBinder.Instance, storage: EnclosingBinder.Storage) -> Lifetime? {
-		if let i = instance as? EnclosingBinder.Inherited.Instance {
-			if let s = storage as? EnclosingBinder.Inherited.Storage {
-				return linkedPreparer.finalizeInstance(i, storage: s)
-			}
-		}
-		return nil
+	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		return inheritedFinalizedInstance(instance, storage: storage)
 	}
 }
+
+/// All NSObject instances can use ObjectBinderStorage which embeds lifetimes in the Objective-C associated object storage.
+public protocol BinderEmbedder: BinderApplyable where Instance: NSObject, Storage: ObjectBinderStorage, Output == Instance {}
+public extension BinderEmbedder {
+	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Output {
+		storage.embed(lifetimes: lifetimes, in: instance)
+		return instance
+	}
+}
+
+/// A `BinderEmbedderConstructor` is the standard configuration for a constructable NSObject.
+public typealias BinderEmbedderConstructor = BinderEmbedder & BinderConstructor

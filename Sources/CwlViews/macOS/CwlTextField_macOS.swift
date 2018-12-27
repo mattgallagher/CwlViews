@@ -19,7 +19,7 @@
 
 #if os(macOS)
 
-public class TextField: ConstructingBinder, TextFieldConvertible {
+public class TextField: Binder, TextFieldConvertible {
 	public static var defaultLabelBindings: [Binding] {
 		return [
 			.isEditable -- false,
@@ -31,8 +31,8 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 	public typealias Instance = NSTextField
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public convenience init(subclass: Instance.Type = Instance.self, labelStyled bindings: Binding...) {
@@ -43,10 +43,10 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 	}
 	public func nsTextField() -> Instance { return instance() }
 	
-	public enum Binding: TextFieldBinding {
+	enum Binding: TextFieldBinding {
 		public typealias EnclosingBinder = TextField
 		public static func textFieldBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -92,7 +92,7 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 		case doCommand((_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TextField
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -117,35 +117,21 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			}
 		}
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
-			case .didFailToFormatString(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:))
-				delegate().addSelector(s).didFailToFormat = x
-			case .isValidObject(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:isValidObject:))
-				delegate().addSelector(s).isValidObject = x
-			case .shouldBeginEditing(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:))
-				delegate().addSelector(s).shouldBeginEditing = x
-			case .shouldEndEditing(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:))
-				delegate().addSelector(s).shouldEndEditing = x
-			case .didFailToValidatePartialString(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:))
-				delegate().addSelector(s).didFailToValidate = x
-			case .completions(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:))
-				delegate().addSelector(s).completions = x
-			case .doCommand(let x):
-				let s = #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:))
-				delegate().addSelector(s).doCommand = x
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
+			case .didFailToFormatString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
+			case .isValidObject(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
+			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
+			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
+			case .didFailToValidatePartialString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
+			case .completions(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
+			case .doCommand(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
+			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 			default: break
 			}
 		}
 
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = possibleDelegate
 			if storage.inUse {
@@ -155,52 +141,52 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .usesSingleLineMode(let x): return x.apply(instance, storage) { i, s, v in i.usesSingleLineMode = v }
+			case .usesSingleLineMode(let x): return x.apply(instance) { i, v in i.usesSingleLineMode = v }
 			case .allowsCharacterPickerTouchBarItem(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.12.2, *) {
 						i.allowsCharacterPickerTouchBarItem = v
 					}
 				}
 			case .allowsDefaultTighteningForTruncation(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.allowsDefaultTighteningForTruncation = v
 					}
 				}
 			case .isAutomaticTextCompletionEnabled(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.12.2, *) {
 						i.isAutomaticTextCompletionEnabled = v
 					}
 				}
 			case .maximumNumberOfLines(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if #available(macOS 10.11, *) {
 						i.maximumNumberOfLines = v
 					}
 				}
-			case .placeholderAttributedString(let x): return x.apply(instance, storage) { i, s, v in i.placeholderAttributedString = v }
-			case .placeholderString(let x): return x.apply(instance, storage) { i, s, v in i.placeholderString = v }
-			case .sendsActionOnEndEditing(let x): return x.apply(instance, storage) { i, s, v in i.cell?.sendsActionOnEndEditing = v }
-			case .isEditable(let x): return x.apply(instance, storage) { i, s, v in i.isEditable = v }
-			case .isSelectable(let x): return x.apply(instance, storage) { i, s, v in i.isSelectable = v }
-			case .allowsEditingTextAttributes(let x): return x.apply(instance, storage) { i, s, v in i.allowsEditingTextAttributes = v }
-			case .importsGraphics(let x): return x.apply(instance, storage) { i, s, v in i.importsGraphics = v }
-			case .textColor(let x): return x.apply(instance, storage) { i, s, v in i.textColor = v }
-			case .preferredMaxLayoutWidth(let x): return x.apply(instance, storage) { i, s, v in i.preferredMaxLayoutWidth = v }
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .drawsBackground(let x): return x.apply(instance, storage) { i, s, v in i.drawsBackground = v }
-			case .bezeled(let x): return x.apply(instance, storage) { i, s, v in i.isBezeled = v }
-			case .bezelStyle(let x): return x.apply(instance, storage) { i, s, v in i.bezelStyle = v }
-			case .isBordered(let x): return x.apply(instance, storage) { i, s, v in i.isBordered = v }
-			case .allowsUndo(let x): return x.apply(instance, storage) { i, s, v in
+			case .placeholderAttributedString(let x): return x.apply(instance) { i, v in i.placeholderAttributedString = v }
+			case .placeholderString(let x): return x.apply(instance) { i, v in i.placeholderString = v }
+			case .sendsActionOnEndEditing(let x): return x.apply(instance) { i, v in i.cell?.sendsActionOnEndEditing = v }
+			case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
+			case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
+			case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
+			case .importsGraphics(let x): return x.apply(instance) { i, v in i.importsGraphics = v }
+			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+			case .preferredMaxLayoutWidth(let x): return x.apply(instance) { i, v in i.preferredMaxLayoutWidth = v }
+			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+			case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
+			case .bezeled(let x): return x.apply(instance) { i, v in i.isBezeled = v }
+			case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
+			case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
+			case .allowsUndo(let x): return x.apply(instance) { i, v in
 				i.cell?.allowsUndo = v
 				}
 				
-			case .selectText(let x): return x.apply(instance, storage) { i, s, v in i.selectText(nil) }
+			case .selectText(let x): return x.apply(instance) { i, v in i.selectText(nil) }
 			case .didFailToValidatePartialString: return nil
 			case .doCommand: return nil
 			case .didFailToFormatString: return nil
@@ -209,7 +195,7 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			case .shouldEndEditing: return nil
 			case .completions: return nil
 			case .stringAction(let x): return x.apply(instance: instance, constructTarget: SignalActionTarget.init, processor: { sender in (sender as? NSTextField)?.attributedStringValue ?? NSAttributedString() })
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -221,39 +207,32 @@ public class TextField: ConstructingBinder, TextFieldConvertible {
 			super.init()
 		}
 		
-		open var isValidObject: ((_ control: NSTextField, _ object: AnyObject) -> Bool)?
 		open func control(_ control: NSControl, isValidObject obj: Any?) -> Bool {
-			return isValidObject!(control as! NSTextField, obj as AnyObject)
+			return handler(ofType: ((_ control: NSTextField, _ object: AnyObject) -> Bool).self)(control as! NSTextField, obj as AnyObject)
 		}
 		
-		open var didFailToValidate: SignalInput<(string: String, errorDescription: String?)>?
 		open func control(_ control: NSControl, didFailToValidatePartialString string: String, errorDescription error: String?) {
-			didFailToValidate!.send((string: string, errorDescription: error))
+			handler(ofType: SignalInput<(string: String, errorDescription: String?)>.self).send((string: string, errorDescription: error))
 		}
 		
-		open var didFailToFormat: ((_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool)?
 		open func control(_ control: NSControl, didFailToFormatString string: String, errorDescription error: String?) -> Bool {
-			return didFailToFormat!(control as! NSTextField, string, error)
+			return handler(ofType: ((_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool).self)(control as! NSTextField, string, error)
 		}
 		
-		open var shouldBeginEditing: ((_ control: NSTextField, _ text: NSText) -> Bool)?
 		open func control(_ control: NSControl, textShouldBeginEditing fieldEditor: NSText) -> Bool {
-			return shouldBeginEditing!(control as! NSTextField, fieldEditor)
+			return handler(ofType: ((_ control: NSTextField, _ text: NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
 		}
 		
-		open var shouldEndEditing: ((_ control: NSTextField, _ text: NSText) -> Bool)?
 		open func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
-			return shouldEndEditing!(control as! NSTextField, fieldEditor)
+			return handler(ofType: ((_ control: NSTextField, _ text: NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
 		}
 		
-		open var completions: ((_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String])?
 		open func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange charRange: NSRange, indexOfSelectedItem index: UnsafeMutablePointer<Int>) -> [String] {
-			return completions!(control as! NSTextField, textView, words, charRange, index)
+			return handler(ofType: ((_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String]).self)(control as! NSTextField, textView, words, charRange, index)
 		}
 		
-		open var doCommand: ((_ control: NSTextField, _ textView: NSTextView, _ doCommandBySelector: Selector) -> Bool)?
 		open func control(_ control: NSControl, textView: NSTextView, doCommandBy doCommandBySelector: Selector) -> Bool {
-			return doCommand!(control as! NSTextField, textView, doCommandBySelector)
+			return handler(ofType: ((_ control: NSTextField, _ textView: NSTextView, _ doCommandBySelector: Selector) -> Bool).self)(control as! NSTextField, textView, doCommandBySelector)
 		}
 	}
 }

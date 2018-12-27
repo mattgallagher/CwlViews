@@ -17,117 +17,120 @@
 //  OF THIS SOFTWARE.
 //
 
-/// This protocol is the minimum definition for a "binder". A binder takes a list of properties and behaviors (called bindings) and constructs an object with the properties and conforming to the behaviors.
-public protocol Binder: BinderChain where Preparer: DerivedPreparer, Storage: BinderStorage, Inherited: BinderChain {
-	associatedtype Parameters: BinderParameters where Parameters.Binding == Binding
-	associatedtype Output
-	var state: BinderState<Output, Parameters> { get set }
-	
-	static func bindingToInherited(_ binding: Binding) -> Inherited.Binding?
-	func applyBindings(to instance: Instance)
-	func consumeBindings() -> [Binding]
-	init(state: BinderState<Output, Parameters>)
+public enum BinderState<Preparer: BinderPreparer> {
+	case pending(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding])
+	case constructed(Preparer.Output)
+	case consumed
 }
 
-extension Binder where Parameters == BindingsOnlyParameters<Binding> {
+public protocol Binder: class {
+	associatedtype Preparer: BinderPreparer
+	
+	var state: BinderState<Preparer> { get set }
+	init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) 
+}
+
+public extension Binder {
+ 	public typealias Instance = Preparer.Instance
+	public typealias Parameters = Preparer.Parameters
+	public typealias Output = Preparer.Output
+	
+	/// Invokes `consume` on the underlying state. If the state is not `pending`, this will trigger a fatal error. State will be set to `consumed`.
+	///
+	/// - Returns: the array of `Binding` from the state parameters.
+	public func consume() -> (type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		guard case .pending(let type, let parameters, let bindings) = state else {
+			fatalError("Attempted to consume bindings from already constructed or consumed binder.")
+		}
+		state = .consumed
+		return (type: type, parameters: parameters, bindings: bindings)
+	}
+}
+
+extension Binder where Preparer.Parameters == Void {
 	/// A constructor used when dynamically assembling arrays of bindings
 	///
 	/// - Parameters:
 	///   - bindings: array of bindings
-	public init(bindings: [Binding]) {
-		self.init(state: .pending(BindingsOnlyParameters(bindings: bindings)))
+	public init(type: Preparer.Instance.Type = Preparer.Instance.self, bindings: [Preparer.Binding]) {
+		self.init(type: type, parameters: (), bindings: bindings)
 	}
 
 	/// A constructor for a binder.
 	///
 	/// - Parameters:
 	///   - bindings: list of bindings
-	public init(_ bindings: Binding...) {
-		self.init(state: .pending(BindingsOnlyParameters(bindings: bindings)))
+	public init(type: Preparer.Instance.Type = Preparer.Instance.self, _ bindings: Preparer.Binding...) {
+		self.init(type: type, parameters: (), bindings: bindings)
 	}
 }
 
-extension Binder where Parameters == BinderSubclassParameters<Instance, Binding> {
-	/// A constructor used when dynamically assembling arrays of bindings. Takes an optional subclass for the constructed instance.
-	///
-	/// - Parameters:
-	///   - subclass: runtime subclass of the instance
-	///   - bindings: array of bindings
-	public init(subclass: Instance.Type = Instance.self, bindings: [Binding]) {
-		let params = BinderSubclassParameters<Instance, Binding>(subclass: subclass, bindings: bindings)
-		self.init(state: .pending(params))
+private extension Binder where Preparer: BinderApplyable {
+	var constructed: Preparer.Output? {
+		guard case .constructed(let output) = state else { return nil }
+		return output
 	}
 	
-	/// The preferred constructor for binders. Takes an optional subclass for the constructed instance and a list of bindings as a variable argument list.
-	///
-	/// - Parameters:
-	///   - subclass: runtime subclass of the instance
-	///   - bindings: list of bindings
-	public init(subclass: Instance.Type = Instance.self, _ bindings: Binding...) {
-		let params = BinderSubclassParameters<Instance, Binding>(subclass: subclass, bindings: bindings)
-		self.init(state: .pending(params))
+	func bind(to source: (_ preparer: Preparer, _ type: Preparer.Instance.Type, _ parameters: Preparer.Parameters, _ storage: Preparer.Storage) -> Preparer.Instance) -> (Preparer, Preparer.Instance, Preparer.Storage, [Lifetime]) {
+		let (type, parameters, bindings) = consume()
+		
+		var preparer = Preparer()
+		for b in bindings {
+			preparer.prepareBinding(b)
+		}
+		
+		let storage = preparer.constructStorage(parameters: parameters)
+		var lifetimes = [Lifetime]()
+		let instance = source(preparer, type, parameters, storage)
+		
+		preparer.prepareInstance(instance, storage: storage)
+		
+		for b in bindings {
+			lifetimes += preparer.applyBinding(b, instance: instance, storage: storage)
+		}
+
+		lifetimes += preparer.finalizeInstance(instance, storage: storage)
+		
+		return (preparer, instance, storage, lifetimes)
 	}
 }
 
-extension Binder {
-	/// Invokes `consume` on the underlying state. If the state is not `pending`, this will trigger a fatal error. State will be set to `consumed`.
-	///
-	/// - Returns: the array of `Binding` from the state parameters.
-	public func consumeBindings() -> [Binding] {
-		return state.consume().bindings
-	}
-
-	/// A utility function that can be called from ConstructingBinder.instance or other functions to turn parameters from a BinderState into a Binder.Output using the Binder.Preparer. The default invocation in ConstructingBinder.instance is normally used unless special construction requirements are involved.
-	///
-	/// - Parameters:
-	///   - additional: ad hoc bindings, applied after other bindings
-	///   - storageConstructor: function to construct an empty BinderStorage, usually Preparer.constructStorage()
-	///   - instanceConstructor: function to construct an unconfigured instance, usually Preparer.constructInstance(subclass:)
-	///   - combine: function to link the instance, storage and generated Lifetimes
-	///   - output: chooses the instance or storage to return as the primary output
-	/// - Returns: the output
-	public func binderConstruct(
-		additional: ((Instance) -> Lifetime?)?,
-		storageConstructor: (Preparer, Parameters, Instance) -> Storage,
-		instanceConstructor: (Preparer, Parameters) -> Instance,
-		combine: (Instance, Storage, [Lifetime]) -> Void,
-		output: (Instance, Storage) -> Output) -> Output {
-		return state.construct { parameters in
-			var preparer = Preparer.init()
-			preparer.prepareBindings(parameters.bindings)
-			let instance = instanceConstructor(preparer, parameters)
-			let storage = storageConstructor(preparer, parameters, instance)
-			preparer.applyBindings(parameters.bindings, instance: instance, storage: storage, additional: additional, combine: combine)
-			return output(instance, storage)
-		}
-	}
-
-	/// A utility function that can be called from Binder.applyBindings(to:) or other functions to turn parameters from a BinderState into a Binder.Output using the Binder.Preparer. The default implementation of Binder.applyBindings(to:) is normally used unless special construction requirements are involved.
-	///
-	/// - Parameters:
-	///	- instance: the instance to which bindings should be applied
-	///   - additional: ad hoc bindings, applied after other bindings
-	///   - storageConstructor: function to construct an empty BinderStorage, usually Preparer.constructStorage()
-	///   - combine: function to link the instance, storage and generated Lifetimes
-	/// - Returns: the output
-	public func binderApply(to instance: Instance,
-		additional: ((Instance) -> Lifetime?)?,
-		storageConstructor: (Preparer, Parameters, Instance) -> Storage,
-		combine: (Instance, Storage, [Lifetime]) -> Void) {
-		state.apply(instance: instance) { inst, parameters in
-			var preparer = Preparer.init()
-			preparer.prepareBindings(parameters.bindings)
-			let storage = storageConstructor(preparer, parameters, instance)
-			preparer.applyBindings(parameters.bindings, instance: instance, storage: storage, additional: additional, combine: combine)
-		}
+public extension Binder where Preparer: BinderApplyable {
+	func apply(to instance: Preparer.Instance) {
+		let (preparer, instance, storage, lifetimes) = bind { (_, _, _, _) in instance }
+		_ = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
 	}
 }
 
-extension Binder where Preparer: StoragePreparer, Instance: NSObject, Output == Instance {
-	/// A default implementation of `applyBindings` for the common case.
-	///
-	/// - Parameter instance: the instance to which bindings should be applied
-	public func applyBindings(to instance: Instance) {
-		binderApply(to: instance, additional: nil, storageConstructor: { prep, params, i in prep.constructStorage() }, combine: embedStorageIfInUse)
+public extension Binder where Preparer: BinderEmbedderConstructor {
+	func instance() -> Preparer.Instance {
+		if let output = constructed { return output }
+		let (_, instance, storage, lifetimes) = bind { (preparer, type, parameters, storage) in
+			preparer.constructInstance(type: type, parameters: parameters, storage: storage)
+		}
+		storage.embed(lifetimes: lifetimes, in: instance)
+		state = .constructed(instance)
+		return instance
+	}
+}
+
+public extension Binder where Preparer: BinderApplyable, Preparer.Storage == Preparer.Output {
+	func wrap(instance: Preparer.Instance) -> Preparer.Output {
+		if let output = constructed { return output }
+		let (preparer, instance, storage, lifetimes) = bind { (_, _, _, _) in instance }
+		let output = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
+		state = .consumed
+		return output
+	}
+}
+
+public extension Binder where Preparer: BinderConstructor, Preparer.Storage == Preparer.Output {
+	func construct() -> Preparer.Output {
+		let (preparer, instance, storage, lifetimes) = bind { (preparer, type, parameters, storage) in
+			preparer.constructInstance(type: type, parameters: parameters, storage: storage)
+		}
+		let output = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
+		state = .constructed(output)
+		return output
 	}
 }

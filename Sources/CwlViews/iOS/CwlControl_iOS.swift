@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class Control: ConstructingBinder, ControlConvertible {
+public class Control: Binder, ControlConvertible {
 	public typealias Instance = UIControl
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class Control: ConstructingBinder, ControlConvertible {
 	}
 	public func uiControl() -> Instance { return instance() }
 	
-	public enum Binding: ControlBinding {
+	enum Binding: ControlBinding {
 		public typealias EnclosingBinder = Control
 		public static func controlBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -54,7 +54,7 @@ public class Control: ConstructingBinder, ControlConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Control
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -63,17 +63,17 @@ public class Control: ConstructingBinder, ControlConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
-			case .isSelected(let x): return x.apply(instance, storage) { i, s, v in i.isSelected = v }
-			case .isHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.isHighlighted = v }
-			case .contentVerticalAlignment(let x): return x.apply(instance, storage) { i, s, v in i.contentVerticalAlignment = v }
-			case .contentHorizontalAlignment(let x): return x.apply(instance, storage) { i, s, v in i.contentHorizontalAlignment = v }
+			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+			case .isSelected(let x): return x.apply(instance) { i, v in i.isSelected = v }
+			case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
+			case .contentVerticalAlignment(let x): return x.apply(instance) { i, v in i.contentVerticalAlignment = v }
+			case .contentHorizontalAlignment(let x): return x.apply(instance) { i, v in i.contentHorizontalAlignment = v }
 			case .actions(let x):
 				var previous: ScopedValues<UIControl.Event, ControlAction>? = nil
 				var junctions = [Lifetime]()
-				var lifetime = x.apply(instance, storage) { i, s, v in
+				var lifetime = x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.removeTarget(nil, action: nil, for: c.0)
@@ -98,7 +98,7 @@ public class Control: ConstructingBinder, ControlConvertible {
 					}
 					lifetime?.cancel()
 				}
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

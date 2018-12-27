@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class TableRowView: ConstructingBinder, TableRowViewConvertible {
+public class TableRowView: Binder, TableRowViewConvertible {
 	public typealias Instance = NSTableRowView
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class TableRowView: ConstructingBinder, TableRowViewConvertible {
 	}
 	public func nsTableRowView() -> Instance { return instance() }
 	
-	public enum Binding: TableRowViewBinding {
+	enum Binding: TableRowViewBinding {
 		public typealias EnclosingBinder = TableRowView
 		public static func tableRowViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -58,7 +58,7 @@ public class TableRowView: ConstructingBinder, TableRowViewConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TableRowView
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -66,18 +66,18 @@ public class TableRowView: ConstructingBinder, TableRowViewConvertible {
 		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
 		
 		public init() {}
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .isEmphasized(let x): return x.apply(instance, storage) { i, s, v in i.isEmphasized = v }
-			case .isFloating(let x): return x.apply(instance, storage) { i, s, v in i.isFloating = v }
-			case .isSelected(let x): return x.apply(instance, storage) { i, s, v in i.isSelected = v }
-			case .selectionHighlightStyle(let x): return x.apply(instance, storage) { i, s, v in i.selectionHighlightStyle = v }
-			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance, storage) { i, s, v in i.draggingDestinationFeedbackStyle = v }
-			case .indentationForDropOperation(let x): return x.apply(instance, storage) { i, s, v in i.indentationForDropOperation = v }
-			case .isTargetForDropOperation(let x): return x.apply(instance, storage) { i, s, v in i.isTargetForDropOperation = v }
-			case .isGroupRowStyle(let x): return x.apply(instance, storage) { i, s, v in i.isGroupRowStyle = v }
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .isEmphasized(let x): return x.apply(instance) { i, v in i.isEmphasized = v }
+			case .isFloating(let x): return x.apply(instance) { i, v in i.isFloating = v }
+			case .isSelected(let x): return x.apply(instance) { i, v in i.isSelected = v }
+			case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
+			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance) { i, v in i.draggingDestinationFeedbackStyle = v }
+			case .indentationForDropOperation(let x): return x.apply(instance) { i, v in i.indentationForDropOperation = v }
+			case .isTargetForDropOperation(let x): return x.apply(instance) { i, v in i.isTargetForDropOperation = v }
+			case .isGroupRowStyle(let x): return x.apply(instance) { i, v in i.isGroupRowStyle = v }
+			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

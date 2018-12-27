@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class AlertAction: ConstructingBinder, AlertActionConvertible {
+public class AlertAction: Binder, AlertActionConvertible {
 	public typealias Instance = UIAlertAction
 	public typealias Inherited = BaseBinder
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class AlertAction: ConstructingBinder, AlertActionConvertible {
 	}
 	public func uiAlertAction() -> Instance { return instance() }
 	
-	public enum Binding: AlertActionBinding {
+	enum Binding: AlertActionBinding {
 		public typealias EnclosingBinder = AlertAction
 		public static func alertActionBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case title(Constant<String>)
@@ -52,7 +52,7 @@ public class AlertAction: ConstructingBinder, AlertActionConvertible {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = AlertAction
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -69,27 +69,27 @@ public class AlertAction: ConstructingBinder, AlertActionConvertible {
 
 		public init() {}
 		
-		public mutating func prepareBinding(_ binding: AlertAction.Binding) {
+		mutating func prepareBinding(_ binding: AlertAction.Binding) {
 			switch binding {
 			case .title(let x): title = x.value
 			case .style(let x): style = x.value
 			case .handler(let x): handler = x
-			case .inheritedBinding(let s): return linkedPreparer.prepareBinding(s)
+			case .inheritedBinding(let s): return inherited.prepareBinding(s)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .title: return nil
 			case .style: return nil
 			case .handler: return nil
-			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: (), storage: ())
+			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let linkedLifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			return AggregateLifetime(lifetimes: [linkedLifetime, handler as Optional<Lifetime>].compactMap { $0 })
 		}

@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class View: ConstructingBinder, ViewConvertible {
+public class View: Binder, ViewConvertible {
 	public typealias Instance = UIView
 	public typealias Inherited = BaseBinder
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class View: ConstructingBinder, ViewConvertible {
 	}
 	public func uiView() -> Instance { return instance() }
 
-	public enum Binding: ViewBinding {
+	enum Binding: ViewBinding {
 		public typealias EnclosingBinder = View
 		public static func viewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case layer(Constant<BackingLayer>)
@@ -76,7 +76,7 @@ public class View: ConstructingBinder, ViewConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = View
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -85,42 +85,42 @@ public class View: ConstructingBinder, ViewConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .layer(let x):
 				x.value.applyBindings(to: instance.layer)
 				return nil
 			case .layout(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					instance.applyLayout(v)
 				}
-			case .backgroundColor(let x): return x.apply(instance, storage) { i, s, v in i.backgroundColor = v }
-			case .isHidden(let x): return x.apply(instance, storage) { i, s, v in i.isHidden = v }
-			case .alpha(let x): return x.apply(instance, storage) { i, s, v in i.alpha = v }
-			case .isOpaque(let x): return x.apply(instance, storage) { i, s, v in i.isOpaque = v }
-			case .tintColor(let x): return x.apply(instance, storage) { i, s, v in i.tintColor = v }
-			case .tintAdjustmentMode(let x): return x.apply(instance, storage) { i, s, v in i.tintAdjustmentMode = v }
-			case .clipsToBounds(let x): return x.apply(instance, storage) { i, s, v in i.clipsToBounds = v }
-			case .clearsContextBeforeDrawing(let x): return x.apply(instance, storage) { i, s, v in i.clearsContextBeforeDrawing = v }
-			case .mask(let x): return x.apply(instance, storage) { i, s, v in i.mask = v?.uiView() }
-			case .isUserInteractionEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isUserInteractionEnabled = v }
-			case .isMultipleTouchEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isMultipleTouchEnabled = v }
-			case .isExclusiveTouch(let x): return x.apply(instance, storage) { i, s, v in i.isExclusiveTouch = v }
-			case .restorationIdentifier(let x): return x.apply(instance, storage) { i, s, v in i.restorationIdentifier = v }
-			case .contentMode(let x): return x.apply(instance, storage) { i, s, v in i.contentMode = v }
-			case .horizontalContentCompressionResistancePriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Axis.horizontal) }
-			case .verticalContentCompressionResistancePriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Axis.vertical) }
-			case .horizontalContentHuggingPriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Axis.horizontal) }
-			case .verticalContentHuggingPriority(let x): return x.apply(instance, storage) { i, s, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Axis.vertical) }
-			case .semanticContentAttribute(let x): return x.apply(instance, storage) { i, s, v in i.semanticContentAttribute = v }
-			case .layoutMargins(let x): return x.apply(instance, storage) { i, s, v in i.layoutMargins = v }
-			case .preservesSuperviewLayoutMargins(let x): return x.apply(instance, storage) { i, s, v in i.preservesSuperviewLayoutMargins = v }
-			case .gestureRecognizers(let x): return x.apply(instance, storage) { i, s, v in i.gestureRecognizers = v }
-			case .motionEffects(let x): return x.apply(instance, storage) { i, s, v in i.motionEffects = v }
-			case .tag(let x): return x.apply(instance, storage) { i, s, v in i.tag = v }
-			case .endEditing(let x): return x.apply(instance, storage) { i, s, v in i.endEditing(v) }
-			case .becomeFirstResponder(let x): return x.apply(instance, storage) { i, s, v in i.becomeFirstResponder() }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: (), storage: ())
+			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+			case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
+			case .alpha(let x): return x.apply(instance) { i, v in i.alpha = v }
+			case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
+			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+			case .tintAdjustmentMode(let x): return x.apply(instance) { i, v in i.tintAdjustmentMode = v }
+			case .clipsToBounds(let x): return x.apply(instance) { i, v in i.clipsToBounds = v }
+			case .clearsContextBeforeDrawing(let x): return x.apply(instance) { i, v in i.clearsContextBeforeDrawing = v }
+			case .mask(let x): return x.apply(instance) { i, v in i.mask = v?.uiView() }
+			case .isUserInteractionEnabled(let x): return x.apply(instance) { i, v in i.isUserInteractionEnabled = v }
+			case .isMultipleTouchEnabled(let x): return x.apply(instance) { i, v in i.isMultipleTouchEnabled = v }
+			case .isExclusiveTouch(let x): return x.apply(instance) { i, v in i.isExclusiveTouch = v }
+			case .restorationIdentifier(let x): return x.apply(instance) { i, v in i.restorationIdentifier = v }
+			case .contentMode(let x): return x.apply(instance) { i, v in i.contentMode = v }
+			case .horizontalContentCompressionResistancePriority(let x): return x.apply(instance) { i, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Axis.horizontal) }
+			case .verticalContentCompressionResistancePriority(let x): return x.apply(instance) { i, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Axis.vertical) }
+			case .horizontalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Axis.horizontal) }
+			case .verticalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Axis.vertical) }
+			case .semanticContentAttribute(let x): return x.apply(instance) { i, v in i.semanticContentAttribute = v }
+			case .layoutMargins(let x): return x.apply(instance) { i, v in i.layoutMargins = v }
+			case .preservesSuperviewLayoutMargins(let x): return x.apply(instance) { i, v in i.preservesSuperviewLayoutMargins = v }
+			case .gestureRecognizers(let x): return x.apply(instance) { i, v in i.gestureRecognizers = v }
+			case .motionEffects(let x): return x.apply(instance) { i, v in i.motionEffects = v }
+			case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
+			case .endEditing(let x): return x.apply(instance) { i, v in i.endEditing(v) }
+			case .becomeFirstResponder(let x): return x.apply(instance) { i, v in i.becomeFirstResponder() }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

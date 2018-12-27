@@ -20,12 +20,12 @@
 
 #if os(iOS)
 
-public class Switch: ConstructingBinder, SwitchConvertible {
+public class Switch: Binder, SwitchConvertible {
 	public typealias Instance = UISwitch
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -33,10 +33,10 @@ public class Switch: ConstructingBinder, SwitchConvertible {
 	}
 	public func uiSwitch() -> Instance { return instance() }
 	
-	public enum Binding: SwitchBinding {
+	enum Binding: SwitchBinding {
 		public typealias EnclosingBinder = Switch
 		public static func switchBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -55,7 +55,7 @@ public class Switch: ConstructingBinder, SwitchConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Switch
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -64,15 +64,15 @@ public class Switch: ConstructingBinder, SwitchConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .isOn(let x): return x.apply(instance, storage) { i, s, v in i.setOn(v.value, animated: v.isAnimated) }
-			case .onTintColor(let x): return x.apply(instance, storage) { i, s, v in i.onTintColor = v }
-			case .tintColor(let x): return x.apply(instance, storage) { i, s, v in i.tintColor = v }
-			case .thumbTintColor(let x): return x.apply(instance, storage) { i, s, v in i.thumbTintColor = v }
-			case .onImage(let x): return x.apply(instance, storage) { i, s, v in i.onImage = v }
-			case .offImage(let x): return x.apply(instance, storage) { i, s, v in i.offImage = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .isOn(let x): return x.apply(instance) { i, v in i.setOn(v.value, animated: v.isAnimated) }
+			case .onTintColor(let x): return x.apply(instance) { i, v in i.onTintColor = v }
+			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+			case .thumbTintColor(let x): return x.apply(instance) { i, v in i.thumbTintColor = v }
+			case .onImage(let x): return x.apply(instance) { i, v in i.onImage = v }
+			case .offImage(let x): return x.apply(instance) { i, v in i.offImage = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class ViewController: ConstructingBinder, ViewControllerConvertible {
+public class ViewController: Binder, ViewControllerConvertible {
 	public typealias Instance = UIViewController
 	public typealias Inherited = BaseBinder
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 	}
 	public func uiViewController() -> Instance { return instance() }
 	
-	public enum Binding: ViewControllerBinding {
+	enum Binding: ViewControllerBinding {
 		public typealias EnclosingBinder = ViewController
 		public static func viewControllerBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case navigationItem(Constant<NavigationItem>)
@@ -75,7 +75,7 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 		case didReceiveMemoryWarning(() -> Void)
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = ViewController
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -87,7 +87,7 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 		public var view: InitialSubsequent<ViewConvertible>?
 		public var loadView: (() -> ViewConvertible)?
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .loadView(let x):
 				assert(view == nil, "Construct the view using either .loadView or .view, not both.")
@@ -95,12 +95,12 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 			case .view(let x):
 				assert(loadView == nil, "Construct the view using either .loadView or .view, not both.")
 				view = x.initialSubsequent()
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
+			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			// The loadView function needs to be ready in case one of the bindings triggers a view load.
 			if let v = view?.initial() {
 				storage.view = v
@@ -111,35 +111,35 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .loadView: return nil
 			case .view:
-				return view?.subsequent.flatMap { $0.apply(instance, storage) { i, s, v in
+				return view?.subsequent.flatMap { $0.apply(instance) { i, v in
 					storage.view = v
 					if i.isViewLoaded {
 						i.view = v.uiView()
 					}
 				} }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .preferredContentSize(let x): return x.apply(instance, storage) { i, s, v in i.preferredContentSize = v }
-			case .modalPresentationStyle(let x): return x.apply(instance, storage) { i, s, v in i.modalPresentationStyle = v }
-			case .modalTransitionStyle(let x): return x.apply(instance, storage) { i, s, v in i.modalTransitionStyle = v }
-			case .isModalInPopover(let x): return x.apply(instance, storage) { i, s, v in i.isModalInPopover = v }
-			case .definesPresentationContext(let x): return x.apply(instance, storage) { i, s, v in i.definesPresentationContext = v }
-			case .providesPresentationContextTransitionStyle(let x): return x.apply(instance, storage) { i, s, v in i.providesPresentationContextTransitionStyle = v }
-			case .transitioningDelegate(let x): return x.apply(instance, storage) { i, s, v in i.transitioningDelegate = v }
-			case .edgesForExtendedLayout(let x): return x.apply(instance, storage) { i, s, v in i.edgesForExtendedLayout = v }
-			case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance, storage) { i, s, v in i.extendedLayoutIncludesOpaqueBars = v }
-			case .restorationIdentifier(let x): return x.apply(instance, storage) { i, s, v in i.restorationIdentifier = v }
-			case .restorationClass(let x): return x.apply(instance, storage) { i, s, v in i.restorationClass = v }
-			case .modalPresentationCapturesStatusBarAppearance(let x): return x.apply(instance, storage) { i, s, v in i.modalPresentationCapturesStatusBarAppearance = v }
-			case .hidesBottomBarWhenPushed(let x): return x.apply(instance, storage) { i, s, v in i.hidesBottomBarWhenPushed = v }
-			case .toolbarItems(let x): return x.apply(instance, storage) { i, s, v in i.setToolbarItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
-			case .tabBarItem(let x): return x.apply(instance, storage) { i, s, v in i.tabBarItem = v.uiTabBarItem() }
-			case .isEditing(let x): return x.apply(instance, storage) { i, s, v in i.setEditing(v.value, animated: v.isAnimated) }
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
+			case .preferredContentSize(let x): return x.apply(instance) { i, v in i.preferredContentSize = v }
+			case .modalPresentationStyle(let x): return x.apply(instance) { i, v in i.modalPresentationStyle = v }
+			case .modalTransitionStyle(let x): return x.apply(instance) { i, v in i.modalTransitionStyle = v }
+			case .isModalInPopover(let x): return x.apply(instance) { i, v in i.isModalInPopover = v }
+			case .definesPresentationContext(let x): return x.apply(instance) { i, v in i.definesPresentationContext = v }
+			case .providesPresentationContextTransitionStyle(let x): return x.apply(instance) { i, v in i.providesPresentationContextTransitionStyle = v }
+			case .transitioningDelegate(let x): return x.apply(instance) { i, v in i.transitioningDelegate = v }
+			case .edgesForExtendedLayout(let x): return x.apply(instance) { i, v in i.edgesForExtendedLayout = v }
+			case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance) { i, v in i.extendedLayoutIncludesOpaqueBars = v }
+			case .restorationIdentifier(let x): return x.apply(instance) { i, v in i.restorationIdentifier = v }
+			case .restorationClass(let x): return x.apply(instance) { i, v in i.restorationClass = v }
+			case .modalPresentationCapturesStatusBarAppearance(let x): return x.apply(instance) { i, v in i.modalPresentationCapturesStatusBarAppearance = v }
+			case .hidesBottomBarWhenPushed(let x): return x.apply(instance) { i, v in i.hidesBottomBarWhenPushed = v }
+			case .toolbarItems(let x): return x.apply(instance) { i, v in i.setToolbarItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
+			case .tabBarItem(let x): return x.apply(instance) { i, v in i.tabBarItem = v.uiTabBarItem() }
+			case .isEditing(let x): return x.apply(instance) { i, v in i.setEditing(v.value, animated: v.isAnimated) }
 			case .present(let x):
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					s.queuedModalPresentations.append(v)
 					s.processModalPresentations(viewController: i)
 				}
@@ -164,11 +164,11 @@ public class ViewController: ConstructingBinder, ViewControllerConvertible {
 			case .didReceiveMemoryWarning(let x):
 				storage.didReceiveMemoryWarning = x
 				return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: (), storage: ())
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let lifetime = linkedPreparer.finalizeInstance((), storage: ())
 			
 			// Send the initial "traitsCollection" once construction is complete.

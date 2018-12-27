@@ -1,5 +1,5 @@
 //
-//  CwlBinderStorage.swift
+//  CwlObjectBinderStorage.swift
 //  CwlViews
 //
 //  Created by Matt Gallagher on 5/08/2015.
@@ -18,39 +18,58 @@
 //
 
 /// Implementation for `BinderStorage` that wraps Cocoa objects.
-open class ObjectBinderStorage: NSObject, BinderStorage {
-	public private(set) var lifetimes: [Lifetime]? = nil
-	public func setLifetimes(_ lifetimes: [Lifetime]) {
-		assert(self.lifetimes == nil, "Bindings should be set once only")
-		self.lifetimes = lifetimes
+open class ObjectBinderStorage: NSObject, DefaultConstructable {
+	public typealias Instance = NSObject
+	private var lifetimes: [Lifetime]? = nil
+	
+	private static var associatedStorageKey = NSObject()
+	
+	public override required init() {
 	}
 	
-	// An `ObjectBinderStorage` is an "internal" object but we don't need to keep it around if it isn't in-use. By default, that means: are we using the object for binding or delegation. Subclasses that store additional properties or implement delegate methods directly (without forwarding to the dynamic delegate) must override this with additional logic.
-	open var inUse: Bool {
-		return lifetimes?.isEmpty == false || dynamicDelegate != nil
+	/// The embed function will avoid embedding and let the ObjectBinderStorage release if this function returns false.
+	/// Override and alter logic if a subclass may require the storage to persist when lifetimes is empty and the dynamic delegate is unused.
+	open var isInUse: Bool {
+		guard let ls = lifetimes else { fatalError("Embed must be called before isInUse") }
+		return ls.isEmpty == false || dynamicDelegate != nil
+	}
+	
+	/// Accessor for any embedded ObjectBinderStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
+	///
+	/// - Parameter for: an NSObject
+	/// - Returns: the embedded ObjectBinderStorage (if any)
+	public static func embeddedStorage(for: NSObject) -> ObjectBinderStorage? {
+		return objc_getAssociatedObject(self, &ObjectBinderStorage.associatedStorageKey) as? ObjectBinderStorage
+	}
+	
+	/// Implementation of the `BinderStorage` method to embed supplied lifetimes in an instance. This may be performed once-only for a given instance and storage (the storage should have the same lifetime as the instance and should not be disconnected once connected).
+	///
+	/// - Parameters:
+	///   - lifetimes: lifetimes that will be stored in this storage
+	///   - instance: an NSObject where this storage will embed itself
+	public func embed(lifetimes: [Lifetime], in instance: NSObject) {
+		assert(self.lifetimes == nil, "Bindings should be set once only")
+		self.lifetimes = lifetimes
+		guard isInUse else { return }
+		
+		assert(ObjectBinderStorage.embeddedStorage(for: instance) == nil, "Bindings should be set once only")
+		objc_setAssociatedObject(instance, &ObjectBinderStorage.associatedStorageKey, self, .OBJC_ASSOCIATION_RETAIN)
 	}
 	
 	/// Explicitly invoke `cancel` on each of the bindings.
 	///
 	/// WARNING: if `cancel` is invoked outside the main thread, it will be *asynchronously* invoked on the main thread.
-	/// Normally, a `cancel` effect is expected to have synchronous effect but it since `cancel` on EnclosingBinder objects is usually used for breaking reference counted loops, it is considered that the synchronous effect of cancel is less important than avoiding deadlocks – and deadlocks would be easy to accidentally trigger if this were synchronously invoked. If you need synchronous effect, ensure that cancel is invoked on the main thread.
+	/// Normally, a `cancel` effect is expected to have synchronous effect but it since `cancel` on Binder objects is usually used for breaking reference counted loops, it is considered that the synchronous effect of cancel is less important than avoiding deadlocks – and deadlocks would be easy to accidentally trigger if this were synchronously invoked. If you need synchronous effect, ensure that cancel is invoked on the main thread.
 	public func cancel() {
-		if let cs = lifetimes {
-			if Thread.isMainThread {
-				// `cancel` is mutating so we must use a `for var` (we can't use `forEach`)
-				for var c in cs {
-					c.cancel()
-				}
-			} else {
-				DispatchQueue.main.async {
-					// `cancel` is mutating so we must use a `for var` (we can't use `forEach`)
-					for var c in cs {
-						c.cancel()
-					}
-				}
-			}
-			lifetimes?.removeAll()
+		guard Thread.isMainThread else { DispatchQueue.main.async(execute: self.cancel); return }
+		
+		// `cancel` is mutating so we must use a `for var` (we can't use `forEach`)
+		for var l in lifetimes ?? [] {
+			l.cancel()
 		}
+		
+		dynamicDelegate?.implementedSelectors = [:]
+		dynamicDelegate = nil
 	}
 	
 	deinit {
@@ -65,7 +84,8 @@ open class ObjectBinderStorage: NSObject, BinderStorage {
 	/// - Parameter selector: Objective-C selector that may be implemented by the dynamicDelegate
 	/// - Returns: the dynamicDelegate, if it implements the selector
 	open override func forwardingTarget(for selector: Selector) -> Any? {
-		if let dd = dynamicDelegate, dd.implementedSelectors.contains(selector) {
+		if let dd = dynamicDelegate, let value = dd.implementedSelectors[selector] {
+			dd.associatedHandler = value
 			return dd
 		}
 		return nil
@@ -76,7 +96,7 @@ open class ObjectBinderStorage: NSObject, BinderStorage {
 	/// - Parameter selector: Objective-C selector that may be implemented by the dynamicDelegate
 	/// - Returns: true if the dynamicDelegate implements the selector, otherwise returns the super implementation
 	open override func responds(to selector: Selector) -> Bool {
-		if let dd = dynamicDelegate, dd.implementedSelectors.contains(selector) {
+		if let dd = dynamicDelegate, dd.implementedSelectors[selector] != nil {
 			return true
 		}
 		return super.responds(to: selector)
@@ -84,13 +104,21 @@ open class ObjectBinderStorage: NSObject, BinderStorage {
 }
 
 /// Used in conjunction with `ObjectBinderStorage`, subclasses of `DynamicDelegate` can implement all delegate methods at compile time but have the `ObjectBinderStorage` report true to `responds(to:)` only in the cases where the delegate method is selected for enabling.
-open class DynamicDelegate: NSObject {
-	open var implementedSelectors = Set<Selector>()
+open class DynamicDelegate: NSObject, DefaultConstructable {
+	var implementedSelectors = Dictionary<Selector, Any>()
+	var associatedHandler: Any?
+	public func handler<Value>(ofType: Value.Type) -> Value {
+		let v = associatedHandler as! Value
+		associatedHandler = nil
+		return v
+	}
 	
-	@discardableResult
-	open func addSelector(_ selector: Selector) -> Self {
-		implementedSelectors.insert(selector)
-		return self
+	public required override init() {
+		super.init()
+	}
+	
+	open func addHandler(_ value: Any, _ selector: Selector) {
+		implementedSelectors[selector] = value
 	}
 }
 
@@ -98,17 +126,10 @@ open class DynamicDelegate: NSObject {
 /// Most objects managed by a `BinderStorage` are Objective-C objects (`NSView`/`UIView`, `NSApplication`/`UIApplication`, etc). For these objects, we can satisfy the requirement of tying the stateful and binder objects together by storing the binder in the Objective-C "associated object" storage.
 private var associatedStorageKey = NSObject()
 extension NSObject { 
-	public func setBinderStorage(_ newValue: BinderStorage?) {
+	public func setBinderStorage(_ newValue: Any?) {
 		objc_setAssociatedObject(self, &associatedStorageKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 	}
-	public func getBinderStorage<T: BinderStorage>(type: T.Type) -> T? {
+	public func getBinderStorage<T: ObjectBinderStorage>(type: T.Type) -> T? {
 		return objc_getAssociatedObject(self, &associatedStorageKey) as? T
-	}
-}
-
-public func embedStorageIfInUse<Storage: BinderStorage>(_ instance: NSObject, _ storage: Storage, _ lifetimes: [Lifetime]) {
-	storage.setLifetimes(lifetimes)
-	if storage.inUse {
-		instance.setBinderStorage(storage)
 	}
 }

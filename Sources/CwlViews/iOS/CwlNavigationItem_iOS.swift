@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class NavigationItem: ConstructingBinder, NavigationItemConvertible {
+public class NavigationItem: Binder, NavigationItemConvertible {
 	public typealias Instance = UINavigationItem
 	public typealias Inherited = BaseBinder
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class NavigationItem: ConstructingBinder, NavigationItemConvertible {
 	}
 	public func uiNavigationItem() -> Instance { return instance() }
 	
-	public enum Binding: NavigationItemBinding {
+	enum Binding: NavigationItemBinding {
 		public typealias EnclosingBinder = NavigationItem
 		public static func navigationItemBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -56,7 +56,7 @@ public class NavigationItem: ConstructingBinder, NavigationItemConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = NavigationItem
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -65,17 +65,17 @@ public class NavigationItem: ConstructingBinder, NavigationItemConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .titleView(let x): return x.apply(instance, storage) { i, s, v in i.titleView = v?.uiView() }
-			case .prompt(let x): return x.apply(instance, storage) { i, s, v in i.prompt = v }
-			case .backBarButtonItem(let x): return x.apply(instance, storage) { i, s, v in i.backBarButtonItem = v?.uiBarButtonItem() }
-			case .hidesBackButton(let x): return x.apply(instance, storage) { i, s, v in i.setHidesBackButton(v.value, animated: v.isAnimated) }
-			case .leftBarButtonItems(let x): return x.apply(instance, storage) { i, s, v in i.setLeftBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
-			case .rightBarButtonItems(let x): return x.apply(instance, storage) { i, s, v in i.setRightBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
-			case .leftItemsSupplementBackButton(let x): return x.apply(instance, storage) { i, s, v in i.leftItemsSupplementBackButton = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: (), storage: ())
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
+			case .titleView(let x): return x.apply(instance) { i, v in i.titleView = v?.uiView() }
+			case .prompt(let x): return x.apply(instance) { i, v in i.prompt = v }
+			case .backBarButtonItem(let x): return x.apply(instance) { i, v in i.backBarButtonItem = v?.uiBarButtonItem() }
+			case .hidesBackButton(let x): return x.apply(instance) { i, v in i.setHidesBackButton(v.value, animated: v.isAnimated) }
+			case .leftBarButtonItems(let x): return x.apply(instance) { i, v in i.setLeftBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
+			case .rightBarButtonItems(let x): return x.apply(instance) { i, v in i.setRightBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
+			case .leftItemsSupplementBackButton(let x): return x.apply(instance) { i, v in i.leftItemsSupplementBackButton = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class Button: ConstructingBinder, ButtonConvertible {
+public class Button: Binder, ButtonConvertible {
 	public typealias Instance = NSButton
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class Button: ConstructingBinder, ButtonConvertible {
 	}
 	public func nsButton() -> Instance { return instance() }
 	
-	public enum Binding: ButtonBinding {
+	enum Binding: ButtonBinding {
 		public typealias EnclosingBinder = Button
 		public static func buttonBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -76,7 +76,7 @@ public class Button: ConstructingBinder, ButtonConvertible {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Button
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -85,35 +85,35 @@ public class Button: ConstructingBinder, ButtonConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .buttonType(let x): return x.apply(instance, storage) { i, s, v in i.setButtonType(v) }
-			case .periodicDelay(let x): return x.apply(instance, storage) { i, s, v in i.setPeriodicDelay(v.delay, interval: v.interval) }
-			case .alternateTitle(let x): return x.apply(instance, storage) { i, s, v in i.alternateTitle = v }
-			case .attributedTitle(let x): return x.apply(instance, storage) { i, s, v in i.attributedTitle = v }
-			case .attributedAlternateTitle(let x): return x.apply(instance, storage) { i, s, v in i.attributedAlternateTitle = v }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .sound(let x): return x.apply(instance, storage) { i, s, v in i.sound = v }
-			case .isSpringLoaded(let x): return x.apply(instance, storage) { i, s, v in if #available(macOS 10.10.3, *) { i.isSpringLoaded = v } }
-			case .maxAcceleratorLevel(let x): return x.apply(instance, storage) { i, s, v in if #available(macOS 10.10.3, *) { i.maxAcceleratorLevel = v } }
-			case .image(let x): return x.apply(instance, storage) { i, s, v in i.image = v }
-			case .alternateImage(let x): return x.apply(instance, storage) { i, s, v in i.alternateImage = v }
-			case .imagePosition(let x): return x.apply(instance, storage) { i, s, v in i.imagePosition = v }
-			case .isBordered(let x): return x.apply(instance, storage) { i, s, v in i.isBordered = v }
-			case .isTransparent(let x): return x.apply(instance, storage) { i, s, v in i.isTransparent = v }
-			case .bezelStyle(let x): return x.apply(instance, storage) { i, s, v in i.bezelStyle = v }
-			case .showsBorderOnlyWhileMouseInside(let x): return x.apply(instance, storage) { i, s, v in i.showsBorderOnlyWhileMouseInside = v }
-			case .allowsMixedState(let x): return x.apply(instance, storage) { i, s, v in i.allowsMixedState = v }
-			case .state(let x): return x.apply(instance, storage) { i, s, v in i.state = v }
-			case .highlight(let x): return x.apply(instance, storage) { i, s, v in i.highlight(v) }
-			case .keyEquivalent(let x): return x.apply(instance, storage) { i, s, v in i.keyEquivalent = v }
-			case .keyEquivalentModifierMask(let x): return x.apply(instance, storage) { i, s, v in i.keyEquivalentModifierMask = v }
-			case .performKeyEquivalent(let x): return x.apply(instance, storage) { i, s, v in i.performKeyEquivalent(with: v) }
-			case .setNextState(let x): return x.apply(instance, storage) { i, s, v in i.setNextState() }
-			case .bezelColor(let x): return x.apply(instance, storage) { i, s, v in if #available(macOS 10.12.2, *) { i.bezelColor = v } }
-			case .imageHugsTitle(let x): return x.apply(instance, storage) { i, s, v in if #available(macOS 10.12, *) { i.imageHugsTitle = v } }
-			case .imageScaling(let x): return x.apply(instance, storage) { i, s, v in i.imageScaling = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .buttonType(let x): return x.apply(instance) { i, v in i.setButtonType(v) }
+			case .periodicDelay(let x): return x.apply(instance) { i, v in i.setPeriodicDelay(v.delay, interval: v.interval) }
+			case .alternateTitle(let x): return x.apply(instance) { i, v in i.alternateTitle = v }
+			case .attributedTitle(let x): return x.apply(instance) { i, v in i.attributedTitle = v }
+			case .attributedAlternateTitle(let x): return x.apply(instance) { i, v in i.attributedAlternateTitle = v }
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
+			case .sound(let x): return x.apply(instance) { i, v in i.sound = v }
+			case .isSpringLoaded(let x): return x.apply(instance) { i, v in if #available(macOS 10.10.3, *) { i.isSpringLoaded = v } }
+			case .maxAcceleratorLevel(let x): return x.apply(instance) { i, v in if #available(macOS 10.10.3, *) { i.maxAcceleratorLevel = v } }
+			case .image(let x): return x.apply(instance) { i, v in i.image = v }
+			case .alternateImage(let x): return x.apply(instance) { i, v in i.alternateImage = v }
+			case .imagePosition(let x): return x.apply(instance) { i, v in i.imagePosition = v }
+			case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
+			case .isTransparent(let x): return x.apply(instance) { i, v in i.isTransparent = v }
+			case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
+			case .showsBorderOnlyWhileMouseInside(let x): return x.apply(instance) { i, v in i.showsBorderOnlyWhileMouseInside = v }
+			case .allowsMixedState(let x): return x.apply(instance) { i, v in i.allowsMixedState = v }
+			case .state(let x): return x.apply(instance) { i, v in i.state = v }
+			case .highlight(let x): return x.apply(instance) { i, v in i.highlight(v) }
+			case .keyEquivalent(let x): return x.apply(instance) { i, v in i.keyEquivalent = v }
+			case .keyEquivalentModifierMask(let x): return x.apply(instance) { i, v in i.keyEquivalentModifierMask = v }
+			case .performKeyEquivalent(let x): return x.apply(instance) { i, v in i.performKeyEquivalent(with: v) }
+			case .setNextState(let x): return x.apply(instance) { i, v in i.setNextState() }
+			case .bezelColor(let x): return x.apply(instance) { i, v in if #available(macOS 10.12.2, *) { i.bezelColor = v } }
+			case .imageHugsTitle(let x): return x.apply(instance) { i, v in if #available(macOS 10.12, *) { i.imageHugsTitle = v } }
+			case .imageScaling(let x): return x.apply(instance) { i, v in i.imageScaling = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

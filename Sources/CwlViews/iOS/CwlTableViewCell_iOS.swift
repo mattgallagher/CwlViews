@@ -23,8 +23,8 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 	public typealias Instance = UITableViewCell
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -42,10 +42,10 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 		return construct(reuseIdentifier: reuseIdentifier)
 	}
 	
-	public enum Binding: TableViewCellBinding {
+	enum Binding: TableViewCellBinding {
 		public typealias EnclosingBinder = TableViewCell
 		public static func tableViewCellBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case cellStyle(Constant<UITableViewCell.CellStyle>)
@@ -79,7 +79,7 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TableViewCell
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -91,15 +91,15 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 		
 		var cellStyle: UITableViewCell.CellStyle = .default
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .cellStyle(let x): cellStyle = x.value
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .cellStyle: return nil
 			case .textLabel(let x):
@@ -120,23 +120,23 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 			case .contentView(let x):
 				x.value.applyBindings(to: instance.contentView)
 				return nil
-			case .backgroundView(let x): return x.apply(instance, storage) { i, s, v in i.backgroundView = v?.uiView() }
-			case .selectedBackgroundView(let x): return x.apply(instance, storage) { i, s, v in i.selectedBackgroundView = v?.uiView() }
-			case .multipleSelectionBackgroundView(let x): return x.apply(instance, storage) { i, s, v in i.multipleSelectionBackgroundView = v?.uiView() }
-			case .accessoryType(let x): return x.apply(instance, storage) { i, s, v in i.accessoryType = v }
-			case .accessoryView(let x): return x.apply(instance, storage) { i, s, v in i.accessoryView = v.uiView() }
-			case .editingAccessoryType(let x): return x.apply(instance, storage) { i, s, v in i.editingAccessoryType = v }
-			case .editingAccessoryView(let x): return x.apply(instance, storage) { i, s, v in i.editingAccessoryView = v.uiView() }
-			case .isSelected(let x): return x.apply(instance, storage) { i, s, v in i.setSelected(v.value, animated: v.isAnimated) }
-			case .isHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.setHighlighted(v.value, animated: v.isAnimated) }
-			case .isEditing(let x): return x.apply(instance, storage) { i, s, v in i.setEditing(v.value, animated: v.isAnimated) }
-			case .showsReorderControl(let x): return x.apply(instance, storage) { i, s, v in i.showsReorderControl = v }
-			case .indentationLevel(let x): return x.apply(instance, storage) { i, s, v in i.indentationLevel = v }
-			case .indentationWidth(let x): return x.apply(instance, storage) { i, s, v in i.indentationWidth = v }
-			case .shouldIndentWhileEditing(let x): return x.apply(instance, storage) { i, s, v in i.shouldIndentWhileEditing = v }
-			case .separatorInset(let x): return x.apply(instance, storage) { i, s, v in i.separatorInset = v }
-			case .focusStyle(let x): return x.apply(instance, storage) { i, s, v in i.focusStyle = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .backgroundView(let x): return x.apply(instance) { i, v in i.backgroundView = v?.uiView() }
+			case .selectedBackgroundView(let x): return x.apply(instance) { i, v in i.selectedBackgroundView = v?.uiView() }
+			case .multipleSelectionBackgroundView(let x): return x.apply(instance) { i, v in i.multipleSelectionBackgroundView = v?.uiView() }
+			case .accessoryType(let x): return x.apply(instance) { i, v in i.accessoryType = v }
+			case .accessoryView(let x): return x.apply(instance) { i, v in i.accessoryView = v.uiView() }
+			case .editingAccessoryType(let x): return x.apply(instance) { i, v in i.editingAccessoryType = v }
+			case .editingAccessoryView(let x): return x.apply(instance) { i, v in i.editingAccessoryView = v.uiView() }
+			case .isSelected(let x): return x.apply(instance) { i, v in i.setSelected(v.value, animated: v.isAnimated) }
+			case .isHighlighted(let x): return x.apply(instance) { i, v in i.setHighlighted(v.value, animated: v.isAnimated) }
+			case .isEditing(let x): return x.apply(instance) { i, v in i.setEditing(v.value, animated: v.isAnimated) }
+			case .showsReorderControl(let x): return x.apply(instance) { i, v in i.showsReorderControl = v }
+			case .indentationLevel(let x): return x.apply(instance) { i, v in i.indentationLevel = v }
+			case .indentationWidth(let x): return x.apply(instance) { i, v in i.indentationWidth = v }
+			case .shouldIndentWhileEditing(let x): return x.apply(instance) { i, v in i.shouldIndentWhileEditing = v }
+			case .separatorInset(let x): return x.apply(instance) { i, v in i.separatorInset = v }
+			case .focusStyle(let x): return x.apply(instance) { i, v in i.focusStyle = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

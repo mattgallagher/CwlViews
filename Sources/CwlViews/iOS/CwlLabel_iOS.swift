@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class Label: ConstructingBinder, LabelConvertible {
+public class Label: Binder, LabelConvertible {
 	public typealias Instance = UILabel
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class Label: ConstructingBinder, LabelConvertible {
 	}
 	public func uiLabel() -> Instance { return instance() }
 	
-	public enum Binding: LabelBinding {
+	enum Binding: LabelBinding {
 		public typealias EnclosingBinder = Label
 		public static func labelBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -65,7 +65,7 @@ public class Label: ConstructingBinder, LabelConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Label
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -74,26 +74,26 @@ public class Label: ConstructingBinder, LabelConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .text(let x): return x.apply(instance, storage) { i, s, v in i.text = v }
-			case .attributedText(let x): return x.apply(instance, storage) { i, s, v in i.attributedText = v }
-			case .font(let x): return x.apply(instance, storage) { i, s, v in i.font = v }
-			case .textColor(let x): return x.apply(instance, storage) { i, s, v in i.textColor = v }
-			case .textAlignment(let x): return x.apply(instance, storage) { i, s, v in i.textAlignment = v }
-			case .lineBreakMode(let x): return x.apply(instance, storage) { i, s, v in i.lineBreakMode = v }
-			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
-			case .adjustsFontSizeToFitWidth(let x): return x.apply(instance, storage) { i, s, v in i.adjustsFontSizeToFitWidth = v }
-			case .allowsDefaultTighteningForTruncation(let x): return x.apply(instance, storage) { i, s, v in i.allowsDefaultTighteningForTruncation = v }
-			case .baselineAdjustment(let x): return x.apply(instance, storage) { i, s, v in i.baselineAdjustment = v }
-			case .minimumScaleFactor(let x): return x.apply(instance, storage) { i, s, v in i.minimumScaleFactor = v }
-			case .numberOfLines(let x): return x.apply(instance, storage) { i, s, v in i.numberOfLines = v }
-			case .highlightedTextColor(let x): return x.apply(instance, storage) { i, s, v in i.highlightedTextColor = v }
-			case .isHighlighted(let x): return x.apply(instance, storage) { i, s, v in i.isHighlighted = v }
-			case .shadowColor(let x): return x.apply(instance, storage) { i, s, v in i.shadowColor = v }
-			case .shadowOffset(let x): return x.apply(instance, storage) { i, s, v in i.shadowOffset = v }
-			case .preferredMaxLayoutWidth(let x): return x.apply(instance, storage) { i, s, v in i.preferredMaxLayoutWidth = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .text(let x): return x.apply(instance) { i, v in i.text = v }
+			case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
+			case .font(let x): return x.apply(instance) { i, v in i.font = v }
+			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+			case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
+			case .lineBreakMode(let x): return x.apply(instance) { i, v in i.lineBreakMode = v }
+			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+			case .adjustsFontSizeToFitWidth(let x): return x.apply(instance) { i, v in i.adjustsFontSizeToFitWidth = v }
+			case .allowsDefaultTighteningForTruncation(let x): return x.apply(instance) { i, v in i.allowsDefaultTighteningForTruncation = v }
+			case .baselineAdjustment(let x): return x.apply(instance) { i, v in i.baselineAdjustment = v }
+			case .minimumScaleFactor(let x): return x.apply(instance) { i, v in i.minimumScaleFactor = v }
+			case .numberOfLines(let x): return x.apply(instance) { i, v in i.numberOfLines = v }
+			case .highlightedTextColor(let x): return x.apply(instance) { i, v in i.highlightedTextColor = v }
+			case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
+			case .shadowColor(let x): return x.apply(instance) { i, v in i.shadowColor = v }
+			case .shadowOffset(let x): return x.apply(instance) { i, v in i.shadowOffset = v }
+			case .preferredMaxLayoutWidth(let x): return x.apply(instance) { i, v in i.preferredMaxLayoutWidth = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

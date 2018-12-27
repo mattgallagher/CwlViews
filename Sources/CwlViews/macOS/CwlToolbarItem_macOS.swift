@@ -46,10 +46,10 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 	}
 	public func nsToolbarItem() -> Instance { return instance() }
 	
-	public enum Binding: ToolbarItemBinding {
+	enum Binding: ToolbarItemBinding {
 		public typealias EnclosingBinder = ToolbarItem
 		public static func toolbarItemBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -75,7 +75,7 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 		case validate((NSToolbarItem) -> Bool)
 	}
 
-	public struct Preparer: StoragePreparer {
+	struct Preparer: StoragePreparer {
 		public typealias EnclosingBinder = ToolbarItem
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -86,34 +86,34 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 
 		var validator: ((NSToolbarItem) -> Bool)?
 		
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .validate(let x): validator = x
-			case .inheritedBinding(let preceeding): linkedPreparer.prepareBinding(preceeding)
+			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 			default: break
 			}
 		}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .label(let x): return x.apply(instance, storage) { i, s, v in i.label = v }
-			case .paletteLabel(let x): return x.apply(instance, storage) { i, s, v in i.paletteLabel = v }
-			case .toolTip(let x): return x.apply(instance, storage) { i, s, v in i.toolTip = v }
-			case .tag(let x): return x.apply(instance, storage) { i, s, v in i.tag = v }
-			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
-			case .image(let x): return x.apply(instance, storage) { i, s, v in i.image = v }
-			case .minSize(let x): return x.apply(instance, storage) { i, s, v in i.minSize = v }
-			case .maxSize(let x): return x.apply(instance, storage) { i, s, v in i.maxSize = v }
-			case .visibilityPriority(let x): return x.apply(instance, storage) { i, s, v in i.visibilityPriority = v }
+			case .label(let x): return x.apply(instance) { i, v in i.label = v }
+			case .paletteLabel(let x): return x.apply(instance) { i, v in i.paletteLabel = v }
+			case .toolTip(let x): return x.apply(instance) { i, v in i.toolTip = v }
+			case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
+			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+			case .image(let x): return x.apply(instance) { i, v in i.image = v }
+			case .minSize(let x): return x.apply(instance) { i, v in i.minSize = v }
+			case .maxSize(let x): return x.apply(instance) { i, v in i.maxSize = v }
+			case .visibilityPriority(let x): return x.apply(instance) { i, v in i.visibilityPriority = v }
 			case .action(let x): return x.apply(instance: instance, constructTarget: ToolbarItemTarget.init, processor: { _ in () })
-			case .menuFormRepresentation(let x): return x.apply(instance, storage) { i, s, v in i.menuFormRepresentation = v.nsMenuItem() }
-			case .view(let x): return x.apply(instance, storage) { i, s, v in i.view = v?.nsView() }
+			case .menuFormRepresentation(let x): return x.apply(instance) { i, v in i.menuFormRepresentation = v.nsMenuItem() }
+			case .view(let x): return x.apply(instance) { i, v in i.view = v?.nsView() }
 			case .validate: return nil
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 		
-		public mutating func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 
 			// Need to apply the validator *after* the action exists

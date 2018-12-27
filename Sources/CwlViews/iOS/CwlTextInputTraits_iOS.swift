@@ -28,7 +28,7 @@ public struct TextInputTraits {
 		self.init(bindings: bindings)
 	}
 	
-	public enum Binding {
+	enum Binding {
 		case autocapitalizationType(Dynamic<UITextAutocapitalizationType>)
 		case autocorrectionType(Dynamic<UITextAutocorrectionType>)
 		case spellCheckingType(Dynamic<UITextSpellCheckingType>)

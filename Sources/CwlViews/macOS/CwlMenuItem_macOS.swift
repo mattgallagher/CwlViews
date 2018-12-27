@@ -19,23 +19,18 @@
 
 #if os(macOS)
 
-public class MenuItem: ConstructingBinder, MenuItemConvertible {
-	public typealias Instance = NSMenuItem
-	public typealias Inherited = BaseBinder
-	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
-		self.state = state
+// MARK: - Binder Part 1: Binder
+public class MenuItem: Binder, MenuItemConvertible {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-   public func nsMenuItem() -> Instance { return instance() }
-	
-	public enum Binding: MenuItemBinding {
-		public typealias EnclosingBinder = MenuItem
-		public static func menuItemBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+}
+
+// MARK: - Binder Part 2: Binding
+public extension MenuItem {
+	enum Binding: MenuItemBinding {
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -66,98 +61,140 @@ public class MenuItem: ConstructingBinder, MenuItemConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
-	public struct Preparer: ConstructingPreparer {
-		public typealias EnclosingBinder = MenuItem
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension MenuItem {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = MenuItem.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = NSMenuItem
+		public typealias Storage = MenuItem.Storage
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
-			case .isHidden(let x): return x.apply(instance, storage) { i, s, v in i.isHidden = v }
-			case .isAlternate(let x): return x.apply(instance, storage) { i, s, v in i.isAlternate = v }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .attributedTitle(let x): return x.apply(instance, storage) { i, s, v in i.attributedTitle = v }
-			case .representedObject(let x): return x.apply(instance, storage) { i, s, v in i.representedObject = v }
-			case .tag(let x): return x.apply(instance, storage) { i, s, v in i.tag = v }
-			case .state(let x): return x.apply(instance, storage) { i, s, v in i.state = v }
-			case .indentationLevel(let x): return x.apply(instance, storage) { i, s, v in i.indentationLevel = v }
-			case .image(let x): return x.apply(instance, storage) { i, s, v in i.image = v }
-			case .onStateImage(let x): return x.apply(instance, storage) { i, s, v in i.onStateImage = v }
-			case .offStateImage(let x): return x.apply(instance, storage) { i, s, v in i.offStateImage = v }
-			case .mixedStateImage(let x): return x.apply(instance, storage) { i, s, v in i.mixedStateImage = v }
-			case .submenu(let x): return x.apply(instance, storage) { i, s, v in i.submenu = v?.nsMenu() }
-			case .keyEquivalent(let x): return x.apply(instance, storage) { i, s, v in i.keyEquivalent = v }
-			case .keyEquivalentModifierMask(let x): return x.apply(instance, storage) { i, s, v in i.keyEquivalentModifierMask = v }
-			case .toolTip(let x): return x.apply(instance, storage) { i, s, v in i.toolTip = v }
-			case .view(let x): return x.apply(instance, storage) { i, s, v in i.view = v?.nsView() }
-			case .action(let x):
-				return x.apply(instance: instance, constructTarget: SignalActionTarget.init) { sender -> (Int, Any?) in
-					guard let menuItem = sender as? NSMenuItem else { return (-1, nil) }
-					return (menuItem.tag, menuItem.representedObject)
-				}
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
-			}
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
+}
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension MenuItem.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .attributedTitle(let x): return x.apply(instance) { i, v in i.attributedTitle = v }
+		case .image(let x): return x.apply(instance) { i, v in i.image = v }
+		case .indentationLevel(let x): return x.apply(instance) { i, v in i.indentationLevel = v }
+		case .isAlternate(let x): return x.apply(instance) { i, v in i.isAlternate = v }
+		case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+		case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
+		case .keyEquivalent(let x): return x.apply(instance) { i, v in i.keyEquivalent = v }
+		case .keyEquivalentModifierMask(let x): return x.apply(instance) { i, v in i.keyEquivalentModifierMask = v }
+		case .mixedStateImage(let x): return x.apply(instance) { i, v in i.mixedStateImage = v }
+		case .offStateImage(let x): return x.apply(instance) { i, v in i.offStateImage = v }
+		case .onStateImage(let x): return x.apply(instance) { i, v in i.onStateImage = v }
+		case .representedObject(let x): return x.apply(instance) { i, v in i.representedObject = v }
+		case .state(let x): return x.apply(instance) { i, v in i.state = v }
+		case .submenu(let x): return x.apply(instance) { i, v in i.submenu = v?.nsMenu() }
+		case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .toolTip(let x): return x.apply(instance) { i, v in i.toolTip = v }
+		case .view(let x): return x.apply(instance) { i, v in i.view = v?.nsView() }
+
+		// 2. Signal bindings are performed on the object after construction.
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .action(let x): return x.apply(to: instance, constructTarget: SignalActionTarget.init)
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension MenuItem {
 	public typealias Storage = ObjectBinderStorage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: MenuItemBinding {
+	public typealias MenuItemName<V> = BindingName<V, MenuItem.Binding, Binding>
+	private typealias B = MenuItem.Binding
+	private static func name<V>(_ source: @escaping (V) -> MenuItem.Binding) -> MenuItemName<V> {
+		return MenuItemName<V>(source: source, downcast: Binding.menuItemBinding)
+	}
+}
+public extension BindingName where Binding: MenuItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .menuItemBinding(MenuItem.Binding.$1(v)) }) }
+	// With:    static var $1: MenuItemName<$2> { return .name(B.$1) }
 
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var isEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .menuItemBinding(MenuItem.Binding.isEnabled(v)) }) }
-	public static var isHidden: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .menuItemBinding(MenuItem.Binding.isHidden(v)) }) }
-	public static var isAlternate: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .menuItemBinding(MenuItem.Binding.isAlternate(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .menuItemBinding(MenuItem.Binding.title(v)) }) }
-	public static var attributedTitle: BindingName<Dynamic<NSAttributedString?>, Binding> { return BindingName<Dynamic<NSAttributedString?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.attributedTitle(v)) }) }
-	public static var tag: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .menuItemBinding(MenuItem.Binding.tag(v)) }) }
-	public static var representedObject: BindingName<Dynamic<AnyObject?>, Binding> { return BindingName<Dynamic<AnyObject?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.representedObject(v)) }) }
-	public static var state: BindingName<Dynamic<NSControl.StateValue>, Binding> { return BindingName<Dynamic<NSControl.StateValue>, Binding>({ v in .menuItemBinding(MenuItem.Binding.state(v)) }) }
-	public static var indentationLevel: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .menuItemBinding(MenuItem.Binding.indentationLevel(v)) }) }
-	public static var image: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.image(v)) }) }
-	public static var onStateImage: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.onStateImage(v)) }) }
-	public static var offStateImage: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.offStateImage(v)) }) }
-	public static var mixedStateImage: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.mixedStateImage(v)) }) }
-	public static var submenu: BindingName<Dynamic<MenuConvertible?>, Binding> { return BindingName<Dynamic<MenuConvertible?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.submenu(v)) }) }
-	public static var keyEquivalent: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .menuItemBinding(MenuItem.Binding.keyEquivalent(v)) }) }
-	public static var keyEquivalentModifierMask: BindingName<Dynamic<NSEvent.ModifierFlags>, Binding> { return BindingName<Dynamic<NSEvent.ModifierFlags>, Binding>({ v in .menuItemBinding(MenuItem.Binding.keyEquivalentModifierMask(v)) }) }
-	public static var toolTip: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.toolTip(v)) }) }
-	public static var view: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .menuItemBinding(MenuItem.Binding.view(v)) }) }
-
+	static var isEnabled: MenuItemName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var isHidden: MenuItemName<Dynamic<Bool>> { return .name(B.isHidden) }
+	static var isAlternate: MenuItemName<Dynamic<Bool>> { return .name(B.isAlternate) }
+	static var title: MenuItemName<Dynamic<String>> { return .name(B.title) }
+	static var attributedTitle: MenuItemName<Dynamic<NSAttributedString?>> { return .name(B.attributedTitle) }
+	static var tag: MenuItemName<Dynamic<Int>> { return .name(B.tag) }
+	static var representedObject: MenuItemName<Dynamic<AnyObject?>> { return .name(B.representedObject) }
+	static var state: MenuItemName<Dynamic<NSControl.StateValue>> { return .name(B.state) }
+	static var indentationLevel: MenuItemName<Dynamic<Int>> { return .name(B.indentationLevel) }
+	static var image: MenuItemName<Dynamic<NSImage?>> { return .name(B.image) }
+	static var onStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(B.onStateImage) }
+	static var offStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(B.offStateImage) }
+	static var mixedStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(B.mixedStateImage) }
+	static var submenu: MenuItemName<Dynamic<MenuConvertible?>> { return .name(B.submenu) }
+	static var keyEquivalent: MenuItemName<Dynamic<String>> { return .name(B.keyEquivalent) }
+	static var keyEquivalentModifierMask: MenuItemName<Dynamic<NSEvent.ModifierFlags>> { return .name(B.keyEquivalentModifierMask) }
+	static var toolTip: MenuItemName<Dynamic<String?>> { return .name(B.toolTip) }
+	static var view: MenuItemName<Dynamic<ViewConvertible?>> { return .name(B.view) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var action: BindingName<TargetAction, Binding> { return BindingName<TargetAction, Binding>({ v in .menuItemBinding(MenuItem.Binding.action(v)) }) }
-
+	static var action: MenuItemName<TargetAction> { return .name(B.action) }
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-}
 
-public protocol MenuItemConvertible {
-	func nsMenuItem() -> MenuItem.Instance
-}
-extension MenuItem.Instance: MenuItemConvertible {
-	public func nsMenuItem() -> MenuItem.Instance { return self }
-}
-
-public protocol MenuItemBinding: BaseBinding {
-	static func menuItemBinding(_ binding: MenuItem.Binding) -> Self
-}
-extension MenuItemBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
-		return menuItemBinding(.inheritedBinding(binding))
+	// Composite binding names
+	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> MenuItemName<SignalInput<Value>> {
+		return Binding.keyPathActionName(keyPath, MenuItem.Binding.action, Binding.menuItemBinding)
 	}
 }
 
-extension NSMenuItem: TargetActionSender {}
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
+public protocol MenuItemConvertible {
+	func nsMenuItem() -> MenuItem.Instance
+}
+extension NSMenuItem: MenuItemConvertible, DefaultConstructable, TargetActionSender {
+	public func nsMenuItem() -> MenuItem.Instance { return self }
+}
+public extension MenuItem {
+	func nsMenuItem() -> MenuItem.Instance { return instance() }
+}
+
+// MARK: - Binder Part 8: Downcast protocols
+public protocol MenuItemBinding: BinderBaseBinding {
+	static func menuItemBinding(_ binding: MenuItem.Binding) -> Self
+}
+public extension MenuItemBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
+		return menuItemBinding(.inheritedBinding(binding))
+	}
+}
+public extension MenuItem.Binding {
+	public typealias Preparer = MenuItem.Preparer
+	static func menuItemBinding(_ binding: MenuItem.Binding) -> MenuItem.Binding {
+		return binding
+	}
+}
 
 #endif

@@ -24,7 +24,7 @@ public struct BindingParser<AssociatedValue, Binding> {
 	}
 }
 
-public enum BindingParserErrors: Error {
+enum BindingParserErrors: Error {
 	case multipleMatchesFound
 	case noMatchesFound
 	case unexpectedArgumentType

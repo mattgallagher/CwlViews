@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class Slider: ConstructingBinder, SliderConvertible {
+public class Slider: Binder, SliderConvertible {
 	public typealias Instance = UISlider
 	public typealias Inherited = Control
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class Slider: ConstructingBinder, SliderConvertible {
 	}
 	public func uiSlider() -> Instance { return instance() }
 	
-	public enum Binding: SliderBinding {
+	enum Binding: SliderBinding {
 		public typealias EnclosingBinder = Slider
 		public static func sliderBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -60,7 +60,7 @@ public class Slider: ConstructingBinder, SliderConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 	
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = Slider
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -69,11 +69,11 @@ public class Slider: ConstructingBinder, SliderConvertible {
 		
 		public init() {}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			case .thumbImage(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setThumbImage(nil, for: c.0)
@@ -86,7 +86,7 @@ public class Slider: ConstructingBinder, SliderConvertible {
 				}
 			case .minimumTrackImage(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setMinimumTrackImage(nil, for: c.0)
@@ -99,7 +99,7 @@ public class Slider: ConstructingBinder, SliderConvertible {
 				}
 			case .maximumTrackImage(let x):
 				var previous: ScopedValues<UIControl.State, UIImage?>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setMaximumTrackImage(nil, for: c.0)
@@ -110,16 +110,16 @@ public class Slider: ConstructingBinder, SliderConvertible {
 						i.setMaximumTrackImage(c.1, for: c.0)
 					}
 				}
-			case .value(let x): return x.apply(instance, storage) { i, s, v in i.setValue(v.value, animated: v.isAnimated) }
-			case .maximumValue(let x): return x.apply(instance, storage) { i, s, v in i.maximumValue = v }
-			case .minimumValue(let x): return x.apply(instance, storage) { i, s, v in i.minimumValue = v }
-			case .isContinuous(let x): return x.apply(instance, storage) { i, s, v in i.isContinuous = v }
-			case .minimumValueImage(let x): return x.apply(instance, storage) { i, s, v in i.minimumValueImage = v }
-			case .maximumValueImage(let x): return x.apply(instance, storage) { i, s, v in i.maximumValueImage = v }
-			case .minimumTrackTintColor(let x): return x.apply(instance, storage) { i, s, v in i.minimumTrackTintColor = v }
-			case .maximumTrackTintColor(let x): return x.apply(instance, storage) { i, s, v in i.maximumTrackTintColor = v }
-			case .thumbTintColor(let x): return x.apply(instance, storage) { i, s, v in i.thumbTintColor = v }
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: instance, storage: storage)
+			case .value(let x): return x.apply(instance) { i, v in i.setValue(v.value, animated: v.isAnimated) }
+			case .maximumValue(let x): return x.apply(instance) { i, v in i.maximumValue = v }
+			case .minimumValue(let x): return x.apply(instance) { i, v in i.minimumValue = v }
+			case .isContinuous(let x): return x.apply(instance) { i, v in i.isContinuous = v }
+			case .minimumValueImage(let x): return x.apply(instance) { i, v in i.minimumValueImage = v }
+			case .maximumValueImage(let x): return x.apply(instance) { i, v in i.maximumValueImage = v }
+			case .minimumTrackTintColor(let x): return x.apply(instance) { i, v in i.minimumTrackTintColor = v }
+			case .maximumTrackTintColor(let x): return x.apply(instance) { i, v in i.maximumTrackTintColor = v }
+			case .thumbTintColor(let x): return x.apply(instance) { i, v in i.thumbTintColor = v }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

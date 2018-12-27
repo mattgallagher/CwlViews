@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvertible {
+public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 	public typealias Instance = UITabBar
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,11 +32,11 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 	}
 	public func uiTabBar() -> Instance { return instance() }
 	
-	public enum Binding: TabBarBinding {
+	enum Binding: TabBarBinding {
 		public typealias ItemIdentifierType = ItemIdentifier
 		public typealias EnclosingBinder = TabBar
 		public static func tabBarBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		// 0. Static bindings are applied at construction and are subsequently immutable.
 
@@ -70,7 +70,7 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 		case itemConstructor((ItemIdentifier) -> TabBarItemConvertible)
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TabBar
 		public var linkedPreparer = Inherited.Preparer()
 
@@ -97,30 +97,20 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 		
 		var tabBarItemConstructor: ((ItemIdentifier) -> TabBarItemConvertible)?
 
-		public mutating func prepareBinding(_ binding: Binding) {
+		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .itemConstructor(let x): tabBarItemConstructor = x
-			case .willBeginCustomizing(let x):
-				let s = #selector(UITabBarDelegate.tabBar(_:willBeginCustomizing:))
-				delegate().addSelector(s).willBeginCustomizing = x
-			case .didBeginCustomizing(let x):
-				let s = #selector(UITabBarDelegate.tabBar(_:didBeginCustomizing:))
-				delegate().addSelector(s).didBeginCustomizing = x
-			case .willEndCustomizing(let x):
-				let s = #selector(UITabBarDelegate.tabBar(_:willEndCustomizing:changed:))
-				delegate().addSelector(s).willEndCustomizing = x
-			case .didEndCustomizing(let x):
-				let s = #selector(UITabBarDelegate.tabBar(_:didEndCustomizing:changed:))
-				delegate().addSelector(s).didEndCustomizing = x
-			case .didSelectItem(let x):
-				let s = #selector(UITabBarDelegate.tabBar(_:didSelect:))
-				delegate().addSelector(s).didSelectIndex = x
-			case .inheritedBinding(let x): linkedPreparer.prepareBinding(x)
+			case .willBeginCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:willBeginCustomizing:)))
+			case .didBeginCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:didBeginCustomizing:)))
+			case .willEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:willEndCustomizing:changed:)))
+			case .didEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:didEndCustomizing:changed:)))
+			case .didSelectItem(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:didSelect:)))
+			case .inheritedBinding(let x): inherited.prepareBinding(x)
 			default: break
 			}
 		}
 		
-		public mutating func prepareInstance(_ instance: Instance, storage: Storage) {
+		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 
 			storage.dynamicDelegate = possibleDelegate
@@ -133,7 +123,7 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 			linkedPreparer.prepareInstance(instance, storage: storage)
 		}
 		
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			// e.g. case .someProperty(let x): return x.apply(instance, storage) { inst, stor, val in inst.someProperty = val }
 			case .itemConstructor: return nil
@@ -171,7 +161,7 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 			case .willEndCustomizing: return nil
 			case .didEndCustomizing: return nil
 			case .didSelectItem: return nil
-			case .inheritedBinding(let b): return linkedPreparer.applyBinding(b, instance: instance, storage: storage)
+			case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 			}
 		}
 	}
@@ -191,8 +181,8 @@ public class TabBar<ItemIdentifier: Hashable>: ConstructingBinder, TabBarConvert
 			if let existing = allItems[identifier] {
 				return existing.uiTabBarItem()
 			}
-			if let constructor = tabBarItemConstructor {
-				let new = constructor(identifier)
+			if let binding = tabBarItemConstructor {
+				let new = binding(identifier)
 				allItems[identifier] = new
 				return new.uiTabBarItem()
 			}

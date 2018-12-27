@@ -19,12 +19,12 @@
 
 #if os(macOS)
 
-public class TableHeaderView: ConstructingBinder, TableHeaderViewConvertible {
+public class TableHeaderView: Binder, TableHeaderViewConvertible {
 	public typealias Instance = NSTableHeaderView
 	public typealias Inherited = View
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class TableHeaderView: ConstructingBinder, TableHeaderViewConvertible {
 	}
 	public func nsTableHeaderView() -> Instance { return instance() }
 	
-	public enum Binding: TableHeaderViewBinding {
+	enum Binding: TableHeaderViewBinding {
 		public typealias EnclosingBinder = TableHeaderView
 		public static func tableHeaderViewBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -48,7 +48,7 @@ public class TableHeaderView: ConstructingBinder, TableHeaderViewConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = TableHeaderView
 		public var linkedPreparer = Inherited.Preparer()
 		

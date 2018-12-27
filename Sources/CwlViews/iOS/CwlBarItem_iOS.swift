@@ -19,12 +19,12 @@
 
 #if os(iOS)
 
-public class BarItem: ConstructingBinder, BarItemConvertible {
+public class BarItem: Binder, BarItemConvertible {
 	public typealias Instance = UIBarItem
 	public typealias Inherited = BaseBinder
 	
-	public var state: ConstructingBinderState<Instance, Binding>
-	public required init(state: ConstructingBinderState<Instance, Binding>) {
+	public var state: BinderState<Instance, Binding>
+	public required init(state: BinderState<Instance, Binding>) {
 		self.state = state
 	}
 	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
@@ -32,10 +32,10 @@ public class BarItem: ConstructingBinder, BarItemConvertible {
 	}
 	public func uiBarItem() -> Instance { return instance() }
 	
-	public enum Binding: BarItemBinding {
+	enum Binding: BarItemBinding {
 		public typealias EnclosingBinder = BarItem
 		public static func barItemBinding(_ binding: Binding) -> Binding { return binding }
-		case inheritedBinding(Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -56,7 +56,7 @@ public class BarItem: ConstructingBinder, BarItemConvertible {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
 
-	public struct Preparer: ConstructingPreparer {
+	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = BarItem
 		public var linkedPreparer = Inherited.Preparer()
 		
@@ -65,18 +65,18 @@ public class BarItem: ConstructingBinder, BarItemConvertible {
 		
 		public init() {}
 
-		public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			case .isEnabled(let x): return x.apply(instance, storage) { i, s, v in i.isEnabled = v }
-			case .image(let x): return x.apply(instance, storage) { i, s, v in i.image = v }
-			case .landscapeImagePhone(let x): return x.apply(instance, storage) { i, s, v in i.landscapeImagePhone = v }
-			case .imageInsets(let x): return x.apply(instance, storage) { i, s, v in i.imageInsets = v }
-			case .landscapeImagePhoneInsets(let x): return x.apply(instance, storage) { i, s, v in i.landscapeImagePhoneInsets = v }
-			case .title(let x): return x.apply(instance, storage) { i, s, v in i.title = v }
-			case .tag(let x): return x.apply(instance, storage) { i, s, v in i.tag = v }
+			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+			case .image(let x): return x.apply(instance) { i, v in i.image = v }
+			case .landscapeImagePhone(let x): return x.apply(instance) { i, v in i.landscapeImagePhone = v }
+			case .imageInsets(let x): return x.apply(instance) { i, v in i.imageInsets = v }
+			case .landscapeImagePhoneInsets(let x): return x.apply(instance) { i, v in i.landscapeImagePhoneInsets = v }
+			case .title(let x): return x.apply(instance) { i, v in i.title = v }
+			case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
 			case .titleTextAttributes(let x):
 				var previous: ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>? = nil
-				return x.apply(instance, storage) { i, s, v in
+				return x.apply(instance) { i, v in
 					if let p = previous {
 						for c in p.pairs {
 							i.setTitleTextAttributes([:], for: c.0)
@@ -87,7 +87,7 @@ public class BarItem: ConstructingBinder, BarItemConvertible {
 						i.setTitleTextAttributes(c.1, for: c.0)
 					}
 				}
-			case .inheritedBinding(let s): return linkedPreparer.applyBinding(s, instance: (), storage: ())
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			}
 		}
 	}

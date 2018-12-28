@@ -29,7 +29,7 @@ public protocol TargetActionSender: class {
 }
 
 extension TargetAction {
-	public func apply<Source: TargetActionSender>(to instance: Source, constructTarget: () -> SignalActionTarget) -> Lifetime? {
+	public func apply<Source: TargetActionSender>(to instance: Source, constructTarget: () -> SignalActionTarget, selector: Selector = SignalActionTarget.selector) -> Lifetime? {
 		switch self {
 		case .firstResponder(let s):
 			instance.target = nil

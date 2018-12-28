@@ -80,10 +80,10 @@ public extension Control {
 		public typealias Binding = Control.Binding
 		public typealias Inherited = View.Preparer
 		public typealias Instance = NSControl
-		public typealias Storage = Control.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -149,8 +149,8 @@ public extension Control.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension Control {
-	public typealias Storage = View.Storage
+extension Control.Preparer {
+	public typealias Storage = View.Preparer.Storage
 }
 
 // MARK: - Binder Part 6: BindingNames
@@ -248,5 +248,7 @@ public extension Control.Binding {
 		return binding
 	}
 }
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

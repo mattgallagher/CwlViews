@@ -98,7 +98,7 @@ public class Label: Binder, LabelConvertible {
 		}
 	}
 	
-	public typealias Storage = View.Storage
+	public typealias Storage = View.Preparer.Storage
 }
 
 extension BindingName where Binding: LabelBinding {

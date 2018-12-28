@@ -115,10 +115,10 @@ public extension BackingLayer {
 		public typealias Binding = BackingLayer.Binding
 		public typealias Inherited = BinderBase
 		public typealias Instance = CALayer
-		public typealias Storage = BackingLayer.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -231,7 +231,7 @@ public extension BackingLayer.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension BackingLayer {
+extension BackingLayer.Preparer {
 	open class Storage: ObjectBinderStorage, CAAction {
 		// LayerBinderStorage implementation
 		open var layerActions = [String: SignalInput<[AnyHashable: Any]?>]()

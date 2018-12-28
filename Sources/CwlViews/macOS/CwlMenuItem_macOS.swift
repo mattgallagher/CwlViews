@@ -69,10 +69,10 @@ public extension MenuItem {
 		public typealias Binding = MenuItem.Binding
 		public typealias Inherited = BinderBase
 		public typealias Instance = NSMenuItem
-		public typealias Storage = MenuItem.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -118,7 +118,7 @@ public extension MenuItem.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension MenuItem {
+extension MenuItem.Preparer {
 	public typealias Storage = ObjectBinderStorage
 }
 
@@ -196,5 +196,7 @@ public extension MenuItem.Binding {
 		return binding
 	}
 }
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

@@ -117,17 +117,16 @@ public extension Application {
 public extension Application {
 	struct Preparer: BinderDelegateEmbedder {
 		public typealias Binding = Application.Binding
-		public typealias Delegate = Application.Delegate
 		public typealias Inherited = BinderBase
 		public typealias Instance = NSApplication
-		public typealias Storage = Application.Storage
 		
 		public var inherited = Inherited()
-		public var possibleDelegate: Delegate? = nil
+		public var dynamicDelegate: Delegate? = nil
 		public let delegateClass: Delegate.Type
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -288,8 +287,8 @@ public extension Application.Preparer {
 	}
 }
 
-// MARK: - Binder Part 4: Preparer overrides
-extension Application {
+// MARK: - Binder Part 5: Storage and Delegate
+extension Application.Preparer {
 	open class Storage: ObjectBinderStorage, NSApplicationDelegate {
 		open var dockMenu: NSMenu?
 		

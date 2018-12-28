@@ -22,13 +22,11 @@ extension Binding {
 	
 	public static func keyPathActionName<Instance, Value, Intermediate>(_ keyPath: KeyPath<Instance, Value>, _ constructor: @escaping (TargetAction) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Value>, Intermediate, Self> {
 		return compositeName(
-			source: { (value: SignalInput<Value>) -> TargetAction in
+			source: { input in
 				TargetAction.singleTarget(
-					Input<Any?>()
-						.map { c -> Value in (c as! Instance)[keyPath: keyPath] }
-						.bind(to: value)
+					Input<Any?>().map { v in (v as! Instance)[keyPath: keyPath] }.bind(to: input)
 				)
-		},
+			},
 			translate: constructor,
 			downcast: downcast
 		)
@@ -36,11 +34,7 @@ extension Binding {
 	
 	public static func mappedInputName<Value, Mapped, Intermediate>(_ valueToMapped: @escaping (Value) -> Mapped, _ constructor: @escaping (SignalInput<Value>) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Mapped>, Intermediate, Self> {
 		return compositeName(
-			source: { (input: SignalInput<Mapped>) -> SignalInput<Value> in
-				Input<Value>()
-					.map(processor: valueToMapped)
-					.bind(to: input)
-		},
+			source: { Input<Value>().map(valueToMapped).bind(to: $0) },
 			translate: constructor,
 			downcast: downcast
 		)

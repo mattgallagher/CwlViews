@@ -111,7 +111,7 @@ public class Window: Binder, WindowConvertible {
 			}
 		}
 		
-		public func finalizeInstance(_ instance: Instance, storage: View.Storage) -> Lifetime? {
+		public func finalizeInstance(_ instance: Instance, storage: View.Preparer.Storage) -> Lifetime? {
 			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			if let h = isHidden?.resume() {
 				if let c2 = inherited.applyBinding(.isHidden(.dynamic(h)), instance: instance, storage: storage) {
@@ -122,7 +122,7 @@ public class Window: Binder, WindowConvertible {
 		}
 	}
 	
-	public typealias Storage = View.Storage
+	public typealias Storage = View.Preparer.Storage
 }
 
 extension BindingName where Binding: WindowBinding {

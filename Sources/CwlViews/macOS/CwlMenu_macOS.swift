@@ -68,19 +68,18 @@ public extension Menu {
 
 // MARK: - Binder Part 3: Preparer
 public extension Menu {
-	struct Preparer: BinderDelegateConstructor {
+	struct Preparer: BinderDelegateEmbedderConstructor {
 		public typealias Binding = Menu.Binding
-		public typealias Delegate = Menu.Delegate
 		public typealias Inherited = BinderBase
 		public typealias Instance = NSMenu
-		public typealias Storage = Menu.Storage
 		
 		public var inherited = Inherited()
-		public var possibleDelegate: Delegate? = nil
+		public var dynamicDelegate: Delegate? = nil
 		public let delegateClass: Delegate.Type
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -91,7 +90,7 @@ public extension Menu {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension Menu.Preparer {
-	func constructInstance(type: Menu.Preparer.Instance.Type, parameters: Menu.Preparer.Parameters, storage: StackView.Storage) -> Menu.Preparer.Instance {
+	func constructInstance(type: Instance.Type, parameters: Void) -> Instance {
 		let x: NSMenu
 		if let sn = systemName {
 			let name = sn.rawValue
@@ -189,7 +188,7 @@ public extension Menu.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension Menu {
+extension Menu.Preparer {
 	open class Storage: ObjectBinderStorage, NSMenuDelegate {}
 
 	open class Delegate: DynamicDelegate, NSMenuDelegate {

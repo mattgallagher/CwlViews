@@ -91,7 +91,7 @@ public class TextView: Binder, TextViewConvertible {
 		public init(delegateClass: Delegate.Type) {
 			linkedPreparer = Inherited.Preparer(delegateClass: delegateClass)
 		}
-		var possibleDelegate: Delegate? { return linkedPreparer.possibleDelegate as? Delegate }
+		var dynamicDelegate: Delegate? { return linkedPreparer.dynamicDelegate as? Delegate }
 		mutating func delegate() -> Delegate { return linkedPreparer.delegate() as! Delegate }
 		
 		mutating func prepareBinding(_ binding: Binding) {
@@ -188,7 +188,7 @@ public class TextView: Binder, TextViewConvertible {
 		}
 	}
 	
-	open class Storage: ScrollView.Storage, UITextViewDelegate {}
+	open class Storage: ScrollView.Preparer.Storage, UITextViewDelegate {}
 	
 	open class Delegate: ScrollView.Delegate, UITextViewDelegate {
 		public required init() {

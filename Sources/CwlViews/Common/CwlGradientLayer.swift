@@ -49,15 +49,16 @@ public extension GradientLayer {
 // MARK: - Binder Part 3: Preparer
 public extension GradientLayer {
 	struct Preparer: BinderDelegateDerived {
-		public typealias Instance = CAGradientLayer
 		public typealias Binding = GradientLayer.Binding
-		public typealias Storage = GradientLayer.Storage
+		public typealias Inherited = Layer.Preparer
+		public typealias Instance = CAGradientLayer
 		
-		public var inherited: Layer.Preparer
+		public var inherited: Inherited
 		public init(delegateClass: Delegate.Type) {
-			inherited = Layer.Preparer(delegateClass: delegateClass)
+			inherited = Inherited(delegateClass: delegateClass)
 		}
-		public func inheritedBinding(from: Binding) -> Layer.Binding? {
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
@@ -87,7 +88,7 @@ public extension GradientLayer.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension GradientLayer {
+extension GradientLayer.Preparer {
 	public typealias Storage = Layer.Preparer.Storage
 }
 

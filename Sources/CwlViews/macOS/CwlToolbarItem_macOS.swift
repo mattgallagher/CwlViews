@@ -19,52 +19,33 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class ToolbarItem: Binder, ToolbarItemConvertible {
-	public typealias Instance = NSToolbarItem
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Instance, BinderAdditionalParameters<Instance, Binding, NSToolbarItem.Identifier>>
-	public required init(state: BinderState<Instance, BinderAdditionalParameters<Instance, Binding, NSToolbarItem.Identifier>>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public init(subclass: Instance.Type = Instance.self, itemIdentifier: NSToolbarItem.Identifier, bindings: [Binding]) {
-		state = .pending(BinderAdditionalParameters(subclass: subclass, additional: itemIdentifier, bindings: bindings))
-	}
-	public init(subclass: Instance.Type = Instance.self, itemIdentifier: NSToolbarItem.Identifier, _ bindings: Binding...) {
-		state = .pending(BinderAdditionalParameters(subclass: subclass, additional: itemIdentifier, bindings: bindings))
-	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func instance(additional: ((Instance) -> Lifetime?)? = nil) -> Instance {
-		return binderConstruct(
-			additional: additional,
-			storageConstructor: { prep, params, i in prep.constructStorage() },
-			instanceConstructor: { prep, params in prep.constructInstance(subclass: params.subclass, itemIdentifier: params.additional) },
-			combine: embedStorageIfInUse,
-			output: { i, s in i })
-	}
-	public func nsToolbarItem() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension ToolbarItem {
 	enum Binding: ToolbarItemBinding {
-		public typealias EnclosingBinder = ToolbarItem
-		public static func toolbarItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case label(Dynamic<String>)
-		case paletteLabel(Dynamic<String>)
-		case toolTip(Dynamic<String?>)
-		case tag(Dynamic<Int>)
-		case isEnabled(Dynamic<Bool>)
 		case image(Dynamic<NSImage?>)
-		case minSize(Dynamic<NSSize>)
+		case isEnabled(Dynamic<Bool>)
+		case label(Dynamic<String>)
 		case maxSize(Dynamic<NSSize>)
-		case visibilityPriority(Dynamic<NSToolbarItem.VisibilityPriority>)
 		case menuFormRepresentation(Dynamic<MenuItemConvertible>)
+		case minSize(Dynamic<NSSize>)
+		case paletteLabel(Dynamic<String>)
+		case tag(Dynamic<Int>)
+		case toolTip(Dynamic<String?>)
 		case view(Dynamic<ViewConvertible?>)
+		case visibilityPriority(Dynamic<NSToolbarItem.VisibilityPriority>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -74,104 +55,155 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case validate((NSToolbarItem) -> Bool)
 	}
+}
 
-	struct Preparer: StoragePreparer {
-		public typealias EnclosingBinder = ToolbarItem
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension ToolbarItem {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = ToolbarItem.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = NSToolbarItem
+		public typealias Parameters = NSToolbarItem.Identifier
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type, itemIdentifier: NSToolbarItem.Identifier) -> EnclosingBinder.Instance { return subclass.init(itemIdentifier: itemIdentifier) }
-		
+		public var inherited = Inherited()
 		public init() {}
-
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+		
 		var validator: ((NSToolbarItem) -> Bool)?
-		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .validate(let x): validator = x
-			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-			default: break
-			}
-		}
+	}
+}
 
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .label(let x): return x.apply(instance) { i, v in i.label = v }
-			case .paletteLabel(let x): return x.apply(instance) { i, v in i.paletteLabel = v }
-			case .toolTip(let x): return x.apply(instance) { i, v in i.toolTip = v }
-			case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
-			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
-			case .image(let x): return x.apply(instance) { i, v in i.image = v }
-			case .minSize(let x): return x.apply(instance) { i, v in i.minSize = v }
-			case .maxSize(let x): return x.apply(instance) { i, v in i.maxSize = v }
-			case .visibilityPriority(let x): return x.apply(instance) { i, v in i.visibilityPriority = v }
-			case .action(let x): return x.apply(instance: instance, constructTarget: ToolbarItemTarget.init, processor: { _ in () })
-			case .menuFormRepresentation(let x): return x.apply(instance) { i, v in i.menuFormRepresentation = v.nsMenuItem() }
-			case .view(let x): return x.apply(instance) { i, v in i.view = v?.nsView() }
-			case .validate: return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-		
-		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
-
-			// Need to apply the validator *after* the action exists
-			if let v = validator, let target = instance.target as? ToolbarItemTarget {
-				target.validator = v
-			}
-			return lifetime
+// MARK: - Binder Part 4: Preparer overrides
+public extension ToolbarItem.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		case .validate(let x): validator = x
+		default: break
 		}
 	}
 
+	func constructInstance(type: Instance.Type, parameters: NSToolbarItem.Identifier) -> NSToolbarItem {
+		return type.init(itemIdentifier: parameters)
+	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static styles are applied at construction and are subsequently immutable.
+		
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .image(let x): return x.apply(instance) { i, v in i.image = v }
+		case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+		case .label(let x): return x.apply(instance) { i, v in i.label = v }
+		case .maxSize(let x): return x.apply(instance) { i, v in i.maxSize = v }
+		case .menuFormRepresentation(let x): return x.apply(instance) { i, v in i.menuFormRepresentation = v.nsMenuItem() }
+		case .minSize(let x): return x.apply(instance) { i, v in i.minSize = v }
+		case .paletteLabel(let x): return x.apply(instance) { i, v in i.paletteLabel = v }
+		case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
+		case .toolTip(let x): return x.apply(instance) { i, v in i.toolTip = v }
+		case .view(let x): return x.apply(instance) { i, v in i.view = v?.nsView() }
+		case .visibilityPriority(let x): return x.apply(instance) { i, v in i.visibilityPriority = v }
+		
+		// 2. Signal bindings are performed on the object after construction.
+		
+		// 3. Action bindings are triggered by the object after construction.
+		case .action(let x): return x.apply(to: instance, constructTarget: ToolbarItemTarget.init)
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .validate: return nil
+		}
+	}
+	
+	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		// Need to apply the validator *after* the action exists
+		if let v = validator, let target = instance.target as? ToolbarItemTarget {
+			target.validator = v
+		}
+		
+		return inheritedFinalizedInstance(instance, storage: storage)
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension ToolbarItem.Preparer {
 	public typealias Storage = ObjectBinderStorage
 }
 
+// MARK: - Binder Part 6: BindingNames
+extension BindingName where Binding: ToolbarItemBinding {
+	public typealias ToolbarItemName<V> = BindingName<V, ToolbarItem.Binding, Binding>
+	private typealias B = ToolbarItem.Binding
+	private static func name<V>(_ source: @escaping (V) -> ToolbarItem.Binding) -> ToolbarItemName<V> {
+		return ToolbarItemName<V>(source: source, downcast: Binding.toolbarItemBinding)
+	}
+}
 extension BindingName where Binding: ToolbarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.$1(v)) }) }
-
+	// With:    static var $1: ToolbarItemName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var label: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.label(v)) }) }
-	public static var paletteLabel: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.paletteLabel(v)) }) }
-	public static var toolTip: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.toolTip(v)) }) }
-	public static var tag: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.tag(v)) }) }
-	public static var isEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.isEnabled(v)) }) }
-	public static var image: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.image(v)) }) }
-	public static var minSize: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.minSize(v)) }) }
-	public static var maxSize: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.maxSize(v)) }) }
-	public static var visibilityPriority: BindingName<Dynamic<NSToolbarItem.VisibilityPriority>, Binding> { return BindingName<Dynamic<NSToolbarItem.VisibilityPriority>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.visibilityPriority(v)) }) }
-	public static var menuFormRepresentation: BindingName<Dynamic<MenuItemConvertible>, Binding> { return BindingName<Dynamic<MenuItemConvertible>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.menuFormRepresentation(v)) }) }
-	public static var view: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.view(v)) }) }
-
+	static var image: ToolbarItemName<Dynamic<NSImage?>> { return .name(B.image) }
+	static var isEnabled: ToolbarItemName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var label: ToolbarItemName<Dynamic<String>> { return .name(B.label) }
+	static var maxSize: ToolbarItemName<Dynamic<NSSize>> { return .name(B.maxSize) }
+	static var menuFormRepresentation: ToolbarItemName<Dynamic<MenuItemConvertible>> { return .name(B.menuFormRepresentation) }
+	static var minSize: ToolbarItemName<Dynamic<NSSize>> { return .name(B.minSize) }
+	static var paletteLabel: ToolbarItemName<Dynamic<String>> { return .name(B.paletteLabel) }
+	static var tag: ToolbarItemName<Dynamic<Int>> { return .name(B.tag) }
+	static var toolTip: ToolbarItemName<Dynamic<String?>> { return .name(B.toolTip) }
+	static var view: ToolbarItemName<Dynamic<ViewConvertible?>> { return .name(B.view) }
+	static var visibilityPriority: ToolbarItemName<Dynamic<NSToolbarItem.VisibilityPriority>> { return .name(B.visibilityPriority) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var action: BindingName<TargetAction, Binding> { return BindingName<TargetAction, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.action(v)) }) }
-
+	static var action: ToolbarItemName<TargetAction> { return .name(B.action) }
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var validate: BindingName<(NSToolbarItem) -> Bool, Binding> { return BindingName<(NSToolbarItem) -> Bool, Binding>({ v in .toolbarItemBinding(ToolbarItem.Binding.validate(v)) }) }
-}
+	static var validate: ToolbarItemName<(NSToolbarItem) -> Bool> { return .name(B.validate) }
 
-public protocol ToolbarItemConvertible {
-	func nsToolbarItem() -> ToolbarItem.Instance
-}
-extension ToolbarItem.Instance: ToolbarItemConvertible {
-	public func nsToolbarItem() -> ToolbarItem.Instance { return self }
-}
-
-public protocol ToolbarItemBinding: BaseBinding {
-	static func toolbarItemBinding(_ binding: ToolbarItem.Binding) -> Self
-}
-extension ToolbarItemBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
-		return toolbarItemBinding(.inheritedBinding(binding))
+	// Composite binding names
+	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ToolbarItemName<SignalInput<Value>> {
+		return Binding.keyPathActionName(keyPath, ToolbarItem.Binding.action, Binding.toolbarItemBinding)
 	}
 }
 
-extension NSToolbarItem: TargetActionSender {}
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
+public protocol ToolbarItemConvertible {
+	func nsToolbarItem() -> ToolbarItem.Instance
+}
+extension NSToolbarItem: ToolbarItemConvertible, TargetActionSender {
+	public func nsToolbarItem() -> ToolbarItem.Instance { return self }
+}
+public extension ToolbarItem {
+	public func nsToolbarItem() -> ToolbarItem.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
+public protocol ToolbarItemBinding: BinderBaseBinding {
+	static func toolbarItemBinding(_ binding: ToolbarItem.Binding) -> Self
+}
+public extension ToolbarItemBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
+		return toolbarItemBinding(.inheritedBinding(binding))
+	}
+}
+public extension ToolbarItem.Binding {
+	typealias Preparer = ToolbarItem.Preparer
+	static func toolbarItemBinding(_ binding: ToolbarItem.Binding) -> ToolbarItem.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 open class ToolbarItemTarget: SignalActionTarget {
 	open var validator: ((NSToolbarItem) -> Bool)?
 }

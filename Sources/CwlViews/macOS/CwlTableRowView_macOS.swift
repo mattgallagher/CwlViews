@@ -19,37 +19,31 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class TableRowView: Binder, TableRowViewConvertible {
-	public typealias Instance = NSTableRowView
-	public typealias Inherited = View
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsTableRowView() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TableRowView {
 	enum Binding: TableRowViewBinding {
-		public typealias EnclosingBinder = TableRowView
-		public static func tableRowViewBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case isEmphasized(Dynamic<Bool>)
-		case isFloating(Dynamic<Bool>)
-		case isSelected(Dynamic<Bool>)
-		case selectionHighlightStyle(Dynamic<NSTableView.SelectionHighlightStyle>)
+		case backgroundColor(Dynamic<NSColor>)
 		case draggingDestinationFeedbackStyle(Dynamic<NSTableView.DraggingDestinationFeedbackStyle>)
 		case indentationForDropOperation(Dynamic<CGFloat>)
-		case isTargetForDropOperation(Dynamic<Bool>)
+		case isEmphasized(Dynamic<Bool>)
+		case isFloating(Dynamic<Bool>)
 		case isGroupRowStyle(Dynamic<Bool>)
-		case backgroundColor(Dynamic<NSColor>)
-		
+		case isSelected(Dynamic<Bool>)
+		case isTargetForDropOperation(Dynamic<Bool>)
+		case selectionHighlightStyle(Dynamic<NSTableView.SelectionHighlightStyle>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -57,75 +51,120 @@ public class TableRowView: Binder, TableRowViewConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = TableRowView
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .isEmphasized(let x): return x.apply(instance) { i, v in i.isEmphasized = v }
-			case .isFloating(let x): return x.apply(instance) { i, v in i.isFloating = v }
-			case .isSelected(let x): return x.apply(instance) { i, v in i.isSelected = v }
-			case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
-			case .draggingDestinationFeedbackStyle(let x): return x.apply(instance) { i, v in i.draggingDestinationFeedbackStyle = v }
-			case .indentationForDropOperation(let x): return x.apply(instance) { i, v in i.indentationForDropOperation = v }
-			case .isTargetForDropOperation(let x): return x.apply(instance) { i, v in i.isTargetForDropOperation = v }
-			case .isGroupRowStyle(let x): return x.apply(instance) { i, v in i.isGroupRowStyle = v }
-			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-	}
-
-	public typealias Storage = View.Storage
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension TableRowView {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = TableRowView.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = NSTableRowView
+		
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension TableRowView.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+		case .draggingDestinationFeedbackStyle(let x): return x.apply(instance) { i, v in i.draggingDestinationFeedbackStyle = v }
+		case .indentationForDropOperation(let x): return x.apply(instance) { i, v in i.indentationForDropOperation = v }
+		case .isEmphasized(let x): return x.apply(instance) { i, v in i.isEmphasized = v }
+		case .isFloating(let x): return x.apply(instance) { i, v in i.isFloating = v }
+		case .isGroupRowStyle(let x): return x.apply(instance) { i, v in i.isGroupRowStyle = v }
+		case .isSelected(let x): return x.apply(instance) { i, v in i.isSelected = v }
+		case .isTargetForDropOperation(let x): return x.apply(instance) { i, v in i.isTargetForDropOperation = v }
+		case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
+
+		// 2. Signal bindings are performed on the object after construction.
+
+		// 3. Action bindings are triggered by the object after construction.
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension TableRowView.Preparer {
+	public typealias Storage = View.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableRowViewBinding {
+	public typealias TableRowViewName<V> = BindingName<V, TableRowView.Binding, Binding>
+	private typealias B = TableRowView.Binding
+	private static func name<V>(_ source: @escaping (V) -> TableRowView.Binding) -> TableRowViewName<V> {
+		return TableRowViewName<V>(source: source, downcast: Binding.tableRowViewBinding)
+	}
+}
+public extension BindingName where Binding: TableRowViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.$1(v)) }) }
+	// With:    static var $1: TableRowViewName<$2> { return .name(B.$1) }
 
-	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var isEmphasized: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.isEmphasized(v)) }) }
-	public static var isFloating: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.isFloating(v)) }) }
-	public static var isSelected: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.isSelected(v)) }) }
-	public static var selectionHighlightStyle: BindingName<Dynamic<NSTableView.SelectionHighlightStyle>, Binding> { return BindingName<Dynamic<NSTableView.SelectionHighlightStyle>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.selectionHighlightStyle(v)) }) }
-	public static var draggingDestinationFeedbackStyle: BindingName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>, Binding> { return BindingName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.draggingDestinationFeedbackStyle(v)) }) }
-	public static var indentationForDropOperation: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.indentationForDropOperation(v)) }) }
-	public static var isTargetForDropOperation: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.isTargetForDropOperation(v)) }) }
-	public static var isGroupRowStyle: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.isGroupRowStyle(v)) }) }
-	public static var backgroundColor: BindingName<Dynamic<NSColor>, Binding> { return BindingName<Dynamic<NSColor>, Binding>({ v in .tableRowViewBinding(TableRowView.Binding.backgroundColor(v)) }) }
+	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
-
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var backgroundColor: TableRowViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
+	static var draggingDestinationFeedbackStyle: TableRowViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(B.draggingDestinationFeedbackStyle) }
+	static var indentationForDropOperation: TableRowViewName<Dynamic<CGFloat>> { return .name(B.indentationForDropOperation) }
+	static var isEmphasized: TableRowViewName<Dynamic<Bool>> { return .name(B.isEmphasized) }
+	static var isFloating: TableRowViewName<Dynamic<Bool>> { return .name(B.isFloating) }
+	static var isGroupRowStyle: TableRowViewName<Dynamic<Bool>> { return .name(B.isGroupRowStyle) }
+	static var isSelected: TableRowViewName<Dynamic<Bool>> { return .name(B.isSelected) }
+	static var isTargetForDropOperation: TableRowViewName<Dynamic<Bool>> { return .name(B.isTargetForDropOperation) }
+	static var selectionHighlightStyle: TableRowViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol TableRowViewConvertible: ViewConvertible {
 	func nsTableRowView() -> TableRowView.Instance
 }
 extension TableRowViewConvertible {
 	public func nsView() -> View.Instance { return nsTableRowView() }
 }
-extension TableRowView.Instance: TableRowViewConvertible {
+extension NSTableRowView: TableRowViewConvertible {
 	public func nsTableRowView() -> TableRowView.Instance { return self }
 }
+extension TableRowView {
+	public func nsTableRowView() -> TableRowView.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol TableRowViewBinding: ViewBinding {
 	static func tableRowViewBinding(_ binding: TableRowView.Binding) -> Self
 }
-extension TableRowViewBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension TableRowViewBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tableRowViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableRowView.Binding {
+	public typealias Preparer = TableRowView.Preparer
+	static func tableRowViewBinding(_ binding: TableRowView.Binding) -> TableRowView.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

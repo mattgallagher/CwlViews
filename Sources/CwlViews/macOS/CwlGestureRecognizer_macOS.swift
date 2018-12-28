@@ -59,20 +59,18 @@ public extension GestureRecognizer {
 
 // MARK: - Binder Part 3: Preparer
 public extension GestureRecognizer {
-	struct Preparer: BinderDelegateConstructor {
+	struct Preparer: BinderDelegateEmbedderConstructor {
 		public typealias Binding = GestureRecognizer.Binding
-		public typealias Delegate = GestureRecognizer.Delegate
 		public typealias Inherited = BinderBase
 		public typealias Instance = NSGestureRecognizer
-		public typealias Storage = GestureRecognizer.Storage
 		
 		public var inherited = Inherited()
-		public var possibleDelegate: Delegate? = nil
+		public var dynamicDelegate: Delegate? = nil
 		public let delegateClass: Delegate.Type
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -137,8 +135,8 @@ public extension GestureRecognizer.Preparer {
 	}
 }
 
-// MARK: - Binder Part 4: Preparer overrides
-extension GestureRecognizer {
+// MARK: - Binder Part 5: Storage and Delegate
+extension GestureRecognizer.Preparer {
 	open class Storage: ObjectBinderStorage, NSGestureRecognizerDelegate {}
 	
 	open class Delegate: DynamicDelegate, NSGestureRecognizerDelegate {

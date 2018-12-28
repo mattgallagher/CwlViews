@@ -9,15 +9,17 @@
 public struct BinderBase: BinderPreparer {
 	public typealias Instance = Any
 	public typealias Storage = Any
-	public var inherited: BinderBase { get { return self } set { } }
-	public func inheritedBinding(from: BinderBase.Binding) -> BinderBase.Binding? { return nil }
-	public init() {}
 
 	public enum Binding: BinderBaseBinding {
 		case lifetimes(Dynamic<[Lifetime]>)
 		case adHoc((Any) -> Lifetime?)
 	}
 
+	public var inherited: BinderBase { get { return self } set { } }
+
+	public init() {}
+	
+	public func inheritedBinding(from: BinderBase.Binding) -> BinderBase.Binding? { return nil }
 	public mutating func prepareBinding(_ binding: Binding) {}
 	public func prepareInstance(_ instance: Instance, storage: Storage) {}
 	public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
@@ -32,6 +34,7 @@ public struct BinderBase: BinderPreparer {
 		}
 	}
 	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? { return nil }
+	public func combine(lifetimes: [Lifetime], instance: Any, storage: Any) -> Any { return () }
 }
 
 public protocol BinderBaseBinding: Binding {

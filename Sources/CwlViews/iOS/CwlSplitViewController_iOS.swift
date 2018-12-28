@@ -82,13 +82,13 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -115,7 +115,7 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 		
 		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
+			storage.dynamicDelegate = dynamicDelegate
 			if storage.inUse {
 				instance.delegate = storage
 			}

@@ -98,13 +98,13 @@ public class SearchBar: Binder, SearchBarConvertible {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -130,7 +130,7 @@ public class SearchBar: Binder, SearchBarConvertible {
 
 		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
+			storage.dynamicDelegate = dynamicDelegate
 			if storage.inUse {
 				instance.delegate = storage
 			}
@@ -309,7 +309,7 @@ public class SearchBar: Binder, SearchBarConvertible {
 		}
 	}
 
-	open class Storage: View.Storage, UISearchBarDelegate {}
+	open class Storage: View.Preparer.Storage, UISearchBarDelegate {}
 	
 	open class Delegate: DynamicDelegate, UISearchBarDelegate {
 		public required override init() {

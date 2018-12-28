@@ -108,18 +108,18 @@ public extension WebView {
 
 // MARK: - Binder Part 3: Preparer
 public extension WebView {
-	struct Preparer: BinderDelegateConstructor {
+	struct Preparer: BinderDelegateEmbedderConstructor {
 		public typealias Binding = WebView.Binding
 		public typealias Inherited = View.Preparer
 		public typealias Instance = WKWebView
-		public typealias Storage = WebView.Storage
 		
 		public var inherited = Inherited()
-		public var possibleDelegate: Delegate? = nil
+		public var dynamicDelegate: Delegate? = nil
 		public let delegateClass: Delegate.Type
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -185,14 +185,11 @@ public extension WebView.Preparer {
 	}
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
-		if possibleDelegate != nil {
+		prepareDelegate(instance: instance, storage: storage)
+		if delegateIsRequired {
 			precondition(instance.uiDelegate == nil, "Conflicting delegate applied to instance")
-			precondition(instance.navigationDelegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
 			instance.uiDelegate = storage
-			instance.navigationDelegate = storage
 		}
-		
 		inheritedPrepareInstance(instance, storage: storage)
 	}
 
@@ -292,8 +289,8 @@ public extension WebView.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension WebView {
-	open class Storage: View.Storage, WKUIDelegate, WKNavigationDelegate {}
+extension WebView.Preparer {
+	open class Storage: View.Preparer.Storage, WKUIDelegate, WKNavigationDelegate {}
 
 	open class Delegate: DynamicDelegate, WKUIDelegate, WKNavigationDelegate {
 		open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {

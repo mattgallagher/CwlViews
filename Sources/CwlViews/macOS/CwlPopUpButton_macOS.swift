@@ -19,31 +19,27 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class PopUpButton: Binder, PopUpButtonConvertible {
-	public typealias Instance = NSPopUpButton
-	public typealias Inherited = Button
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsPopUpButton() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension PopUpButton {
 	enum Binding: PopUpButtonBinding {
-		public typealias EnclosingBinder = PopUpButton
-		public static func popUpButtonBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case menu(Constant<NSMenu>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case pullsDown(Dynamic<Bool>)
 		case autoenablesItems(Dynamic<Bool>)
-		case menu(Dynamic<(NSMenu, selectedIndex: Int)>)
 		case preferredEdge(Dynamic<NSRectEdge>)
+		case pullsDown(Dynamic<Bool>)
+		case selectedIndex(Dynamic<Int>)
 		case title(Dynamic<String>)
 
 		// 2. Signal bindings are performed on the object after construction.
@@ -53,7 +49,10 @@ public class PopUpButton: Binder, PopUpButtonConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
+// MARK: - Binder Part 3: Preparer
+public extension PopUpButton {
 	struct Preparer: BinderEmbedderConstructor {
 		public typealias EnclosingBinder = PopUpButton
 		public var linkedPreparer = Inherited.Preparer()

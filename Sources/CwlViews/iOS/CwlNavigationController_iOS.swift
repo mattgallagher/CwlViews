@@ -77,13 +77,13 @@ public class NavigationController: Binder, NavigationControllerConvertible {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: NavigationControllerDelegate.Type
-		var possibleDelegate: NavigationControllerDelegate? = nil
+		var dynamicDelegate: NavigationControllerDelegate? = nil
 		mutating func delegate() -> NavigationControllerDelegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -109,7 +109,7 @@ public class NavigationController: Binder, NavigationControllerConvertible {
 		
 		public func prepareInstance(_ instance: UINavigationController, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
+			storage.dynamicDelegate = dynamicDelegate
 			instance.delegate = storage
 			
 			linkedPreparer.prepareInstance(instance, storage: storage)

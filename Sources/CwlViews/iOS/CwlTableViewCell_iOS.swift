@@ -141,7 +141,7 @@ public class TableViewCell: Binder, TableViewCellConvertible {
 		}
 	}
 	
-	public typealias Storage = View.Storage
+	public typealias Storage = View.Preparer.Storage
 }
 
 extension BindingName where Binding: TableViewCellBinding {

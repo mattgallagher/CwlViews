@@ -163,13 +163,13 @@ public class OutlineView<NodeData>: Binder, OutlineViewConvertible {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -229,7 +229,7 @@ public class OutlineView<NodeData>: Binder, OutlineViewConvertible {
 		
 		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil && instance.dataSource == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
+			storage.dynamicDelegate = dynamicDelegate
 			instance.delegate = storage
 			instance.dataSource = storage
 			
@@ -508,7 +508,7 @@ public class OutlineView<NodeData>: Binder, OutlineViewConvertible {
 		}
 	}
 	
-	open class Storage: View.Storage, NSOutlineViewDelegate, NSOutlineViewDataSource {
+	open class Storage: View.Preparer.Storage, NSOutlineViewDelegate, NSOutlineViewDataSource {
 		open override var inUse: Bool { return true }
 		
 		open var actionTarget: SignalDoubleActionTarget? = nil

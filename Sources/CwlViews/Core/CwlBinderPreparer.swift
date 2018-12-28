@@ -69,14 +69,10 @@ public protocol BinderApplyable: BinderPreparer {
 	/// Constructs the `Storage`
 	///
 	/// - Returns: the storage
-	func constructStorage(parameters: Parameters) -> Storage
-	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Output
-}
+	func constructStorage(instance: Instance) -> Storage
 
-public extension BinderApplyable where Storage: DefaultConstructable {
-	func constructStorage(parameters: Parameters) -> Storage {
-		return Storage()
-	}
+	/// - Returns: the output, after tying the lifetimes of the instance and storage together
+	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Output
 }
 
 /// Preparers usually construct the `Instance` from a subclass type except in specific cases where additional non-binding parameters are required for instance construction.
@@ -85,11 +81,11 @@ public protocol BinderConstructor: BinderApplyable {
 	///
 	/// - Parameter subclass: subclass of the instance type to use for construction
 	/// - Returns: the instance
-	func constructInstance(type: Instance.Type, parameters: Parameters, storage: Storage) -> Instance
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance
 }
 
 public extension BinderConstructor where Instance: DefaultConstructable {
-	func constructInstance(type: Instance.Type, parameters: Parameters, storage: Storage) -> Instance {
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
 		return type.init()
 	}
 }

@@ -70,6 +70,15 @@
 		C97A5B5A21D5BE8A001D98DD /* CwlMenuItem_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9351F251DCAD3D0001D484B /* CwlMenuItem_macOS.swift */; };
 		C97A5B5B21D5CE8E001D98DD /* CwlControl_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C952092A1DCB0B5C005F478B /* CwlControl_macOS.swift */; };
 		C97A5B6021D657AF001D98DD /* CwlBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97A5B5F21D657AF001D98DD /* CwlBinding.swift */; };
+		C97A5B6421D6DEBB001D98DD /* CwlToolbar_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9351F1E1DCAD2BC001D484B /* CwlToolbar_macOS.swift */; };
+		C97A5B6521D6DEBB001D98DD /* CwlToolbarItem_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9351F231DCAD2CA001D484B /* CwlToolbarItem_macOS.swift */; };
+		C97A5B6621D6DEBB001D98DD /* CwlWindow_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C948540E1DC4E8E1009CC145 /* CwlWindow_macOS.swift */; };
+		C97B16C021D745DC00F72DB9 /* CwlTableCellView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB71DD0160A00913019 /* CwlTableCellView_macOS.swift */; };
+		C97B16C121D745DC00F72DB9 /* CwlTableColumn_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB81DD0160A00913019 /* CwlTableColumn_macOS.swift */; };
+		C97B16C221D745DC00F72DB9 /* CwlTableHeaderView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DB91DD0160A00913019 /* CwlTableHeaderView_macOS.swift */; };
+		C97B16C321D745DC00F72DB9 /* CwlTableRowView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBA1DD0160A00913019 /* CwlTableRowView_macOS.swift */; };
+		C97B16C421D745DC00F72DB9 /* CwlTableView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBB1DD0160A00913019 /* CwlTableView_macOS.swift */; };
+		C97B16C921D7B36E00F72DB9 /* CwlButton_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C952092F1DCB0F02005F478B /* CwlButton_macOS.swift */; };
 		C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */; };
 		C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */; };
 		C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */; };
@@ -1158,12 +1167,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C97B16C921D7B36E00F72DB9 /* CwlButton_macOS.swift in Sources */,
 				C95FABC221D49841007CCE78 /* CwlBinderDelegate.swift in Sources */,
 				C9C868611FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */,
 				C95FABC521D4A0C0007CCE78 /* CwlBackingLayer.swift in Sources */,
+				C97B16C121D745DC00F72DB9 /* CwlTableColumn_macOS.swift in Sources */,
 				C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */,
 				C9F3979B1FD0CA3E00BEE049 /* CwlStackAdapter.swift in Sources */,
 				C952BB341F3DCAE200B61DF1 /* CwlLayout.swift in Sources */,
+				C97A5B6621D6DEBB001D98DD /* CwlWindow_macOS.swift in Sources */,
 				C95FABC421D49AA3007CCE78 /* CwlBinderBase.swift in Sources */,
 				C97A5B5021D589DE001D98DD /* CwlGestureRecognizer_macOS.swift in Sources */,
 				C91CC2D1206F0DD7006FFF97 /* CwlBinder.swift in Sources */,
@@ -1177,7 +1189,11 @@
 				C9A18B3C1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */,
 				C9ADA3A81EE3BFEC00C29925 /* CwlObjectStorage.swift in Sources */,
 				C97A5B6021D657AF001D98DD /* CwlBinding.swift in Sources */,
+				C97B16C321D745DC00F72DB9 /* CwlTableRowView_macOS.swift in Sources */,
+				C97A5B6521D6DEBB001D98DD /* CwlToolbarItem_macOS.swift in Sources */,
+				C97B16C421D745DC00F72DB9 /* CwlTableView_macOS.swift in Sources */,
 				C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */,
+				C97A5B6421D6DEBB001D98DD /* CwlToolbar_macOS.swift in Sources */,
 				C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */,
 				C9B27EA91E51D34300265580 /* CwlArrayMutation.swift in Sources */,
 				C95FABC721D5009C007CCE78 /* CwlGradientLayer.swift in Sources */,
@@ -1186,6 +1202,7 @@
 				C97A5B5721D59F03001D98DD /* CwlClipView_macOS.swift in Sources */,
 				C97A5B5A21D5BE8A001D98DD /* CwlMenuItem_macOS.swift in Sources */,
 				C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
+				C97B16C221D745DC00F72DB9 /* CwlTableHeaderView_macOS.swift in Sources */,
 				C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
 				C97A5B5921D5BE8A001D98DD /* CwlMenu_macOS.swift in Sources */,
 				C95FABC821D511AA007CCE78 /* CwlStackView.swift in Sources */,
@@ -1193,6 +1210,7 @@
 				C95FABC621D4A1C6007CCE78 /* CwlLayer.swift in Sources */,
 				C97A5B5521D59656001D98DD /* CwlWebView.swift in Sources */,
 				C91307411F66384200174902 /* CwlCoder.swift in Sources */,
+				C97B16C021D745DC00F72DB9 /* CwlTableCellView_macOS.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

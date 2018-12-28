@@ -19,59 +19,34 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class TableColumn<RowData>: Binder {
-	public typealias Instance = NSTableColumn
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Storage, BinderAdditionalParameters<Instance, Binding, NSUserInterfaceItemIdentifier>>
-	public required init(state: BinderState<Storage, BinderAdditionalParameters<Instance, Binding, NSUserInterfaceItemIdentifier>>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public init(subclass: Instance.Type = Instance.self, identifier: NSUserInterfaceItemIdentifier, bindings: [Binding]) {
-		state = .pending(BinderAdditionalParameters(subclass: subclass, additional: identifier, bindings: bindings))
-	}
-	public init(subclass: Instance.Type = Instance.self, identifier: NSUserInterfaceItemIdentifier, _ bindings: Binding...) {
-		state = .pending(BinderAdditionalParameters(subclass: subclass, additional: identifier, bindings: bindings))
-	}
-	func applyBindings(to instance: Instance) {
-		binderApply(
-			to: instance,
-			additional: nil,
-			storageConstructor: { prep, params, i in Storage(column: instance) },
-			combine: { i, s, cs in s.setLifetimes(cs) })
-	}
-	public func construct(additional: ((Instance) -> Lifetime?)? = nil) -> Storage {
-		return binderConstruct(
-			additional: additional,
-			storageConstructor: { prep, params, i in Storage(column: i) },
-			instanceConstructor: { prep, params in params.subclass.init(identifier: params.additional) },
-			combine: { i, s, cs in s.setLifetimes(cs) },
-			output: { i, s in s })
-	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TableColumn {
 	enum Binding: TableColumnBinding {
 		public typealias RowDataType = RowData
-		public typealias EnclosingBinder = TableColumn
-		public static func tableColumnBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case width(Dynamic<CGFloat>)
-		case minWidth(Dynamic<CGFloat>)
-		case maxWidth(Dynamic<CGFloat>)
-		case resizingMask(Dynamic<NSTableColumn.ResizingOptions>)
-		case title(Dynamic<String>)
 		case headerCell(Dynamic<NSTableHeaderCell>)
-		case isEditable(Dynamic<Bool>)
-		case sortDescriptorPrototype(Dynamic<NSSortDescriptor?>)
-		case isHidden(Dynamic<Bool>)
 		case headerToolTip(Dynamic<String?>)
+		case isEditable(Dynamic<Bool>)
+		case isHidden(Dynamic<Bool>)
+		case maxWidth(Dynamic<CGFloat>)
+		case minWidth(Dynamic<CGFloat>)
+		case resizingMask(Dynamic<NSTableColumn.ResizingOptions>)
+		case sortDescriptorPrototype(Dynamic<NSSortDescriptor?>)
 		case sortFunction(Dynamic<(_ isRow: RowData, _ orderedBefore: RowData) -> Bool>)
+		case title(Dynamic<String>)
+		case width(Dynamic<CGFloat>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case sizeToFit(Signal<Void>)
@@ -80,100 +55,162 @@ public class TableColumn<RowData>: Binder {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case cellConstructor((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)
-		case dataMissingCell(() -> TableCellViewConvertible?)
 		case cellIdentifierForRow((RowData?) -> NSUserInterfaceItemIdentifier)
-	}
-
-	struct Preparer: DerivedPreparer {
-		public typealias EnclosingBinder = TableColumn
-		public var linkedPreparer = Inherited.Preparer()
-
-		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .width(let x): return x.apply(instance) { i, v in i.width = v }
-			case .minWidth(let x): return x.apply(instance) { i, v in i.minWidth = v }
-			case .maxWidth(let x): return x.apply(instance) { i, v in i.maxWidth = v }
-			case .resizingMask(let x): return x.apply(instance) { i, v in i.resizingMask = v }
-			case .title(let x): return x.apply(instance) { i, v in i.title = v }
-			case .headerCell(let x): return x.apply(instance) { i, v in i.headerCell = v }
-			case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
-			case .sortDescriptorPrototype(let x): return x.apply(instance) { i, v in i.sortDescriptorPrototype = v }
-			case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
-			case .headerToolTip(let x): return x.apply(instance) { i, v in i.headerToolTip = v }
-			case .sortFunction(let x):
-				return x.apply(instance) { i, v in
-					s.sortFunction = v
-				}
-			case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
-			case .cellConstructor(let x):
-				storage.cellConstructor = x
-				return nil
-			case .dataMissingCell(let x):
-				storage.dataMissingCell = x
-				return nil
-			case .cellIdentifierForRow(let x):
-				storage.cellIdentifier = x
-				return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-	}
-
-	open class Storage: ObjectBinderStorage {
-		// Retain the tableColumn since this binder will own the object (rather than the typical object owning the binder arrangment)
-		open var tableColumn: NSTableColumn
-		
-		public required init(column: NSTableColumn) {
-			self.tableColumn = column
-			super.init()
-		}
-		
-		open var sortFunction: ((_ isRow: RowData, _ orderedBefore: RowData) -> Bool)?
-		open var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
-		open var dataMissingCell: (() -> TableCellViewConvertible?)?
-		open var cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
+		case dataMissingCell(() -> TableCellViewConvertible?)
 	}
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension TableColumn {
+	struct Preparer: BinderConstructor {
+		public typealias Binding = TableColumn.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = NSTableColumn
+		public typealias Parameters = NSUserInterfaceItemIdentifier
+		public typealias Output = Storage
+		
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage(tableColumn: instance, cellConstructor: cellConstructor, cellIdentifier: cellIdentifier, dataMissingCell: dataMissingCell) }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+
+		public var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
+		public var cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
+		public var dataMissingCell: (() -> TableCellViewConvertible?)?
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension TableColumn.Preparer {
+	public func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
+		return type.init(identifier: parameters)
+	}
+	
+	public func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Storage {
+		return storage
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		case .cellConstructor(let x): cellConstructor = x
+		case .cellIdentifierForRow(let x): cellIdentifier = x
+		case .dataMissingCell(let x): dataMissingCell = x
+		default: break
+		}
+	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .headerCell(let x): return x.apply(instance) { i, v in i.headerCell = v }
+		case .headerToolTip(let x): return x.apply(instance) { i, v in i.headerToolTip = v }
+		case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
+		case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
+		case .maxWidth(let x): return x.apply(instance) { i, v in i.maxWidth = v }
+		case .minWidth(let x): return x.apply(instance) { i, v in i.minWidth = v }
+		case .resizingMask(let x): return x.apply(instance) { i, v in i.resizingMask = v }
+		case .sortDescriptorPrototype(let x): return x.apply(instance) { i, v in i.sortDescriptorPrototype = v }
+		case .sortFunction(let x): return x.apply(instance, storage) { i, s, v in s.sortFunction = v }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .width(let x): return x.apply(instance) { i, v in i.width = v }
+
+		// 2. Signal bindings are performed on the object after construction.
+		case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
+
+		// 3. Action bindings are triggered by the object after construction.
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .cellConstructor: return nil
+		case .cellIdentifierForRow: return nil
+		case .dataMissingCell: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension TableColumn.Preparer {
+	open class Storage: ObjectBinderStorage {
+		public let tableColumn: NSTableColumn
+		public let cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
+		public let cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
+		public let dataMissingCell: (() -> TableCellViewConvertible?)?
+
+		open var sortFunction: ((_ isRow: RowData, _ orderedBefore: RowData) -> Bool)?
+
+		public init(tableColumn: NSTableColumn, cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?, cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?, dataMissingCell: (() -> TableCellViewConvertible?)?) {
+			self.tableColumn = tableColumn
+			self.cellConstructor = cellConstructor
+			self.cellIdentifier = cellIdentifier
+			self.dataMissingCell = dataMissingCell
+		}
+	}
+}
+
+// MARK: - Binder Part 6: BindingNames
+extension BindingName where Binding: TableColumnBinding {
+	public typealias TableColumnName<V> = BindingName<V, TableColumn<Binding.RowDataType>.Binding, Binding>
+	private typealias B = TableColumn<Binding.RowDataType>.Binding
+	private static func name<V>(_ source: @escaping (V) -> TableColumn<Binding.RowDataType>.Binding) -> TableColumnName<V> {
+		return TableColumnName<V>(source: source, downcast: Binding.tableColumnBinding)
+	}
+}
 extension BindingName where Binding: TableColumnBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .tableColumnBinding(TableColumn.Binding.$1(v)) }) }
-
+	// With:    static var $1: TableColumnName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var width: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.width(v)) }) }
-	public static var minWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.minWidth(v)) }) }
-	public static var maxWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.maxWidth(v)) }) }
-	public static var resizingMask: BindingName<Dynamic<NSTableColumn.ResizingOptions>, Binding> { return BindingName<Dynamic<NSTableColumn.ResizingOptions>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.resizingMask(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.title(v)) }) }
-	public static var headerCell: BindingName<Dynamic<NSTableHeaderCell>, Binding> { return BindingName<Dynamic<NSTableHeaderCell>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.headerCell(v)) }) }
-	public static var isEditable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.isEditable(v)) }) }
-	public static var sortDescriptorPrototype: BindingName<Dynamic<NSSortDescriptor?>, Binding> { return BindingName<Dynamic<NSSortDescriptor?>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.sortDescriptorPrototype(v)) }) }
-	public static var isHidden: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.isHidden(v)) }) }
-	public static var headerToolTip: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.headerToolTip(v)) }) }
-	public static var sortFunction: BindingName<Dynamic<(_ isRow: Binding.RowDataType, _ orderedBefore: Binding.RowDataType) -> Bool>, Binding> { return BindingName<Dynamic<(_ isRow: Binding.RowDataType, _ orderedBefore: Binding.RowDataType) -> Bool>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.sortFunction(v)) }) }
-
+	static var headerCell: TableColumnName<Dynamic<NSTableHeaderCell>> { return .name(B.headerCell) }
+	static var headerToolTip: TableColumnName<Dynamic<String?>> { return .name(B.headerToolTip) }
+	static var isEditable: TableColumnName<Dynamic<Bool>> { return .name(B.isEditable) }
+	static var isHidden: TableColumnName<Dynamic<Bool>> { return .name(B.isHidden) }
+	static var maxWidth: TableColumnName<Dynamic<CGFloat>> { return .name(B.maxWidth) }
+	static var minWidth: TableColumnName<Dynamic<CGFloat>> { return .name(B.minWidth) }
+	static var resizingMask: TableColumnName<Dynamic<NSTableColumn.ResizingOptions>> { return .name(B.resizingMask) }
+	static var sortDescriptorPrototype: TableColumnName<Dynamic<NSSortDescriptor?>> { return .name(B.sortDescriptorPrototype) }
+	static var sortFunction: TableColumnName<Dynamic<(_ isRow: Binding.RowDataType, _ orderedBefore: Binding.RowDataType) -> Bool>> { return .name(B.sortFunction) }
+	static var title: TableColumnName<Dynamic<String>> { return .name(B.title) }
+	static var width: TableColumnName<Dynamic<CGFloat>> { return .name(B.width) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var sizeToFit: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.sizeToFit(v)) }) }
-
+	static var sizeToFit: TableColumnName<Signal<Void>> { return .name(B.sizeToFit) }
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var cellConstructor: BindingName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<Binding.RowDataType>) -> TableCellViewConvertible, Binding> { return BindingName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<Binding.RowDataType>) -> TableCellViewConvertible, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.cellConstructor(v)) }) }
-	public static var dataMissingCell: BindingName<() -> TableCellViewConvertible?, Binding> { return BindingName<() -> TableCellViewConvertible?, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.dataMissingCell(v)) }) }
-	public static var cellIdentifierForRow: BindingName<(Binding.RowDataType?) -> NSUserInterfaceItemIdentifier, Binding> { return BindingName<(Binding.RowDataType?) -> NSUserInterfaceItemIdentifier, Binding>({ v in .tableColumnBinding(TableColumn<Binding.RowDataType>.Binding.cellIdentifierForRow(v)) }) }
+	static var cellConstructor: TableColumnName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<Binding.RowDataType>) -> TableCellViewConvertible> { return .name(B.cellConstructor) }
+	static var cellIdentifierForRow: TableColumnName<(Binding.RowDataType?) -> NSUserInterfaceItemIdentifier> { return .name(B.cellIdentifierForRow) }
+	static var dataMissingCell: TableColumnName<() -> TableCellViewConvertible?> { return .name(B.dataMissingCell) }
 }
 
-public protocol TableColumnBinding: BaseBinding {
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
+
+// MARK: - Binder Part 8: Downcast protocols
+public protocol TableColumnBinding: BinderBaseBinding {
 	associatedtype RowDataType
 	static func tableColumnBinding(_ binding: TableColumn<RowDataType>.Binding) -> Self
 }
-extension TableColumnBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension TableColumnBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return tableColumnBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableColumn.Binding {
+	public typealias Preparer = TableColumn.Preparer
+	static func tableColumnBinding(_ binding: TableColumn.Binding) -> TableColumn.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

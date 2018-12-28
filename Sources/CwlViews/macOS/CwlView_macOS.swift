@@ -75,11 +75,10 @@ public extension View {
 		public typealias Binding = View.Binding
 		public typealias Inherited = BinderBase
 		public typealias Instance = NSView
-		public typealias Storage = View.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
-
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -174,7 +173,7 @@ public extension View.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension View {
+extension View.Preparer {
 	public typealias Storage = ObjectBinderStorage
 }
 

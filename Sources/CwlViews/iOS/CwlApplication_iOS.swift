@@ -107,13 +107,13 @@ public class Application: Binder {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -254,7 +254,7 @@ public class Application: Binder {
 		private static func constructStorageAndPrepareInstance(_ prep: Preparer, params: BindingsOnlyParameters<Binding>, i: Instance) -> Storage {
 			let storage = prep.constructStorage()
 			precondition(i.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = prep.possibleDelegate
+			storage.dynamicDelegate = prep.dynamicDelegate
 			i.delegate = storage
 			return storage
 		}

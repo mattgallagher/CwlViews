@@ -78,13 +78,13 @@ public class NavigationBar: Binder, NavigationBarConvertible {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -103,9 +103,9 @@ public class NavigationBar: Binder, NavigationBarConvertible {
 		
 		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			// Don't steal the delegate from the navigation controller
-			if possibleDelegate != nil {
+			if dynamicDelegate != nil {
 				precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-				storage.dynamicDelegate = possibleDelegate
+				storage.dynamicDelegate = dynamicDelegate
 				instance.delegate = storage
 			}
 			
@@ -166,7 +166,7 @@ public class NavigationBar: Binder, NavigationBarConvertible {
 		}
 	}
 
-	open class Storage: View.Storage, UINavigationBarDelegate {}
+	open class Storage: View.Preparer.Storage, UINavigationBarDelegate {}
 
 	open class Delegate: DynamicDelegate, UINavigationBarDelegate {
 		public required override init() {

@@ -19,28 +19,20 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class Window: Binder, WindowConvertible {
-	public typealias Instance = NSWindow
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsWindow() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension Window {
 	enum Binding: WindowBinding {
-		public typealias EnclosingBinder = Window
-		public typealias Inherited = BaseBinder.Binding
-		public static func windowBinding(_ binding: Window.Binding) -> Window.Binding { return binding }
-		case inheritedBinding(Inherited)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		
-		//	1. Static styles are applied at construction and are subsequently immutable.
 		case contentView(Constant<View>)
 		case deferCreation(Constant<Bool>)
 
@@ -50,49 +42,45 @@ public class Window: Binder, WindowConvertible {
 		case allowsToolTipsWhenApplicationIsInactive(Dynamic<Bool>)
 		case alphaValue(Dynamic<CGFloat>)
 		case animationBehavior(Dynamic<NSWindow.AnimationBehavior>)
-		case isAutodisplay(Dynamic<Bool>)
 		case autorecalculatesKeyViewLoop(Dynamic<Bool>)
 		case backingType(Dynamic<NSWindow.BackingStoreType>)
 		case canBecomeVisibleWithoutLogin(Dynamic<Bool>)
 		case canHide(Dynamic<Bool>)
 		case collectionBehavior(Dynamic<NSWindow.CollectionBehavior>)
 		case colorSpace(Dynamic<NSColorSpace>)
-		case contentMinSize(Dynamic<NSSize>)
-		case contentMaxSize(Dynamic<NSSize>)
-		@available(macOS 10.11, *)
-		case minFullScreenContentSize(Dynamic<NSSize>)
-		@available(macOS 10.11, *)
-		case maxFullScreenContentSize(Dynamic<NSSize>)
 		case contentAspectRatio(Dynamic<NSSize>)
+		case contentHeight(Dynamic<WindowSize>)
+		case contentMaxSize(Dynamic<NSSize>)
+		case contentMinSize(Dynamic<NSSize>)
 		case contentResizeIncrements(Dynamic<NSSize>)
 		case contentWidth(Dynamic<WindowSize>)
-		case contentHeight(Dynamic<WindowSize>)
 		case depthLimit(Dynamic<NSWindow.Depth?>)
 		case displaysWhenScreenProfileChanges(Dynamic<Bool>)
-		case isDocumentEdited(Dynamic<Bool>)
-		case isExcludedFromWindowsMenu(Dynamic<Bool>)
 		case frameAutosaveName(Dynamic<NSWindow.FrameAutosaveName>)
 		case frameHorizontal(Dynamic<WindowPlacement>)
 		case frameVertical(Dynamic<WindowPlacement>)
 		case hasShadow(Dynamic<Bool>)
 		case hidesOnDeactivate(Dynamic<Bool>)
 		case ignoresMouseEvents(Dynamic<Bool>)
+		case isAutodisplay(Dynamic<Bool>)
+		case isDocumentEdited(Dynamic<Bool>)
+		case isExcludedFromWindowsMenu(Dynamic<Bool>)
+		case isMovable(Dynamic<Bool>)
+		case isMovableByWindowBackground(Dynamic<Bool>)
+		case isOneShot(Dynamic<Bool>)
+		case isOpaque(Dynamic<Bool>)
+		case isRestorable(Dynamic<Bool>)
 		case key(Dynamic<Bool>)
 		case level(Dynamic<NSWindow.Level>)
 		case main(Dynamic<Bool>)
 		case miniwindowImage(Dynamic<NSImage?>)
 		case miniwindowTitle(Dynamic<String>)
-		case isMovable(Dynamic<Bool>)
-		case isMovableByWindowBackground(Dynamic<Bool>)
-		case isOneShot(Dynamic<Bool>)
-		case isOpaque(Dynamic<Bool>)
 		case order(Dynamic<WindowOrder>)
 		case preferredBackingLocation(Dynamic<NSWindow.BackingLocation>)
 		case preservesContentDuringLiveResize(Dynamic<Bool>)
 		case preventsApplicationTerminationWhenModal(Dynamic<Bool>)
 		case representedURL(Dynamic<URL?>)
 		case resizeStyle(Dynamic<WindowResizeStyle>)
-		case isRestorable(Dynamic<Bool>)
 		case restorationClass(Dynamic<NSWindowRestoration.Type>)
 		case screen(Dynamic<NSScreen?>)
 		case sharingType(Dynamic<NSWindow.SharingType>)
@@ -100,23 +88,28 @@ public class Window: Binder, WindowConvertible {
 		case title(Dynamic<String>)
 		case toolbar(Dynamic<ToolbarConvertible>)
 
+		@available(macOS 10.11, *)
+		case minFullScreenContentSize(Dynamic<NSSize>)
+		@available(macOS 10.11, *)
+		case maxFullScreenContentSize(Dynamic<NSSize>)
+
 		// 2. Signal bindings are performed on the object after construction.
 		case close(Signal<WindowCloseBehavior>)
+		case criticalSheet(Signal<Callback<NSWindow, NSApplication.ModalResponse>>)
 		case deminiaturize(Signal<Void>)
 		case display(Signal<Bool>)
 		case invalidateShadow(Signal<Void>)
 		case miniaturize(Signal<Bool>)
+		case presentError(Signal<Callback<Error, Bool>>)
 		case printWindow(Signal<Void>)
 		case recalculateKeyViewLoop(Signal<Void>)
 		case runToolbarCustomizationPalette(Signal<Void>)
 		case selectNextKeyView(Signal<Void>)
 		case selectPreviousKeyView(Signal<Void>)
+		case sheet(Signal<Callback<NSWindow, NSApplication.ModalResponse>>)
 		case toggleFullScreen(Signal<Void>)
 		case toggleToolbarShown(Signal<Void>)
 		case zoom(Signal<Bool>)
-		case sheet(Signal<Callback<NSWindow, NSApplication.ModalResponse>>)
-		case criticalSheet(Signal<Callback<NSWindow, NSApplication.ModalResponse>>)
-		case presentError(Signal<Callback<Error, Bool>>)
 		
 		// 3. Action bindings are triggered by the object after construction.
 		case didBecomeKey(SignalInput<Void>)
@@ -159,420 +152,322 @@ public class Window: Binder, WindowConvertible {
 		case willUseFullScreenPresentationOptions((NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions)
 		case willUseStandardFrame((NSWindow, NSRect) -> NSRect)
 	}
+}
 
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = Window
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension Window {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = Window.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = NSWindow
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			let width = contentWidthInitial ?? WindowSize(constant: Preparer.defaultWindowSize.width)
-			let height = contentHeightInitial ?? WindowSize(constant: Preparer.defaultWindowSize.height)
-			let screen = screenInitial ?? NSScreen.screens.first
-			let styleMask = styleMaskInitial ?? [.titled, .resizable, .closable, .miniaturizable]
-			let backingType = backingTypeInitial ?? .buffered
-			
-			// Apply the ContentSize binding
-			var contentSize = width.applyWidthToContentSize(NSZeroSize, onScreen: screen, windowClass: subclass, styleMask: styleMask)
-			contentSize = height.applyHeightToContentSize(contentSize, onScreen: screen, windowClass: subclass, styleMask: styleMask)
-			
-			var frameRect = subclass.frameRect(forContentRect: NSRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height), styleMask: styleMask)
-			frameRect.origin.y = screen.map { $0.visibleFrame.origin.y + $0.visibleFrame.size.height - frameRect.size.height } ?? 0
-			
-			let cr = subclass.contentRect(forFrameRect: frameRect, styleMask: styleMask)
-			
-			// Create the window
-			let w = subclass.init(contentRect: cr, styleMask: styleMask, backing: backingType, defer: deferCreation, screen: screen)
-			w.isReleasedWhenClosed = false
-			
-			// To be consistent with setting ".Screen", constrain the window to the screen.
-			if let scr = screen {
-				let r = w.constrainFrameRect(w.frame, to:scr)
-				w.setFrameOrigin(r.origin)
-			}
-			return w
-		}
-		
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				possibleDelegate = d
-				return d
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+
+		public var deferCreation: Bool? = nil
 		
-		// InitialSubsequent styles and other special handling
-		var deferCreation = true
-
-		var key: Dynamic<Bool>? = nil
-		var main: Dynamic<Bool>? = nil
-		var order: Dynamic<WindowOrder>? = nil
-
-		var frameAutosaveName: Dynamic<String>? = nil
-		var backingType = InitialSubsequent<NSWindow.BackingStoreType>()
-		var backingTypeInitial: NSWindow.BackingStoreType? = nil
-		var screen = InitialSubsequent<NSScreen?>()
-		var screenInitial: NSScreen?? = nil
-		var frameHorizontal: Dynamic<WindowPlacement>? = nil
-		var frameVertical: Dynamic<WindowPlacement>? = nil
-		var contentWidth = InitialSubsequent<WindowSize>()
-		var contentWidthInitial: WindowSize? = nil
-		var contentHeight = InitialSubsequent<WindowSize>()
-		var contentHeightInitial: WindowSize? = nil
-		var styleMask = InitialSubsequent<NSWindow.StyleMask>()
-		var styleMaskInitial: NSWindow.StyleMask? = nil
+		public var contentWidth = InitialSubsequent<WindowSize>()
+		public var contentHeight = InitialSubsequent<WindowSize>()
+		public var screen = InitialSubsequent<NSScreen?>()
+		public var styleMask = InitialSubsequent<NSWindow.StyleMask>()
+		public var backingType = InitialSubsequent<NSWindow.BackingStoreType>()
 		
-		public static var defaultWindowSize: NSSize { return NSSize(width: 400, height: 400) }
+		public var frameAutosaveName: Dynamic<String>? = nil
+		public var frameHorizontal: Dynamic<WindowPlacement>? = nil
+		public var frameVertical: Dynamic<WindowPlacement>? = nil
+		public var key: Dynamic<Bool>? = nil
+		public var main: Dynamic<Bool>? = nil
+		public var order: Dynamic<WindowOrder>? = nil
+		
+		public static let defaultWindowSize = NSSize(width: 400, height: 400)
+	}
+}
 
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .deferCreation(let x): deferCreation = x.value
-			case .backingType(let x):
-				backingType = x.initialSubsequent()
-				backingTypeInitial = backingType.initial()
-			case .key(let x): key = x
-			case .order(let x): order = x
-			case .main(let x): main = x
-			case .frameAutosaveName(let x): frameAutosaveName = x
-			case .frameHorizontal(let x): frameHorizontal = x
-			case .frameVertical(let x): frameVertical = x
-			case .contentWidth(let x):
-				contentWidth = x.initialSubsequent()
-				contentWidthInitial = contentWidth.initial()
-			case .contentHeight(let x):
-				contentHeight = x.initialSubsequent()
-				contentHeightInitial = contentHeight.initial()
-			case .screen(let x):
-				screen = x.initialSubsequent()
-				screenInitial = screen.initial()
-			case .styleMask(let x):
-				styleMask = x.initialSubsequent()
-				styleMaskInitial = styleMask.initial()
-			case .willResize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
-			case .willUseStandardFrame(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
-			case .shouldZoom(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
-			case .willUseFullScreenContentSize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
-			case .willUseFullScreenPresentationOptions(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
-			case .shouldClose(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
-			case .shouldPopUpDocumentPathMenu(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
-			case .willResizeForVersionBrowser(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
-			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-			default: break
-			}
+// MARK: - Binder Part 4: Preparer overrides
+public extension Window.Preparer {
+	public func constructInstance(type: NSWindow.Type, parameters: Void) -> NSWindow {
+		let width = contentWidth.initial ?? WindowSize(constant: Window.Preparer.defaultWindowSize.width)
+		let height = contentHeight.initial ?? WindowSize(constant: Window.Preparer.defaultWindowSize.height)
+		let screen = self.screen.initial ?? NSScreen.screens.first
+		let styleMask = self.styleMask.initial ?? [.titled, .resizable, .closable, .miniaturizable]
+		let backingType = self.backingType.initial ?? .buffered
+		
+		// Apply the ContentSize binding
+		var contentSize = width.applyWidthToContentSize(NSZeroSize, onScreen: screen, windowClass: type, styleMask: styleMask)
+		contentSize = height.applyHeightToContentSize(contentSize, onScreen: screen, windowClass: type, styleMask: styleMask)
+		
+		var frameRect = type.frameRect(forContentRect: NSRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height), styleMask: styleMask)
+		frameRect.origin.y = screen.map { $0.visibleFrame.origin.y + $0.visibleFrame.size.height - frameRect.size.height } ?? 0
+		
+		let cr = type.contentRect(forFrameRect: frameRect, styleMask: styleMask)
+		
+		// Create the window
+		let w = type.init(contentRect: cr, styleMask: styleMask, backing: backingType, defer: deferCreation ?? true, screen: screen)
+		w.isReleasedWhenClosed = false
+		
+		// To be consistent with setting ".Screen", constrain the window to the screen.
+		if let scr = screen {
+			let r = w.constrainFrameRect(w.frame, to:scr)
+			w.setFrameOrigin(r.origin)
 		}
-
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
-			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
-			if storage.inUse {
-				instance.delegate = storage
-			}
-
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .contentView(let x):
-				if let cv = instance.contentView {
-					x.value.applyBindings(to: cv)
-				}
-				return nil
-			case .backingType: return backingType.resume()?.apply(instance) { i, v in i.backingType = v }
-			case .frameHorizontal: return nil
-			case .frameVertical: return nil
-			case .contentWidth: return contentWidth.resume()?.apply(instance) { i, v in i.setContentSize(v.applyWidthToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
-			case .contentHeight: return contentHeight.resume()?.apply(instance) { i, v in i.setContentSize(v.applyHeightToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
-			case .deferCreation:
-				return nil
-			case .key: return nil
-			case .level(let x): return x.apply(instance) { i, v in i.level = v }
-			case .main: return nil
-			case .order: return nil
-			case .screen:
-				return screen.subsequent.flatMap { $0.apply(instance) { i, v in
-					let r = i.constrainFrameRect(i.frame, to:v)
-					i.setFrameOrigin(r.origin)
-				} }
-			case .styleMask: return styleMask.subsequent.flatMap { $0.apply(instance) { i, v in i.styleMask = v } }
-			case .title(let x): return x.apply(instance) { i, v in i.title = v }
-			case .frameAutosaveName: return nil
-			case .alphaValue(let x): return x.apply(instance) { i, v in i.alphaValue = v }
-			case .colorSpace(let x): return x.apply(instance) { i, v in i.colorSpace = v }
-			case .canHide(let x): return x.apply(instance) { i, v in i.canHide = v }
-			case .hidesOnDeactivate(let x): return x.apply(instance) { i, v in i.hidesOnDeactivate = v }
-			case .collectionBehavior(let x): return x.apply(instance) { i, v in i.collectionBehavior = v }
-			case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
-				
-			case .contentMinSize(let x): return x.apply(instance) { i, v in i.contentMinSize = v }
-			case .contentMaxSize(let x): return x.apply(instance) { i, v in i.contentMaxSize = v }
-			case .minFullScreenContentSize(let x):
-				return x.apply(instance) { i, v in
-					if #available(macOS 10.11, *) {
-						i.minFullScreenContentSize = v
-					}
-				}
-			case .maxFullScreenContentSize(let x):
-				return x.apply(instance) { i, v in
-					if #available(macOS 10.11, *) {
-						i.maxFullScreenContentSize = v
-					}
-				}
-			case .contentAspectRatio(let x): return x.apply(instance) { i, v in i.contentAspectRatio = v }
-			case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
-				
-				
-			case .hasShadow(let x): return x.apply(instance) { i, v in i.hasShadow = v }
-			case .preventsApplicationTerminationWhenModal(let x): return x.apply(instance) { i, v in i.preventsApplicationTerminationWhenModal = v }
-			case .canBecomeVisibleWithoutLogin(let x): return x.apply(instance) { i, v in i.canBecomeVisibleWithoutLogin = v }
-			case .sharingType(let x): return x.apply(instance) { i, v in i.sharingType = v }
-			case .preferredBackingLocation(let x): return x.apply(instance) { i, v in i.preferredBackingLocation = v }
-			case .isOneShot(let x): return x.apply(instance) { i, v in i.isOneShot = v }
-			case .depthLimit(let x):
-				return x.apply(instance) { i, v in
-					if let v = v {
-						i.depthLimit = v
-					} else {
-						i.setDynamicDepthLimit(true)
-					}
-				}
-			case .resizeStyle(let x):
-				return x.apply(instance) { i, v in
-					switch v {
-					case .increment(let s):
-						i.resizeIncrements = s
-					case .contentAspect(let s):
-						i.contentAspectRatio = s
-					}
-				}
-			case .preservesContentDuringLiveResize(let x): return x.apply(instance) { i, v in i.preservesContentDuringLiveResize = v }
-			case .isExcludedFromWindowsMenu(let x): return x.apply(instance) { i, v in i.isExcludedFromWindowsMenu = v }
-			case .allowsToolTipsWhenApplicationIsInactive(let x): return x.apply(instance) { i, v in i.allowsToolTipsWhenApplicationIsInactive = v }
-			case .autorecalculatesKeyViewLoop(let x): return x.apply(instance) { i, v in i.autorecalculatesKeyViewLoop = v }
-			case .acceptsMouseMovedEvents(let x): return x.apply(instance) { i, v in i.acceptsMouseMovedEvents = v }
-			case .ignoresMouseEvents(let x): return x.apply(instance) { i, v in i.ignoresMouseEvents = v }
-			case .isRestorable(let x): return x.apply(instance) { i, v in i.isRestorable = v }
-			case .restorationClass(let x):
-				return x.apply(instance) { i, v in
-					i.restorationClass = v
-				}
-			case .isAutodisplay(let x): return x.apply(instance) { i, v in i.isAutodisplay = v }
-			case .allowsConcurrentViewDrawing(let x): return x.apply(instance) { i, v in i.allowsConcurrentViewDrawing = v }
-			case .animationBehavior(let x): return x.apply(instance) { i, v in i.animationBehavior = v }
-			case .isDocumentEdited(let x): return x.apply(instance) { i, v in i.isDocumentEdited = v }
-			case .representedURL(let x): return x.apply(instance) { i, v in i.representedURL = v }
-			case .displaysWhenScreenProfileChanges(let x): return x.apply(instance) { i, v in i.displaysWhenScreenProfileChanges = v }
-			case .isMovableByWindowBackground(let x): return x.apply(instance) { i, v in i.isMovableByWindowBackground = v }
-			case .isMovable(let x): return x.apply(instance) { i, v in i.isMovable = v }
-			case .miniwindowImage(let x): return x.apply(instance) { i, v in i.miniwindowImage = v }
-			case .miniwindowTitle(let x): return x.apply(instance) { i, v in i.miniwindowTitle = v }
-			case .willResize: return nil
-			case .willUseStandardFrame: return nil
-			case .shouldZoom: return nil
-			case .willUseFullScreenContentSize: return nil
-			case .willUseFullScreenPresentationOptions: return nil
-			case .shouldClose: return nil
-			case .shouldPopUpDocumentPathMenu: return nil
-			case .willResizeForVersionBrowser: return nil
-			case .sheet(let x):
-				return x.apply(instance) { i, v in
-					i.beginSheet(v.value) { r in _ = v.callback.send(value: r) }
-				}
-			case .criticalSheet(let x):
-				return x.apply(instance) { i, v in
-					i.beginCriticalSheet(v.value) { r in _ = v.callback.send(value: r) }
-				}
-			case .presentError(let x):
-				return x.apply(instance) { i, v in
-					let ptr = Unmanaged.passRetained(v.callback).toOpaque()
-					let sel = #selector(Window.Storage.didPresentError(recovered:contextInfo:))
-					i.presentError(v.value, modalFor: i, delegate: s, didPresent: sel, contextInfo: ptr)
-				}
-			case .close(let x):
-				return x.apply(instance) { i, v in
-					switch v {
-					case .dismiss:
-						if i.isSheet {
-							i.sheetParent?.endSheet(i)
-						} else if NSApplication.shared.modalWindow == i {
-							NSApplication.shared.stopModal()
-						} else {
-							i.close()
-						}
-					case .perform:
-						if i.isSheet {
-							i.sheetParent?.endSheet(i)
-						} else if NSApplication.shared.modalWindow == i {
-							NSApplication.shared.stopModal()
-						} else {
-							i.performClose(nil)
-						}
-					case .stopModal(let c):
-						if i.isSheet {
-							i.sheetParent?.endSheet(i, returnCode: c)
-						} else if NSApplication.shared.modalWindow == i {
-							NSApplication.shared.stopModal(withCode: c)
-						} else {
-							i.close()
-						}
-					}
-				}
-			case .zoom(let x):
-				return x.apply(instance) { i, v in
-					if v {
-						i.performZoom(nil)
-					} else {
-						i.zoom(nil)
-					}
-				}
-			case .toggleFullScreen(let x): return x.apply(instance) { i, v in i.toggleFullScreen(nil) }
-			case .toggleToolbarShown(let x): return x.apply(instance) { i, v in i.toggleToolbarShown(nil) }
-			case .invalidateShadow(let x): return x.apply(instance) { i, v in i.invalidateShadow() }
-			case .runToolbarCustomizationPalette(let x): return x.apply(instance) { i, v in i.runToolbarCustomizationPalette(nil) }
-			case .recalculateKeyViewLoop(let x): return x.apply(instance) { i, v in i.recalculateKeyViewLoop() }
-			case .display(let x):
-				return x.apply(instance) { i, v in
-					if v {
-						i.displayIfNeeded()
-					} else {
-						i.display()
-					}
-				}
-			case .miniaturize(let x):
-				return x.apply(instance) { i, v in
-					if v {
-						i.performMiniaturize(nil)
-					} else {
-						i.miniaturize(nil)
-					}
-				}
-			case .deminiaturize(let x): return x.apply(instance) { i, v in i.deminiaturize(nil) }
-			case .printWindow(let x): return x.apply(instance) { i, v in i.printWindow(nil) }
-			case .selectNextKeyView(let x): return x.apply(instance) { i, v in i.selectNextKeyView(nil) }
-			case .selectPreviousKeyView(let x): return x.apply(instance) { i, v in i.selectPreviousKeyView(nil) }
-			case .didBecomeKey(let x):
-				return Signal.notifications(name: NSWindow.didBecomeKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didBecomeMain(let x):
-				return Signal.notifications(name: NSWindow.didBecomeMainNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didChangeBackingProperties(let x):
-				return Signal.notifications(name: NSWindow.didChangeBackingPropertiesNotification, object: instance).map { n in
-					let cs = n.userInfo.flatMap { $0[NSWindow.oldColorSpaceUserInfoKey] as? NSColorSpace }
-					let sf = n.userInfo.flatMap { ($0[NSWindow.oldScaleFactorUserInfoKey] as? NSNumber).map { CGFloat($0.doubleValue) } }
-					return (oldColorSpace: cs, oldScaleFactor: sf )
-					}.cancellableBind(to: x)
-			case .didChangeOcclusionState(let x):
-				return Signal.notifications(name: NSWindow.didChangeOcclusionStateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didChangeScreen(let x):
-				return Signal.notifications(name: NSWindow.didChangeScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didChangeScreenProfile(let x):
-				return Signal.notifications(name: NSWindow.didChangeScreenProfileNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didDeminiaturize(let x):
-				return Signal.notifications(name: NSWindow.didDeminiaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didEndSheet(let x):
-				return Signal.notifications(name: NSWindow.didEndSheetNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didEndLiveResize(let x):
-				return Signal.notifications(name: NSWindow.didEndLiveResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didExpose(let x):
-				return Signal.notifications(name: NSWindow.didExposeNotification, object: instance).compactMap { (n: Notification) -> NSRect? in return (n.userInfo?["NSExposedRect"] as? NSValue)?.rectValue ?? nil }.cancellableBind(to: x)
-			case .didEnterFullScreen(let x):
-				return Signal.notifications(name: NSWindow.didEnterFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didEnterVersionBrowser(let x):
-				return Signal.notifications(name: NSWindow.didEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didExitFullScreen(let x):
-				return Signal.notifications(name: NSWindow.didExitFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didExitVersionBrowser(let x):
-				return Signal.notifications(name: NSWindow.didExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didMiniaturize(let x):
-				return Signal.notifications(name: NSWindow.didMiniaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didMove(let x):
-				return Signal.notifications(name: NSWindow.didMoveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didResignKey(let x):
-				return Signal.notifications(name: NSWindow.didResignKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didResignMain(let x):
-				return Signal.notifications(name: NSWindow.didResignMainNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didResize(let x):
-				return Signal.notifications(name: NSWindow.didResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .didUpdate(let x):
-				return Signal.notifications(name: NSWindow.didUpdateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willBeginSheet(let x):
-				return Signal.notifications(name: NSWindow.willBeginSheetNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willClose(let x):
-				return Signal.notifications(name: NSWindow.willCloseNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willMiniaturize(let x):
-				return Signal.notifications(name: NSWindow.willMiniaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willMove(let x):
-				return Signal.notifications(name: NSWindow.willMoveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willStartLiveResize(let x):
-				return Signal.notifications(name: NSWindow.willStartLiveResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willEnterFullScreen(let x):
-				return Signal.notifications(name: NSWindow.willEnterFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willExitFullScreen(let x):
-				return Signal.notifications(name: NSWindow.willExitFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willEnterVersionBrowser(let x):
-				return Signal.notifications(name: NSWindow.willEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .willExitVersionBrowser(let x):
-				return Signal.notifications(name: NSWindow.willExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
-			case .inheritedBinding(let s):
-				return inherited.applyBinding(s, instance: instance, storage: storage)
-			}
-		}
-
-		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
-			
-			// Apply frame placement
-			instance.layoutIfNeeded()
-			let h = frameHorizontal?.apply(instance) { i, v in i.setFrameOrigin(v.applyFrameHorizontal(i.screen, frameRect: i.frame)) }
-			let v = frameVertical?.apply(instance) { i, v in i.setFrameOrigin(v.applyFrameVertical(i.screen, frameRect: i.frame)) }
-			let a = frameAutosaveName?.apply(instance) { i, v in i.setFrameAutosaveName(v) }
-			
-			var captureOrder = order?.initialSubsequent()
-			var captureKey = key?.initialSubsequent()
-			var captureMain = main?.initialSubsequent()
-
-			// Apply captured variables that need to be applied after all other properties on construction
-			switch (captureOrder?.initial() ?? .front) {
-			case .front where captureKey?.initial() == true: instance.makeKeyAndOrderFront(nil)
-			case .front: fallthrough
-			case .back: WindowOrder.back.applyToWindow(instance)
-			case .out: break
-			}
-			if (captureMain?.initial() ?? true) == true {
-				instance.makeMain()
-			}
-
-			let o = captureOrder?.resume()?.apply(instance) { i, v in v.applyToWindow(i) }
-			let k = captureKey?.resume()?.apply(instance) { i, v in
-				if v {
-					i.makeKey()
-				} else {
-					i.resignKey()
-				}
-			}
-			let m = captureMain?.resume()?.apply(instance) { i, v in
-				if v {
-					i.makeMain()
-				} else {
-					i.resignMain()
-				}
-			}
-
-			return AggregateLifetime(lifetimes: [lifetime, o, k, m, h, v, a].compactMap { $0 })
+		return w
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .deferCreation(let x): deferCreation = x.value
+		case .backingType(let x): backingType = x.initialSubsequent()
+		case .key(let x): key = x
+		case .order(let x): order = x
+		case .main(let x): main = x
+		case .frameAutosaveName(let x): frameAutosaveName = x
+		case .frameHorizontal(let x): frameHorizontal = x
+		case .frameVertical(let x): frameVertical = x
+		case .contentWidth(let x): contentWidth = x.initialSubsequent()
+		case .contentHeight(let x): contentHeight = x.initialSubsequent()
+		case .screen(let x): screen = x.initialSubsequent()
+		case .styleMask(let x): styleMask = x.initialSubsequent()
+		case .willResize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
+		case .willUseStandardFrame(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
+		case .shouldZoom(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
+		case .willUseFullScreenContentSize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
+		case .willUseFullScreenPresentationOptions(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
+		case .shouldClose(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
+		case .shouldPopUpDocumentPathMenu(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
+		case .willResizeForVersionBrowser(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		default: break
 		}
 	}
 
-	open class Storage: View.Storage, NSWindowDelegate {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let s): return inherited.applyBinding(s, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .contentView(let x):
+			if let cv = instance.contentView {
+				x.value.apply(to: cv)
+			}
+			return nil
+		case .deferCreation: return nil
+
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .acceptsMouseMovedEvents(let x): return x.apply(instance) { i, v in i.acceptsMouseMovedEvents = v }
+		case .allowsConcurrentViewDrawing(let x): return x.apply(instance) { i, v in i.allowsConcurrentViewDrawing = v }
+		case .allowsToolTipsWhenApplicationIsInactive(let x): return x.apply(instance) { i, v in i.allowsToolTipsWhenApplicationIsInactive = v }
+		case .alphaValue(let x): return x.apply(instance) { i, v in i.alphaValue = v }
+		case .animationBehavior(let x): return x.apply(instance) { i, v in i.animationBehavior = v }
+		case .autorecalculatesKeyViewLoop(let x): return x.apply(instance) { i, v in i.autorecalculatesKeyViewLoop = v }
+		case .backingType: return backingType.resume()?.apply(instance) { i, v in i.backingType = v }
+		case .canBecomeVisibleWithoutLogin(let x): return x.apply(instance) { i, v in i.canBecomeVisibleWithoutLogin = v }
+		case .canHide(let x): return x.apply(instance) { i, v in i.canHide = v }
+		case .collectionBehavior(let x): return x.apply(instance) { i, v in i.collectionBehavior = v }
+		case .colorSpace(let x): return x.apply(instance) { i, v in i.colorSpace = v }
+		case .contentAspectRatio(let x): return x.apply(instance) { i, v in i.contentAspectRatio = v }
+		case .contentHeight: return contentHeight.resume()?.apply(instance) { i, v in i.setContentSize(v.applyHeightToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
+		case .contentMaxSize(let x): return x.apply(instance) { i, v in i.contentMaxSize = v }
+		case .contentMinSize(let x): return x.apply(instance) { i, v in i.contentMinSize = v }
+		case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
+		case .contentWidth: return contentWidth.resume()?.apply(instance) { i, v in i.setContentSize(v.applyWidthToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
+		case .depthLimit(let x): return x.apply(instance) { i, v in v.map { i.depthLimit = $0 } ?? i.setDynamicDepthLimit(true) }
+		case .displaysWhenScreenProfileChanges(let x): return x.apply(instance) { i, v in i.displaysWhenScreenProfileChanges = v }
+		case .frameAutosaveName: return nil
+		case .frameHorizontal: return nil
+		case .frameVertical: return nil
+		case .hasShadow(let x): return x.apply(instance) { i, v in i.hasShadow = v }
+		case .hidesOnDeactivate(let x): return x.apply(instance) { i, v in i.hidesOnDeactivate = v }
+		case .ignoresMouseEvents(let x): return x.apply(instance) { i, v in i.ignoresMouseEvents = v }
+		case .isAutodisplay(let x): return x.apply(instance) { i, v in i.isAutodisplay = v }
+		case .isDocumentEdited(let x): return x.apply(instance) { i, v in i.isDocumentEdited = v }
+		case .isExcludedFromWindowsMenu(let x): return x.apply(instance) { i, v in i.isExcludedFromWindowsMenu = v }
+		case .isMovable(let x): return x.apply(instance) { i, v in i.isMovable = v }
+		case .isMovableByWindowBackground(let x): return x.apply(instance) { i, v in i.isMovableByWindowBackground = v }
+		case .isOneShot(let x): return x.apply(instance) { i, v in i.isOneShot = v }
+		case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
+		case .isRestorable(let x): return x.apply(instance) { i, v in i.isRestorable = v }
+		case .key: return nil
+		case .level(let x): return x.apply(instance) { i, v in i.level = v }
+		case .main: return nil
+		case .miniwindowImage(let x): return x.apply(instance) { i, v in i.miniwindowImage = v }
+		case .miniwindowTitle(let x): return x.apply(instance) { i, v in i.miniwindowTitle = v }
+		case .order: return nil
+		case .preferredBackingLocation(let x): return x.apply(instance) { i, v in i.preferredBackingLocation = v }
+		case .preservesContentDuringLiveResize(let x): return x.apply(instance) { i, v in i.preservesContentDuringLiveResize = v }
+		case .preventsApplicationTerminationWhenModal(let x): return x.apply(instance) { i, v in i.preventsApplicationTerminationWhenModal = v }
+		case .representedURL(let x): return x.apply(instance) { i, v in i.representedURL = v }
+		case .resizeStyle(let x):
+			return x.apply(instance) { i, v in
+				switch v {
+				case .increment(let s):
+					i.resizeIncrements = s
+				case .contentAspect(let s):
+					i.contentAspectRatio = s
+				}
+			}
+		case .restorationClass(let x): return x.apply(instance) { i, v in i.restorationClass = v }
+		case .screen:
+			return screen.resume().flatMap { $0.apply(instance) { i, v in
+				let r = i.constrainFrameRect(i.frame, to:v)
+				i.setFrameOrigin(r.origin)
+			} }
+		case .sharingType(let x): return x.apply(instance) { i, v in i.sharingType = v }
+		case .styleMask: return styleMask.resume().flatMap { $0.apply(instance) { i, v in i.styleMask = v } }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
+
+		case .minFullScreenContentSize(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.11, *) {
+					i.minFullScreenContentSize = v
+				}
+			}
+		case .maxFullScreenContentSize(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.11, *) {
+					i.maxFullScreenContentSize = v
+				}
+			}
+		
+		// 2. Signal bindings are performed on the object after construction.
+		case .close(let x):
+			return x.apply(instance) { i, v in
+				switch v {
+				case .stopModal(let c):
+					if i.isSheet {
+						i.sheetParent?.endSheet(i, returnCode: c)
+					} else if NSApplication.shared.modalWindow == i {
+						NSApplication.shared.stopModal(withCode: c)
+					} else {
+						i.close()
+					}
+				case _ where i.isSheet: i.sheetParent?.endSheet(i)
+				case _ where NSApplication.shared.modalWindow == i: NSApplication.shared.stopModal()
+				case .perform: i.performClose(nil)
+				case .dismiss: i.close()
+				}
+			}
+		case .criticalSheet(let x): return x.apply(instance) { i, v in i.beginCriticalSheet(v.value) { r in _ = v.callback.send(value: r) } }
+		case .deminiaturize(let x): return x.apply(instance) { i, v in i.deminiaturize(nil) }
+		case .display(let x): return x.apply(instance) { i, v in v ? i.displayIfNeeded() : i.display() }
+		case .invalidateShadow(let x): return x.apply(instance) { i, v in i.invalidateShadow() }
+		case .miniaturize(let x): return x.apply(instance) { i, v in v ? i.performMiniaturize(nil) : i.miniaturize(nil) }
+		case .presentError(let x):
+			return x.apply(instance, storage) { i, s, v in
+				let ptr = Unmanaged.passRetained(v.callback).toOpaque()
+				let sel = #selector(Window.Preparer.Storage.didPresentError(recovered:contextInfo:))
+				i.presentError(v.value, modalFor: i, delegate: s, didPresent: sel, contextInfo: ptr)
+			}
+		case .printWindow(let x): return x.apply(instance) { i, v in i.printWindow(nil) }
+		case .recalculateKeyViewLoop(let x): return x.apply(instance) { i, v in i.recalculateKeyViewLoop() }
+		case .runToolbarCustomizationPalette(let x): return x.apply(instance) { i, v in i.runToolbarCustomizationPalette(nil) }
+		case .selectNextKeyView(let x): return x.apply(instance) { i, v in i.selectNextKeyView(nil) }
+		case .selectPreviousKeyView(let x): return x.apply(instance) { i, v in i.selectPreviousKeyView(nil) }
+		case .sheet(let x): return x.apply(instance) { i, v in i.beginSheet(v.value) { r in _ = v.callback.send(value: r) } }
+		case .toggleFullScreen(let x): return x.apply(instance) { i, v in i.toggleFullScreen(nil) }
+		case .toggleToolbarShown(let x): return x.apply(instance) { i, v in i.toggleToolbarShown(nil) }
+		case .zoom(let x): return x.apply(instance) { i, v in v ? i.performZoom(nil) : i.zoom(nil) }
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .didBecomeKey(let x): return Signal.notifications(name: NSWindow.didBecomeKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didBecomeMain(let x): return Signal.notifications(name: NSWindow.didBecomeMainNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didChangeBackingProperties(let x):
+			return Signal.notifications(name: NSWindow.didChangeBackingPropertiesNotification, object: instance).map { n in
+				let cs = n.userInfo.flatMap { $0[NSWindow.oldColorSpaceUserInfoKey] as? NSColorSpace }
+				let sf = n.userInfo.flatMap { ($0[NSWindow.oldScaleFactorUserInfoKey] as? NSNumber).map { CGFloat($0.doubleValue) } }
+				return (oldColorSpace: cs, oldScaleFactor: sf )
+			}.cancellableBind(to: x)
+		case .didChangeOcclusionState(let x): return Signal.notifications(name: NSWindow.didChangeOcclusionStateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didChangeScreen(let x): return Signal.notifications(name: NSWindow.didChangeScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didChangeScreenProfile(let x): return Signal.notifications(name: NSWindow.didChangeScreenProfileNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didDeminiaturize(let x): return Signal.notifications(name: NSWindow.didDeminiaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didEndLiveResize(let x): return Signal.notifications(name: NSWindow.didEndLiveResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didEndSheet(let x): return Signal.notifications(name: NSWindow.didEndSheetNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didEnterFullScreen(let x): return Signal.notifications(name: NSWindow.didEnterFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didEnterVersionBrowser(let x): return Signal.notifications(name: NSWindow.didEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didExitFullScreen(let x): return Signal.notifications(name: NSWindow.didExitFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didExitVersionBrowser(let x): return Signal.notifications(name: NSWindow.didExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didExpose(let x): return Signal.notifications(name: NSWindow.didExposeNotification, object: instance).compactMap { (n: Notification) -> NSRect? in return (n.userInfo?["NSExposedRect"] as? NSValue)?.rectValue ?? nil }.cancellableBind(to: x)
+		case .didMiniaturize(let x): return Signal.notifications(name: NSWindow.didMiniaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didMove(let x): return Signal.notifications(name: NSWindow.didMoveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didResignKey(let x): return Signal.notifications(name: NSWindow.didResignKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didResignMain(let x): return Signal.notifications(name: NSWindow.didResignMainNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didResize(let x): return Signal.notifications(name: NSWindow.didResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didUpdate(let x): return Signal.notifications(name: NSWindow.didUpdateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willBeginSheet(let x): return Signal.notifications(name: NSWindow.willBeginSheetNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willClose(let x): return Signal.notifications(name: NSWindow.willCloseNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willEnterFullScreen(let x): return Signal.notifications(name: NSWindow.willEnterFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willEnterVersionBrowser(let x): return Signal.notifications(name: NSWindow.willEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willExitFullScreen(let x): return Signal.notifications(name: NSWindow.willExitFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willExitVersionBrowser(let x): return Signal.notifications(name: NSWindow.willExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willMiniaturize(let x): return Signal.notifications(name: NSWindow.willMiniaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willMove(let x): return Signal.notifications(name: NSWindow.willMoveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willStartLiveResize(let x): return Signal.notifications(name: NSWindow.willStartLiveResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .shouldClose: return nil
+		case .shouldPopUpDocumentPathMenu: return nil
+		case .shouldZoom: return nil
+		case .willResize: return nil
+		case .willResizeForVersionBrowser: return nil
+		case .willUseFullScreenContentSize: return nil
+		case .willUseFullScreenPresentationOptions: return nil
+		case .willUseStandardFrame: return nil
+		}
+	}
+
+	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		var lifetimes = [Lifetime]()
+		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
+		
+		// Layout the content
+		instance.layoutIfNeeded()
+		
+		// Following content layout, attempt to place the window on screen
+		lifetimes += frameHorizontal?.apply(instance) { i, v in
+			i.setFrameOrigin(v.applyFrameHorizontal(i.screen, frameRect: i.frame))
+		}
+		lifetimes += frameVertical?.apply(instance) { i, v in
+			i.setFrameOrigin(v.applyFrameVertical(i.screen, frameRect: i.frame))
+		}
+		lifetimes += frameAutosaveName?.apply(instance) { i, v in
+			i.setFrameAutosaveName(v)
+		}
+		
+		// Set intial order, key and main after everything else
+		let captureOrder = order?.initialSubsequent()
+		let captureKey = key?.initialSubsequent()
+		let captureMain = main?.initialSubsequent()
+		switch (captureOrder?.initial ?? .front) {
+		case .front where captureKey?.initial == true: instance.makeKeyAndOrderFront(nil)
+		case .front: fallthrough
+		case .back: WindowOrder.back.applyToWindow(instance)
+		case .out: break
+		}
+		if (captureMain?.initial ?? true) == true {
+			instance.makeMain()
+		}
+		
+		// Resume order, key and main
+		lifetimes += captureOrder?.resume()?.apply(instance) { i, v in v.applyToWindow(i) }
+		lifetimes += captureKey?.resume()?.apply(instance) { i, v in v ? i.makeKey() : i.resignKey() }
+		lifetimes += captureMain?.resume()?.apply(instance) { i, v in v ? i.makeMain() : i.resignMain() }
+		
+		return AggregateLifetime(lifetimes: lifetimes)
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension Window.Preparer {
+	open class Storage: View.Preparer.Storage, NSWindowDelegate {
 		@objc func didPresentError(recovered: Bool, contextInfo: UnsafeMutableRawPointer?) {
 			if let ptr = contextInfo {
 				Unmanaged<SignalInput<Bool>>.fromOpaque(ptr).takeRetainedValue().send(value: recovered)
@@ -581,10 +476,6 @@ public class Window: Binder, WindowConvertible {
 	}
 
 	open class Delegate: DynamicDelegate, NSWindowDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func windowWillResize(_ window: NSWindow, to toSize: NSSize) -> NSSize {
 			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)(window, toSize)
 		}
@@ -614,155 +505,175 @@ public class Window: Binder, WindowConvertible {
 		}
 		
 		open func window(_ window: NSWindow, willResizeForVersionBrowserWithMaxPreferredSize: NSSize, maxAllowedSize: NSSize) -> NSSize {
-			return handler(ofType: ((_ window: NSWindow, _ maxPreferredSize: NSSize, _ maxAllowedSize: NSSize) -> NSSize).self)(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
+			return handler(ofType: ((NSWindow, NSSize, NSSize) -> NSSize).self)(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
+extension BindingName where Binding: WindowBinding {
+	public typealias WindowName<V> = BindingName<V, Window.Binding, Binding>
+	private typealias B = Window.Binding
+	private static func name<V>(_ source: @escaping (V) -> Window.Binding) -> WindowName<V> {
+		return WindowName<V>(source: source, downcast: Binding.windowBinding)
+	}
+}
 extension BindingName where Binding: WindowBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .windowBinding(Window.Binding.$1(v)) }) }
+	// With:    static var $1: WindowName<$2> { return .name(B.$1) }
 	
-	//	0. Static styles are applied at construction and are subsequently immutable.
-	public static var contentView: BindingName<Constant<View>, Binding> { return BindingName<Constant<View>, Binding>({ v in .windowBinding(Window.Binding.contentView(v)) }) }
-	public static var deferCreation: BindingName<Constant<Bool>, Binding> { return BindingName<Constant<Bool>, Binding>({ v in .windowBinding(Window.Binding.deferCreation(v)) }) }
-
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	//	1. Static styles are applied at construction and are subsequently immutable.
+	static var contentView: WindowName<Constant<View>> { return .name(B.contentView) }
+	static var deferCreation: WindowName<Constant<Bool>> { return .name(B.deferCreation) }
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var acceptsMouseMovedEvents: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.acceptsMouseMovedEvents(v)) }) }
-	public static var allowsConcurrentViewDrawing: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.allowsConcurrentViewDrawing(v)) }) }
-	public static var allowsToolTipsWhenApplicationIsInactive: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.allowsToolTipsWhenApplicationIsInactive(v)) }) }
-	public static var alphaValue: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .windowBinding(Window.Binding.alphaValue(v)) }) }
-	public static var animationBehavior: BindingName<Dynamic<NSWindow.AnimationBehavior>, Binding> { return BindingName<Dynamic<NSWindow.AnimationBehavior>, Binding>({ v in .windowBinding(Window.Binding.animationBehavior(v)) }) }
-	public static var isAutodisplay: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isAutodisplay(v)) }) }
-	public static var autorecalculatesKeyViewLoop: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.autorecalculatesKeyViewLoop(v)) }) }
-	public static var backingType: BindingName<Dynamic<NSWindow.BackingStoreType>, Binding> { return BindingName<Dynamic<NSWindow.BackingStoreType>, Binding>({ v in .windowBinding(Window.Binding.backingType(v)) }) }
-	public static var canBecomeVisibleWithoutLogin: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.canBecomeVisibleWithoutLogin(v)) }) }
-	public static var canHide: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.canHide(v)) }) }
-	public static var collectionBehavior: BindingName<Dynamic<NSWindow.CollectionBehavior>, Binding> { return BindingName<Dynamic<NSWindow.CollectionBehavior>, Binding>({ v in .windowBinding(Window.Binding.collectionBehavior(v)) }) }
-	public static var colorSpace: BindingName<Dynamic<NSColorSpace>, Binding> { return BindingName<Dynamic<NSColorSpace>, Binding>({ v in .windowBinding(Window.Binding.colorSpace(v)) }) }
-	public static var contentMinSize: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .windowBinding(Window.Binding.contentMinSize(v)) }) }
-	public static var contentMaxSize: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .windowBinding(Window.Binding.contentMaxSize(v)) }) }
-	@available(macOS 10.11, *)
-	public static var minFullScreenContentSize: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .windowBinding(Window.Binding.minFullScreenContentSize(v)) }) }
-	@available(macOS 10.11, *)
-	public static var maxFullScreenContentSize: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .windowBinding(Window.Binding.maxFullScreenContentSize(v)) }) }
-	public static var contentAspectRatio: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .windowBinding(Window.Binding.contentAspectRatio(v)) }) }
-	public static var contentResizeIncrements: BindingName<Dynamic<NSSize>, Binding> { return BindingName<Dynamic<NSSize>, Binding>({ v in .windowBinding(Window.Binding.contentResizeIncrements(v)) }) }
+	static var acceptsMouseMovedEvents: WindowName<Dynamic<Bool>> { return .name(B.acceptsMouseMovedEvents) }
+	static var allowsConcurrentViewDrawing: WindowName<Dynamic<Bool>> { return .name(B.allowsConcurrentViewDrawing) }
+	static var allowsToolTipsWhenApplicationIsInactive: WindowName<Dynamic<Bool>> { return .name(B.allowsToolTipsWhenApplicationIsInactive) }
+	static var alphaValue: WindowName<Dynamic<CGFloat>> { return .name(B.alphaValue) }
+	static var animationBehavior: WindowName<Dynamic<NSWindow.AnimationBehavior>> { return .name(B.animationBehavior) }
+	static var autorecalculatesKeyViewLoop: WindowName<Dynamic<Bool>> { return .name(B.autorecalculatesKeyViewLoop) }
+	static var backingType: WindowName<Dynamic<NSWindow.BackingStoreType>> { return .name(B.backingType) }
+	static var canBecomeVisibleWithoutLogin: WindowName<Dynamic<Bool>> { return .name(B.canBecomeVisibleWithoutLogin) }
+	static var canHide: WindowName<Dynamic<Bool>> { return .name(B.canHide) }
+	static var collectionBehavior: WindowName<Dynamic<NSWindow.CollectionBehavior>> { return .name(B.collectionBehavior) }
+	static var colorSpace: WindowName<Dynamic<NSColorSpace>> { return .name(B.colorSpace) }
+	static var contentAspectRatio: WindowName<Dynamic<NSSize>> { return .name(B.contentAspectRatio) }
+	static var contentHeight: WindowName<Dynamic<WindowSize>> { return .name(B.contentHeight) }
+	static var contentMaxSize: WindowName<Dynamic<NSSize>> { return .name(B.contentMaxSize) }
+	static var contentMinSize: WindowName<Dynamic<NSSize>> { return .name(B.contentMinSize) }
+	static var contentResizeIncrements: WindowName<Dynamic<NSSize>> { return .name(B.contentResizeIncrements) }
+	static var contentWidth: WindowName<Dynamic<WindowSize>> { return .name(B.contentWidth) }
+	static var depthLimit: WindowName<Dynamic<NSWindow.Depth?>> { return .name(B.depthLimit) }
+	static var displaysWhenScreenProfileChanges: WindowName<Dynamic<Bool>> { return .name(B.displaysWhenScreenProfileChanges) }
+	static var frameAutosaveName: WindowName<Dynamic<NSWindow.FrameAutosaveName>> { return .name(B.frameAutosaveName) }
+	static var frameHorizontal: WindowName<Dynamic<WindowPlacement>> { return .name(B.frameHorizontal) }
+	static var frameVertical: WindowName<Dynamic<WindowPlacement>> { return .name(B.frameVertical) }
+	static var hasShadow: WindowName<Dynamic<Bool>> { return .name(B.hasShadow) }
+	static var hidesOnDeactivate: WindowName<Dynamic<Bool>> { return .name(B.hidesOnDeactivate) }
+	static var ignoresMouseEvents: WindowName<Dynamic<Bool>> { return .name(B.ignoresMouseEvents) }
+	static var isAutodisplay: WindowName<Dynamic<Bool>> { return .name(B.isAutodisplay) }
+	static var isDocumentEdited: WindowName<Dynamic<Bool>> { return .name(B.isDocumentEdited) }
+	static var isExcludedFromWindowsMenu: WindowName<Dynamic<Bool>> { return .name(B.isExcludedFromWindowsMenu) }
+	static var isMovable: WindowName<Dynamic<Bool>> { return .name(B.isMovable) }
+	static var isMovableByWindowBackground: WindowName<Dynamic<Bool>> { return .name(B.isMovableByWindowBackground) }
+	static var isOneShot: WindowName<Dynamic<Bool>> { return .name(B.isOneShot) }
+	static var isOpaque: WindowName<Dynamic<Bool>> { return .name(B.isOpaque) }
+	static var isRestorable: WindowName<Dynamic<Bool>> { return .name(B.isRestorable) }
+	static var key: WindowName<Dynamic<Bool>> { return .name(B.key) }
+	static var level: WindowName<Dynamic<NSWindow.Level>> { return .name(B.level) }
+	static var main: WindowName<Dynamic<Bool>> { return .name(B.main) }
+	static var miniwindowImage: WindowName<Dynamic<NSImage?>> { return .name(B.miniwindowImage) }
+	static var miniwindowTitle: WindowName<Dynamic<String>> { return .name(B.miniwindowTitle) }
+	static var order: WindowName<Dynamic<WindowOrder>> { return .name(B.order) }
+	static var preferredBackingLocation: WindowName<Dynamic<NSWindow.BackingLocation>> { return .name(B.preferredBackingLocation) }
+	static var preservesContentDuringLiveResize: WindowName<Dynamic<Bool>> { return .name(B.preservesContentDuringLiveResize) }
+	static var preventsApplicationTerminationWhenModal: WindowName<Dynamic<Bool>> { return .name(B.preventsApplicationTerminationWhenModal) }
+	static var representedURL: WindowName<Dynamic<URL?>> { return .name(B.representedURL) }
+	static var resizeStyle: WindowName<Dynamic<WindowResizeStyle>> { return .name(B.resizeStyle) }
+	static var restorationClass: WindowName<Dynamic<NSWindowRestoration.Type>> { return .name(B.restorationClass) }
+	static var screen: WindowName<Dynamic<NSScreen?>> { return .name(B.screen) }
+	static var sharingType: WindowName<Dynamic<NSWindow.SharingType>> { return .name(B.sharingType) }
+	static var styleMask: WindowName<Dynamic<NSWindow.StyleMask>> { return .name(B.styleMask) }
+	static var title: WindowName<Dynamic<String>> { return .name(B.title) }
+	static var toolbar: WindowName<Dynamic<ToolbarConvertible>> { return .name(B.toolbar) }
 	
-	/// Binding name for the horizonal component of `AppKit.NSWindow.setContentSize(_ size: NSSize)`
-	public static var contentWidth: BindingName<Dynamic<WindowSize>, Binding> { return BindingName<Dynamic<WindowSize>, Binding>({ v in .windowBinding(Window.Binding.contentWidth(v)) }) }
-	public static var contentHeight: BindingName<Dynamic<WindowSize>, Binding> { return BindingName<Dynamic<WindowSize>, Binding>({ v in .windowBinding(Window.Binding.contentHeight(v)) }) }
-	public static var depthLimit: BindingName<Dynamic<NSWindow.Depth?>, Binding> { return BindingName<Dynamic<NSWindow.Depth?>, Binding>({ v in .windowBinding(Window.Binding.depthLimit(v)) }) }
-	public static var displaysWhenScreenProfileChanges: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.displaysWhenScreenProfileChanges(v)) }) }
-	public static var isDocumentEdited: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isDocumentEdited(v)) }) }
-	public static var isExcludedFromWindowsMenu: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isExcludedFromWindowsMenu(v)) }) }
-	public static var frameAutosaveName: BindingName<Dynamic<NSWindow.FrameAutosaveName>, Binding> { return BindingName<Dynamic<NSWindow.FrameAutosaveName>, Binding>({ v in .windowBinding(Window.Binding.frameAutosaveName(v)) }) }
-	public static var frameHorizontal: BindingName<Dynamic<WindowPlacement>, Binding> { return BindingName<Dynamic<WindowPlacement>, Binding>({ v in .windowBinding(Window.Binding.frameHorizontal(v)) }) }
-	public static var frameVertical: BindingName<Dynamic<WindowPlacement>, Binding> { return BindingName<Dynamic<WindowPlacement>, Binding>({ v in .windowBinding(Window.Binding.frameVertical(v)) }) }
-	public static var hasShadow: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.hasShadow(v)) }) }
-	public static var hidesOnDeactivate: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.hidesOnDeactivate(v)) }) }
-	public static var ignoresMouseEvents: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.ignoresMouseEvents(v)) }) }
-	public static var key: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.key(v)) }) }
-	public static var level: BindingName<Dynamic<NSWindow.Level>, Binding> { return BindingName<Dynamic<NSWindow.Level>, Binding>({ v in .windowBinding(Window.Binding.level(v)) }) }
-	public static var main: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.main(v)) }) }
-	public static var miniwindowImage: BindingName<Dynamic<NSImage?>, Binding> { return BindingName<Dynamic<NSImage?>, Binding>({ v in .windowBinding(Window.Binding.miniwindowImage(v)) }) }
-	public static var miniwindowTitle: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .windowBinding(Window.Binding.miniwindowTitle(v)) }) }
-	public static var isMovable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isMovable(v)) }) }
-	public static var isMovableByWindowBackground: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isMovableByWindowBackground(v)) }) }
-	public static var isOneShot: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isOneShot(v)) }) }
-	public static var isOpaque: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isOpaque(v)) }) }
-	public static var order: BindingName<Dynamic<WindowOrder>, Binding> { return BindingName<Dynamic<WindowOrder>, Binding>({ v in .windowBinding(Window.Binding.order(v)) }) }
-	public static var preferredBackingLocation: BindingName<Dynamic<NSWindow.BackingLocation>, Binding> { return BindingName<Dynamic<NSWindow.BackingLocation>, Binding>({ v in .windowBinding(Window.Binding.preferredBackingLocation(v)) }) }
-	public static var preservesContentDuringLiveResize: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.preservesContentDuringLiveResize(v)) }) }
-	public static var preventsApplicationTerminationWhenModal: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.preventsApplicationTerminationWhenModal(v)) }) }
-	public static var representedURL: BindingName<Dynamic<URL?>, Binding> { return BindingName<Dynamic<URL?>, Binding>({ v in .windowBinding(Window.Binding.representedURL(v)) }) }
-	public static var resizeStyle: BindingName<Dynamic<WindowResizeStyle>, Binding> { return BindingName<Dynamic<WindowResizeStyle>, Binding>({ v in .windowBinding(Window.Binding.resizeStyle(v)) }) }
-	public static var isRestorable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .windowBinding(Window.Binding.isRestorable(v)) }) }
-	public static var restorationClass: BindingName<Dynamic<NSWindowRestoration.Type>, Binding> { return BindingName<Dynamic<NSWindowRestoration.Type>, Binding>({ v in .windowBinding(Window.Binding.restorationClass(v)) }) }
-	public static var screen: BindingName<Dynamic<NSScreen?>, Binding> { return BindingName<Dynamic<NSScreen?>, Binding>({ v in .windowBinding(Window.Binding.screen(v)) }) }
-	public static var sharingType: BindingName<Dynamic<NSWindow.SharingType>, Binding> { return BindingName<Dynamic<NSWindow.SharingType>, Binding>({ v in .windowBinding(Window.Binding.sharingType(v)) }) }
-	public static var styleMask: BindingName<Dynamic<NSWindow.StyleMask>, Binding> { return BindingName<Dynamic<NSWindow.StyleMask>, Binding>({ v in .windowBinding(Window.Binding.styleMask(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .windowBinding(Window.Binding.title(v)) }) }
-	public static var toolbar: BindingName<Dynamic<ToolbarConvertible>, Binding> { return BindingName<Dynamic<ToolbarConvertible>, Binding>({ v in .windowBinding(Window.Binding.toolbar(v)) }) }
-
+	@available(macOS 10.11, *)
+	static var minFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.minFullScreenContentSize) }
+	@available(macOS 10.11, *)
+	static var maxFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.maxFullScreenContentSize) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var close: BindingName<Signal<WindowCloseBehavior>, Binding> { return BindingName<Signal<WindowCloseBehavior>, Binding>({ v in .windowBinding(Window.Binding.close(v)) }) }
-	public static var deminiaturize: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.deminiaturize(v)) }) }
-	public static var display: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .windowBinding(Window.Binding.display(v)) }) }
-	public static var invalidateShadow: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.invalidateShadow(v)) }) }
-	public static var miniaturize: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .windowBinding(Window.Binding.miniaturize(v)) }) }
-	public static var printWindow: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.printWindow(v)) }) }
-	public static var recalculateKeyViewLoop: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.recalculateKeyViewLoop(v)) }) }
-	public static var runToolbarCustomizationPalette: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.runToolbarCustomizationPalette(v)) }) }
-	public static var selectNextKeyView: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.selectNextKeyView(v)) }) }
-	public static var selectPreviousKeyView: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.selectPreviousKeyView(v)) }) }
-	public static var toggleFullScreen: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.toggleFullScreen(v)) }) }
-	public static var toggleToolbarShown: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.toggleToolbarShown(v)) }) }
-	public static var zoom: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .windowBinding(Window.Binding.zoom(v)) }) }
-	public static var sheet: BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding> { return BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding>({ v in .windowBinding(Window.Binding.sheet(v)) }) }
-	public static var criticalSheet: BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding> { return BindingName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>, Binding>({ v in .windowBinding(Window.Binding.criticalSheet(v)) }) }
-	public static var presentError: BindingName<Signal<Callback<Error, Bool>>, Binding> { return BindingName<Signal<Callback<Error, Bool>>, Binding>({ v in .windowBinding(Window.Binding.presentError(v)) }) }
+	static var close: WindowName<Signal<WindowCloseBehavior>> { return .name(B.close) }
+	static var criticalSheet: WindowName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>> { return .name(B.criticalSheet) }
+	static var deminiaturize: WindowName<Signal<Void>> { return .name(B.deminiaturize) }
+	static var display: WindowName<Signal<Bool>> { return .name(B.display) }
+	static var invalidateShadow: WindowName<Signal<Void>> { return .name(B.invalidateShadow) }
+	static var miniaturize: WindowName<Signal<Bool>> { return .name(B.miniaturize) }
+	static var presentError: WindowName<Signal<Callback<Error, Bool>>> { return .name(B.presentError) }
+	static var printWindow: WindowName<Signal<Void>> { return .name(B.printWindow) }
+	static var recalculateKeyViewLoop: WindowName<Signal<Void>> { return .name(B.recalculateKeyViewLoop) }
+	static var runToolbarCustomizationPalette: WindowName<Signal<Void>> { return .name(B.runToolbarCustomizationPalette) }
+	static var selectNextKeyView: WindowName<Signal<Void>> { return .name(B.selectNextKeyView) }
+	static var selectPreviousKeyView: WindowName<Signal<Void>> { return .name(B.selectPreviousKeyView) }
+	static var sheet: WindowName<Signal<Callback<NSWindow, NSApplication.ModalResponse>>> { return .name(B.sheet) }
+	static var toggleFullScreen: WindowName<Signal<Void>> { return .name(B.toggleFullScreen) }
+	static var toggleToolbarShown: WindowName<Signal<Void>> { return .name(B.toggleToolbarShown) }
+	static var zoom: WindowName<Signal<Bool>> { return .name(B.zoom) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var didBecomeKey: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didBecomeKey(v)) }) }
-	public static var didBecomeMain: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didBecomeMain(v)) }) }
-	public static var didChangeBackingProperties: BindingName<SignalInput<(oldColorSpace: NSColorSpace?, oldScaleFactor: CGFloat?)>, Binding> { return BindingName<SignalInput<(oldColorSpace: NSColorSpace?, oldScaleFactor: CGFloat?)>, Binding>({ v in .windowBinding(Window.Binding.didChangeBackingProperties(v)) }) }
-	public static var didChangeOcclusionState: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didChangeOcclusionState(v)) }) }
-	public static var didChangeScreen: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didChangeScreen(v)) }) }
-	public static var didChangeScreenProfile: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didChangeScreenProfile(v)) }) }
-	public static var didDeminiaturize: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didDeminiaturize(v)) }) }
-	public static var didEndLiveResize: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didEndLiveResize(v)) }) }
-	public static var didEndSheet: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didEndSheet(v)) }) }
-	public static var didEnterFullScreen: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didEnterFullScreen(v)) }) }
-	public static var didEnterVersionBrowser: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didEnterVersionBrowser(v)) }) }
-	public static var didExitFullScreen: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didExitFullScreen(v)) }) }
-	public static var didExitVersionBrowser: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didExitVersionBrowser(v)) }) }
-	public static var didExpose: BindingName<SignalInput<NSRect>, Binding> { return BindingName<SignalInput<NSRect>, Binding>({ v in .windowBinding(Window.Binding.didExpose(v)) }) }
-	public static var didMiniaturize: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didMiniaturize(v)) }) }
-	public static var didMove: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didMove(v)) }) }
-	public static var didResignKey: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didResignKey(v)) }) }
-	public static var didResignMain: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didResignMain(v)) }) }
-	public static var didResize: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didResize(v)) }) }
-	public static var didUpdate: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didUpdate(v)) }) }
-	public static var willBeginSheet: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willBeginSheet(v)) }) }
-	public static var willClose: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willClose(v)) }) }
-	public static var willEnterFullScreen: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willEnterFullScreen(v)) }) }
-	public static var willEnterVersionBrowser: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willEnterVersionBrowser(v)) }) }
-	public static var willExitFullScreen: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willExitFullScreen(v)) }) }
-	public static var willExitVersionBrowser: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willExitVersionBrowser(v)) }) }
-	public static var willMiniaturize: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willMiniaturize(v)) }) }
-	public static var willMove: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willMove(v)) }) }
-	public static var willStartLiveResize: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.willStartLiveResize(v)) }) }
-
+	static var didBecomeKey: WindowName<SignalInput<Void>> { return .name(B.didBecomeKey) }
+	static var didBecomeMain: WindowName<SignalInput<Void>> { return .name(B.didBecomeMain) }
+	static var didChangeBackingProperties: WindowName<SignalInput<(oldColorSpace: NSColorSpace?, oldScaleFactor: CGFloat?)>> { return .name(B.didChangeBackingProperties) }
+	static var didChangeOcclusionState: WindowName<SignalInput<Void>> { return .name(B.didChangeOcclusionState) }
+	static var didChangeScreen: WindowName<SignalInput<Void>> { return .name(B.didChangeScreen) }
+	static var didChangeScreenProfile: WindowName<SignalInput<Void>> { return .name(B.didChangeScreenProfile) }
+	static var didDeminiaturize: WindowName<SignalInput<Void>> { return .name(B.didDeminiaturize) }
+	static var didEndLiveResize: WindowName<SignalInput<Void>> { return .name(B.didEndLiveResize) }
+	static var didEndSheet: WindowName<SignalInput<Void>> { return .name(B.didEndSheet) }
+	static var didEnterFullScreen: WindowName<SignalInput<Void>> { return .name(B.didEnterFullScreen) }
+	static var didEnterVersionBrowser: WindowName<SignalInput<Void>> { return .name(B.didEnterVersionBrowser) }
+	static var didExitFullScreen: WindowName<SignalInput<Void>> { return .name(B.didExitFullScreen) }
+	static var didExitVersionBrowser: WindowName<SignalInput<Void>> { return .name(B.didExitVersionBrowser) }
+	static var didExpose: WindowName<SignalInput<NSRect>> { return .name(B.didExpose) }
+	static var didMiniaturize: WindowName<SignalInput<Void>> { return .name(B.didMiniaturize) }
+	static var didMove: WindowName<SignalInput<Void>> { return .name(B.didMove) }
+	static var didResignKey: WindowName<SignalInput<Void>> { return .name(B.didResignKey) }
+	static var didResignMain: WindowName<SignalInput<Void>> { return .name(B.didResignMain) }
+	static var didResize: WindowName<SignalInput<Void>> { return .name(B.didResize) }
+	static var didUpdate: WindowName<SignalInput<Void>> { return .name(B.didUpdate) }
+	static var willBeginSheet: WindowName<SignalInput<Void>> { return .name(B.willBeginSheet) }
+	static var willClose: WindowName<SignalInput<Void>> { return .name(B.willClose) }
+	static var willEnterFullScreen: WindowName<SignalInput<Void>> { return .name(B.willEnterFullScreen) }
+	static var willEnterVersionBrowser: WindowName<SignalInput<Void>> { return .name(B.willEnterVersionBrowser) }
+	static var willExitFullScreen: WindowName<SignalInput<Void>> { return .name(B.willExitFullScreen) }
+	static var willExitVersionBrowser: WindowName<SignalInput<Void>> { return .name(B.willExitVersionBrowser) }
+	static var willMiniaturize: WindowName<SignalInput<Void>> { return .name(B.willMiniaturize) }
+	static var willMove: WindowName<SignalInput<Void>> { return .name(B.willMove) }
+	static var willStartLiveResize: WindowName<SignalInput<Void>> { return .name(B.willStartLiveResize) }
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var shouldClose: BindingName<(NSWindow) -> Bool, Binding> { return BindingName<(NSWindow) -> Bool, Binding>({ v in .windowBinding(Window.Binding.shouldClose(v)) }) }
-	public static var shouldPopUpDocumentPathMenu: BindingName<(NSWindow, NSMenu) -> Bool, Binding> { return BindingName<(NSWindow, NSMenu) -> Bool, Binding>({ v in .windowBinding(Window.Binding.shouldPopUpDocumentPathMenu(v)) }) }
-	public static var shouldZoom: BindingName<(NSWindow, NSRect) -> Bool, Binding> { return BindingName<(NSWindow, NSRect) -> Bool, Binding>({ v in .windowBinding(Window.Binding.shouldZoom(v)) }) }
-	public static var willResize: BindingName<(NSWindow, NSSize) -> NSSize, Binding> { return BindingName<(NSWindow, NSSize) -> NSSize, Binding>({ v in .windowBinding(Window.Binding.willResize(v)) }) }
-	public static var willResizeForVersionBrowser: BindingName<(_ window: NSWindow, _ maxPreferredSize: NSSize, _ maxAllowedSize: NSSize) -> NSSize, Binding> { return BindingName<(_ window: NSWindow, _ maxPreferredSize: NSSize, _ maxAllowedSize: NSSize) -> NSSize, Binding>({ v in .windowBinding(Window.Binding.willResizeForVersionBrowser(v)) }) }
-	public static var willUseFullScreenContentSize: BindingName<(NSWindow, NSSize) -> NSSize, Binding> { return BindingName<(NSWindow, NSSize) -> NSSize, Binding>({ v in .windowBinding(Window.Binding.willUseFullScreenContentSize(v)) }) }
-	public static var willUseFullScreenPresentationOptions: BindingName<(NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions, Binding> { return BindingName<(NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions, Binding>({ v in .windowBinding(Window.Binding.willUseFullScreenPresentationOptions(v)) }) }
-	public static var willUseStandardFrame: BindingName<(NSWindow, NSRect) -> NSRect, Binding> { return BindingName<(NSWindow, NSRect) -> NSRect, Binding>({ v in .windowBinding(Window.Binding.willUseStandardFrame(v)) }) }
+	static var shouldClose: WindowName<(NSWindow) -> Bool> { return .name(B.shouldClose) }
+	static var shouldPopUpDocumentPathMenu: WindowName<(NSWindow, NSMenu) -> Bool> { return .name(B.shouldPopUpDocumentPathMenu) }
+	static var shouldZoom: WindowName<(NSWindow, NSRect) -> Bool> { return .name(B.shouldZoom) }
+	static var willResize: WindowName<(NSWindow, NSSize) -> NSSize> { return .name(B.willResize) }
+	static var willResizeForVersionBrowser: WindowName<(_ window: NSWindow, _ maxPreferredSize: NSSize, _ maxAllowedSize: NSSize) -> NSSize> { return .name(B.willResizeForVersionBrowser) }
+	static var willUseFullScreenContentSize: WindowName<(NSWindow, NSSize) -> NSSize> { return .name(B.willUseFullScreenContentSize) }
+	static var willUseFullScreenPresentationOptions: WindowName<(NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions> { return .name(B.willUseFullScreenPresentationOptions) }
+	static var willUseStandardFrame: WindowName<(NSWindow, NSRect) -> NSRect> { return .name(B.willUseStandardFrame) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol WindowConvertible {
 	func nsWindow() -> Window.Instance
 }
-extension Window.Instance: WindowConvertible {
+extension NSWindow: WindowConvertible, DefaultConstructable, HasDelegate {
 	public func nsWindow() -> Window.Instance { return self }
 }
-
-public protocol WindowBinding: BaseBinding {
-	static func windowBinding(_ binding: Window.Binding) -> Self
+public extension Window {
+	public func nsWindow() -> Window.Instance { return instance() }
 }
 
-extension WindowBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+// MARK: - Binder Part 8: Downcast protocols
+public protocol WindowBinding: BinderBaseBinding {
+	static func windowBinding(_ binding: Window.Binding) -> Self
+}
+public extension WindowBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return windowBinding(.inheritedBinding(binding))
 	}
 }
+public extension Window.Binding {
+	public typealias Preparer = Window.Preparer
+	static func windowBinding(_ binding: Window.Binding) -> Window.Binding {
+		return binding
+	}
+}
 
+// MARK: - Binder Part 9: Other supporting types
 public enum WindowCloseBehavior {
 	case dismiss
 	case perform

@@ -76,13 +76,13 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -112,6 +112,7 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 		
 		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			case .pageData(let x):
 				return x.apply(instance, storage) { inst, stor, val in
 					stor.changePageData(val.value, in: inst, animation: val.animation)
@@ -122,7 +123,6 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 			case .navigationOrientation: return nil
 			case .spineLocation: return nil
 			case .pageSpacing: return nil
-			case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 			case .willTransitionTo: return nil
 			case .didFinishAnimating: return nil
 			case .spineLocationFor: return nil

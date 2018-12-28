@@ -18,14 +18,11 @@
 //
 
 /// Implementation for `BinderStorage` that wraps Cocoa objects.
-open class ObjectBinderStorage: NSObject, DefaultConstructable {
+open class ObjectBinderStorage: NSObject {
 	public typealias Instance = NSObject
 	private var lifetimes: [Lifetime]? = nil
 	
 	private static var associatedStorageKey = NSObject()
-	
-	public override required init() {
-	}
 	
 	/// The embed function will avoid embedding and let the ObjectBinderStorage release if this function returns false.
 	/// Override and alter logic if a subclass may require the storage to persist when lifetimes is empty and the dynamic delegate is unused.
@@ -107,14 +104,15 @@ open class ObjectBinderStorage: NSObject, DefaultConstructable {
 open class DynamicDelegate: NSObject, DefaultConstructable {
 	var implementedSelectors = Dictionary<Selector, Any>()
 	var associatedHandler: Any?
-	public func handler<Value>(ofType: Value.Type) -> Value {
-		let v = associatedHandler as! Value
-		associatedHandler = nil
-		return v
-	}
 	
 	public required override init() {
 		super.init()
+	}
+	
+	open func handler<Value>(ofType: Value.Type) -> Value {
+		let v = associatedHandler as! Value
+		associatedHandler = nil
+		return v
 	}
 	
 	open func addHandler(_ value: Any, _ selector: Selector) {

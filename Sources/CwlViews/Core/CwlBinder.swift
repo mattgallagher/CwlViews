@@ -71,7 +71,7 @@ private extension Binder where Preparer: BinderApplyable {
 		return output
 	}
 	
-	func bind(to source: (_ preparer: Preparer, _ type: Preparer.Instance.Type, _ parameters: Preparer.Parameters, _ storage: Preparer.Storage) -> Preparer.Instance) -> (Preparer, Preparer.Instance, Preparer.Storage, [Lifetime]) {
+	func bind(to source: (_ preparer: Preparer, _ type: Preparer.Instance.Type, _ parameters: Preparer.Parameters) -> Preparer.Instance) -> (Preparer, Preparer.Instance, Preparer.Storage, [Lifetime]) {
 		let (type, parameters, bindings) = consume()
 		
 		var preparer = Preparer()
@@ -79,9 +79,9 @@ private extension Binder where Preparer: BinderApplyable {
 			preparer.prepareBinding(b)
 		}
 		
-		let storage = preparer.constructStorage(parameters: parameters)
 		var lifetimes = [Lifetime]()
-		let instance = source(preparer, type, parameters, storage)
+		let instance = source(preparer, type, parameters)
+		let storage = preparer.constructStorage(instance: instance)
 		
 		preparer.prepareInstance(instance, storage: storage)
 		
@@ -97,27 +97,27 @@ private extension Binder where Preparer: BinderApplyable {
 
 public extension Binder where Preparer: BinderApplyable {
 	func apply(to instance: Preparer.Instance) {
-		let (preparer, instance, storage, lifetimes) = bind { (_, _, _, _) in instance }
+		let (preparer, instance, storage, lifetimes) = bind { (_, _, _) in instance }
 		_ = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
 	}
 }
 
-public extension Binder where Preparer: BinderEmbedderConstructor {
+public extension Binder where Preparer: BinderConstructor, Preparer.Instance == Preparer.Output {
 	func instance() -> Preparer.Instance {
 		if let output = constructed { return output }
-		let (_, instance, storage, lifetimes) = bind { (preparer, type, parameters, storage) in
-			preparer.constructInstance(type: type, parameters: parameters, storage: storage)
+		let (preparer, instance, storage, lifetimes) = bind { (preparer, type, parameters) in
+			preparer.constructInstance(type: type, parameters: parameters)
 		}
-		storage.embed(lifetimes: lifetimes, in: instance)
+		let output = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
 		state = .constructed(instance)
-		return instance
+		return output
 	}
 }
 
 public extension Binder where Preparer: BinderApplyable, Preparer.Storage == Preparer.Output {
 	func wrap(instance: Preparer.Instance) -> Preparer.Output {
 		if let output = constructed { return output }
-		let (preparer, instance, storage, lifetimes) = bind { (_, _, _, _) in instance }
+		let (preparer, instance, storage, lifetimes) = bind { (_, _, _) in instance }
 		let output = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
 		state = .consumed
 		return output
@@ -126,8 +126,8 @@ public extension Binder where Preparer: BinderApplyable, Preparer.Storage == Pre
 
 public extension Binder where Preparer: BinderConstructor, Preparer.Storage == Preparer.Output {
 	func construct() -> Preparer.Output {
-		let (preparer, instance, storage, lifetimes) = bind { (preparer, type, parameters, storage) in
-			preparer.constructInstance(type: type, parameters: parameters, storage: storage)
+		let (preparer, instance, storage, lifetimes) = bind { (preparer, type, parameters) in
+			preparer.constructInstance(type: type, parameters: parameters)
 		}
 		let output = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
 		state = .constructed(output)

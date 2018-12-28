@@ -84,13 +84,13 @@ public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -113,7 +113,7 @@ public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 
-			storage.dynamicDelegate = possibleDelegate
+			storage.dynamicDelegate = dynamicDelegate
 			storage.tabBarItemConstructor = tabBarItemConstructor
 			
 			if storage.inUse {
@@ -126,6 +126,7 @@ public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
 			// e.g. case .someProperty(let x): return x.apply(instance, storage) { inst, stor, val in inst.someProperty = val }
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			case .itemConstructor: return nil
 			case .items(let x):
 				return x.apply(instance, storage) { inst, stor, val in
@@ -161,12 +162,11 @@ public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 			case .willEndCustomizing: return nil
 			case .didEndCustomizing: return nil
 			case .didSelectItem: return nil
-			case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 			}
 		}
 	}
 
-	open class Storage: View.Storage, UITabBarDelegate {
+	open class Storage: View.Preparer.Storage, UITabBarDelegate {
 		open var tabBarItemConstructor: ((ItemIdentifier) -> TabBarItemConvertible)?
 		open var allItems: [ItemIdentifier: TabBarItemConvertible] = [:]
 		

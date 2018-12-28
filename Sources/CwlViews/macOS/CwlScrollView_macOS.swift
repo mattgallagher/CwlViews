@@ -89,10 +89,10 @@ public extension ScrollView {
 		public typealias Binding = ScrollView.Binding
 		public typealias Inherited = View.Preparer
 		public typealias Instance = NSScrollView
-		public typealias Storage = ScrollView.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -166,8 +166,8 @@ public extension ScrollView.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension ScrollView {
-	open class Storage: View.Storage {
+extension ScrollView.Preparer {
+	open class Storage: View.Preparer.Storage {
 		open override var isInUse: Bool {
 			return super.isInUse || !floatingSubviews.isEmpty
 		}
@@ -268,5 +268,7 @@ public extension ScrollView.Binding {
 		return binding
 	}
 }
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

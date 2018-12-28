@@ -82,10 +82,10 @@ public extension StackView {
 		public typealias Binding = StackView.Binding
 		public typealias Inherited = View.Preparer
 		public typealias Instance = NSUIStackView
-		public typealias Storage = StackView.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -169,13 +169,13 @@ public extension StackView.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension StackView {
+extension StackView.Preparer {
 	#if os(macOS)
-		open class Storage: View.Storage {
+		open class Storage: View.Preparer.Storage {
 			open var gravity: NSStackView.Gravity = .center
 		}
 	#else
-		public typealias Storage = View.Storage
+		public typealias Storage = View.Preparer.Storage
 	#endif
 }
 

@@ -54,19 +54,18 @@ public extension Layer {
 
 // MARK: - Binder Part 3: Preparer
 public extension Layer {
-	struct Preparer: BinderDelegateConstructor {
+	struct Preparer: BinderDelegateEmbedderConstructor {
 		public typealias Binding = Layer.Binding
-		public typealias Delegate = Layer.Delegate
 		public typealias Inherited = BackingLayer.Preparer
 		public typealias Instance = CALayer
-		public typealias Storage = Layer.Storage
 		
 		public var inherited = Inherited()
-		public var possibleDelegate: Delegate? = nil
+		public var dynamicDelegate: Delegate? = nil
 		public let delegateClass: Delegate.Type
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -110,7 +109,7 @@ public extension Layer.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension Layer {
+extension Layer.Preparer {
 	open class Storage: BackingLayer.Preparer.Storage, CALayerDelegate {}
 	
 	open class Delegate: DynamicDelegate, CALayerDelegate {

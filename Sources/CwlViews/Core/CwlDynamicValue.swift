@@ -83,6 +83,10 @@ public struct InitialSubsequent<Value> {
 		self.initial = initial
 		self.subsequent = subsequent
 	}
+	
+	public func resume() -> Signal<Value>? {
+		return subsequent?.resume()
+	}
 }
 
 extension Signal {

@@ -19,22 +19,17 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class TableCellView: Binder, TableCellViewConvertible {
-	public typealias Instance = NSTableCellView
-	public typealias Inherited = View
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsTableCellView() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TableCellView {
 	enum Binding: TableCellViewBinding {
-		public typealias EnclosingBinder = TableCellView
-		public static func tableCellViewBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -49,36 +44,68 @@ public class TableCellView: Binder, TableCellViewConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
+// MARK: - Binder Part 3: Preparer
+public extension TableCellView {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = TableCellView
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = TableCellView.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = NSTableCellView
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .backgroundStyle(let x): return x.apply(instance) { i, v in i.backgroundStyle = v }
-			case .rowSizeStyle(let x): return x.apply(instance) { i, v in i.rowSizeStyle = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+	}
 }
 
-	public typealias Storage = View.Storage
+// MARK: - Binder Part 4: Preparer overrides
+public extension TableCellView.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .backgroundStyle(let x): return x.apply(instance) { i, v in i.backgroundStyle = v }
+		case .rowSizeStyle(let x): return x.apply(instance) { i, v in i.rowSizeStyle = v }
+
+		// 2. Signal bindings are performed on the object after construction.
+
+		// 3. Action bindings are triggered by the object after construction.
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
 }
 
+// MARK: - Binder Part 5: Storage and Delegate
+extension TableCellView.Preparer {
+	public typealias Storage = View.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableCellViewBinding {
+	public typealias TableCellViewName<V> = BindingName<V, TableCellView.Binding, Binding>
+	private typealias B = TableCellView.Binding
+	private static func name<V>(_ source: @escaping (V) -> TableCellView.Binding) -> TableCellViewName<V> {
+		return TableCellViewName<V>(source: source, downcast: Binding.tableCellViewBinding)
+	}
+}
+public extension BindingName where Binding: TableCellViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .tableCellViewBinding(TableCellView.Binding.$1(v)) }) }
+	// With:    static var $1: TableCellViewName<$2> { return .name(B.$1) }
 
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var backgroundStyle: BindingName<Dynamic<NSView.BackgroundStyle>, Binding> { return BindingName<Dynamic<NSView.BackgroundStyle>, Binding>({ v in .tableCellViewBinding(TableCellView.Binding.backgroundStyle(v)) }) }
-	public static var rowSizeStyle: BindingName<Dynamic<NSTableView.RowSizeStyle>, Binding> { return BindingName<Dynamic<NSTableView.RowSizeStyle>, Binding>({ v in .tableCellViewBinding(TableCellView.Binding.rowSizeStyle(v)) }) }
+	static var backgroundStyle: TableCellViewName<Dynamic<NSView.BackgroundStyle>> { return .name(B.backgroundStyle) }
+	static var rowSizeStyle: TableCellViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(B.rowSizeStyle) }
 
 	// 2. Signal bindings are performed on the object after construction.
 
@@ -87,23 +114,36 @@ extension BindingName where Binding: TableCellViewBinding {
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol TableCellViewConvertible: ViewConvertible {
 	func nsTableCellView() -> TableCellView.Instance
 }
 extension TableCellViewConvertible {
 	public func nsView() -> View.Instance { return nsTableCellView() }
 }
-extension TableCellView.Instance: TableCellViewConvertible {
+extension NSTableCellView: TableCellViewConvertible {
 	public func nsTableCellView() -> TableCellView.Instance { return self }
 }
+public extension TableCellView {
+	func nsTableCellView() -> TableCellView.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol TableCellViewBinding: ViewBinding {
 	static func tableCellViewBinding(_ binding: TableCellView.Binding) -> Self
 }
-extension TableCellViewBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension TableCellViewBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tableCellViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableCellView.Binding {
+	public typealias Preparer = TableCellView.Preparer
+	static func tableCellViewBinding(_ binding: TableCellView.Binding) -> TableCellView.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

@@ -10,10 +10,11 @@ public protocol BinderDelegateEmbedder: BinderEmbedder where Instance: HasDelega
 	associatedtype Delegate: DynamicDelegate
 	init(delegateClass: Delegate.Type)
 	var delegateClass: Delegate.Type { get }
-	var possibleDelegate: Delegate? { get set }
+	var dynamicDelegate: Delegate? { get set }
+	var delegateIsRequired: Bool { get }
 }
 
-public typealias BinderDelegateConstructor = BinderDelegateEmbedder & BinderConstructor
+public typealias BinderDelegateEmbedderConstructor = BinderDelegateEmbedder & BinderConstructor
 
 public protocol HasDelegate: class {
 	associatedtype DelegateProtocol
@@ -25,12 +26,14 @@ public extension BinderDelegateEmbedder {
 		self.init(delegateClass: Delegate.self)
 	}
 	
+	var delegateIsRequired: Bool { return dynamicDelegate != nil }
+	
 	mutating func delegate() -> Delegate {
-		if let d = possibleDelegate {
+		if let d = dynamicDelegate {
 			return d
 		} else {
 			let d = delegateClass.init()
-			possibleDelegate = d
+			dynamicDelegate = d
 			return d
 		}
 	}
@@ -38,9 +41,11 @@ public extension BinderDelegateEmbedder {
 
 public extension BinderDelegateEmbedder where Delegate: DynamicDelegate {
 	func prepareDelegate(instance: Instance, storage: Storage) {
-		if possibleDelegate != nil {
+		if delegateIsRequired {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = possibleDelegate
+			if dynamicDelegate != nil {
+				storage.dynamicDelegate = dynamicDelegate
+			}
 			instance.delegate = (storage as! Instance.DelegateProtocol)
 		}
 	}
@@ -51,7 +56,7 @@ public extension BinderDelegateEmbedder where Delegate: DynamicDelegate {
 	}
 }
 
-public protocol BinderDelegateDerived: BinderEmbedderConstructor where Inherited: BinderDelegateConstructor {
+public protocol BinderDelegateDerived: BinderEmbedderConstructor where Inherited: BinderDelegateEmbedderConstructor {
 	init(delegateClass: Inherited.Delegate.Type)
 }
 
@@ -60,8 +65,8 @@ public extension BinderDelegateDerived {
 	init() {
 		self.init(delegateClass: Inherited.Delegate.self)
 	}
-	var possibleDelegate: Inherited.Delegate? {
-		get { return inherited.possibleDelegate }
-		set { inherited.possibleDelegate = newValue }
+	var dynamicDelegate: Inherited.Delegate? {
+		get { return inherited.dynamicDelegate }
+		set { inherited.dynamicDelegate = newValue }
 	}
 }

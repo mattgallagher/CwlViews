@@ -77,13 +77,13 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 			self.delegateClass = delegateClass
 		}
 		public let delegateClass: Delegate.Type
-		var possibleDelegate: Delegate? = nil
+		var dynamicDelegate: Delegate? = nil
 		mutating func delegate() -> Delegate {
-			if let d = possibleDelegate {
+			if let d = dynamicDelegate {
 				return d
 			} else {
 				let d = delegateClass.init()
-				possibleDelegate = d
+				dynamicDelegate = d
 				return d
 			}
 		}
@@ -110,7 +110,7 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 		public func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 
-			storage.dynamicDelegate = possibleDelegate
+			storage.dynamicDelegate = dynamicDelegate
 			storage.tabConstructor = tabConstructor
 
 			if storage.inUse {
@@ -122,6 +122,7 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 		
 		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
+			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			case .tabBar(let x):
 				x.value.applyBindings(to: instance.tabBar)
 				return nil
@@ -150,7 +151,6 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 			case .preferredInterfaceOrientationForPresentation: return nil
 			case .interactionControllerForAnimation: return nil
 			case .animationControllerForTransition: return nil
-			case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 			}
 		}
 	}

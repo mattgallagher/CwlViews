@@ -56,10 +56,10 @@ public extension ClipView {
 		public typealias Binding = ClipView.Binding
 		public typealias Inherited = View.Preparer
 		public typealias Instance = NSClipView
-		public typealias Storage = ClipView.Storage
 		
 		public var inherited = Inherited()
 		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -82,8 +82,8 @@ public extension ClipView.Preparer {
 }
 
 // MARK: - Binder Part 5: Storage and Delegate
-extension ClipView {
-	public typealias Storage = View.Storage
+extension ClipView.Preparer {
+	public typealias Storage = View.Preparer.Storage
 }
 
 // MARK: - Binder Part 6: BindingNames
@@ -145,5 +145,7 @@ public extension ClipView.Binding {
 		return binding
 	}
 }
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

@@ -142,7 +142,7 @@ public class TableView<RowData>: Binder, TableViewConvertible {
 		public init(delegateClass: Delegate.Type) {
 			linkedPreparer = Inherited.Preparer(delegateClass: delegateClass)
 		}
-		var possibleDelegate: Delegate? { return linkedPreparer.possibleDelegate as? Delegate }
+		var dynamicDelegate: Delegate? { return linkedPreparer.dynamicDelegate as? Delegate }
 		mutating func delegate() -> Delegate { return linkedPreparer.delegate() as! Delegate }
 		
 		var tableViewStyle: UITableView.Style = .plain
@@ -355,7 +355,7 @@ public class TableView<RowData>: Binder, TableViewConvertible {
 		}
 	}
 
-	open class Storage: ScrollView.Storage, UITableViewDelegate, UITableViewDataSource {
+	open class Storage: ScrollView.Preparer.Storage, UITableViewDelegate, UITableViewDataSource {
 		open override var inUse: Bool { return true }
 		open var sections = TableRowState<TableSectionState<RowData>>()
 		open var indexTitles: [String]? = nil

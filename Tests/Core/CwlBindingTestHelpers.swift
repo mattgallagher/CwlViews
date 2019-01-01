@@ -9,152 +9,137 @@
 import XCTest
 @testable import CwlViews
 
-func testValueBinding<B: BaseBinding, InputValue, OutputValue: Equatable>(name: BindingName<Dynamic<InputValue>, B>, constructor: (B) -> B.EnclosingBinder.Instance, skipReleaseCheck: Bool = false, initial: OutputValue, first: @autoclosure () -> (InputValue, OutputValue), second: (InputValue, OutputValue), getter: (B.EnclosingBinder.Instance) -> OutputValue, file: StaticString = #file, line: UInt = #line) where B.EnclosingBinder: Binder, B.EnclosingBinder.Instance: NSObject {
-	weak var weakInstance: B.EnclosingBinder.Instance? = nil
-	autoreleasepool {
-		let (i, s) = Signal<InputValue>.create()
-		let binding = name.constructor(Dynamic.dynamic(s))
-		
-		let instance = constructor(binding)
-		weakInstance = instance
-		XCTAssertEqual(getter(instance), initial, "initial condition failed", file: file, line: line)
-		
-		autoreleasepool {
-			let (input, output) = first()
-			i.send(input)
-			XCTAssertEqual(getter(instance), output, "first condition failed", file: file, line: line)
-			
-			i.send(second.0)
-		}
-		XCTAssertEqual(getter(instance), second.1, "second condition failed", file: file, line: line)
-	}
-	if !skipReleaseCheck {
-		XCTAssertNil(weakInstance, "release check failed", file: file, line: line)
+protocol TestableBinder: Binder {
+	static var testInstance: Preparer.Instance.Type { get }
+	static var parameters: Preparer.Parameters { get }
+	static var shoudPerformReleaseCheck: Bool { get }
+	static func constructor(binding: Preparer.Binding) -> Preparer.Instance
+}
+
+extension TestableBinder {
+	static var testInstance: Preparer.Instance.Type { return Preparer.Instance.self }
+}
+
+extension TestableBinder where Preparer.Parameters == Void {
+	static var parameters: Preparer.Parameters { return () }
+}
+
+extension TestableBinder where Preparer: BinderConstructor, Preparer.Parameters == Void, Preparer.Instance == Preparer.Output {
+	static var shoudPerformReleaseCheck: Bool { return true }
+	static func constructor(binding: Preparer.Binding) -> Preparer.Instance {
+		return Self.init(type: Preparer.Instance.self, parameters: (), bindings: [binding]).instance()
 	}
 }
 
-//func testValueBinding<B: BaseBinding, InputValue, OutputValue: Equatable>(name: BindingName<Dynamic<InputValue>, B>, constructor: (B) -> B.EnclosingBinder.Instance, skipReleaseCheck: Bool = false, initial: OutputValue, firstInput: @autoclosure () -> (InputValue), firstOutput: @autoclosure () -> (OutputValue), secondInput: InputValue, secondOutput: OutputValue, getter: (B.EnclosingBinder.Instance) -> OutputValue, file: StaticString = #file, line: UInt = #line) where B.EnclosingBinder: Binder, B.EnclosingBinder.Instance: NSObject {
-//	weak var weakInstance: B.EnclosingBinder.Instance? = nil
-//	autoreleasepool {
-//		let (i, s) = Signal<InputValue>.create()
-//		let binding = name.constructor(Dynamic.dynamic(s))
-//		
-//		let instance = constructor(binding)
-//		weakInstance = instance
-//		XCTAssertEqual(getter(instance), initial, "initial condition failed", file: file, line: line)
-//		
-//		autoreleasepool {
-//			let input = firstInput()
-//			let output = firstOutput()
-//			i.send(input)
-//			XCTAssertEqual(getter(instance), output, "first condition failed", file: file, line: line)
-//			
-//			i.send(secondInput)
-//		}
-//		XCTAssertEqual(getter(instance), secondOutput, "second condition failed", file: file, line: line)
-//	}
-//	if !skipReleaseCheck {
-//		XCTAssertNil(weakInstance, "release check failed", file: file, line: line)
-//	}
-//}
-
-func testSignalBinding<InputValue, Binding, Instance: NSObject, OutputValue>(name: BindingName<Signal<InputValue>, Binding>, constructor: (Binding) -> Instance, skipReleaseCheck: Bool = false, initial: OutputValue, first: @autoclosure () -> (InputValue, OutputValue), second: (InputValue, OutputValue), getter: (Instance) -> OutputValue, file: StaticString = #file, line: UInt = #line) where OutputValue: Equatable {
-	weak var weakInstance: Instance? = nil
-	autoreleasepool {
-		let (i, s) = Signal<InputValue>.create()
-		let binding = name.constructor(s)
-		
-		let instance = constructor(binding)
-		weakInstance = instance
-		XCTAssertEqual(getter(instance), initial, "initial condition failed", file: file, line: line)
-		
+extension TestableBinder where Preparer.Instance: NSObject {
+	static func testValueBinding<InputValue, OutputValue: Equatable>(name: BindingName<Dynamic<InputValue>, Preparer.Binding, Preparer.Binding>, inputs: (InputValue, InputValue), outputs: (OutputValue, OutputValue, OutputValue), getter: (Preparer.Instance) -> OutputValue, file: StaticString = #file, line: UInt = #line) {
+		weak var weakInstance: Preparer.Instance? = nil
 		autoreleasepool {
-			let (input, output) = first()
-			i.send(input)
-			XCTAssertEqual(getter(instance), output, "first condition failed", file: file, line: line)
+			let (i, s) = Signal<InputValue>.create()
+			let binding = name.binding(with: Dynamic.dynamic(s))
 			
-			i.send(second.0)
-		}
-		XCTAssertEqual(getter(instance), second.1, "second condition failed", file: file, line: line)
-	}
-	if !skipReleaseCheck {
-		XCTAssertNil(weakInstance, file: file, line: line)
-	}
-}
-
-func testSignalBinding<InputValue, Binding, Instance: NSObject, OutputValue>(name: BindingName<Signal<InputValue>, Binding>, constructor: (Binding) -> Instance, skipReleaseCheck: Bool = false, initial: OutputValue, firstInput: @autoclosure () -> (InputValue), firstOutput: @autoclosure () -> OutputValue, secondInput: InputValue, secondOutput: OutputValue, getter: (Instance) -> OutputValue, file: StaticString = #file, line: UInt = #line) where OutputValue: Equatable {
-	weak var weakInstance: Instance? = nil
-	autoreleasepool {
-		let (i, s) = Signal<InputValue>.create()
-		let binding = name.constructor(s)
-		
-		let instance = constructor(binding)
-		weakInstance = instance
-		XCTAssertEqual(getter(instance), initial, "initial condition failed", file: file, line: line)
-		
-		autoreleasepool {
-			let input = firstInput()
-			let output = firstOutput()
-			i.send(input)
-			XCTAssertEqual(getter(instance), output, "first condition failed", file: file, line: line)
+			let instance = Self.constructor(binding: binding)
+			weakInstance = instance
+			XCTAssertEqual(getter(instance), outputs.0, "initial condition failed", file: file, line: line)
 			
-			i.send(secondInput)
+			autoreleasepool {
+				i.send(inputs.0)
+				XCTAssertEqual(getter(instance), outputs.1, "first condition failed", file: file, line: line)
+				
+				i.send(inputs.1)
+			}
+			XCTAssertEqual(getter(instance), outputs.2, "second condition failed", file: file, line: line)
+			
+			if !Self.shoudPerformReleaseCheck {
+				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+			}
 		}
-		XCTAssertEqual(getter(instance), secondOutput, "second condition failed", file: file, line: line)
+		if Self.shoudPerformReleaseCheck {
+			XCTAssertNil(weakInstance, "release check failed", file: file, line: line)
+		}
 	}
-	if !skipReleaseCheck {
-		XCTAssertNil(weakInstance, file: file, line: line)
-	}
-}
-
-func testActionBinding<Value, Binding, Instance: NSObject>(name: BindingName<SignalInput<Value>, Binding>, constructor: (Binding) -> Instance, skipReleaseCheck: Bool = false, trigger: (Instance) -> (), validate: (Value) -> Bool, file: StaticString = #file, line: UInt = #line) {
-	weak var weakInstance: Instance? = nil
 	
-	var results = [Result<Value>]()
-	var subscriptionLifetime: Lifetime?
-	autoreleasepool {
-		let (i, s) = Signal<Value>.create()
-		let binding = name.constructor(i)
-		
-		subscriptionLifetime = s.subscribe { r in results.append(r) }
-		
-		let instance = constructor(binding)
-		weakInstance = instance
-		
-		XCTAssert(results.isEmpty, "value received before trigger", file: file, line: line)
-		trigger(instance)
-		
-		let first = results.first?.value
-		XCTAssertNotNil(first, "trigger produced no results", file: file, line: line)
-		XCTAssert(first.map { validate($0) } == true, "validation failed", file: file, line: line)
-		
-		if skipReleaseCheck {
-			instance.setBinderStorage(nil)
+	static func testSignalBinding<InputValue, OutputValue: Equatable>(name: BindingName<Signal<InputValue>, Preparer.Binding, Preparer.Binding>, inputs: (InputValue, InputValue), outputs: (OutputValue, OutputValue, OutputValue), getter: (Preparer.Instance) -> OutputValue, file: StaticString = #file, line: UInt = #line) {
+		weak var weakInstance: Preparer.Instance? = nil
+		autoreleasepool {
+			let (i, s) = Signal<InputValue>.create()
+			let binding = name.binding(with: s)
+			
+			let instance = Self.constructor(binding: binding)
+			weakInstance = instance
+			XCTAssertEqual(getter(instance), outputs.0, "initial condition failed", file: file, line: line)
+			
+			autoreleasepool {
+				i.send(inputs.0)
+				XCTAssertEqual(getter(instance), outputs.1, "first condition failed", file: file, line: line)
+				
+				i.send(inputs.1)
+			}
+			XCTAssertEqual(getter(instance), outputs.2, "second condition failed", file: file, line: line)
+			
+			if !Self.shoudPerformReleaseCheck {
+				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+			}
+		}
+		if Self.shoudPerformReleaseCheck {
+			XCTAssertNil(weakInstance, file: file, line: line)
 		}
 	}
-	withExtendedLifetime(subscriptionLifetime) {}
-	XCTAssert(results.last?.error as? SignalComplete == .cancelled, file: file, line: line)
-	if !skipReleaseCheck {
-		XCTAssertNil(weakInstance, file: file, line: line)
-	}
-}
 
-func testDelegateBinding<Value, Binding, Instance: NSObject>(name: BindingName<Value, Binding>, constructor: (Binding) -> Instance, skipReleaseCheck: Bool = false, handler: Value, trigger: (Instance) -> (), validate: () -> Bool, file: StaticString = #file, line: UInt = #line) {
-	weak var weakInstance: Instance? = nil
+	static func testActionBinding<Value>(name: BindingName<SignalInput<Value>, Preparer.Binding, Preparer.Binding>, trigger: (Preparer.Instance) -> (), validate: (Value) -> Bool, file: StaticString = #file, line: UInt = #line) where Preparer.Instance: NSObject {
+		weak var weakInstance: Preparer.Instance? = nil
+		
+		var results = [Result<Value, SignalEnd>]()
+		var subscriptionLifetime: Lifetime?
+		autoreleasepool {
+			let (i, s) = Signal<Value>.create()
+			let binding = name.binding(with: i)
+			
+			subscriptionLifetime = s.subscribe { r in results.append(r) }
+			
+			let instance = Self.constructor(binding: binding)
+			weakInstance = instance
+			
+			XCTAssert(results.isEmpty, "value received before trigger", file: file, line: line)
+			trigger(instance)
+			
+			let first = results.first?.value
+			XCTAssertNotNil(first, "trigger produced no results", file: file, line: line)
+			XCTAssert(first.map { validate($0) } == true, "validation failed", file: file, line: line)
+			
+			if !Self.shoudPerformReleaseCheck {
+				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+			}
+		}
+		withExtendedLifetime(subscriptionLifetime) {}
+		if Self.shoudPerformReleaseCheck {
+			XCTAssert(results.last?.error == .cancelled, file: file, line: line)
+			XCTAssertNil(weakInstance, file: file, line: line)
+		}
+	}
 	
-	autoreleasepool {
-		let binding = name.constructor(handler)
+	static func testDelegateBinding<Value>(name: BindingName<Value, Preparer.Binding, Preparer.Binding>, handler: Value, trigger: (Preparer.Instance) -> (), validate: () -> Bool, file: StaticString = #file, line: UInt = #line) where Preparer.Instance: NSObject {
+		weak var weakInstance: Preparer.Instance? = nil
 		
-		let instance = constructor(binding)
-		weakInstance = instance
-		
-		trigger(instance)
-		
-		XCTAssert(validate(), "validation failed", file: file, line: line)
+		autoreleasepool {
+			let binding = name.binding(with: handler)
+			
+			let instance = Self.constructor(binding: binding)
+			weakInstance = instance
+			
+			trigger(instance)
+			
+			XCTAssert(validate(), "validation failed", file: file, line: line)
+			
+			if !Self.shoudPerformReleaseCheck {
+				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+			}
+		}
+		if Self.shoudPerformReleaseCheck {
+			XCTAssertNil(weakInstance, file: file, line: line)
+		}
 	}
-	if !skipReleaseCheck {
-		XCTAssertNil(weakInstance, file: file, line: line)
-	}
+	
 }
 
 struct TestError: Error, Equatable {

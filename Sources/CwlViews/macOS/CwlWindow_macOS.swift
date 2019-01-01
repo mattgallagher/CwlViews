@@ -88,10 +88,8 @@ public extension Window {
 		case title(Dynamic<String>)
 		case toolbar(Dynamic<ToolbarConvertible>)
 
-		@available(macOS 10.11, *)
-		case minFullScreenContentSize(Dynamic<NSSize>)
-		@available(macOS 10.11, *)
-		case maxFullScreenContentSize(Dynamic<NSSize>)
+		@available(macOS 10.11, *) case minFullScreenContentSize(Dynamic<NSSize>)
+		@available(macOS 10.11, *) case maxFullScreenContentSize(Dynamic<NSSize>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case close(Signal<WindowCloseBehavior>)
@@ -172,22 +170,22 @@ public extension Window {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
-		public var deferCreation: Bool? = nil
+		var deferCreation: Bool? = nil
 		
-		public var contentWidth = InitialSubsequent<WindowSize>()
-		public var contentHeight = InitialSubsequent<WindowSize>()
-		public var screen = InitialSubsequent<NSScreen?>()
-		public var styleMask = InitialSubsequent<NSWindow.StyleMask>()
-		public var backingType = InitialSubsequent<NSWindow.BackingStoreType>()
+		var contentWidth = InitialSubsequent<WindowSize>()
+		var contentHeight = InitialSubsequent<WindowSize>()
+		var screen = InitialSubsequent<NSScreen?>()
+		var styleMask = InitialSubsequent<NSWindow.StyleMask>()
+		var backingType = InitialSubsequent<NSWindow.BackingStoreType>()
 		
-		public var frameAutosaveName: Dynamic<String>? = nil
-		public var frameHorizontal: Dynamic<WindowPlacement>? = nil
-		public var frameVertical: Dynamic<WindowPlacement>? = nil
-		public var key: Dynamic<Bool>? = nil
-		public var main: Dynamic<Bool>? = nil
-		public var order: Dynamic<WindowOrder>? = nil
+		var frameAutosaveName: Dynamic<String>? = nil
+		var frameHorizontal: Dynamic<WindowPlacement>? = nil
+		var frameVertical: Dynamic<WindowPlacement>? = nil
+		var key: Dynamic<Bool>? = nil
+		var main: Dynamic<Bool>? = nil
+		var order: Dynamic<WindowOrder>? = nil
 		
-		public static let defaultWindowSize = NSSize(width: 400, height: 400)
+		static let defaultWindowSize = NSSize(width: 400, height: 400)
 	}
 }
 
@@ -223,27 +221,28 @@ public extension Window.Preparer {
 	
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
-		case .deferCreation(let x): deferCreation = x.value
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		
 		case .backingType(let x): backingType = x.initialSubsequent()
-		case .key(let x): key = x
-		case .order(let x): order = x
-		case .main(let x): main = x
+		case .contentHeight(let x): contentHeight = x.initialSubsequent()
+		case .contentWidth(let x): contentWidth = x.initialSubsequent()
+		case .deferCreation(let x): deferCreation = x.value
 		case .frameAutosaveName(let x): frameAutosaveName = x
 		case .frameHorizontal(let x): frameHorizontal = x
 		case .frameVertical(let x): frameVertical = x
-		case .contentWidth(let x): contentWidth = x.initialSubsequent()
-		case .contentHeight(let x): contentHeight = x.initialSubsequent()
+		case .key(let x): key = x
+		case .main(let x): main = x
+		case .order(let x): order = x
 		case .screen(let x): screen = x.initialSubsequent()
-		case .styleMask(let x): styleMask = x.initialSubsequent()
-		case .willResize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
-		case .willUseStandardFrame(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
-		case .shouldZoom(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
-		case .willUseFullScreenContentSize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
-		case .willUseFullScreenPresentationOptions(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
 		case .shouldClose(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
 		case .shouldPopUpDocumentPathMenu(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
+		case .shouldZoom(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
+		case .styleMask(let x): styleMask = x.initialSubsequent()
+		case .willResize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
 		case .willResizeForVersionBrowser(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
-		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		case .willUseFullScreenContentSize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
+		case .willUseFullScreenPresentationOptions(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
+		case .willUseStandardFrame(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
 		default: break
 		}
 	}
@@ -518,7 +517,7 @@ extension BindingName where Binding: WindowBinding {
 		return WindowName<V>(source: source, downcast: Binding.windowBinding)
 	}
 }
-extension BindingName where Binding: WindowBinding {
+public extension BindingName where Binding: WindowBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: WindowName<$2> { return .name(B.$1) }
@@ -581,10 +580,8 @@ extension BindingName where Binding: WindowBinding {
 	static var title: WindowName<Dynamic<String>> { return .name(B.title) }
 	static var toolbar: WindowName<Dynamic<ToolbarConvertible>> { return .name(B.toolbar) }
 	
-	@available(macOS 10.11, *)
-	static var minFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.minFullScreenContentSize) }
-	@available(macOS 10.11, *)
-	static var maxFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.maxFullScreenContentSize) }
+	@available(macOS 10.11, *) static var minFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.minFullScreenContentSize) }
+	@available(macOS 10.11, *) static var maxFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.maxFullScreenContentSize) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var close: WindowName<Signal<WindowCloseBehavior>> { return .name(B.close) }

@@ -19,6 +19,7 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class TextField: Binder, TextFieldConvertible {
 	public static var defaultLabelBindings: [Binding] {
 		return [
@@ -28,187 +29,172 @@ public class TextField: Binder, TextFieldConvertible {
 		]
 	}
 	
-	public typealias Instance = NSTextField
-	public typealias Inherited = Control
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public convenience init(subclass: Instance.Type = Instance.self, labelStyled bindings: Binding...) {
-		self.init(subclass: subclass, bindings: TextField.defaultLabelBindings + bindings)
+
+	public convenience init(type: Instance.Type = Instance.self, labelStyled bindings: Binding...) {
+		self.init(type: type, bindings: TextField.defaultLabelBindings + bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsTextField() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TextField {
 	enum Binding: TextFieldBinding {
-		public typealias EnclosingBinder = TextField
-		public static func textFieldBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
-		case isEditable(Dynamic<Bool>)
-		case isSelectable(Dynamic<Bool>)
 		case allowsEditingTextAttributes(Dynamic<Bool>)
-		case importsGraphics(Dynamic<Bool>)
-		case textColor(Dynamic<NSColor?>)
-		case preferredMaxLayoutWidth(Dynamic<CGFloat>)
+		case allowsUndo(Dynamic<Bool>)
 		case backgroundColor(Dynamic<NSColor?>)
-		case drawsBackground(Dynamic<Bool>)
 		case bezeled(Dynamic<Bool>)
 		case bezelStyle(Dynamic<NSTextField.BezelStyle>)
+		case drawsBackground(Dynamic<Bool>)
+		case importsGraphics(Dynamic<Bool>)
 		case isBordered(Dynamic<Bool>)
-		case allowsUndo(Dynamic<Bool>)
-		case sendsActionOnEndEditing(Dynamic<Bool>)
-		case usesSingleLineMode(Dynamic<Bool>)
-		@available(macOS 10.12.2, *)
-		case allowsCharacterPickerTouchBarItem(Dynamic<Bool>)
-		@available(macOS 10.11, *)
-		case allowsDefaultTighteningForTruncation(Dynamic<Bool>)
-		@available(macOS 10.12.2, *)
-		case isAutomaticTextCompletionEnabled(Dynamic<Bool>)
-		@available(macOS 10.11, *)
-		case maximumNumberOfLines(Dynamic<Int>)
+		case isEditable(Dynamic<Bool>)
+		case isSelectable(Dynamic<Bool>)
 		case placeholderAttributedString(Dynamic<NSAttributedString?>)
 		case placeholderString(Dynamic<String?>)
+		case preferredMaxLayoutWidth(Dynamic<CGFloat>)
+		case sendsActionOnEndEditing(Dynamic<Bool>)
+		case textColor(Dynamic<NSColor?>)
+		case usesSingleLineMode(Dynamic<Bool>)
+
+		@available(macOS 10.12.2, *) case allowsCharacterPickerTouchBarItem(Dynamic<Bool>)
+		@available(macOS 10.11, *) case allowsDefaultTighteningForTruncation(Dynamic<Bool>)
+		@available(macOS 10.12.2, *) case isAutomaticTextCompletionEnabled(Dynamic<Bool>)
+		@available(macOS 10.11, *) case maximumNumberOfLines(Dynamic<Int>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case selectText(Signal<Void>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		case stringAction(TargetAction)
 		case didFailToValidatePartialString(SignalInput<(string: String, errorDescription: String?)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case completions((_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String])
 		case didFailToFormatString((_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool)
+		case doCommand((_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool)
 		case isValidObject((_ control: NSTextField, _ object: AnyObject) -> Bool)
 		case shouldBeginEditing((_ control: NSTextField, _ text: NSText) -> Bool)
 		case shouldEndEditing((_ control: NSTextField, _ text: NSText) -> Bool)
-		case completions((_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String])
-		case doCommand((_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool)
 	}
+}
 
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = TextField
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension TextField {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = TextField.Binding
+		public typealias Inherited = Control.Preparer
+		public typealias Instance = NSTextField
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var dynamicDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = dynamicDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				dynamicDelegate = d
-				return d
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension TextField.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .didFailToFormatString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
-			case .isValidObject(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
-			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
-			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
-			case .didFailToValidatePartialString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
-			case .completions(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
-			case .doCommand(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
-			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-			default: break
-			}
-		}
-
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
-			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = dynamicDelegate
-			if storage.inUse {
-				instance.delegate = storage
-			}
-
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .usesSingleLineMode(let x): return x.apply(instance) { i, v in i.usesSingleLineMode = v }
-			case .allowsCharacterPickerTouchBarItem(let x):
-				return x.apply(instance) { i, v in
-					if #available(macOS 10.12.2, *) {
-						i.allowsCharacterPickerTouchBarItem = v
-					}
-				}
-			case .allowsDefaultTighteningForTruncation(let x):
-				return x.apply(instance) { i, v in
-					if #available(macOS 10.11, *) {
-						i.allowsDefaultTighteningForTruncation = v
-					}
-				}
-			case .isAutomaticTextCompletionEnabled(let x):
-				return x.apply(instance) { i, v in
-					if #available(macOS 10.12.2, *) {
-						i.isAutomaticTextCompletionEnabled = v
-					}
-				}
-			case .maximumNumberOfLines(let x):
-				return x.apply(instance) { i, v in
-					if #available(macOS 10.11, *) {
-						i.maximumNumberOfLines = v
-					}
-				}
-			case .placeholderAttributedString(let x): return x.apply(instance) { i, v in i.placeholderAttributedString = v }
-			case .placeholderString(let x): return x.apply(instance) { i, v in i.placeholderString = v }
-			case .sendsActionOnEndEditing(let x): return x.apply(instance) { i, v in i.cell?.sendsActionOnEndEditing = v }
-			case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
-			case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
-			case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
-			case .importsGraphics(let x): return x.apply(instance) { i, v in i.importsGraphics = v }
-			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
-			case .preferredMaxLayoutWidth(let x): return x.apply(instance) { i, v in i.preferredMaxLayoutWidth = v }
-			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
-			case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
-			case .bezeled(let x): return x.apply(instance) { i, v in i.isBezeled = v }
-			case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
-			case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
-			case .allowsUndo(let x): return x.apply(instance) { i, v in
-				i.cell?.allowsUndo = v
-				}
-				
-			case .selectText(let x): return x.apply(instance) { i, v in i.selectText(nil) }
-			case .didFailToValidatePartialString: return nil
-			case .doCommand: return nil
-			case .didFailToFormatString: return nil
-			case .isValidObject: return nil
-			case .shouldBeginEditing: return nil
-			case .shouldEndEditing: return nil
-			case .completions: return nil
-			case .stringAction(let x): return x.apply(instance: instance, constructTarget: SignalActionTarget.init, processor: { sender in (sender as? NSTextField)?.attributedStringValue ?? NSAttributedString() })
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		case .completions(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
+		case .didFailToFormatString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
+		case .didFailToValidatePartialString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
+		case .doCommand(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
+		case .isValidObject(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
+		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
+		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
+		default: break
 		}
 	}
 
-	open class Storage: Control.Storage, NSTextFieldDelegate {}
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
+		case .allowsUndo(let x): return x.apply(instance) { i, v in i.cell?.allowsUndo = v }
+		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+		case .bezeled(let x): return x.apply(instance) { i, v in i.isBezeled = v }
+		case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
+		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
+		case .importsGraphics(let x): return x.apply(instance) { i, v in i.importsGraphics = v }
+		case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
+		case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
+		case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
+		case .placeholderAttributedString(let x): return x.apply(instance) { i, v in i.placeholderAttributedString = v }
+		case .placeholderString(let x): return x.apply(instance) { i, v in i.placeholderString = v }
+		case .preferredMaxLayoutWidth(let x): return x.apply(instance) { i, v in i.preferredMaxLayoutWidth = v }
+		case .sendsActionOnEndEditing(let x): return x.apply(instance) { i, v in i.cell?.sendsActionOnEndEditing = v }
+		case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+		case .usesSingleLineMode(let x): return x.apply(instance) { i, v in i.usesSingleLineMode = v }
+
+		case .allowsCharacterPickerTouchBarItem(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.12.2, *) {
+					i.allowsCharacterPickerTouchBarItem = v
+				}
+			}
+		case .allowsDefaultTighteningForTruncation(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.11, *) {
+					i.allowsDefaultTighteningForTruncation = v
+				}
+			}
+		case .isAutomaticTextCompletionEnabled(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.12.2, *) {
+					i.isAutomaticTextCompletionEnabled = v
+				}
+			}
+		case .maximumNumberOfLines(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.11, *) {
+					i.maximumNumberOfLines = v
+				}
+			}
+
+		// 2. Signal bindings are performed on the object after construction.
+		case .selectText(let x): return x.apply(instance) { i, v in i.selectText(nil) }
+
+		// 3. Action bindings are triggered by the object after construction.
+		case .didFailToValidatePartialString: return nil
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .completions: return nil
+		case .didFailToFormatString: return nil
+		case .doCommand: return nil
+		case .isValidObject: return nil
+		case .shouldBeginEditing: return nil
+		case .shouldEndEditing: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension TextField.Preparer {
+	open class Storage: Control.Preparer.Storage, NSTextFieldDelegate {}
 
 	open class Delegate: DynamicDelegate, NSTextFieldDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func control(_ control: NSControl, isValidObject obj: Any?) -> Bool {
-			return handler(ofType: ((_ control: NSTextField, _ object: AnyObject) -> Bool).self)(control as! NSTextField, obj as AnyObject)
+			return handler(ofType: ((NSTextField, AnyObject) -> Bool).self)(control as! NSTextField, obj as AnyObject)
 		}
 		
 		open func control(_ control: NSControl, didFailToValidatePartialString string: String, errorDescription error: String?) {
@@ -216,91 +202,110 @@ public class TextField: Binder, TextFieldConvertible {
 		}
 		
 		open func control(_ control: NSControl, didFailToFormatString string: String, errorDescription error: String?) -> Bool {
-			return handler(ofType: ((_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool).self)(control as! NSTextField, string, error)
+			return handler(ofType: ((NSTextField, String, String?) -> Bool).self)(control as! NSTextField, string, error)
 		}
 		
 		open func control(_ control: NSControl, textShouldBeginEditing fieldEditor: NSText) -> Bool {
-			return handler(ofType: ((_ control: NSTextField, _ text: NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
+			return handler(ofType: ((NSTextField, NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
 		}
 		
 		open func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
-			return handler(ofType: ((_ control: NSTextField, _ text: NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
+			return handler(ofType: ((NSTextField, NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
 		}
 		
 		open func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange charRange: NSRange, indexOfSelectedItem index: UnsafeMutablePointer<Int>) -> [String] {
-			return handler(ofType: ((_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String]).self)(control as! NSTextField, textView, words, charRange, index)
+			return handler(ofType: ((NSTextField,  NSTextView, [String], NSRange, UnsafeMutablePointer<Int>) -> [String]).self)(control as! NSTextField, textView, words, charRange, index)
 		}
 		
 		open func control(_ control: NSControl, textView: NSTextView, doCommandBy doCommandBySelector: Selector) -> Bool {
-			return handler(ofType: ((_ control: NSTextField, _ textView: NSTextView, _ doCommandBySelector: Selector) -> Bool).self)(control as! NSTextField, textView, doCommandBySelector)
+			return handler(ofType: ((NSTextField,  NSTextView, Selector) -> Bool).self)(control as! NSTextField, textView, doCommandBySelector)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextFieldBinding {
+	public typealias TextFieldName<V> = BindingName<V, TextField.Binding, Binding>
+	private typealias B = TextField.Binding
+	private static func name<V>(_ source: @escaping (V) -> TextField.Binding) -> TextFieldName<V> {
+		return TextFieldName<V>(source: source, downcast: Binding.textFieldBinding)
+	}
+}
+public extension BindingName where Binding: TextFieldBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .textFieldBinding(TextField.Binding.$1(v)) }) }
-
+	// With:    static var $1: TextFieldName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	public static var isEditable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.isEditable(v)) }) }
-	public static var isSelectable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.isSelectable(v)) }) }
-	public static var allowsEditingTextAttributes: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.allowsEditingTextAttributes(v)) }) }
-	public static var importsGraphics: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.importsGraphics(v)) }) }
-	public static var textColor: BindingName<Dynamic<NSColor?>, Binding> { return BindingName<Dynamic<NSColor?>, Binding>({ v in .textFieldBinding(TextField.Binding.textColor(v)) }) }
-	public static var preferredMaxLayoutWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .textFieldBinding(TextField.Binding.preferredMaxLayoutWidth(v)) }) }
-	public static var backgroundColor: BindingName<Dynamic<NSColor?>, Binding> { return BindingName<Dynamic<NSColor?>, Binding>({ v in .textFieldBinding(TextField.Binding.backgroundColor(v)) }) }
-	public static var drawsBackground: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.drawsBackground(v)) }) }
-	public static var bezeled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.bezeled(v)) }) }
-	public static var bezelStyle: BindingName<Dynamic<NSTextField.BezelStyle>, Binding> { return BindingName<Dynamic<NSTextField.BezelStyle>, Binding>({ v in .textFieldBinding(TextField.Binding.bezelStyle(v)) }) }
-	public static var isBordered: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.isBordered(v)) }) }
-	public static var allowsUndo: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.allowsUndo(v)) }) }
-	public static var sendsActionOnEndEditing: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.sendsActionOnEndEditing(v)) }) }
-	public static var usesSingleLineMode: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.usesSingleLineMode(v)) }) }
-	@available(macOS 10.12.2, *)
-	public static var allowsCharacterPickerTouchBarItem: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.allowsCharacterPickerTouchBarItem(v)) }) }
-	@available(macOS 10.11, *)
-	public static var allowsDefaultTighteningForTruncation: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.allowsDefaultTighteningForTruncation(v)) }) }
-	@available(macOS 10.12.2, *)
-	public static var isAutomaticTextCompletionEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.isAutomaticTextCompletionEnabled(v)) }) }
-	@available(macOS 10.11, *)
-	public static var maximumNumberOfLines: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .textFieldBinding(TextField.Binding.maximumNumberOfLines(v)) }) }
-	public static var placeholderAttributedString: BindingName<Dynamic<NSAttributedString?>, Binding> { return BindingName<Dynamic<NSAttributedString?>, Binding>({ v in .textFieldBinding(TextField.Binding.placeholderAttributedString(v)) }) }
-	public static var placeholderString: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .textFieldBinding(TextField.Binding.placeholderString(v)) }) }
-
+	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
+	static var allowsUndo: TextFieldName<Dynamic<Bool>> { return .name(B.allowsUndo) }
+	static var backgroundColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.backgroundColor) }
+	static var bezeled: TextFieldName<Dynamic<Bool>> { return .name(B.bezeled) }
+	static var bezelStyle: TextFieldName<Dynamic<NSTextField.BezelStyle>> { return .name(B.bezelStyle) }
+	static var drawsBackground: TextFieldName<Dynamic<Bool>> { return .name(B.drawsBackground) }
+	static var importsGraphics: TextFieldName<Dynamic<Bool>> { return .name(B.importsGraphics) }
+	static var isBordered: TextFieldName<Dynamic<Bool>> { return .name(B.isBordered) }
+	static var isEditable: TextFieldName<Dynamic<Bool>> { return .name(B.isEditable) }
+	static var isSelectable: TextFieldName<Dynamic<Bool>> { return .name(B.isSelectable) }
+	static var placeholderAttributedString: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.placeholderAttributedString) }
+	static var placeholderString: TextFieldName<Dynamic<String?>> { return .name(B.placeholderString) }
+	static var preferredMaxLayoutWidth: TextFieldName<Dynamic<CGFloat>> { return .name(B.preferredMaxLayoutWidth) }
+	static var sendsActionOnEndEditing: TextFieldName<Dynamic<Bool>> { return .name(B.sendsActionOnEndEditing) }
+	static var textColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.textColor) }
+	static var usesSingleLineMode: TextFieldName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
+	
+	@available(macOS 10.12.2, *) static var allowsCharacterPickerTouchBarItem: TextFieldName<Dynamic<Bool>> { return .name(B.allowsCharacterPickerTouchBarItem) }
+	@available(macOS 10.11, *) static var allowsDefaultTighteningForTruncation: TextFieldName<Dynamic<Bool>> { return .name(B.allowsDefaultTighteningForTruncation) }
+	@available(macOS 10.12.2, *) static var isAutomaticTextCompletionEnabled: TextFieldName<Dynamic<Bool>> { return .name(B.isAutomaticTextCompletionEnabled) }
+	@available(macOS 10.11, *) static var maximumNumberOfLines: TextFieldName<Dynamic<Int>> { return .name(B.maximumNumberOfLines) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var selectText: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .textFieldBinding(TextField.Binding.selectText(v)) }) }
-
+	static var selectText: TextFieldName<Signal<Void>> { return .name(B.selectText) }
+	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var stringAction: BindingName<TargetAction, Binding> { return BindingName<TargetAction, Binding>({ v in .textFieldBinding(TextField.Binding.stringAction(v)) }) }
-	public static var didFailToValidatePartialString: BindingName<SignalInput<(string: String, errorDescription: String?)>, Binding> { return BindingName<SignalInput<(string: String, errorDescription: String?)>, Binding>({ v in .textFieldBinding(TextField.Binding.didFailToValidatePartialString(v)) }) }
-
+	static var didFailToValidatePartialString: TextFieldName<SignalInput<(string: String, errorDescription: String?)>> { return .name(B.didFailToValidatePartialString) }
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var didFailToFormatString: BindingName<(_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool, Binding> { return BindingName<(_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.didFailToFormatString(v)) }) }
-	public static var isValidObject: BindingName<(_ control: NSTextField, _ object: AnyObject) -> Bool, Binding> { return BindingName<(_ control: NSTextField, _ object: AnyObject) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.isValidObject(v)) }) }
-	public static var shouldBeginEditing: BindingName<(_ control: NSTextField, _ text: NSText) -> Bool, Binding> { return BindingName<(_ control: NSTextField, _ text: NSText) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldBeginEditing(v)) }) }
-	public static var shouldEndEditing: BindingName<(_ control: NSTextField, _ text: NSText) -> Bool, Binding> { return BindingName<(_ control: NSTextField, _ text: NSText) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldEndEditing(v)) }) }
-	public static var completions: BindingName<(_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String], Binding> { return BindingName<(_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String], Binding>({ v in .textFieldBinding(TextField.Binding.completions(v)) }) }
-	public static var doCommand: BindingName<(_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool, Binding> { return BindingName<(_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.doCommand(v)) }) }
+	static var completions: TextFieldName<(_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String]> { return .name(B.completions) }
+	static var didFailToFormatString: TextFieldName<(_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool> { return .name(B.didFailToFormatString) }
+	static var doCommand: TextFieldName<(_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool> { return .name(B.doCommand) }
+	static var isValidObject: TextFieldName<(_ control: NSTextField, _ object: AnyObject) -> Bool> { return .name(B.isValidObject) }
+	static var shouldBeginEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(B.shouldBeginEditing) }
+	static var shouldEndEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(B.shouldEndEditing) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol TextFieldConvertible: ControlConvertible {
 	func nsTextField() -> TextField.Instance
 }
 extension TextFieldConvertible {
 	public func nsControl() -> Control.Instance { return nsTextField() }
 }
-extension TextField.Instance: TextFieldConvertible {
+extension NSTextField: TextFieldConvertible, HasDelegate {
 	public func nsTextField() -> TextField.Instance { return self }
 }
+public extension TextField {
+	func nsTextField() -> TextField.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol TextFieldBinding: ControlBinding {
 	static func textFieldBinding(_ binding: TextField.Binding) -> Self
 }
-extension TextFieldBinding {
-	public static func controlBinding(_ binding: Control.Binding) -> Self {
+public extension TextFieldBinding {
+	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return textFieldBinding(.inheritedBinding(binding))
 	}
 }
+public extension TextField.Binding {
+	public typealias Preparer = TextField.Preparer
+	static func textFieldBinding(_ binding: TextField.Binding) -> TextField.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

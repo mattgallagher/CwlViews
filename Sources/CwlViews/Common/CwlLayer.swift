@@ -33,8 +33,7 @@ public extension Layer {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case constraints(Dynamic<[CAConstraint]>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case constraints(Dynamic<[CAConstraint]>)
 
 		//	2. Signal bindings are performed on the object after construction.
 
@@ -76,9 +75,9 @@ public extension Layer {
 public extension Layer.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		case .display(let x): delegate().addHandler(x, #selector(CALayerDelegate.display(_:)))
 		case .draw(let x): delegate().addHandler(x, #selector(CALayerDelegate.draw(_:in:)))
-		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		default: break
 		}
 	}
@@ -147,8 +146,7 @@ public extension BindingName where Binding: LayerBinding {
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var constraints: LayerName<Dynamic<[Layer.CAConstraint]>> { return .name(B.constraints) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var constraints: LayerName<Dynamic<[Layer.CAConstraint]>> { return .name(B.constraints) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	

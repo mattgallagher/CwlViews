@@ -55,18 +55,12 @@ public extension StackView {
 		case distribution(Dynamic<NSUIStackViewDistribution>)
 		case spacing(Dynamic<CGFloat>)
 		
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case edgeInsets(Dynamic<NSEdgeInsets>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
-		@available(macOS, unavailable) @available(iOS 11, *)
-		case isLayoutMarginsRelativeArrangement(())
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case verticalClippingResistance(Dynamic<NSUILayoutPriority>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case verticalHuggingPriority(Dynamic<NSUILayoutPriority>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case edgeInsets(Dynamic<NSEdgeInsets>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
+		@available(macOS, unavailable) @available(iOS 11, *) case isLayoutMarginsRelativeArrangement(())
+		@available(macOS 10.13, *) @available(iOS, unavailable) case verticalClippingResistance(Dynamic<NSUILayoutPriority>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case verticalHuggingPriority(Dynamic<NSUILayoutPriority>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
@@ -201,18 +195,12 @@ public extension BindingName where Binding: StackViewBinding {
 	static var distribution: StackViewName<Dynamic<StackView.NSUIStackViewDistribution>> { return .name(B.distribution) }
 	static var spacing: StackViewName<Dynamic<CGFloat>> { return .name(B.spacing) }
 	
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var edgeInsets: StackViewName<Dynamic<NSEdgeInsets>> { return .name(B.edgeInsets) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalClippingResistance) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalHuggingPriority) }
-	@available(macOS, unavailable) @available(iOS 11, *)
-	static var isLayoutMarginsRelativeArrangement: StackViewName<()> { return .name(B.isLayoutMarginsRelativeArrangement) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var verticalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalClippingResistance) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var verticalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalHuggingPriority) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<NSEdgeInsets>> { return .name(B.edgeInsets) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalClippingResistance) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalHuggingPriority) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var isLayoutMarginsRelativeArrangement: StackViewName<()> { return .name(B.isLayoutMarginsRelativeArrangement) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalClippingResistance) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalHuggingPriority) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

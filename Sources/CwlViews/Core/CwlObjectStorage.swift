@@ -35,8 +35,15 @@ open class ObjectBinderStorage: NSObject {
 	///
 	/// - Parameter for: an NSObject
 	/// - Returns: the embedded ObjectBinderStorage (if any)
-	public static func embeddedStorage(for: NSObject) -> ObjectBinderStorage? {
-		return objc_getAssociatedObject(self, &ObjectBinderStorage.associatedStorageKey) as? ObjectBinderStorage
+	public static func embeddedStorage(for object: NSObject) -> ObjectBinderStorage? {
+		return objc_getAssociatedObject(object, &ObjectBinderStorage.associatedStorageKey) as? ObjectBinderStorage
+	}
+	
+	/// Accessor for any embedded ObjectBinderStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
+	///
+	/// - Parameter newValue: an ObjectBinderStorage or nil (if clearinging storage)
+	public static func setEmbeddedStorage(_ newValue: ObjectBinderStorage?, for object: NSObject) {
+		objc_setAssociatedObject(object, &associatedStorageKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 	}
 	
 	/// Implementation of the `BinderStorage` method to embed supplied lifetimes in an instance. This may be performed once-only for a given instance and storage (the storage should have the same lifetime as the instance and should not be disconnected once connected).
@@ -50,7 +57,7 @@ open class ObjectBinderStorage: NSObject {
 		guard isInUse else { return }
 		
 		assert(ObjectBinderStorage.embeddedStorage(for: instance) == nil, "Bindings should be set once only")
-		objc_setAssociatedObject(instance, &ObjectBinderStorage.associatedStorageKey, self, .OBJC_ASSOCIATION_RETAIN)
+		ObjectBinderStorage.setEmbeddedStorage(self, for: instance)
 	}
 	
 	/// Explicitly invoke `cancel` on each of the bindings.
@@ -117,17 +124,5 @@ open class DynamicDelegate: NSObject, DefaultConstructable {
 	
 	open func addHandler(_ value: Any, _ selector: Selector) {
 		implementedSelectors[selector] = value
-	}
-}
-
-
-/// Most objects managed by a `BinderStorage` are Objective-C objects (`NSView`/`UIView`, `NSApplication`/`UIApplication`, etc). For these objects, we can satisfy the requirement of tying the stateful and binder objects together by storing the binder in the Objective-C "associated object" storage.
-private var associatedStorageKey = NSObject()
-extension NSObject { 
-	public func setBinderStorage(_ newValue: Any?) {
-		objc_setAssociatedObject(self, &associatedStorageKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
-	}
-	public func getBinderStorage<T: ObjectBinderStorage>(type: T.Type) -> T? {
-		return objc_getAssociatedObject(self, &associatedStorageKey) as? T
 	}
 }

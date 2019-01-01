@@ -50,6 +50,7 @@ public extension GradientLayer {
 public extension GradientLayer {
 	struct Preparer: BinderDelegateDerived {
 		public typealias Binding = GradientLayer.Binding
+		public typealias Delegate = Inherited.Delegate
 		public typealias Inherited = Layer.Preparer
 		public typealias Instance = CAGradientLayer
 		
@@ -100,7 +101,7 @@ extension BindingName where Binding: GradientLayerBinding {
 		return GradientLayerName<V>(source: source, downcast: Binding.gradientLayerBinding)
 	}
 }
-extension BindingName where Binding: GradientLayerBinding {
+public extension BindingName where Binding: GradientLayerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: GradientLayerName<$2> { return .name(B.$1) }

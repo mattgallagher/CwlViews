@@ -25,6 +25,10 @@ public class TableColumn<RowData>: Binder {
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
+
+	public convenience init(type: Instance.Type = Instance.self, identifier: NSUserInterfaceItemIdentifier, _ bindings: Binding...) {
+		self.init(type: type, parameters: identifier, bindings: bindings)
+	}
 }
 
 // MARK: - Binder Part 2: Binding
@@ -76,9 +80,9 @@ public extension TableColumn {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
-		public var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
-		public var cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
-		public var dataMissingCell: (() -> TableCellViewConvertible?)?
+		var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
+		var cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
+		var dataMissingCell: (() -> TableCellViewConvertible?)?
 	}
 }
 
@@ -95,6 +99,7 @@ public extension TableColumn.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		
 		case .cellConstructor(let x): cellConstructor = x
 		case .cellIdentifierForRow(let x): cellIdentifier = x
 		case .dataMissingCell(let x): dataMissingCell = x
@@ -161,7 +166,7 @@ extension BindingName where Binding: TableColumnBinding {
 		return TableColumnName<V>(source: source, downcast: Binding.tableColumnBinding)
 	}
 }
-extension BindingName where Binding: TableColumnBinding {
+public extension BindingName where Binding: TableColumnBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: TableColumnName<$2> { return .name(B.$1) }

@@ -31,14 +31,16 @@ public struct BindingName<Value, Source, Binding> {
 	public func binding(with value: Value) -> Binding {
 		return downcast(source(value))
 	}
+}
 
+public extension BindingName {
 	/// Build a signal binding (invocations on the instance after construction) from a name and a signal
 	///
 	/// - Parameters:
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func <--<Interface: SignalInterface>(name: BindingName<Value, Source, Binding>, value: Interface) -> Binding where Signal<Interface.OutputValue> == Value {
+	static func <--<Interface: SignalInterface>(name: BindingName<Value, Source, Binding>, value: Interface) -> Binding where Signal<Interface.OutputValue> == Value {
 		return name.binding(with: value.signal)
 	}
 
@@ -48,7 +50,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func <--<Interface: SignalInterface>(name: BindingName<Value, Source, Binding>, value: Interface) -> Binding where Dynamic<Interface.OutputValue> == Value {
+	static func <--<Interface: SignalInterface>(name: BindingName<Value, Source, Binding>, value: Interface) -> Binding where Dynamic<Interface.OutputValue> == Value {
 		return name.binding(with: Dynamic<Interface.OutputValue>.dynamic(value.signal))
 	}
 
@@ -58,7 +60,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --><InputInterface: SignalInputInterface>(name: BindingName<Value, Source, Binding>, value: InputInterface) -> Binding where SignalInput<InputInterface.InputValue> == Value {
+	static func --><InputInterface: SignalInputInterface>(name: BindingName<Value, Source, Binding>, value: InputInterface) -> Binding where SignalInput<InputInterface.InputValue> == Value {
 		return name.binding(with: value.input)
 	}
 
@@ -68,7 +70,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Constant<A> == Value {
+	static func --<A>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Constant<A> == Value {
 		return name.binding(with: Value.constant(value))
 	}
 
@@ -78,7 +80,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Dynamic<A> == Value {
+	static func --<A>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Dynamic<A> == Value {
 		return name.binding(with: Dynamic<A>.constant(value))
 	}
 
@@ -88,7 +90,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<R>(name: BindingName<Value, Source, Binding>, value: @escaping () -> R) -> Binding where Value == () -> R {
+	static func --<R>(name: BindingName<Value, Source, Binding>, value: @escaping () -> R) -> Binding where Value == () -> R {
 		return name.binding(with: value)
 	}
 
@@ -98,7 +100,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A) -> R) -> Binding where Value == (A) -> R {
+	static func --<A, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A) -> R) -> Binding where Value == (A) -> R {
 		return name.binding(with: value)
 	}
 
@@ -108,7 +110,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A, B, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B) -> R) -> Binding where Value == (A, B) -> R {
+	static func --<A, B, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B) -> R) -> Binding where Value == (A, B) -> R {
 		return name.binding(with: value)
 	}
 
@@ -118,7 +120,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A, B, C, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B, C) -> R) -> Binding where Value == (A, B, C) -> R {
+	static func --<A, B, C, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B, C) -> R) -> Binding where Value == (A, B, C) -> R {
 		return name.binding(with: value)
 	}
 
@@ -128,7 +130,7 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A, B, C, D, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B, C, D) -> R) -> Binding where Value == (A, B, C, D) -> R {
+	static func --<A, B, C, D, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B, C, D) -> R) -> Binding where Value == (A, B, C, D) -> R {
 		return name.binding(with: value)
 	}
 
@@ -138,19 +140,19 @@ public struct BindingName<Value, Source, Binding> {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --<A, B, C, D, E, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B, C, D, E) -> R) -> Binding where Value == (A, B, C, D, E) -> R {
+	static func --<A, B, C, D, E, R>(name: BindingName<Value, Source, Binding>, value: @escaping (A, B, C, D, E) -> R) -> Binding where Value == (A, B, C, D, E) -> R {
 		return name.binding(with: value)
 	}
 }
 
-extension BindingName where Value == TargetAction {
+public extension BindingName where Value == TargetAction {
 	/// Build an `TargetAction` binding (callbacks triggered by the instance) from a name and a signal input.
 	///
 	/// - Parameters:
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func --><InputInterface: SignalInputInterface>(name: BindingName<TargetAction, Source, Binding>, value: InputInterface) -> Binding where InputInterface.InputValue == Any? {
+	static func --><InputInterface: SignalInputInterface>(name: BindingName<TargetAction, Source, Binding>, value: InputInterface) -> Binding where InputInterface.InputValue == Any? {
 		return name.binding(with: .singleTarget(value.input))
 	}
 	
@@ -160,7 +162,7 @@ extension BindingName where Value == TargetAction {
 	///   - name: the binding name
 	///   - value: the binding argument
 	/// - Returns: the binding
-	public static func -->(name: BindingName<TargetAction, Source, Binding>, value: Selector) -> Binding {
+	static func -->(name: BindingName<TargetAction, Source, Binding>, value: Selector) -> Binding {
 		return name.binding(with: TargetAction.firstResponder(value))
 	}
 }

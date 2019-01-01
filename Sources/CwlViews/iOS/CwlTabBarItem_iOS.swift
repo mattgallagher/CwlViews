@@ -44,10 +44,8 @@ public class TabBarItem: Binder, TabBarItemConvertible {
 		case selectedImage(Dynamic<UIImage?>)
 		case titlePositionAdjustment(Dynamic<UIOffset>)
 		case badgeValue(Dynamic<String?>)
-		@available(iOS 10.0, *)
-		case badgeColor(Dynamic<UIColor?>)
-		@available(iOS 10.0, *)
-		case badgeTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>)
+		@available(iOS 10.0, *) case badgeColor(Dynamic<UIColor?>)
+		@available(iOS 10.0, *) case badgeTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		

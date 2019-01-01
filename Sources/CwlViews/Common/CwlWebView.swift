@@ -35,20 +35,15 @@ public extension WebView {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case configuration(Constant<WKWebViewConfiguration>)
 
-		@available(macOS, unavailable) @available(iOS 11, *)
-		case scrollView(Constant<ScrollView>)
+		@available(macOS, unavailable) @available(iOS 11, *) case scrollView(Constant<ScrollView>)
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case allowsBackForwardNavigationGestures(Dynamic<Bool>)
 
-		@available(macOS 10.11, *)
-		case allowsLinkPreview(Dynamic<Bool>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case allowsMagnification(Dynamic<Bool>)
-		@available(macOS 10.11, *)
-		case customUserAgent(Dynamic<String?>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case magnification(Dynamic<(factor: CGFloat, centeredAt: CGPoint)>)
+		@available(macOS 10.11, *) case allowsLinkPreview(Dynamic<Bool>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case allowsMagnification(Dynamic<Bool>)
+		@available(macOS 10.11, *) case customUserAgent(Dynamic<String?>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case magnification(Dynamic<(factor: CGFloat, centeredAt: CGPoint)>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		case evaluateJavaScript(Signal<Callback<String, (Any?, Error?)>>)
@@ -79,20 +74,15 @@ public extension WebView {
 		case runJavaScriptConfirmPanel(SignalInput<Callback<(message: String, frame: WKFrameInfo), Bool>>)
 		case runJavaScriptTextInputPanel(SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>)
 		
-		@available(macOS 10.11, iOS 9.0, *)
-		case didClose(SignalInput<Void>)
-		@available(macOS 10.12, *) @available(iOS, unavailable)
-		case runOpenPanel(SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>)
+		@available(macOS 10.11, iOS 9.0, *) case didClose(SignalInput<Void>)
+		@available(macOS 10.12, *) @available(iOS, unavailable) case runOpenPanel(SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>)
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case createWebView((_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?)
 		
-		@available(macOS, unavailable) @available(iOS 10.0, *)
-		case commitPreviewingViewController((_ webView: WKWebView, _ previewingViewController: UIViewController) -> Void)
-		@available(macOS, unavailable) @available(iOS 10.0, *)
-		case previewingViewController((_ webView: WKWebView, _ elementInfo: WKPreviewElementInfo, _ previewActions: [WKPreviewActionItem]) -> UIViewController?)
-		@available(macOS, unavailable) @available(iOS 10.0, *)
-		case shouldPreviewElement((_ webView: WKWebView, _ elementInfo: WKPreviewElementInfo) -> Bool)
+		@available(macOS, unavailable) @available(iOS 10.0, *) case commitPreviewingViewController((_ webView: WKWebView, _ previewingViewController: UIViewController) -> Void)
+		@available(macOS, unavailable) @available(iOS 10.0, *) case previewingViewController((_ webView: WKWebView, _ elementInfo: WKPreviewElementInfo, _ previewActions: [WKPreviewActionItem]) -> UIViewController?)
+		@available(macOS, unavailable) @available(iOS 10.0, *) case shouldPreviewElement((_ webView: WKWebView, _ elementInfo: WKPreviewElementInfo) -> Bool)
 	}
 
 	#if os(macOS)
@@ -132,6 +122,8 @@ public extension WebView {
 public extension WebView.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		
 		case .configuration(let x): configuration = x.value
 		case .didCommit(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didCommit:)))
 		case .didStartProvisionalNavigation(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didStartProvisionalNavigation:)))
@@ -179,7 +171,6 @@ public extension WebView.Preparer {
 					delegate().addHandler(x, #selector(WKUIDelegate.webView(_:commitPreviewingViewController:)))
 				}
 			#endif
-		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		default: break
 		}
 	}
@@ -389,20 +380,15 @@ public extension BindingName where Binding: WebViewBinding {
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	static var configuration: WebViewName<Constant<WKWebViewConfiguration>> { return .name(B.configuration) }
 	
-	@available(macOS, unavailable) @available(iOS 11, *)
-	static var scrollView: WebViewName<Constant<ScrollView>> { return .name(B.scrollView) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var scrollView: WebViewName<Constant<ScrollView>> { return .name(B.scrollView) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
 	static var allowsBackForwardNavigationGestures: WebViewName<Dynamic<Bool>> { return .name(B.allowsBackForwardNavigationGestures) }
 	
-	@available(macOS 10.11, *)
-	static var allowsLinkPreview: WebViewName<Dynamic<Bool>> { return .name(B.allowsLinkPreview) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var allowsMagnification: WebViewName<Dynamic<Bool>> { return .name(B.allowsMagnification) }
-	@available(macOS 10.11, *)
-	static var customUserAgent: WebViewName<Dynamic<String?>> { return .name(B.customUserAgent) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var magnification: WebViewName<Dynamic<(factor: CGFloat, centeredAt: CGPoint)>> { return .name(B.magnification) }
+	@available(macOS 10.11, *) static var allowsLinkPreview: WebViewName<Dynamic<Bool>> { return .name(B.allowsLinkPreview) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var allowsMagnification: WebViewName<Dynamic<Bool>> { return .name(B.allowsMagnification) }
+	@available(macOS 10.11, *) static var customUserAgent: WebViewName<Dynamic<String?>> { return .name(B.customUserAgent) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var magnification: WebViewName<Dynamic<(factor: CGFloat, centeredAt: CGPoint)>> { return .name(B.magnification) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	static var evaluateJavaScript: WebViewName<Signal<Callback<String, (Any?, Error?)>>> { return .name(B.evaluateJavaScript) }
@@ -433,20 +419,15 @@ public extension BindingName where Binding: WebViewBinding {
 	static var runJavaScriptConfirmPanel: WebViewName<SignalInput<Callback<(message: String, frame: WKFrameInfo), Bool>>> { return .name(B.runJavaScriptConfirmPanel) }
 	static var runJavaScriptTextInputPanel: WebViewName<SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>> { return .name(B.runJavaScriptTextInputPanel) }
 	
-	@available(macOS 10.11, iOS 9.0, *)
-	static var didClose: WebViewName<SignalInput<Void>> { return .name(B.didClose) }
-	@available(macOS 10.12, *) @available(iOS, unavailable)
-	static var runOpenPanel: WebViewName<SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>> { return .name(B.runOpenPanel) }
+	@available(macOS 10.11, iOS 9.0, *) static var didClose: WebViewName<SignalInput<Void>> { return .name(B.didClose) }
+	@available(macOS 10.12, *) @available(iOS, unavailable) static var runOpenPanel: WebViewName<SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>> { return .name(B.runOpenPanel) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 	static var createWebView: WebViewName<(_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?> { return .name(B.createWebView) }
 	
-	@available(macOS, unavailable) @available(iOS 10.0, *)
-	static var commitPreviewingViewController: WebViewName<(_ webView: WKWebView, _ previewingViewController: WebView.UIViewController) -> Void> { return .name(B.commitPreviewingViewController) }
-	@available(macOS, unavailable) @available(iOS 10.0, *)
-	static var previewingViewController: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo, _ previewActions: [WebView.WKPreviewActionItem]) -> WebView.UIViewController?> { return .name(B.previewingViewController) }
-	@available(macOS, unavailable) @available(iOS 10.0, *)
-	static var shouldPreviewElement: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo) -> Bool> { return .name(B.shouldPreviewElement) }
+	@available(macOS, unavailable) @available(iOS 10.0, *) static var commitPreviewingViewController: WebViewName<(_ webView: WKWebView, _ previewingViewController: WebView.UIViewController) -> Void> { return .name(B.commitPreviewingViewController) }
+	@available(macOS, unavailable) @available(iOS 10.0, *) static var previewingViewController: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo, _ previewActions: [WebView.WKPreviewActionItem]) -> WebView.UIViewController?> { return .name(B.previewingViewController) }
+	@available(macOS, unavailable) @available(iOS 10.0, *) static var shouldPreviewElement: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo) -> Bool> { return .name(B.shouldPreviewElement) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

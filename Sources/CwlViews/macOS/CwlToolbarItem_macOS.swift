@@ -25,6 +25,10 @@ public class ToolbarItem: Binder, ToolbarItemConvertible {
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
+
+	public convenience init(type: Instance.Type = Instance.self, itemIdentifier: NSToolbarItem.Identifier, _ bindings: Binding...) {
+		self.init(type: type, parameters: itemIdentifier, bindings: bindings)
+	}
 }
 
 // MARK: - Binder Part 2: Binding
@@ -81,6 +85,7 @@ public extension ToolbarItem.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		
 		case .validate(let x): validator = x
 		default: break
 		}
@@ -142,7 +147,7 @@ extension BindingName where Binding: ToolbarItemBinding {
 		return ToolbarItemName<V>(source: source, downcast: Binding.toolbarItemBinding)
 	}
 }
-extension BindingName where Binding: ToolbarItemBinding {
+public extension BindingName where Binding: ToolbarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: ToolbarItemName<$2> { return .name(B.$1) }

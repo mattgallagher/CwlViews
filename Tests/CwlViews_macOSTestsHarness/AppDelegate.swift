@@ -8,8 +8,8 @@
 
 import Cocoa
 
-@objc(ApplicationSubclass)
-public class ApplicationSubclass: NSApplication {
+@objc(TestApplication)
+public class TestApplication: NSApplication {
 	public var relaunchOnLogin: Bool? = nil
 	public override func enableRelaunchOnLogin() {
 		relaunchOnLogin = true

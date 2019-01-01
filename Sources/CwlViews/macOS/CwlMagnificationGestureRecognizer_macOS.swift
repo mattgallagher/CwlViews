@@ -20,87 +20,126 @@
 #if os(macOS)
 
 public class MagnificationGestureRecognizer: Binder, MagnificationGestureRecognizerConvertible {
-	public typealias Instance = NSMagnificationGestureRecognizer
-	public typealias Inherited = GestureRecognizer
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsMagnificationGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension MagnificationGestureRecognizer {
 	enum Binding: MagnificationGestureRecognizerBinding {
-		public typealias EnclosingBinder = MagnificationGestureRecognizer
-		public static func magnificationGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case magnification(Dynamic<CGFloat>)
-
+		
 		// 2. Signal bindings are performed on the object after construction.
-
+		
 		// 3. Action bindings are triggered by the object after construction.
-
+		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = MagnificationGestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .magnification(let x): return x.apply(instance) { i, v in i.magnification = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-	}
-
-	public typealias Storage = GestureRecognizer.Storage
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension MagnificationGestureRecognizer {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = MagnificationGestureRecognizer.Binding
+		public typealias Inherited = GestureRecognizer.Preparer
+		public typealias Instance = NSMagnificationGestureRecognizer
+		
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension MagnificationGestureRecognizer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .magnification(let x): return x.apply(instance) { i, v in i.magnification = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+		
+		// 3. Action bindings are triggered by the object after construction.
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension MagnificationGestureRecognizer.Preparer {
+	public typealias Storage = GestureRecognizer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: MagnificationGestureRecognizerBinding {
+	public typealias MagnificationGestureRecognizerName<V> = BindingName<V, MagnificationGestureRecognizer.Binding, Binding>
+	private typealias B = MagnificationGestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> MagnificationGestureRecognizer.Binding) -> MagnificationGestureRecognizerName<V> {
+		return MagnificationGestureRecognizerName<V>(source: source, downcast: Binding.magnificationGestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: MagnificationGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .magnificationGestureRecognizerBinding(MagnificationGestureRecognizer.Binding.$1(v)) }) }
-
+	// With:    static var $1: MagnificationGestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var magnification: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .magnificationGestureRecognizerBinding(MagnificationGestureRecognizer.Binding.magnification(v)) }) }
-
+	static var magnification: MagnificationGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.magnification) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol MagnificationGestureRecognizerConvertible: GestureRecognizerConvertible {
 	func nsMagnificationGestureRecognizer() -> MagnificationGestureRecognizer.Instance
 }
 extension MagnificationGestureRecognizerConvertible {
 	public func nsGestureRecognizer() -> GestureRecognizer.Instance { return nsMagnificationGestureRecognizer() }
 }
-extension MagnificationGestureRecognizer.Instance: MagnificationGestureRecognizerConvertible {
+extension NSMagnificationGestureRecognizer: MagnificationGestureRecognizerConvertible {
 	public func nsMagnificationGestureRecognizer() -> MagnificationGestureRecognizer.Instance { return self }
 }
+public extension MagnificationGestureRecognizer {
+	func nsMagnificationGestureRecognizer() -> MagnificationGestureRecognizer.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol MagnificationGestureRecognizerBinding: GestureRecognizerBinding {
 	static func magnificationGestureRecognizerBinding(_ binding: MagnificationGestureRecognizer.Binding) -> Self
 }
-extension MagnificationGestureRecognizerBinding {
-	public static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
+public extension MagnificationGestureRecognizerBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return magnificationGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension MagnificationGestureRecognizer.Binding {
+	public typealias Preparer = MagnificationGestureRecognizer.Preparer
+	static func magnificationGestureRecognizerBinding(_ binding: MagnificationGestureRecognizer.Binding) -> MagnificationGestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

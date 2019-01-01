@@ -83,8 +83,8 @@ public extension View {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
-		public var backingLayer: BackingLayer? = nil
-		public var postsFrameChangedNotifications: Bool = false
+		var backingLayer: BackingLayer? = nil
+		var postsFrameChangedNotifications: Bool = false
 	}
 }
 
@@ -93,6 +93,7 @@ public extension View.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		
 		case .layer(let x): backingLayer = x.value
 		case .boundsDidChange: postsFrameChangedNotifications = true 
 		case .frameDidChange: postsFrameChangedNotifications = true
@@ -185,7 +186,7 @@ extension BindingName where Binding: ViewBinding {
 		return ViewName<V>(source: source, downcast: Binding.viewBinding)
 	}
 }
-extension BindingName where Binding: ViewBinding {
+public extension BindingName where Binding: ViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: ViewName<$2> { return .name(B.$1) }

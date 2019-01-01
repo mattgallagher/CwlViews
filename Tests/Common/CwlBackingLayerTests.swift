@@ -12,11 +12,40 @@ import XCTest
 #endif
 @testable import CwlViews
 
-func backingLayerConstructor(_ binding: BackingLayer.Binding) -> BackingLayer.Instance {
-	let binder = BackingLayer(binding)
-	let layer = CALayer()
-	binder.applyBindings(to: layer)
-	return layer
+class TestLayer: CALayer {
+	var needsDisplayCalled: Int = 0
+	override func setNeedsDisplay() {
+		needsDisplayCalled += 1
+	}
+
+	var lastDisplayedRect: CGRect = .zero
+	override func setNeedsDisplay(_ r: CGRect) {
+		lastDisplayedRect = r
+	}
+
+	var removeAllCalled: Int = 0
+	override func removeAllAnimations() {
+		removeAllCalled += 1
+	}
+	
+	var removedKeys: [String] = []
+	override func removeAnimation(forKey key: String) {
+		removedKeys.append(key)
+	}
+	
+	var lastScrolledRect: CGRect = .zero
+	override func scrollRectToVisible(_ r: CGRect) {
+		lastScrolledRect = r
+	}
+}
+
+extension BackingLayer: TestableBinder {
+	static func constructor(binding: BackingLayer.Binding) -> Preparer.Instance {
+		let layer = TestLayer()
+		BackingLayer(binding).apply(to: layer)
+		return layer
+	}
+	static var shoudPerformReleaseCheck: Bool { return false }
 }
 
 class CwlBackingLayerTests: XCTestCase {
@@ -27,47 +56,35 @@ class CwlBackingLayerTests: XCTestCase {
 	
 	#if os(macOS)
 		func testAutoresizingMask() {
-			testValueBinding(
+			BackingLayer.testValueBinding(
 				name: .autoresizingMask,
-				constructor: backingLayerConstructor,
-				skipReleaseCheck: true,
-				initial: [],
-				first: (.layerMinXMargin, .layerMinXMargin),
-				second: (.layerMinYMargin, .layerMinYMargin),
+				inputs: (.layerMinXMargin, .layerMinYMargin),
+				outputs: ([], .layerMinXMargin, .layerMinYMargin),
 				getter: { $0.autoresizingMask }
 			)
 		}
 	#endif
 	func testAffineTransform() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .affineTransform,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGAffineTransform.identity,
-			first: (CGAffineTransform(rotationAngle: 10), CGAffineTransform(rotationAngle: 10)),
-			second: (CGAffineTransform(scaleX: 2, y: 2), CGAffineTransform(scaleX: 2, y: 2)),
+			inputs: (CGAffineTransform(rotationAngle: 10), CGAffineTransform(scaleX: 2, y: 2)),
+			outputs: (CGAffineTransform.identity, CGAffineTransform(rotationAngle: 10), CGAffineTransform(scaleX: 2, y: 2)),
 			getter: { $0.affineTransform() }
 		)
 	}
 	func testAnchorPoint() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .anchorPoint,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGPoint(x: 0.5, y: 0.5),
-			first: (CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 0)),
-			second: (CGPoint(x: 1, y: 1), CGPoint(x: 1, y: 1)),
+			inputs: (CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)),
+			outputs: (CGPoint(x: 0.5, y: 0.5), CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)),
 			getter: { $0.anchorPoint }
 		)
 	}
 	func testAnchorPointZ() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .anchorPointZ,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (1, 1),
-			second: (-1, -1),
+			inputs: (1, -1),
+			outputs: (0, 1, -1),
 			getter: { $0.anchorPointZ }
 		)
 	}
@@ -76,13 +93,10 @@ class CwlBackingLayerTests: XCTestCase {
 		let input = Input<[AnyHashable: Any]?>().subscribeValuesUntilEnd {
 			lastValue = $0 as? [String: String]
 		}
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .actions,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (["a": input], 1),
-			second: (["b": input], 2),
+			inputs: (["a": input], ["b": input]),
+			outputs: (0, 1, 2),
 			getter: { (l: CALayer) -> Int in
 				if let a = l.actions?["a"] {
 					a.run(forKey: "a", object: l, arguments: ["b": "c"])
@@ -97,468 +111,395 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testBackgroundColor() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .backgroundColor,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])),
-			second: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			outputs: (nil, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
 			getter: { $0.backgroundColor }
 		)
 	}
 	#if os(macOS)
 		func testBackgroundFilters() {
-			testValueBinding(
+			BackingLayer.testValueBinding(
 				name: .backgroundFilters,
-				constructor: backingLayerConstructor,
-				skipReleaseCheck: true,
-				initial: nil,
-				first: ([CIFilter(name: "CIGaussianBlur")!], "CIGaussianBlur"),
-				second: ([CIFilter(name: "CIBloom")!], "CIBloom"),
+				inputs: ([CIFilter(name: "CIGaussianBlur")!], [CIFilter(name: "CIBloom")!]),
+				outputs: (nil, "CIGaussianBlur", "CIBloom"),
 				getter: { ($0.backgroundFilters?.first as? CIFilter)?.name }
 			)
 		}
 	#endif
 	func testBorderColor() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .borderColor,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1]),
-			first: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])),
-			second: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			outputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
 			getter: { $0.borderColor }
 		)
 	}
 	func testBorderWidth() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .borderWidth,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (1, 1),
-			second: (-1, -1),
+			inputs: (1, -1),
+			outputs: (0, 1, -1),
 			getter: { $0.borderWidth }
 		)
 	}
 	func testBounds() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .bounds,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: .zero,
-			first: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 0, y: 0, width: 1, height: 1)),
-			second: (CGRect(x: 1, y: 1, width: 2, height: 2), CGRect(x: 1, y: 1, width: 2, height: 2)),
+			inputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
+			outputs: (.zero, CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
 			getter: { $0.bounds }
 		)
 	}
 	#if os(macOS)
 		func testCompositingFilter() {
-			testValueBinding(
+			BackingLayer.testValueBinding(
 				name: .compositingFilter,
-				constructor: backingLayerConstructor,
-				skipReleaseCheck: true,
-				initial: nil,
-				first: (CIFilter(name: "CIGaussianBlur"), "CIGaussianBlur"),
-				second: (CIFilter(name: "CIBloom"), "CIBloom"),
+				inputs: (CIFilter(name: "CIGaussianBlur"), CIFilter(name: "CIBloom")),
+				outputs: (nil, "CIGaussianBlur", "CIBloom"),
 				getter: { ($0.compositingFilter as? CIFilter)?.name }
 			)
 		}
 	#endif
 	func testContents() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .contents,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: (1, 1),
-			second: (2, 2),
+			inputs: (1, 2),
+			outputs: (nil, 1, 2),
 			getter: { $0.contents as? Int }
 		)
 	}
 	func testContentsCenter() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .contentsCenter,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGRect(x: 0, y: 0, width: 1, height: 1),
-			first: (CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 0, y: 0, width: 2, height: 2)),
-			second: (CGRect(x: 1, y: 1, width: 3, height: 3), CGRect(x: 1, y: 1, width: 3, height: 3)),
+			inputs: (CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
+			outputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
 			getter: { $0.contentsCenter }
 		)
 	}
 	func testContentsGravity() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .contentsGravity,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: .resize,
-			first: (.top, .top),
-			second: (.bottom, .bottom),
+			inputs: (.top, .bottom),
+			outputs: (.resize, .top, .bottom),
 			getter: { $0.contentsGravity }
 		)
 	}
 	func testContentsRect() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .contentsRect,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGRect(x: 0, y: 0, width: 1, height: 1),
-			first: (CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 0, y: 0, width: 2, height: 2)),
-			second: (CGRect(x: 1, y: 1, width: 3, height: 3), CGRect(x: 1, y: 1, width: 3, height: 3)),
+			inputs: (CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
+			outputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
 			getter: { $0.contentsRect }
 		)
 	}
 	func testContentsScale() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .contentsScale,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 1,
-			first: (1, 1),
-			second: (-1, -1),
+			inputs: (1, -1),
+			outputs: (1, 1, -1),
 			getter: { $0.contentsScale }
 		)
 	}
 	func testCornerRadius() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .cornerRadius,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (1, 1),
-			second: (-1, -1),
+			inputs: (1, -1),
+			outputs: (0, 1, -1),
 			getter: { $0.cornerRadius }
 		)
 	}
 	func testIsDoubleSided() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .isDoubleSided,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: true,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (true, true, false),
 			getter: { $0.isDoubleSided }
 		)
 	}
 	func testDrawsAsynchronously() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .drawsAsynchronously,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.drawsAsynchronously }
 		)
 	}
 	func testEdgeAntialiasingMask() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .edgeAntialiasingMask,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: [.layerLeftEdge, .layerRightEdge, .layerBottomEdge, .layerTopEdge],
-			first: (CAEdgeAntialiasingMask.layerBottomEdge, CAEdgeAntialiasingMask.layerBottomEdge),
-			second: (CAEdgeAntialiasingMask.layerTopEdge, CAEdgeAntialiasingMask.layerTopEdge),
+			inputs: (CAEdgeAntialiasingMask.layerBottomEdge, CAEdgeAntialiasingMask.layerTopEdge),
+			outputs: ([.layerLeftEdge, .layerRightEdge, .layerBottomEdge, .layerTopEdge], CAEdgeAntialiasingMask.layerBottomEdge, CAEdgeAntialiasingMask.layerTopEdge),
 			getter: { $0.edgeAntialiasingMask }
 		)
 	}
 	#if os(macOS)
 		func testFilters() {
-			testValueBinding(
+			BackingLayer.testValueBinding(
 				name: .filters,
-				constructor: backingLayerConstructor,
-				skipReleaseCheck: true,
-				initial: nil,
-				first: ([CIFilter(name: "CIGaussianBlur")!], "CIGaussianBlur"),
-				second: ([CIFilter(name: "CIBloom")!], "CIBloom"),
+				inputs: ([CIFilter(name: "CIGaussianBlur")!], [CIFilter(name: "CIBloom")!]),
+				outputs: (nil, "CIGaussianBlur", "CIBloom"),
 				getter: { ($0.filters?.first as? CIFilter)?.name }
 			)
 		}
 	#endif
 	func testFrame() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .frame,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: .zero,
-			first: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 0, y: 0, width: 1, height: 1)),
-			second: (CGRect(x: 1, y: 1, width: 2, height: 2), CGRect(x: 1, y: 1, width: 2, height: 2)),
+			inputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
+			outputs: (.zero, CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
 			getter: { $0.frame }
 		)
 	}
 	func testIsGeometryFlipped() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .isGeometryFlipped,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isGeometryFlipped }
 		)
 	}
 	func testIsHidden() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .isHidden,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isHidden }
 		)
 	}
 	func testMagnificationFilter() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .magnificationFilter,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CALayerContentsFilter.linear,
-			first: (CALayerContentsFilter.nearest, CALayerContentsFilter.nearest),
-			second: (CALayerContentsFilter.trilinear, CALayerContentsFilter.trilinear),
+			inputs: (CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
+			outputs: (CALayerContentsFilter.linear, CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
 			getter: { $0.magnificationFilter }
 		)
 	}
 	func testMask() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .mask,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil as CGRect?,
-			first: (Layer() as LayerConvertible?, CGRect.zero as CGRect?),
-			second: (Layer(.frame -- CGRect(x: 0, y: 0, width: 1, height: 1)) as LayerConvertible?, CGRect(x: 0, y: 0, width: 1, height: 1) as CGRect?),
+			inputs: (Layer() as LayerConvertible?, Layer(.frame -- CGRect(x: 0, y: 0, width: 1, height: 1)) as LayerConvertible?),
+			outputs: (nil as CGRect?, CGRect.zero as CGRect?, CGRect(x: 0, y: 0, width: 1, height: 1) as CGRect?),
 			getter: { (layer: CALayer) -> CGRect? in layer.mask?.frame }
 		)
 	}
 	func testMasksToBounds() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .masksToBounds,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.masksToBounds }
 		)
 	}
 	func testMinificationFilter() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .minificationFilter,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CALayerContentsFilter.linear,
-			first: (CALayerContentsFilter.nearest, CALayerContentsFilter.nearest),
-			second: (CALayerContentsFilter.trilinear, CALayerContentsFilter.trilinear),
+			inputs: (CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
+			outputs: (CALayerContentsFilter.linear, CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
 			getter: { $0.minificationFilter }
 		)
 	}
 	func testMinificationFilterBias() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .minificationFilterBias,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (1, 1),
-			second: (-1, -1),
+			inputs: (1, -1),
+			outputs: (0, 1, -1),
 			getter: { $0.minificationFilterBias }
 		)
 	}
 	func testName() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .name,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: ("a", "a"),
-			second: ("b", "b"),
+			inputs: ("a", "b"),
+			outputs: (nil, "a", "b"),
 			getter: { $0.name }
 		)
 	}
 	func testNeedsDisplayOnBoundsChange() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .needsDisplayOnBoundsChange,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.needsDisplayOnBoundsChange }
 		)
 	}
 	func testOpacity() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .opacity,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 1,
-			first: (0, 0),
-			second: (0.5, 0.5),
+			inputs: (0, 0.5),
+			outputs: (1, 0, 0.5),
 			getter: { $0.opacity }
 		)
 	}
 	func testIsOpaque() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .isOpaque,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isOpaque }
 		)
 	}
 	func testPosition() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .position,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGPoint(x: 0.0, y: 0.0),
-			first: (CGPoint(x: 0.5, y: 0.5), CGPoint(x: 0.5, y: 0.5)),
-			second: (CGPoint(x: 1, y: 1), CGPoint(x: 1, y: 1)),
+			inputs: (CGPoint(x: 0.5, y: 0.5), CGPoint(x: 1, y: 1)),
+			outputs: (CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.5, y: 0.5), CGPoint(x: 1, y: 1)),
 			getter: { $0.position }
 		)
 	}
 	func testRasterizationScale() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .rasterizationScale,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 1,
-			first: (3, 3),
-			second: (2, 2),
+			inputs: (3, 2),
+			outputs: (1, 3, 2),
 			getter: { $0.rasterizationScale }
 		)
 	}
 	func testShadowColor() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .shadowColor,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1]),
-			first: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])),
-			second: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			outputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
 			getter: { $0.shadowColor }
 		)
 	}
 	func testShadowOffset() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .shadowOffset,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CGSize(width: 0, height: -3),
-			first: (CGSize(width: 0, height: 0), CGSize(width: 0, height: 0)),
-			second: (CGSize(width: 1, height: 1), CGSize(width: 1, height: 1)),
+			inputs: (CGSize(width: 0, height: 0), CGSize(width: 1, height: 1)),
+			outputs: (CGSize(width: 0, height: -3), CGSize(width: 0, height: 0), CGSize(width: 1, height: 1)),
 			getter: { $0.shadowOffset }
 		)
 	}
 	func testShadowOpacity() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .shadowOpacity,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (1, 1),
-			second: (0.5, 0.5),
+			inputs: (1, 0.5),
+			outputs: (0, 1, 0.5),
 			getter: { $0.shadowOpacity }
 		)
 	}
 	func testShadowPath() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .shadowPath,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: (CGPath(rect: .zero, transform: nil) as CGPath?, .zero),
-			second: (CGPath(rect: CGRect(x: 0, y: 0, width: 1, height: 1), transform: nil) as CGPath?, CGRect(x: 0, y: 0, width: 1, height: 1)),
+			inputs: (CGPath(rect: .zero, transform: nil) as CGPath?, CGPath(rect: CGRect(x: 0, y: 0, width: 1, height: 1), transform: nil) as CGPath?),
+			outputs: (nil, .zero, CGRect(x: 0, y: 0, width: 1, height: 1)),
 			getter: { (l: CALayer) -> CGRect? in l.shadowPath?.boundingBox }
 		)
 	}
 	func testShadowRadius() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .shadowRadius,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 3,
-			first: (1, 1),
-			second: (2, 2),
+			inputs: (1, 2),
+			outputs: (3, 1, 2),
 			getter: { $0.shadowRadius }
 		)
 	}
 	func testShouldRasterize() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .shouldRasterize,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.shouldRasterize }
 		)
 	}
 	func testStyle() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .style,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: ([:], [:]),
-			second: (["a": "b"], ["a": "b"]),
+			inputs: ([:], ["a": "b"]),
+			outputs: (nil, [:], ["a": "b"]),
 			getter: { $0.style as? [String: String] }
 		)
 	}
 	func testSublayers() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .sublayers,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: ([Layer()], CGRect.zero),
-			second: ([Layer(.frame -- CGRect(x: 0, y: 0, width: 1, height: 1))], CGRect(x: 0, y: 0, width: 1, height: 1)),
+			inputs: ([Layer()], [Layer(.frame -- CGRect(x: 0, y: 0, width: 1, height: 1))]),
+			outputs: (nil, CGRect.zero, CGRect(x: 0, y: 0, width: 1, height: 1)),
 			getter: { $0.sublayers?.first?.frame }
 		)
 	}
 	func testSublayerTransform() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .sublayerTransform,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CATransform3DMakeScale(1, 1, 1),
-			first: (CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeRotation(10, 1, 2, 3)),
-			second: (CATransform3DMakeTranslation(1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
+			inputs: (CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
+			outputs: (CATransform3DMakeScale(1, 1, 1), CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
 			getter: { $0.sublayerTransform }
 		)
 	}
 	func testTransform() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .transform,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: CATransform3DMakeScale(1, 1, 1),
-			first: (CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeRotation(10, 1, 2, 3)),
-			second: (CATransform3DMakeTranslation(1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
+			inputs: (CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
+			outputs: (CATransform3DMakeScale(1, 1, 1), CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
 			getter: { $0.transform }
 		)
 	}
 	func testZPosition() {
-		testValueBinding(
+		BackingLayer.testValueBinding(
 			name: .zPosition,
-			constructor: backingLayerConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (3, 3),
-			second: (2, 2),
+			inputs: (3, 2),
+			outputs: (0, 3, 2),
 			getter: { $0.zPosition }
 		)
 	}
 	
-	// MARK: - 1. Value bindings
+	// MARK: - 2. Signal bindings
 	
-//	func testAddAnimation() {
-//		test(signalBinding)
-//	}
+	func testAddAnimation() {
+		BackingLayer.testSignalBinding(
+			name: .addAnimation,
+			inputs: (AnimationForKey.fade, AnimationForKey.moveIn(from: .left)),
+			outputs: (nil, .fade, .moveIn),
+			getter: { ($0.animation(forKey: kCATransition) as? CATransition)?.type }
+		)
+	}
+
+	func testNeedsDisplay() {
+		BackingLayer.testSignalBinding(
+			name: .needsDisplay,
+			inputs: ((), ()),
+			outputs: (0, 1, 2),
+			getter: { ($0 as! TestLayer).needsDisplayCalled }
+		)
+	}
+
+	func testNeedsDisplayInRect() {
+		BackingLayer.testSignalBinding(
+			name: .needsDisplayInRect,
+			inputs: (CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
+			outputs: (CGRect.zero, CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
+			getter: { ($0 as! TestLayer).lastDisplayedRect }
+		)
+	}
+
+	func testRemoveAllAnimations() {
+		BackingLayer.testSignalBinding(
+			name: .removeAllAnimations,
+			inputs: ((), ()),
+			outputs: (0, 1, 2),
+			getter: { ($0 as! TestLayer).removeAllCalled }
+		)
+	}
+
+	func testRemoveAnimationForKey() {
+		BackingLayer.testSignalBinding(
+			name: .removeAnimationForKey,
+			inputs: ("a", "b"),
+			outputs: ([], ["a"], ["a", "b"]),
+			getter: { ($0 as! TestLayer).removedKeys }
+		)
+	}
+
+	func testScrollRectToVisible() {
+		BackingLayer.testSignalBinding(
+			name: .scrollRectToVisible,
+			inputs: (CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
+			outputs: (CGRect.zero, CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
+			getter: { ($0 as! TestLayer).lastScrolledRect }
+		)
+	}
 }
 
 extension CATransform3D: Equatable {

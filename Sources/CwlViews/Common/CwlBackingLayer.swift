@@ -78,20 +78,16 @@ public extension BackingLayer {
 		case transform(Dynamic<CATransform3D>)
 		case zPosition(Dynamic<CGFloat>)
 		
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case autoresizingMask(Dynamic<CAAutoresizingMask>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case backgroundFilters(Dynamic<[CIFilter]?>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case compositingFilter(Dynamic<CIFilter?>)
-		@available(macOS 10.13, *) @available(iOS, unavailable)
-		case filters(Dynamic<[CIFilter]?>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case autoresizingMask(Dynamic<CAAutoresizingMask>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case backgroundFilters(Dynamic<[CIFilter]?>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case compositingFilter(Dynamic<CIFilter?>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case filters(Dynamic<[CIFilter]?>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		case addAnimation(Signal<AnimationForKey>)
 		case needsDisplay(Signal<Void>)
 		case needsDisplayInRect(Signal<CGRect>)
-		case removeAllAnimations(Signal<String>)
+		case removeAllAnimations(Signal<Void>)
 		case removeAnimationForKey(Signal<String>)
 		case scrollRectToVisible(Signal<CGRect>)
 		
@@ -216,7 +212,9 @@ public extension BackingLayer.Preparer {
 			#endif
 
 		//	2. Signal bindings are performed on the object after construction.
-		case .addAnimation(let x): return x.apply(instance) { i, v in i.add(v.animation, forKey: v.key) }
+		case .addAnimation(let x): return x.apply(instance) { i, v in
+			i.add(v.animation, forKey: v.key)
+		}
 		case .needsDisplay(let x): return x.apply(instance) { i, v in i.setNeedsDisplay() }
 		case .needsDisplayInRect(let x): return x.apply(instance) { i, v in i.setNeedsDisplay(v) }
 		case .removeAllAnimations(let x): return x.apply(instance) { i, v in i.removeAllAnimations() }
@@ -300,20 +298,16 @@ public extension BindingName where Binding: BackingLayerBinding {
 	static var transform: BackingLayerName<Dynamic<CATransform3D>> { return .name(B.transform) }
 	static var zPosition: BackingLayerName<Dynamic<CGFloat>> { return .name(B.zPosition) }
 	
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var autoresizingMask: BackingLayerName<Dynamic<BackingLayer.CAAutoresizingMask>> { return .name(B.autoresizingMask) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var backgroundFilters: BackingLayerName<Dynamic<[BackingLayer.CIFilter]?>> { return .name(B.backgroundFilters) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var compositingFilter: BackingLayerName<Dynamic<BackingLayer.CIFilter?>> { return .name(B.compositingFilter) }
-	@available(macOS 10.13, *) @available(iOS, unavailable)
-	static var filters: BackingLayerName<Dynamic<[BackingLayer.CIFilter]?>> { return .name(B.filters) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var autoresizingMask: BackingLayerName<Dynamic<BackingLayer.CAAutoresizingMask>> { return .name(B.autoresizingMask) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var backgroundFilters: BackingLayerName<Dynamic<[BackingLayer.CIFilter]?>> { return .name(B.backgroundFilters) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var compositingFilter: BackingLayerName<Dynamic<BackingLayer.CIFilter?>> { return .name(B.compositingFilter) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var filters: BackingLayerName<Dynamic<[BackingLayer.CIFilter]?>> { return .name(B.filters) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	static var addAnimation: BackingLayerName<Signal<AnimationForKey>> { return .name(B.addAnimation) }
 	static var needsDisplay: BackingLayerName<Signal<Void>> { return .name(B.needsDisplay) }
 	static var needsDisplayInRect: BackingLayerName<Signal<CGRect>> { return .name(B.needsDisplayInRect) }
-	static var removeAllAnimations: BackingLayerName<Signal<String>> { return .name(B.removeAllAnimations) }
+	static var removeAllAnimations: BackingLayerName<Signal<Void>> { return .name(B.removeAllAnimations) }
 	static var removeAnimationForKey: BackingLayerName<Signal<String>> { return .name(B.removeAnimationForKey) }
 	static var scrollRectToVisible: BackingLayerName<Signal<CGRect>> { return .name(B.scrollRectToVisible) }
 	
@@ -353,16 +347,14 @@ public struct AnimationForKey {
 	public static var fade: AnimationForKey {
 		let t = CATransition()
 		t.type = CATransitionType.fade
-		return AnimationForKey(animation: t)
+		
+		// NOTE: fade animations are always applied under key kCATransition so it's pointeless trying to set a key
+		return AnimationForKey(animation: t, forKey: nil)
 	}
 	
 	public enum Direction {
-		case left
-		case right
-		case top
-		case bottom
-		
-		func transition(ofType: CATransitionType) -> AnimationForKey {
+		case left, right, top, bottom
+		func transition(ofType: CATransitionType, forKey: String? = nil) -> AnimationForKey {
 			let t = CATransition()
 			t.type = ofType
 			switch self {
@@ -371,19 +363,19 @@ public struct AnimationForKey {
 			case .top: t.subtype = CATransitionSubtype.fromTop
 			case .bottom: t.subtype = CATransitionSubtype.fromBottom
 			}
-			return AnimationForKey(animation: t)
+			return AnimationForKey(animation: t, forKey: forKey)
 		}
 	}
 	
-	public static func moveIn(from: Direction) -> AnimationForKey {
-		return from.transition(ofType: CATransitionType.moveIn)
+	public static func moveIn(from: Direction, forKey: String? = nil) -> AnimationForKey {
+		return from.transition(ofType: CATransitionType.moveIn, forKey: forKey)
 	}
 	
-	public static func push(from: Direction) -> AnimationForKey {
-		return from.transition(ofType: CATransitionType.push)
+	public static func push(from: Direction, forKey: String? = nil) -> AnimationForKey {
+		return from.transition(ofType: CATransitionType.push, forKey: forKey)
 	}
 	
-	public static func reveal(from: Direction) -> AnimationForKey {
-		return from.transition(ofType: CATransitionType.reveal)
+	public static func reveal(from: Direction, forKey: String? = nil) -> AnimationForKey {
+		return from.transition(ofType: CATransitionType.reveal, forKey: forKey)
 	}
 }

@@ -20,21 +20,15 @@
 #if os(macOS)
 
 public class PanGestureRecognizer: Binder, PanGestureRecognizerConvertible {
-	public typealias Instance = NSPanGestureRecognizer
-	public typealias Inherited = GestureRecognizer
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsPanGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension PanGestureRecognizer {
 	enum Binding: PanGestureRecognizerBinding {
-		public typealias EnclosingBinder = PanGestureRecognizer
-		public static func panGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -48,59 +42,104 @@ public class PanGestureRecognizer: Binder, PanGestureRecognizerConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = PanGestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .buttonMask(let x): return x.apply(instance) { i, v in i.buttonMask = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-	}
-
-	public typealias Storage = GestureRecognizer.Storage
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension PanGestureRecognizer {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = PanGestureRecognizer.Binding
+		public typealias Inherited = GestureRecognizer.Preparer
+		public typealias Instance = NSPanGestureRecognizer
+		
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension PanGestureRecognizer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .buttonMask(let x): return x.apply(instance) { i, v in i.buttonMask = v }
+		
+		// 2. Signal bindings are performed on the object after construction.
+		
+		// 3. Action bindings are triggered by the object after construction.
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension PanGestureRecognizer.Preparer {
+	public typealias Storage = GestureRecognizer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PanGestureRecognizerBinding {
+	public typealias PanGestureRecognizerName<V> = BindingName<V, PanGestureRecognizer.Binding, Binding>
+	private typealias B = PanGestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> PanGestureRecognizer.Binding) -> PanGestureRecognizerName<V> {
+		return PanGestureRecognizerName<V>(source: source, downcast: Binding.panGestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: PanGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .panGestureRecognizerBinding(PanGestureRecognizer.Binding.$1(v)) }) }
-
+	// With:    static var $1: PanGestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var buttonMask: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .panGestureRecognizerBinding(PanGestureRecognizer.Binding.buttonMask(v)) }) }
-
+	static var buttonMask: PanGestureRecognizerName<Dynamic<Int>> { return .name(B.buttonMask) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol PanGestureRecognizerConvertible: GestureRecognizerConvertible {
 	func nsPanGestureRecognizer() -> PanGestureRecognizer.Instance
 }
 extension PanGestureRecognizerConvertible {
 	public func nsGestureRecognizer() -> GestureRecognizer.Instance { return nsPanGestureRecognizer() }
 }
-extension PanGestureRecognizer.Instance: PanGestureRecognizerConvertible {
+extension NSPanGestureRecognizer: PanGestureRecognizerConvertible {
 	public func nsPanGestureRecognizer() -> PanGestureRecognizer.Instance { return self }
 }
+public extension PanGestureRecognizer {
+	func nsPanGestureRecognizer() -> PanGestureRecognizer.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol PanGestureRecognizerBinding: GestureRecognizerBinding {
 	static func panGestureRecognizerBinding(_ binding: PanGestureRecognizer.Binding) -> Self
 }
-extension PanGestureRecognizerBinding {
-	public static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
+public extension PanGestureRecognizerBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return panGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension PanGestureRecognizer.Binding {
+	public typealias Preparer = PanGestureRecognizer.Preparer
+	static func panGestureRecognizerBinding(_ binding: PanGestureRecognizer.Binding) -> PanGestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

@@ -147,11 +147,12 @@ public extension TableView {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
-		public var singleAction: TargetAction?
-		public var doubleAction: TargetAction?
+		var singleAction: TargetAction?
+		var doubleAction: TargetAction?
 	}
 }
 
+// MARK: - Binder Part 4: Preparer overrides
 public extension TableView.Preparer {
 	var delegateIsRequired: Bool { return true }
 	
@@ -199,6 +200,7 @@ public extension TableView.Preparer {
 	
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
+		case .inheritedBinding(.action): return nil
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -637,7 +639,7 @@ extension BindingName where Binding: TableViewBinding {
 		return TableViewName<V>(source: source, downcast: Binding.tableViewBinding)
 	}
 }
-extension BindingName where Binding: TableViewBinding {
+public extension BindingName where Binding: TableViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: TableViewName<$2> { return .name(B.$1) }
@@ -754,7 +756,7 @@ public extension TableViewBinding {
 	}
 }
 public extension TableView.Binding {
-	public typealias Preparer = Window.Preparer
+	public typealias Preparer = TableView.Preparer
 	static func tableViewBinding(_ binding: TableView<RowDataType>.Binding) -> TableView<RowDataType>.Binding {
 		return binding
 	}

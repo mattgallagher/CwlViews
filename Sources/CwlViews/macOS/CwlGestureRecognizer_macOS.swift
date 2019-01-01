@@ -35,10 +35,8 @@ public extension GestureRecognizer {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		@available(macOS 10.12.2, *)
-		case allowedTouchTypes(Dynamic<NSTouch.TouchTypeMask>)
-		@available(macOS 10.11, *)
-		case pressureConfiguration(Dynamic<NSPressureConfiguration>)
+		@available(macOS 10.12.2, *) case allowedTouchTypes(Dynamic<NSTouch.TouchTypeMask>)
+		@available(macOS 10.11, *) case pressureConfiguration(Dynamic<NSPressureConfiguration>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
@@ -52,8 +50,7 @@ public extension GestureRecognizer {
 		case shouldRequireFailure((NSGestureRecognizer, NSGestureRecognizer) -> Bool)
 		case shouldRequireToFail((NSGestureRecognizer, NSGestureRecognizer) -> Bool)
 		
-		@available(macOS 10.12.2, *)
-		case shouldReceiveTouch((NSGestureRecognizer, NSTouch) -> Bool)
+		@available(macOS 10.12.2, *) case shouldReceiveTouch((NSGestureRecognizer, NSTouch) -> Bool)
 	}
 }
 
@@ -81,19 +78,19 @@ public extension GestureRecognizer {
 public extension GestureRecognizer.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
-		case .shouldAttemptToRecognize(let x):
-			if #available(macOS 10.11, *) {
-				delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
-			}
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		case .shouldBegin(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
 		case .shouldRecognizeSimultaneously(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
 		case .shouldRequireFailure(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
 		case .shouldRequireToFail(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
+		case .shouldAttemptToRecognize(let x):
+			if #available(macOS 10.11, *) {
+				delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
+			}
 		case .shouldReceiveTouch(let x):
 			if #available(macOS 10.12.2, *) {
 				delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
 			}
-		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		default: break
 		}
 	}
@@ -174,7 +171,7 @@ extension BindingName where Binding: GestureRecognizerBinding {
 		return GestureRecognizerName<V>(source: source, downcast: Binding.gestureRecognizerBinding)
 	}
 }
-extension BindingName where Binding: GestureRecognizerBinding {
+public extension BindingName where Binding: GestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: GestureRecognizerName<$2> { return .name(B.$1) }
@@ -182,10 +179,8 @@ extension BindingName where Binding: GestureRecognizerBinding {
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	@available(macOS 10.12.2, *)
-	static var allowedTouchTypes: GestureRecognizerName<Dynamic<NSTouch.TouchTypeMask>> { return .name(B.allowedTouchTypes) }
-	@available(macOS 10.11, *)
-	static var pressureConfiguration: GestureRecognizerName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
+	@available(macOS 10.12.2, *) static var allowedTouchTypes: GestureRecognizerName<Dynamic<NSTouch.TouchTypeMask>> { return .name(B.allowedTouchTypes) }
+	@available(macOS 10.11, *) static var pressureConfiguration: GestureRecognizerName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
@@ -199,8 +194,7 @@ extension BindingName where Binding: GestureRecognizerBinding {
 	static var shouldRequireFailure: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(B.shouldRequireFailure) }
 	static var shouldRequireToFail: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(B.shouldRequireToFail) }
 	
-	@available(macOS 10.12.2, *)
-	static var shouldReceiveTouch: GestureRecognizerName<(NSGestureRecognizer, NSTouch) -> Bool> { return .name(B.shouldReceiveTouch) }
+	@available(macOS 10.12.2, *) static var shouldReceiveTouch: GestureRecognizerName<(NSGestureRecognizer, NSTouch) -> Bool> { return .name(B.shouldReceiveTouch) }
 
 	// Composite binding names
 	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {

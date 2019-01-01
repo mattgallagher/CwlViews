@@ -36,15 +36,11 @@ public struct TextInputTraits {
 		case keyboardAppearance(Dynamic<UIKeyboardAppearance>)
 		case keyboardType(Dynamic<UIKeyboardType>)
 		case returnKeyType(Dynamic<UIReturnKeyType>)
-		@available(iOS 11.0, *)
-		case smartDashesType(Dynamic<UITextSmartDashesType>)
-		@available(iOS 11.0, *)
-		case smartQuotesType(Dynamic<UITextSmartQuotesType>)
-		@available(iOS 11.0, *)
-		case smartInsertDeleteType(Dynamic<UITextSmartInsertDeleteType>)
+		@available(iOS 11.0, *) case smartDashesType(Dynamic<UITextSmartDashesType>)
+		@available(iOS 11.0, *) case smartQuotesType(Dynamic<UITextSmartQuotesType>)
+		@available(iOS 11.0, *) case smartInsertDeleteType(Dynamic<UITextSmartInsertDeleteType>)
 		case isSecureTextEntry(Dynamic<Bool>)
-		@available(iOS 10.0, *)
-		case textContentType(Dynamic<UITextContentType>)
+		@available(iOS 10.0, *) case textContentType(Dynamic<UITextContentType>)
 	}
 }
 

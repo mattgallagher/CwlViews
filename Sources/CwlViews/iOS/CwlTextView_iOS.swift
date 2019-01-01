@@ -71,10 +71,8 @@ public class TextView: Binder, TextViewConvertible {
 		case shouldBeginEditing((UITextView) -> Bool)
 		case shouldEndEditing((UITextView) -> Bool)
 		case shouldChangeText((UITextView, NSRange, String) -> Bool)
-		@available(iOS 10.0, *)
-		case shouldInteractWithAttachment((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)
-		@available(iOS 10.0, *)
-		case shouldInteractWithURL((UITextView, URL, NSRange, UITextItemInteraction) -> Bool)
+		@available(iOS 10.0, *) case shouldInteractWithAttachment((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)
+		@available(iOS 10.0, *) case shouldInteractWithURL((UITextView, URL, NSRange, UITextItemInteraction) -> Bool)
 	}
 	
 	struct Preparer: BinderEmbedderConstructor {

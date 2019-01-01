@@ -109,7 +109,7 @@ class ViewModel {
 		
 		// When a remove instruction is received, apply it to each the selected rows
 		(self.removeInput, self.removeEndpoint) = Signal<Void>.create { s -> SignalOutput<Document.Action> in
-			so.sample(s).transform { (r: Result<IndexSet>, n: SignalNext<Document.Action>) in
+			so.sample(s).transform { (r: Result<IndexSet, SignalEnd>, n: SignalNext<Document.Action>) in
 				switch r {
 				case .success(let v): v.forEach { n.send(value: .deleteRow($0)) }
 				case .failure(let e): n.send(error: e)
@@ -165,7 +165,7 @@ func mainWindow(model: DocumentAdapter) -> Window {
 		.frameAutosaveName -- NSWindow.FrameAutosaveName("MyWindow"),
 		.frameHorizontal -- 5,
 		.frameVertical -- -15,
-		.errorSheet <-- viewModel.informationalErrorSignal.ignoreCallback(),
+		.presentError <-- viewModel.informationalErrorSignal.ignoreCallback(),
 		.toolbar -- Toolbar(
 			identifier: NSToolbar.Identifier("toolbar"),
 			.displayMode -- .iconAndLabel,
@@ -209,7 +209,7 @@ func mainWindow(model: DocumentAdapter) -> Window {
 			.layout -- .horizontal(.view(StackView(
 				.axis -- NSUserInterfaceLayoutOrientation.vertical,
 				.edgeInsets -- NSEdgeInsets(top: 5, left: 5, bottom: 15, right: 5),
-				.views -- [
+				.arrangedSubviews -- [
 					TableView<Document.Row>.scrollEmbedded(
 						.layer -- BackingLayer(
 							.shadowOpacity -- 1,
@@ -251,7 +251,7 @@ func mainWindow(model: DocumentAdapter) -> Window {
 					),
 					StackView(
 						.axis -- NSUserInterfaceLayoutOrientation.horizontal,
-						.views -- [
+						.arrangedSubviews -- [
 							Button(
 								.bezelStyle -- NSButton.BezelStyle.rounded,
 								.title -- NSLocalizedString("Add row", comment: ""),

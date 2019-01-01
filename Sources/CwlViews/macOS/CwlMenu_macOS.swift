@@ -84,7 +84,7 @@ public extension Menu {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
-		public var systemName: SystemMenu?
+		var systemName: SystemMenu?
 	}
 }
 
@@ -112,11 +112,12 @@ public extension Menu.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-		case .systemName(let x): systemName = x.value
+		
+		case .confinementRect(let x): delegate().addHandler(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
 		case .didClose(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menuDidClose(_:)))
+		case .systemName(let x): systemName = x.value
 		case .willHighlight(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menu(_:willHighlight:)))
 		case .willOpen(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menuWillOpen(_:)))
-		case .confinementRect(let x): delegate().addHandler(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
 		default: break
 		}
 	}

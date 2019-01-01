@@ -33,10 +33,10 @@ public extension PopUpButton {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case menu(Constant<NSMenu>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case autoenablesItems(Dynamic<Bool>)
+		case menu(Dynamic<MenuConvertible>)
 		case preferredEdge(Dynamic<NSRectEdge>)
 		case pullsDown(Dynamic<Bool>)
 		case selectedIndex(Dynamic<Int>)
@@ -54,87 +54,125 @@ public extension PopUpButton {
 // MARK: - Binder Part 3: Preparer
 public extension PopUpButton {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = PopUpButton
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = PopUpButton.Binding
+		public typealias Inherited = Button.Preparer
+		public typealias Instance = NSPopUpButton
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			return subclass.init(frame: NSRect.zero, pullsDown: pullsDownInitial ?? false)
-		}
-
-		public var pullsDown = InitialSubsequent<Bool>()
-		public var pullsDownInitial: Bool? = nil
-
+		public var inherited = Inherited()
 		public init() {}
-
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .pullsDown(let x):
-				pullsDown = x.initialSubsequent()
-				pullsDownInitial = pullsDown.initial()
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .pullsDown: return pullsDown.resume()?.apply(instance) { i, v in i.pullsDown = v }
-			case .autoenablesItems(let x): return x.apply(instance) { i, v in i.autoenablesItems = v }
-			case .menu(let x):
-				return x.apply(instance) { i, v in
-					i.menu = v.0
-					i.selectItem(at: v.selectedIndex)
-				}
-			case .preferredEdge(let x): return x.apply(instance) { i, v in i.preferredEdge = v }
-			case .title(let x): return x.apply(instance) { i, v in i.title = v }
-			case .willPopUp(let x):
-				return Signal.notifications(name: NSPopUpButton.willPopUpNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
+		
+		var pullsDown = InitialSubsequent<Bool>()
 	}
-
-	public typealias Storage = Button.Storage
 }
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension PopUpButton.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		case .pullsDown(let x): pullsDown = x.initialSubsequent()
+		default: break
+		}
+	}
+	
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
+		return type.init(frame: NSRect.zero, pullsDown: pullsDown.initial ?? false)
+	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .autoenablesItems(let x): return x.apply(instance) { i, v in i.autoenablesItems = v }
+		case .menu(let x): return x.apply(instance) { i, v in i.menu = v.nsMenu() }
+		case .preferredEdge(let x): return x.apply(instance) { i, v in i.preferredEdge = v }
+		case .pullsDown: return pullsDown.resume()?.apply(instance) { i, v in i.pullsDown = v }
+		case .selectedIndex(let x): return x.apply(instance) { i, v in i.selectItem(at: v) }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+
+		// 2. Signal bindings are performed on the object after construction.
+
+		// 3. Action bindings are triggered by the object after construction.
+		case .willPopUp(let x): return Signal.notifications(name: NSPopUpButton.willPopUpNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension PopUpButton.Preparer {
+	public typealias Storage = Button.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PopUpButtonBinding {
+	public typealias PopUpButtonName<V> = BindingName<V, PopUpButton.Binding, Binding>
+	private typealias B = PopUpButton.Binding
+	private static func name<V>(_ source: @escaping (V) -> PopUpButton.Binding) -> PopUpButtonName<V> {
+		return PopUpButtonName<V>(source: source, downcast: Binding.popUpButtonBinding)
+	}
+}
+public extension BindingName where Binding: PopUpButtonBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.$1(v)) }) }
-
+	// With:    static var $1: PopUpButtonName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var pullsDown: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.pullsDown(v)) }) }
-	public static var autoenablesItems: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.autoenablesItems(v)) }) }
-	public static var menu: BindingName<Dynamic<(NSMenu, selectedIndex: Int)>, Binding> { return BindingName<Dynamic<(NSMenu, selectedIndex: Int)>, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.menu(v)) }) }
-	public static var preferredEdge: BindingName<Dynamic<NSRectEdge>, Binding> { return BindingName<Dynamic<NSRectEdge>, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.preferredEdge(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.title(v)) }) }
-
+	static var autoenablesItems: PopUpButtonName<Dynamic<Bool>> { return .name(B.autoenablesItems) }
+	static var menu: PopUpButtonName<Dynamic<MenuConvertible>> { return .name(B.menu) }
+	static var preferredEdge: PopUpButtonName<Dynamic<NSRectEdge>> { return .name(B.preferredEdge) }
+	static var pullsDown: PopUpButtonName<Dynamic<Bool>> { return .name(B.pullsDown) }
+	static var selectedIndex: PopUpButtonName<Dynamic<Int>> { return .name(B.selectedIndex) }
+	static var title: PopUpButtonName<Dynamic<String>> { return .name(B.title) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var willPopUp: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .popUpButtonBinding(PopUpButton.Binding.willPopUp(v)) }) }
-
+	static var willPopUp: PopUpButtonName<SignalInput<Void>> { return .name(B.willPopUp) }
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol PopUpButtonConvertible: ButtonConvertible {
 	func nsPopUpButton() -> PopUpButton.Instance
 }
 extension PopUpButtonConvertible {
 	public func nsButton() -> Button.Instance { return nsPopUpButton() }
 }
-extension PopUpButton.Instance: PopUpButtonConvertible {
+extension NSPopUpButton: PopUpButtonConvertible {
 	public func nsPopUpButton() -> PopUpButton.Instance { return self }
 }
+public extension PopUpButton {
+	func nsPopUpButton() -> PopUpButton.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol PopUpButtonBinding: ButtonBinding {
 	static func popUpButtonBinding(_ binding: PopUpButton.Binding) -> Self
 }
-extension PopUpButtonBinding {
-	public static func buttonBinding(_ binding: Button.Binding) -> Self {
+public extension PopUpButtonBinding {
+	static func buttonBinding(_ binding: Button.Binding) -> Self {
 		return popUpButtonBinding(.inheritedBinding(binding))
 	}
 }
+public extension PopUpButton.Binding {
+	public typealias Preparer = PopUpButton.Preparer
+	static func popUpButtonBinding(_ binding: PopUpButton.Binding) -> PopUpButton.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

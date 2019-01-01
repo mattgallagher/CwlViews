@@ -70,13 +70,23 @@ public extension ClipView {
 public extension ClipView.Preparer {
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
-		case .copiesOnScroll(let x): return x.apply(instance) { i, v in i.copiesOnScroll = v }
-		case .documentView(let x): return x.apply(instance) { i, v in i.documentView = v?.nsView() }
-		case .documentCursor(let x): return x.apply(instance) { i, v in i.documentCursor = v }
-		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
-		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
-		case .scrollTo(let x): return x.apply(instance) { i, v in i.scroll(to: v) }
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
+		case .copiesOnScroll(let x): return x.apply(instance) { i, v in i.copiesOnScroll = v }
+		case .documentCursor(let x): return x.apply(instance) { i, v in i.documentCursor = v }
+		case .documentView(let x): return x.apply(instance) { i, v in i.documentView = v?.nsView() }
+		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
+		
+		// 2. Signal bindings are performed on the object after construction.
+		case .scrollTo(let x): return x.apply(instance) { i, v in i.scroll(to: v) }
+
+		// 3. Action bindings are triggered by the object after construction.
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		}
 	}
 }

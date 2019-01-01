@@ -20,21 +20,15 @@
 #if os(macOS)
 
 public class ClickGestureRecognizer: Binder, ClickGestureRecognizerConvertible {
-	public typealias Instance = NSClickGestureRecognizer
-	public typealias Inherited = GestureRecognizer
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func nsClickGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension ClickGestureRecognizer {
 	enum Binding: ClickGestureRecognizerBinding {
-		public typealias EnclosingBinder = ClickGestureRecognizer
-		public static func clickGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -42,68 +36,113 @@ public class ClickGestureRecognizer: Binder, ClickGestureRecognizerConvertible {
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case buttonMask(Dynamic<Int>)
 		case numberOfClicksRequired(Dynamic<Int>)
-
+		
 		// 2. Signal bindings are performed on the object after construction.
-
+		
 		// 3. Action bindings are triggered by the object after construction.
-
+		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = ClickGestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .buttonMask(let x): return x.apply(instance) { i, v in i.buttonMask = v }
-			case .numberOfClicksRequired(let x): return x.apply(instance) { i, v in i.numberOfClicksRequired = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-	}
-
-	public typealias Storage = GestureRecognizer.Storage
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension ClickGestureRecognizer {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = ClickGestureRecognizer.Binding
+		public typealias Inherited = GestureRecognizer.Preparer
+		public typealias Instance = NSClickGestureRecognizer
+		
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension ClickGestureRecognizer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .buttonMask(let x): return x.apply(instance) { i, v in i.buttonMask = v }
+		case .numberOfClicksRequired(let x): return x.apply(instance) { i, v in i.numberOfClicksRequired = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+		
+		// 3. Action bindings are triggered by the object after construction.
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension ClickGestureRecognizer.Preparer {
+	public typealias Storage = GestureRecognizer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ClickGestureRecognizerBinding {
+	public typealias ClickGestureRecognizerName<V> = BindingName<V, ClickGestureRecognizer.Binding, Binding>
+	private typealias B = ClickGestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> ClickGestureRecognizer.Binding) -> ClickGestureRecognizerName<V> {
+		return ClickGestureRecognizerName<V>(source: source, downcast: Binding.clickGestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: ClickGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .clickGestureRecognizerBinding(ClickGestureRecognizer.Binding.$1(v)) }) }
- 
+	// With:    static var $1: ClickGestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var buttonMask: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .clickGestureRecognizerBinding(ClickGestureRecognizer.Binding.buttonMask(v)) }) }
-	public static var numberOfClicksRequired: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .clickGestureRecognizerBinding(ClickGestureRecognizer.Binding.numberOfClicksRequired(v)) }) }
-
+	static var buttonMask: ClickGestureRecognizerName<Dynamic<Int>> { return .name(B.buttonMask) }
+	static var numberOfClicksRequired: ClickGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfClicksRequired) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol ClickGestureRecognizerConvertible: GestureRecognizerConvertible {
 	func nsClickGestureRecognizer() -> ClickGestureRecognizer.Instance
 }
 extension ClickGestureRecognizerConvertible {
 	public func nsGestureRecognizer() -> GestureRecognizer.Instance { return nsClickGestureRecognizer() }
 }
-extension ClickGestureRecognizer.Instance: ClickGestureRecognizerConvertible {
+extension NSClickGestureRecognizer: ClickGestureRecognizerConvertible {
 	public func nsClickGestureRecognizer() -> ClickGestureRecognizer.Instance { return self }
 }
+public extension ClickGestureRecognizer {
+	func nsClickGestureRecognizer() -> ClickGestureRecognizer.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol ClickGestureRecognizerBinding: GestureRecognizerBinding {
 	static func clickGestureRecognizerBinding(_ binding: ClickGestureRecognizer.Binding) -> Self
 }
-extension ClickGestureRecognizerBinding {
-	public static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
+public extension ClickGestureRecognizerBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return clickGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ClickGestureRecognizer.Binding {
+	public typealias Preparer = ClickGestureRecognizer.Preparer
+	static func clickGestureRecognizerBinding(_ binding: ClickGestureRecognizer.Binding) -> ClickGestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

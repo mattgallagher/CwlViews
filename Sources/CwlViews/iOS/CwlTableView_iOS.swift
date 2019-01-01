@@ -347,7 +347,7 @@ public class TableView<RowData>: Binder, TableViewConvertible {
 			}
 		}
 
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			storage.rowsChangedInput = rowsChangedInput
 
 			linkedPreparer.prepareInstance(instance, storage: storage)
@@ -518,153 +518,153 @@ public class TableView<RowData>: Binder, TableViewConvertible {
 		}
 		
 		open func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canFocusRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-			return handler(ofType: ((_ action: Selector, _ tableRowData: TableRow<RowData>, _ sender: Any?) -> Bool).self)(action, tableRowData(at: indexPath, in: tableView), sender)
+			return handler(ofType: ((_ action: Selector, _ tableRowData: TableRow<RowData>, _ sender: Any?) -> Bool).self)!(action, tableRowData(at: indexPath, in: tableView), sender)
 		}
 		
 		open func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, didEndDisplayingHeaderView view: UIView, forSection section: Int) {
-			handler(ofType: SignalInput<Int>.self).send(value: section)
+			handler(ofType: SignalInput<Int>.self)!.send(value: section)
 		}
 		
 		open func tableView(_ tableView: UITableView, didEndDisplayingFooterView view: UIView, forSection section: Int) {
-			handler(ofType: SignalInput<Int>.self).send(value: section)
+			handler(ofType: SignalInput<Int>.self)!.send(value: section)
 		}
 		
 		open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
 			
 			(tableView.delegate as? Storage)?.notifyVisibleRowsChanged(in: tableView)
 		}
 		
 		open func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
-			handler(ofType: SignalInput<TableRow<RowData>?>.self).send(value: indexPath.map { tableRowData(at: $0, in: tableView) })
+			handler(ofType: SignalInput<TableRow<RowData>?>.self)!.send(value: indexPath.map { tableRowData(at: $0, in: tableView) })
 		}
 		
 		open func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, didUnhighlightRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self).send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, didUpdateFocusIn context: UITableViewFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
-			return handler(ofType: ((UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void).self)(tableView, context, coordinator)
+			return handler(ofType: ((UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void).self)!(tableView, context, coordinator)
 		}
 		
 		open func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> [UITableViewRowAction]?).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> [UITableViewRowAction]?).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> UITableViewCell.EditingStyle).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> UITableViewCell.EditingStyle).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
-			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)!(section)
 		}
 		
 		open func tableView(_ tableView: UITableView, estimatedHeightForHeaderInSection section: Int) -> CGFloat {
-			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)!(section)
 		}
 		
 		open func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> CGFloat).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> CGFloat).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)!(section)
 		}
 		
 		open func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-			return handler(ofType: ((_ section: Int, _ title: String?) -> ViewConvertible?).self)(section, tableView.dataSource?.tableView?(tableView, titleForFooterInSection: section))?.uiView()
+			return handler(ofType: ((_ section: Int, _ title: String?) -> ViewConvertible?).self)!(section, tableView.dataSource?.tableView?(tableView, titleForFooterInSection: section))?.uiView()
 		}
 		
 		open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-			return handler(ofType: ((_ section: Int) -> CGFloat).self)(section)
+			return handler(ofType: ((_ section: Int) -> CGFloat).self)!(section)
 		}
 		
 		open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-			return handler(ofType: ((_ section: Int, _ title: String?) -> ViewConvertible?).self)(section, tableView.dataSource?.tableView?(tableView, titleForHeaderInSection: section))?.uiView()
+			return handler(ofType: ((_ section: Int, _ title: String?) -> ViewConvertible?).self)!(section, tableView.dataSource?.tableView?(tableView, titleForHeaderInSection: section))?.uiView()
 		}
 		
 		open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> CGFloat).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> CGFloat).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Int).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Int).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func indexPathForPreferredFocusedView(in tableView: UITableView) -> IndexPath? {
-			return handler(ofType: ((UITableView) -> IndexPath).self)(tableView)
+			return handler(ofType: ((UITableView) -> IndexPath).self)!(tableView)
 		}
 		
 		open func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-			handler(ofType: SignalInput<(from: TableRow<RowData>, to: IndexPath)>.self).send(value: (from: tableRowData(at: sourceIndexPath, in: tableView), to: destinationIndexPath))
+			handler(ofType: SignalInput<(from: TableRow<RowData>, to: IndexPath)>.self)!.send(value: (from: tableRowData(at: sourceIndexPath, in: tableView), to: destinationIndexPath))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldShowMenuForRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldUpdateFocusIn context: UITableViewFocusUpdateContext) -> Bool {
-			return handler(ofType: ((UITableView, UITableViewFocusUpdateContext) -> Bool).self)(tableView, context)
+			return handler(ofType: ((UITableView, UITableViewFocusUpdateContext) -> Bool).self)!(tableView, context)
 		}
 		
 		open func tableView(_ tableView: UITableView, targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath, toProposedIndexPath proposedDestinationIndexPath: IndexPath) -> IndexPath {
-			return handler(ofType: ((_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath).self)(tableView, sourceIndexPath, proposedDestinationIndexPath)
+			return handler(ofType: ((_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath).self)!(tableView, sourceIndexPath, proposedDestinationIndexPath)
 		}
 		
 		open func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> String?).self)(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableRowData: TableRow<RowData>) -> String?).self)!(tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
-			handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Void).self)(tableView, tableRowData(at: indexPath, in: tableView))
+			handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Void).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
-			return handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?).self)(tableView, tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
-			handler(ofType: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void).self)(tableView, section, view)
+			handler(ofType: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void).self)!(tableView, section, view)
 		}
 		
 		open func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-			handler(ofType: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void).self)(tableView, section, view)
+			handler(ofType: ((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void).self)!(tableView, section, view)
 		}
 		
 		open var willDisplayRow: ((_ tableView: UITableView, _ indexPath: IndexPath, _ cell: UITableViewCell) -> Void)?
@@ -674,11 +674,11 @@ public class TableView<RowData>: Binder, TableViewConvertible {
 		}
 		
 		open func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-			return handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?).self)(tableView, tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<(editingStyle: UITableViewCell.EditingStyle, row: TableRow<RowData>)>.self).send(value: (editingStyle, tableRowData(at: indexPath, in: tableView)))
+			handler(ofType: SignalInput<(editingStyle: UITableViewCell.EditingStyle, row: TableRow<RowData>)>.self)!.send(value: (editingStyle, tableRowData(at: indexPath, in: tableView)))
 		}
 	}
 }

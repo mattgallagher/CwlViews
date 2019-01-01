@@ -114,10 +114,10 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 			switch binding {
 			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			case .pageData(let x):
-				return x.apply(instance, storage) { inst, stor, val in
-					stor.changePageData(val.value, in: inst, animation: val.animation)
+				return x.apply(instance, storage) { i, s, v in
+					s.changePageData(v.value, in: i, animation: v.animation)
 				}
-			case .isDoubleSided(let x): return x.apply(instance, storage) { inst, stor, val in inst.isDoubleSided = val }
+			case .isDoubleSided(let x): return x.apply(instance) { i, s, v in i.isDoubleSided = v }
 			case .constructPage: return nil
 			case .transitionStyle: return nil
 			case .navigationOrientation: return nil
@@ -206,23 +206,23 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 		}
 		
 		open func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
-			handler(ofType: (([UIViewController]) -> Void).self)(pendingViewControllers)
+			handler(ofType: (([UIViewController]) -> Void).self)!(pendingViewControllers)
 		}
 		
 		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-			handler(ofType: ((Bool, [UIViewController], Bool) -> Void).self)(finished, previousViewControllers, completed)
+			handler(ofType: ((Bool, [UIViewController], Bool) -> Void).self)!(finished, previousViewControllers, completed)
 		}
 		
 		open func pageViewController(_ pageViewController: UIPageViewController, spineLocationFor orientation: UIInterfaceOrientation) -> UIPageViewController.SpineLocation {
-			return handler(ofType: ((UIInterfaceOrientation) -> UIPageViewController.SpineLocation).self)(orientation)
+			return handler(ofType: ((UIInterfaceOrientation) -> UIPageViewController.SpineLocation).self)!(orientation)
 		}
 		
 		open func pageViewControllerSupportedInterfaceOrientations(_ pageViewController: UIPageViewController) -> UIInterfaceOrientationMask {
-			return handler(ofType: (() -> UIInterfaceOrientationMask).self)()
+			return handler(ofType: (() -> UIInterfaceOrientationMask).self)!()
 		}
 		
 		open func pageViewControllerPreferredInterfaceOrientationForPresentation(_ pageViewController: UIPageViewController) -> UIInterfaceOrientation {
-			return handler(ofType: (() -> UIInterfaceOrientation).self)()
+			return handler(ofType: (() -> UIInterfaceOrientation).self)!()
 		}
 	}
 }

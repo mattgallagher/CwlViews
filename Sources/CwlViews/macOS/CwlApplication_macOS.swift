@@ -168,9 +168,8 @@ public extension Application.Preparer {
 		case .willTerminate(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationWillTerminate(_:)))
 
 		case .userDidAcceptCloudKitShare(let x):
-			if #available(macOS 10.12, *) {
-				delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:userDidAcceptCloudKitShareWith:)))
-			}
+			guard #available(macOS 10.12, *) else { return }
+			delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:userDidAcceptCloudKitShareWith:)))
 		default: break
 		}
 	}
@@ -271,7 +270,7 @@ public extension Application.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension Application.Preparer {
-	open class Storage: ObjectBinderStorage, NSApplicationDelegate {
+	open class Storage: EmbeddedObjectStorage, NSApplicationDelegate {
 		open var dockMenu: NSMenu?
 		
 		open override var isInUse: Bool {
@@ -285,7 +284,7 @@ extension Application.Preparer {
 	
 	open class Delegate: DynamicDelegate, NSApplicationDelegate {
 		open func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-			switch handler(ofType: (() -> ApplicationTerminateReply).self)() {
+			switch handler(ofType: (() -> ApplicationTerminateReply).self)!() {
 			case .now: return NSApplication.TerminateReply.terminateNow
 			case .cancel: return NSApplication.TerminateReply.terminateCancel
 			case .later(let c):
@@ -298,92 +297,92 @@ extension Application.Preparer {
 		}
 		
 		open func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-			return handler(ofType: (() -> Bool).self)()
+			return handler(ofType: (() -> Bool).self)!()
 		}
 		
 		open func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
-			return handler(ofType: ((Bool) -> Bool).self)(hasVisibleWindows)
+			return handler(ofType: ((Bool) -> Bool).self)!(hasVisibleWindows)
 		}
 		
 		open func application(_ application: NSApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
-			return handler(ofType: ((NSUserActivity, @escaping ([NSUserActivityRestoring]) -> Void) -> Bool).self)(userActivity, restorationHandler)
+			return handler(ofType: ((NSUserActivity, @escaping ([NSUserActivityRestoring]) -> Void) -> Bool).self)!(userActivity, restorationHandler)
 		}
 		
 		open func application(_ application: NSApplication, willPresentError error: Error) -> Error {
-			return handler(ofType: ((Error) -> Error).self)(error)
+			return handler(ofType: ((Error) -> Error).self)!(error)
 		}
 		
 		open func application(_ application: NSApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)(userActivityType)
+			return handler(ofType: ((String) -> Bool).self)!(userActivityType)
 		}
 		
 		open func application(_ sender: Any, openFileWithoutUI filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)(filename)
+			return handler(ofType: ((String) -> Bool).self)!(filename)
 		}
 		
 		open func application(_ sender: NSApplication, openFile filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)(filename)
+			return handler(ofType: ((String) -> Bool).self)!(filename)
 		}
 		
 		open func application(_ sender: NSApplication, openFiles filenames: [String]) {
-			handler(ofType: (([String]) -> Void).self)(filenames)
+			handler(ofType: (([String]) -> Void).self)!(filenames)
 		}
 		
 		open func application(_ sender: NSApplication, printFile filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)(filename)
+			return handler(ofType: ((String) -> Bool).self)!(filename)
 		}
 		
 		open func application(_ application: NSApplication, printFiles filenames: [String], withSettings printSettings: [NSPrintInfo.AttributeKey: Any], showPrintPanels: Bool) -> NSApplication.PrintReply {
-			return handler(ofType: (([String], [NSPrintInfo.AttributeKey: Any], Bool) -> NSApplication.PrintReply).self)(filenames, printSettings, showPrintPanels)
+			return handler(ofType: (([String], [NSPrintInfo.AttributeKey: Any], Bool) -> NSApplication.PrintReply).self)!(filenames, printSettings, showPrintPanels)
 		}
 		
 		open func application(_ sender: NSApplication, openTempFile filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)(filename)
+			return handler(ofType: ((String) -> Bool).self)!(filename)
 		}
 		
 		open func applicationOpenUntitledFile(_ sender: NSApplication) -> Bool {
-			return handler(ofType: (() -> Bool).self)()
+			return handler(ofType: (() -> Bool).self)!()
 		}
 		
 		open func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-			return handler(ofType: (() -> Bool).self)()
+			return handler(ofType: (() -> Bool).self)!()
 		}
 		
 		open func applicationWillTerminate(_ notification: Notification) {
-			handler(ofType: (() -> Void).self)()
+			handler(ofType: (() -> Void).self)!()
 		}
 		
 		open func application(_ application: NSApplication, didUpdate userActivity: NSUserActivity) {
-			return handler(ofType: ((NSUserActivity) -> Void).self)(userActivity)
+			return handler(ofType: ((NSUserActivity) -> Void).self)!(userActivity)
 		}
 		
 		open func application(_ application: NSApplication, willEncodeRestorableState coder: NSCoder) {
-			return handler(ofType: ((NSCoder) -> Void).self)(coder)
+			return handler(ofType: ((NSCoder) -> Void).self)!(coder)
 		}
 		
 		open func application(_ application: NSApplication, didDecodeRestorableState coder: NSCoder) {
-			return handler(ofType: ((NSCoder) -> Void).self)(coder)
+			return handler(ofType: ((NSCoder) -> Void).self)!(coder)
 		}
 		
 		open func application(_ application: NSApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
-			handler(ofType: SignalInput<(userActivityType: String, error: Error)>.self).send(value: (userActivityType, error))
+			handler(ofType: SignalInput<(userActivityType: String, error: Error)>.self)!.send(value: (userActivityType, error))
 		}
 		
 		open func application(_ application: NSApplication, didReceiveRemoteNotification userInfo: [String: Any]) {
-			handler(ofType: SignalInput<[String: Any]>.self).send(value: userInfo)
+			handler(ofType: SignalInput<[String: Any]>.self)!.send(value: userInfo)
 		}
 		
 		open func application(_ application: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-			handler(ofType: SignalInput<Data>.self).send(value: deviceToken)
+			handler(ofType: SignalInput<Data>.self)!.send(value: deviceToken)
 		}
 		
 		open func application(_ application: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-			handler(ofType: SignalInput<Error>.self).send(value: error)
+			handler(ofType: SignalInput<Error>.self)!.send(value: error)
 		}
 		
 		@available(macOS 10.12, *)
 		open func application(_ application: NSApplication, userDidAcceptCloudKitShareWith metadata: CKShare.Metadata) {
-			handler(ofType: ((CKShare.Metadata) -> Void).self)(metadata)
+			handler(ofType: ((CKShare.Metadata) -> Void).self)!(metadata)
 		}
 	}
 }

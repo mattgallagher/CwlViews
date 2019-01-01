@@ -89,8 +89,10 @@ public extension WebView {
 		typealias UIViewController = ()
 		typealias WKPreviewElementInfo = ()
 		typealias WKPreviewActionItem = ()
+		typealias WKOpenPanelParameters = WKOpenPanelParameters
 	#else
 		typealias UIViewController = UIKit.UIViewController
+		typealias WKOpenPanelParameters = ()
 		typealias WKPreviewElementInfo = WebKit.WKPreviewElementInfo
 		typealias WKPreviewActionItem = WebKit.WKPreviewActionItem
 	#endif
@@ -132,9 +134,8 @@ public extension WebView.Preparer {
 		case .didFailProvisionalNavigation(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didFailProvisionalNavigation:withError:)))
 		case .didFinish(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didFinish:)))
 		case .contentProcessDidTerminate(let x):
-			if #available(macOS 10.11, *) {
-				delegate().addHandler(x, #selector(WKNavigationDelegate.webViewWebContentProcessDidTerminate(_:)))
-			}
+			guard #available(macOS 10.11, *) else { return }
+			delegate().addHandler(x, #selector(WKNavigationDelegate.webViewWebContentProcessDidTerminate(_:)))
 		case .decideActionPolicy(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView,WKNavigationAction, @escaping (WKNavigationActionPolicy) -> Void) -> Void)?))
 		case .decideResponsePolicy(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView, WKNavigationResponse, @escaping (WKNavigationResponsePolicy) -> Void) -> Void)?))
 		case .didReceiveAuthenticationChallenge(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didReceive:completionHandler:)))
@@ -143,33 +144,27 @@ public extension WebView.Preparer {
 		case .runJavaScriptTextInputPanel(let x): delegate().addHandler(x, #selector(WKUIDelegate.webView(_:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:)))
 		case .createWebView(let x): delegate().addHandler(x, #selector(WKUIDelegate.webView(_:createWebViewWith:for:windowFeatures:)))
 		case .didClose(let x):
-			if #available(macOS 10.11, iOS 9.0, *) {
-				delegate().addHandler(x, #selector(WKUIDelegate.webViewDidClose(_:)))
-			}
+			guard #available(macOS 10.11, iOS 9.0, *) else { return }
+			delegate().addHandler(x, #selector(WKUIDelegate.webViewDidClose(_:)))
 		case .runOpenPanel(let x):
 			#if os(macOS)
-				if #available(macOS 10.12, *) {
-					delegate().addHandler(x, #selector(WKUIDelegate.webView(_:runOpenPanelWith:initiatedByFrame:completionHandler:)))
-				}
+				guard #available(macOS 10.12, *) else { return }
+				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:runOpenPanelWith:initiatedByFrame:completionHandler:)))
 			#endif
 		case .shouldPreviewElement(let x):
 			#if os(iOS)
-				if #available(iOS 10.0, *) {
-					let s = #selector(WKUIDelegate.webView(_:shouldPreviewElement:))
-					delegate().addHandler(x, #selector(WKUIDelegate.webView(_:shouldPreviewElement:)))
-				}
+				guard #available(iOS 10.0, *) else { return }
+				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:shouldPreviewElement:)))
 			#endif
 		case .previewingViewController(let x):
 			#if os(iOS)
-				if #available(iOS 10.0, *) {
-					delegate().addHandler(x, #selector(WKUIDelegate.webView(_:previewingViewControllerForElement:defaultActions:)))
-				}
+				guard #available(iOS 10.0, *) else { return }
+				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:previewingViewControllerForElement:defaultActions:)))
 			#endif
 		case .commitPreviewingViewController(let x):
 			#if os(iOS)
-				if #available(iOS 10.0, *) {
-					delegate().addHandler(x, #selector(WKUIDelegate.webView(_:commitPreviewingViewController:)))
-				}
+				guard #available(iOS 10.0, *) else { return }
+				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:commitPreviewingViewController:)))
 			#endif
 		default: break
 		}
@@ -195,7 +190,7 @@ public extension WebView.Preparer {
 			#if os(macOS)
 				return nil
 			#else
-				x.value.applyBindings(to: instance.scrollView)
+				x.value.apply(to: instance.scrollView)
 				return nil
 			#endif
 			
@@ -204,9 +199,8 @@ public extension WebView.Preparer {
 		
 		case .allowsLinkPreview(let x):
 			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.allowsLinkPreview = v
-				}
+				guard #available(macOS 10.11, *) else { return }
+				i.allowsLinkPreview = v
 			}
 		case .allowsMagnification(let x):
 			#if os(macOS)
@@ -216,9 +210,8 @@ public extension WebView.Preparer {
 			#endif
 		case .customUserAgent(let x):
 			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.customUserAgent = v
-				}
+				guard #available(macOS 10.11, *) else { return }
+				i.customUserAgent = v
 			}
 		case .magnification(let x):
 			#if os(macOS)
@@ -239,17 +232,11 @@ public extension WebView.Preparer {
 		case .stopLoading(let x): return x.apply(instance) { i, v in i.stopLoading() }
 
 		case .loadData(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					v.callback.send(value: i.load(v.value.data, mimeType: v.value.mimeType, characterEncodingName: v.value.characterEncodingName, baseURL: v.value.baseURL))
-				}
-			}
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in v.callback.send(value: i.load(v.value.data, mimeType: v.value.mimeType, characterEncodingName: v.value.characterEncodingName, baseURL: v.value.baseURL)) }
 		case .loadFile(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					v.callback.send(value: i.loadFileURL(v.value.url, allowingReadAccessTo: v.value.allowingReadAccessTo))
-				}
-			}
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in v.callback.send(value: i.loadFileURL(v.value.url, allowingReadAccessTo: v.value.allowingReadAccessTo)) }
 			
 		//	3. Action bindings are triggered by the object after construction.
 		case .contentProcessDidTerminate: return nil
@@ -285,80 +272,80 @@ extension WebView.Preparer {
 
 	open class Delegate: DynamicDelegate, WKUIDelegate, WKNavigationDelegate {
 		open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-			handler(ofType: SignalInput<WKNavigation>.self).send(value: navigation)
+			handler(ofType: SignalInput<WKNavigation>.self)!.send(value: navigation)
 		}
 		
 		open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-			handler(ofType: SignalInput<WKNavigation>.self).send(value: navigation)
+			handler(ofType: SignalInput<WKNavigation>.self)!.send(value: navigation)
 		}
 		
 		open func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-			handler(ofType: SignalInput<WKNavigation>.self).send(value: navigation)
+			handler(ofType: SignalInput<WKNavigation>.self)!.send(value: navigation)
 		}
 		
 		open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-			handler(ofType: SignalInput<(WKNavigation, Error)>.self).send(value: (navigation, error))
+			handler(ofType: SignalInput<(WKNavigation, Error)>.self)!.send(value: (navigation, error))
 		}
 		
 		open func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-			handler(ofType: SignalInput<(WKNavigation, Error)>.self).send(value: (navigation, error))
+			handler(ofType: SignalInput<(WKNavigation, Error)>.self)!.send(value: (navigation, error))
 		}
 		
 		open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-			handler(ofType: SignalInput<WKNavigation>.self).send(value: navigation)
+			handler(ofType: SignalInput<WKNavigation>.self)!.send(value: navigation)
 		}
 		
 		open func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-			handler(ofType: SignalInput<Callback<WKNavigationAction, WKNavigationActionPolicy>>.self).send(value: Callback(navigationAction, Input().subscribeWhile(context: .main) { r in decisionHandler(r.value ?? .cancel); return false }))
+			handler(ofType: SignalInput<Callback<WKNavigationAction, WKNavigationActionPolicy>>.self)!.send(value: Callback(navigationAction, Input().subscribeWhile(context: .main) { r in decisionHandler(r.value ?? .cancel); return false }))
 		}
 		
 		open func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-			handler(ofType: SignalInput<Callback<WKNavigationResponse, WKNavigationResponsePolicy>>.self).send(value: Callback(navigationResponse, Input().subscribeWhile(context: .main) { r in decisionHandler(r.value ?? .cancel); return false }))
+			handler(ofType: SignalInput<Callback<WKNavigationResponse, WKNavigationResponsePolicy>>.self)!.send(value: Callback(navigationResponse, Input().subscribeWhile(context: .main) { r in decisionHandler(r.value ?? .cancel); return false }))
 		}
 		
 		open func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-			handler(ofType: SignalInput<Callback<URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?)>>.self).send(value: Callback(challenge, Input().subscribeWhile(context: .main) { r in completionHandler(r.value?.0 ?? .cancelAuthenticationChallenge, r.value?.1); return false }))
+			handler(ofType: SignalInput<Callback<URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?)>>.self)!.send(value: Callback(challenge, Input().subscribeWhile(context: .main) { r in completionHandler(r.value?.0 ?? .cancelAuthenticationChallenge, r.value?.1); return false }))
 		}
 		
 		open func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-			handler(ofType: SignalInput<Callback<(message: String, frame: WKFrameInfo), ()>>.self).send(value: Callback((message: message, frame: frame), Input().subscribeWhile(context: .main) { r in completionHandler(); return false }))
+			handler(ofType: SignalInput<Callback<(message: String, frame: WKFrameInfo), ()>>.self)!.send(value: Callback((message: message, frame: frame), Input().subscribeWhile(context: .main) { r in completionHandler(); return false }))
 		}
 		
 		open func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-			handler(ofType: SignalInput<Callback<(message: String, frame: WKFrameInfo), Bool>>.self).send(value: Callback((message: message, frame: frame), Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? false); return false }))
+			handler(ofType: SignalInput<Callback<(message: String, frame: WKFrameInfo), Bool>>.self)!.send(value: Callback((message: message, frame: frame), Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? false); return false }))
 		}
 		
 		open func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-			handler(ofType: SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>.self).send(value: Callback((prompt: prompt, defaultText: defaultText, frame: frame), Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? nil); return false }))
+			handler(ofType: SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>.self)!.send(value: Callback((prompt: prompt, defaultText: defaultText, frame: frame), Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? nil); return false }))
 		}
 		
 		open func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-			return handler(ofType: ((WKWebView, WKWebViewConfiguration, WKNavigationAction, WKWindowFeatures) -> WKWebView?).self)(webView, configuration, navigationAction, windowFeatures)
+			return handler(ofType: ((WKWebView, WKWebViewConfiguration, WKNavigationAction, WKWindowFeatures) -> WKWebView?).self)!(webView, configuration, navigationAction, windowFeatures)
 		}
 
 		open func webViewDidClose(_ webView: WKWebView) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 
 		#if os(iOS)
 			@available(iOS 10.0, *) open func webView(_ webView: WKWebView, shouldPreviewElement elementInfo: WKPreviewElementInfo) -> Bool {
-				return handler(ofType: ((WKWebView, WKPreviewElementInfo) -> Bool).self)(webView, elementInfo)
+				return handler(ofType: ((WKWebView, WKPreviewElementInfo) -> Bool).self)!(webView, elementInfo)
 			}
 			
 			open func webView(_ webView: WKWebView, commitPreviewingViewController previewingViewController: UIViewController) {
-				handler(ofType: ((WKWebView, UIViewController) -> Void).self)(webView, previewingViewController)
+				handler(ofType: ((WKWebView, UIViewController) -> Void).self)!(webView, previewingViewController)
 			}
 			
 			@available(iOS 10.0, *) open func webView(_ webView: WKWebView, previewingViewControllerForElement elementInfo: WKPreviewElementInfo, defaultActions previewActions: [WKPreviewActionItem]) -> UIViewController? {
-				return handler(ofType: ((WKWebView, WKPreviewElementInfo, [WKPreviewActionItem]) -> UIViewController?).self)(webView, elementInfo, previewActions)
+				return handler(ofType: ((WKWebView, WKPreviewElementInfo, [WKPreviewActionItem]) -> UIViewController?).self)!(webView, elementInfo, previewActions)
 			}
 		#else
-			@available(macOS 10.12, *) open func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
-				handler(ofType: SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>.self).send(value: (parameters: parameters, frame: frame, completion: Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? nil); return false }))
+			@available(macOS 10.12, *) open func webView(_ webView: WKWebView, runOpenPanelWith parameters: WebView.WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
+				handler(ofType: SignalInput<(parameters: WebView.WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>.self)!.send(value: (parameters: parameters, frame: frame, completion: Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? nil); return false }))
 			}
 		#endif
 	}
@@ -420,7 +407,7 @@ public extension BindingName where Binding: WebViewBinding {
 	static var runJavaScriptTextInputPanel: WebViewName<SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>> { return .name(B.runJavaScriptTextInputPanel) }
 	
 	@available(macOS 10.11, iOS 9.0, *) static var didClose: WebViewName<SignalInput<Void>> { return .name(B.didClose) }
-	@available(macOS 10.12, *) @available(iOS, unavailable) static var runOpenPanel: WebViewName<SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>> { return .name(B.runOpenPanel) }
+	@available(macOS 10.12, *) @available(iOS, unavailable) static var runOpenPanel: WebViewName<SignalInput<(parameters: WebView.WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>> { return .name(B.runOpenPanel) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 	static var createWebView: WebViewName<(_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?> { return .name(B.createWebView) }

@@ -145,11 +145,8 @@ public extension View.Preparer {
 		case .verticalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.vertical) }
 			
 		case .pressureConfiguration(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.pressureConfiguration = v
-				}
-			}
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.pressureConfiguration = v }
 			
 		// 2. Signal bindings are performed on the object after construction.
 		case .needsDisplay(let x): return x.apply(instance) { i, v in i.needsDisplay = v }
@@ -175,7 +172,7 @@ public extension View.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension View.Preparer {
-	public typealias Storage = ObjectBinderStorage
+	public typealias Storage = EmbeddedObjectStorage
 }
 
 // MARK: - Binder Part 6: BindingNames

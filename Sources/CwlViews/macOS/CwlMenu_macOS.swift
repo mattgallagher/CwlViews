@@ -143,10 +143,8 @@ public extension Menu.Preparer {
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 			
 		case .userInterfaceLayoutDirection(let x):
-			if #available(macOS 10.11, *) {
-				return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
-			}
-			return nil
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .cancelTracking(let x): return x.apply(instance) { i, v in i.cancelTracking() }
@@ -190,19 +188,19 @@ public extension Menu.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension Menu.Preparer {
-	open class Storage: ObjectBinderStorage, NSMenuDelegate {}
+	open class Storage: EmbeddedObjectStorage, NSMenuDelegate {}
 
 	open class Delegate: DynamicDelegate, NSMenuDelegate {
 		open func menuWillOpen(_ menu: NSMenu) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func menuDidClose(_ menu: NSMenu) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func confinementRect(for menu: NSMenu, on screen: NSScreen?) -> NSRect {
-			return handler(ofType: ((NSMenu, NSScreen?) -> NSRect).self)(menu, screen)
+			return handler(ofType: ((NSMenu, NSScreen?) -> NSRect).self)!(menu, screen)
 		}
 		
 		open func menu(_ menu: NSMenu, willHighlight: NSMenuItem?) {

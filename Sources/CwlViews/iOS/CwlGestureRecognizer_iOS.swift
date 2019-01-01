@@ -19,191 +19,218 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class GestureRecognizer: Binder, GestureRecognizerConvertible {
-	public typealias Instance = UIGestureRecognizer
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension GestureRecognizer {
 	enum Binding: GestureRecognizerBinding {
-		public typealias EnclosingBinder = GestureRecognizer
-		public static func gestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
+		case allowedPressTypes(Dynamic<[NSNumber]>)
+		case allowedTouchTypes(Dynamic<[NSNumber]>)
 		case cancelsTouchesInView(Dynamic<Bool>)
 		case delaysTouchesBegan(Dynamic<Bool>)
 		case delaysTouchesEnded(Dynamic<Bool>)
-		case allowedPressTypes(Dynamic<[NSNumber]>)
-		case allowedTouchTypes(Dynamic<[NSNumber]>)
+
 		@available(iOS 9.2, *) case requiresExclusiveTouchType(Dynamic<Bool>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
 		// 3. Action bindings are triggered by the object after construction.
-		case action(SignalInput<Void>)
+		case action(SignalInput<Any?>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case shouldBegin((UIGestureRecognizer) -> Bool)
+		case shouldBeRequiredToFail((UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool)
+		case shouldReceivePress((UIGestureRecognizer, UIPress) -> Bool)
 		case shouldReceiveTouch((UIGestureRecognizer, UITouch) -> Bool)
 		case shouldRecognizeSimultanously((UIGestureRecognizer, UIGestureRecognizer) -> Bool)
 		case shouldRequireFailure((UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool)
-		case shouldBeRequiredToFail((UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool)
-		case shouldReceivePress((UIGestureRecognizer, UIPress) -> Bool)
 	}
+}
 
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = GestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension GestureRecognizer {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = GestureRecognizer.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = UIGestureRecognizer
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var dynamicDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = dynamicDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				dynamicDelegate = d
-				return d
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension GestureRecognizer.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .shouldBegin(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
-			case .shouldReceiveTouch(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UITouch) -> Bool)?))
-			case .shouldRecognizeSimultanously(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
-			case .shouldRequireFailure(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
-			case .shouldBeRequiredToFail(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
-			case .shouldReceivePress(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UIPress) -> Bool)?))
-			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-			default: break
-			}
-		}
-
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
-			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = dynamicDelegate
-			if storage.inUse {
-				instance.delegate = storage
-			}
-
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .action(let x):
-				let target = SignalActionTarget()
-				instance.addTarget(target, action: SignalActionTarget.selector)
-				return target.signal.map { _ in () }.cancellableBind(to: x)
-			case .cancelsTouchesInView(let x): return x.apply(instance) { i, v in i.cancelsTouchesInView = v }
-			case .delaysTouchesBegan(let x): return x.apply(instance) { i, v in i.delaysTouchesBegan = v }
-			case .delaysTouchesEnded(let x): return x.apply(instance) { i, v in i.delaysTouchesEnded = v }
-			case .allowedPressTypes(let x): return x.apply(instance) { i, v in i.allowedPressTypes = v }
-			case .allowedTouchTypes(let x): return x.apply(instance) { i, v in i.allowedTouchTypes = v }
-			case .requiresExclusiveTouchType(let x):
-				return x.apply(instance) { i, v in
-					if #available(iOS 9.2, *) {
-						i.requiresExclusiveTouchType = v
-					}
-				}
-			case .shouldBegin: return nil
-			case .shouldReceiveTouch: return nil
-			case .shouldRecognizeSimultanously: return nil
-			case .shouldRequireFailure: return nil
-			case .shouldBeRequiredToFail: return nil
-			case .shouldReceivePress: return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		case .shouldBegin(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
+		case .shouldBeRequiredToFail(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
+		case .shouldReceivePress(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UIPress) -> Bool)?))
+		case .shouldReceiveTouch(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UITouch) -> Bool)?))
+		case .shouldRecognizeSimultanously(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
+		case .shouldRequireFailure(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
+		default: break
 		}
 	}
 
-	open class Storage: ObjectBinderStorage, UIGestureRecognizerDelegate {}
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .allowedPressTypes(let x): return x.apply(instance) { i, v in i.allowedPressTypes = v }
+		case .allowedTouchTypes(let x): return x.apply(instance) { i, v in i.allowedTouchTypes = v }
+		case .cancelsTouchesInView(let x): return x.apply(instance) { i, v in i.cancelsTouchesInView = v }
+		case .delaysTouchesBegan(let x): return x.apply(instance) { i, v in i.delaysTouchesBegan = v }
+		case .delaysTouchesEnded(let x): return x.apply(instance) { i, v in i.delaysTouchesEnded = v }
+		
+		case .requiresExclusiveTouchType(let x):
+			guard #available(iOS 9.2, *) else { return nil }
+			return x.apply(instance) { i, v in i.requiresExclusiveTouchType = v }
+
+		// 2. Signal bindings are performed on the object after construction.
+
+		// 3. Action bindings are triggered by the object after construction.
+		case .action(let x):
+			let target = SignalActionTarget()
+			instance.addTarget(target, action: SignalActionTarget.selector)
+			return target.signal.cancellableBind(to: x)
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .shouldBegin: return nil
+		case .shouldReceiveTouch: return nil
+		case .shouldRecognizeSimultanously: return nil
+		case .shouldRequireFailure: return nil
+		case .shouldBeRequiredToFail: return nil
+		case .shouldReceivePress: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension GestureRecognizer.Preparer {
+	open class Storage: EmbeddedObjectStorage, UIGestureRecognizerDelegate {}
 
 	open class Delegate: DynamicDelegate, UIGestureRecognizerDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer) -> Bool).self)(gestureRecognizer)
+			return handler(ofType: ((UIGestureRecognizer) -> Bool).self)!(gestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UITouch) -> Bool).self)(gestureRecognizer, touch)
+			return handler(ofType: ((UIGestureRecognizer, UITouch) -> Bool).self)!(gestureRecognizer, touch)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)(gestureRecognizer, otherGestureRecognizer)
+			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool).self)(gestureRecognizer, otherGestureRecognizer)
+			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool).self)(gestureRecognizer, otherGestureRecognizer)
+			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive press: UIPress) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UIPress) -> Bool).self)(gestureRecognizer, press)
+			return handler(ofType: ((UIGestureRecognizer, UIPress) -> Bool).self)!(gestureRecognizer, press)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: GestureRecognizerBinding {
+	public typealias GestureRecognizerName<V> = BindingName<V, GestureRecognizer.Binding, Binding>
+	private typealias B = GestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> GestureRecognizer.Binding) -> GestureRecognizerName<V> {
+		return GestureRecognizerName<V>(source: source, downcast: Binding.gestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: GestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.$1(v)) }) }
-	public static var cancelsTouchesInView: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.cancelsTouchesInView(v)) }) }
-	public static var delaysTouchesBegan: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.delaysTouchesBegan(v)) }) }
-	public static var delaysTouchesEnded: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.delaysTouchesEnded(v)) }) }
-	public static var allowedPressTypes: BindingName<Dynamic<[NSNumber]>, Binding> { return BindingName<Dynamic<[NSNumber]>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.allowedPressTypes(v)) }) }
-	public static var allowedTouchTypes: BindingName<Dynamic<[NSNumber]>, Binding> { return BindingName<Dynamic<[NSNumber]>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.allowedTouchTypes(v)) }) }
-	@available(iOS 9.2, *) public static var requiresExclusiveTouchType: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.requiresExclusiveTouchType(v)) }) }
-	public static var action: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.action(v)) }) }
-	public static var shouldBegin: BindingName<(UIGestureRecognizer) -> Bool, Binding> { return BindingName<(UIGestureRecognizer) -> Bool, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.shouldBegin(v)) }) }
-	public static var shouldReceiveTouch: BindingName<(UIGestureRecognizer, UITouch) -> Bool, Binding> { return BindingName<(UIGestureRecognizer, UITouch) -> Bool, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.shouldReceiveTouch(v)) }) }
-	public static var shouldRecognizeSimultanously: BindingName<(UIGestureRecognizer, UIGestureRecognizer) -> Bool, Binding> { return BindingName<(UIGestureRecognizer, UIGestureRecognizer) -> Bool, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.shouldRecognizeSimultanously(v)) }) }
-	public static var shouldRequireFailure: BindingName<(UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool, Binding> { return BindingName<(UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.shouldRequireFailure(v)) }) }
-	public static var shouldBeRequiredToFail: BindingName<(UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool, Binding> { return BindingName<(UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.shouldBeRequiredToFail(v)) }) }
-	public static var shouldReceivePress: BindingName<(UIGestureRecognizer, UIPress) -> Bool, Binding> { return BindingName<(UIGestureRecognizer, UIPress) -> Bool, Binding>({ v in .gestureRecognizerBinding(GestureRecognizer.Binding.shouldReceivePress(v)) }) }
+	// With:    static var $1: GestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var allowedPressTypes: GestureRecognizerName<Dynamic<[NSNumber]>> { return .name(B.allowedPressTypes) }
+	static var allowedTouchTypes: GestureRecognizerName<Dynamic<[NSNumber]>> { return .name(B.allowedTouchTypes) }
+	static var cancelsTouchesInView: GestureRecognizerName<Dynamic<Bool>> { return .name(B.cancelsTouchesInView) }
+	static var delaysTouchesBegan: GestureRecognizerName<Dynamic<Bool>> { return .name(B.delaysTouchesBegan) }
+	static var delaysTouchesEnded: GestureRecognizerName<Dynamic<Bool>> { return .name(B.delaysTouchesEnded) }
+	
+	@available(iOS 9.2, *) static var requiresExclusiveTouchType: GestureRecognizerName<Dynamic<Bool>> { return .name(B.requiresExclusiveTouchType) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	static var action: GestureRecognizerName<SignalInput<Any?>> { return .name(B.action) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var shouldBegin: GestureRecognizerName<(UIGestureRecognizer) -> Bool> { return .name(B.shouldBegin) }
+	static var shouldBeRequiredToFail: GestureRecognizerName<(UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool> { return .name(B.shouldBeRequiredToFail) }
+	static var shouldReceivePress: GestureRecognizerName<(UIGestureRecognizer, UIPress) -> Bool> { return .name(B.shouldReceivePress) }
+	static var shouldReceiveTouch: GestureRecognizerName<(UIGestureRecognizer, UITouch) -> Bool> { return .name(B.shouldReceiveTouch) }
+	static var shouldRecognizeSimultanously: GestureRecognizerName<(UIGestureRecognizer, UIGestureRecognizer) -> Bool> { return .name(B.shouldRecognizeSimultanously) }
+	static var shouldRequireFailure: GestureRecognizerName<(UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool> { return .name(B.shouldRequireFailure) }
+
+	// Composite binding names
+	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {
+		return Binding.mappedInputName(GestureRecognizer.Binding.action, Binding.gestureRecognizerBinding) { sender in (sender as! Binding.Preparer.Instance)[keyPath: keyPath] }
+	}
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol GestureRecognizerConvertible {
 	func uiGestureRecognizer() -> GestureRecognizer.Instance
 }
-extension GestureRecognizer.Instance: GestureRecognizerConvertible {
+extension UIGestureRecognizer: GestureRecognizerConvertible, DefaultConstructable, HasDelegate {
 	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return self }
 }
-
-public protocol GestureRecognizerBinding: BaseBinding {
-	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self
+public extension GestureRecognizer {
+	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return instance() }
 }
 
-extension GestureRecognizerBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+// MARK: - Binder Part 8: Downcast protocols
+public protocol GestureRecognizerBinding: BinderBaseBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self
+}
+public extension GestureRecognizerBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return gestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension GestureRecognizer.Binding {
+	public typealias Preparer = GestureRecognizer.Preparer
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> GestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

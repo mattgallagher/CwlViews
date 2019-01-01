@@ -113,7 +113,7 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 			}
 		}
 		
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = dynamicDelegate
 			if storage.inUse {
@@ -171,7 +171,7 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 			}
 		}
 
-		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			if !instance.isCollapsed {
 				storage.displayModeButton?.send(value: instance.displayModeButtonItem)
@@ -222,35 +222,35 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 		}
 		
 		open func splitViewController(_ svc: UISplitViewController, willChangeTo displayMode: UISplitViewController.DisplayMode) {
-			handler(ofType: SignalInput<UISplitViewController.DisplayMode>.self).send(value: displayMode)
+			handler(ofType: SignalInput<UISplitViewController.DisplayMode>.self)!.send(value: displayMode)
 		}
 		
 		open func targetDisplayModeForAction(in svc: UISplitViewController) -> UISplitViewController.DisplayMode {
-			return handler(ofType: ((UISplitViewController) -> UISplitViewController.DisplayMode).self)(svc)
+			return handler(ofType: ((UISplitViewController) -> UISplitViewController.DisplayMode).self)!(svc)
 		}
 		
 		open func splitViewControllerPreferredInterfaceOrientationForPresentation(_ splitViewController: UISplitViewController) -> UIInterfaceOrientation {
-			return handler(ofType: ((UISplitViewController) -> UIInterfaceOrientation).self)(splitViewController)
+			return handler(ofType: ((UISplitViewController) -> UIInterfaceOrientation).self)!(splitViewController)
 		}
 		
 		open func splitViewControllerSupportedInterfaceOrientations(_ splitViewController: UISplitViewController) -> UIInterfaceOrientationMask {
-			return handler(ofType: ((UISplitViewController) -> UIInterfaceOrientationMask).self)(splitViewController)
+			return handler(ofType: ((UISplitViewController) -> UIInterfaceOrientationMask).self)!(splitViewController)
 		}
 		
 		open func primaryViewController(forCollapsing splitViewController: UISplitViewController) -> UIViewController? {
-			return handler(ofType: ((UISplitViewController) -> UIViewController?).self)(splitViewController)
+			return handler(ofType: ((UISplitViewController) -> UIViewController?).self)!(splitViewController)
 		}
 		
 		open func primaryViewController(forExpanding splitViewController: UISplitViewController) -> UIViewController? {
-			return handler(ofType: ((UISplitViewController) -> UIViewController?).self)(splitViewController)
+			return handler(ofType: ((UISplitViewController) -> UIViewController?).self)!(splitViewController)
 		}
 		
 		open func splitViewController(_ splitViewController: UISplitViewController, show vc: UIViewController, sender: Any?) -> Bool {
-			return handler(ofType: ((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool).self)(splitViewController, vc, sender)
+			return handler(ofType: ((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool).self)!(splitViewController, vc, sender)
 		}
 		
 		open func splitViewController(_ splitViewController: UISplitViewController, showDetail vc: UIViewController, sender: Any?) -> Bool {
-			return handler(ofType: ((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool).self)(splitViewController, vc, sender)
+			return handler(ofType: ((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool).self)!(splitViewController, vc, sender)
 		}
 	}
 }

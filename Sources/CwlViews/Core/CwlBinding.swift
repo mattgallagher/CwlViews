@@ -32,7 +32,7 @@ extension Binding {
 		)
 	}
 	
-	public static func mappedInputName<Value, Mapped, Intermediate>(_ valueToMapped: @escaping (Value) -> Mapped, _ constructor: @escaping (SignalInput<Value>) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Mapped>, Intermediate, Self> {
+	public static func mappedInputName<Value, Mapped, Intermediate>(_ constructor: @escaping (SignalInput<Value>) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self, _ valueToMapped: @escaping (Value) -> Mapped) -> BindingName<SignalInput<Mapped>, Intermediate, Self> {
 		return compositeName(
 			source: { Input<Value>().map(valueToMapped).bind(to: $0) },
 			translate: constructor,

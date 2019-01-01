@@ -109,7 +109,7 @@ public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 			}
 		}
 		
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 
 			storage.dynamicDelegate = dynamicDelegate
@@ -124,36 +124,34 @@ public class TabBar<ItemIdentifier: Hashable>: Binder, TabBarConvertible {
 		
 		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 			switch binding {
-			// e.g. case .someProperty(let x): return x.apply(instance, storage) { inst, stor, val in inst.someProperty = val }
 			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
 			case .itemConstructor: return nil
 			case .items(let x):
-				return x.apply(instance, storage) { inst, stor, val in
-					let items = val.value.compactMap { stor.tabBarItem(for: $0) }
-					inst.setItems(items, animated: val.isAnimated)
+				return x.apply(instance, storage) { i, s, v in
+					let items = v.value.compactMap { s.tabBarItem(for: $0) }
+					i.setItems(items, animated: v.isAnimated)
 				}
-			case .selectItem(let x): return x.apply(instance, storage) { inst, stor, val in inst.selectedItem = stor.tabBarItem(for: val) }
-			case .barStyle(let x): return x.apply(instance, storage) { inst, stor, val in inst.barStyle = val }
-			case .isTranslucent(let x): return x.apply(instance, storage) { inst, stor, val in inst.isTranslucent = val }
-			case .barTintColor(let x): return x.apply(instance, storage) { inst, stor, val in inst.barTintColor = val }
-			case .tintColor(let x): return x.apply(instance, storage) { inst, stor, val in inst.tintColor = val }
-			case .unselectedItemTintColor(let x): return x.apply(instance, storage) { inst, stor, val in
-					if #available(iOS 10.0, *) {
-						inst.unselectedItemTintColor = val
-					}
-				}
-			case .backgroundImage(let x): return x.apply(instance, storage) { inst, stor, val in inst.backgroundImage = val }
-			case .shadowImage(let x): return x.apply(instance, storage) { inst, stor, val in inst.shadowImage = val }
-			case .selectionIndicatorImage(let x): return x.apply(instance, storage) { inst, stor, val in inst.selectionIndicatorImage = val }
-			case .itemPositioning(let x): return x.apply(instance, storage) { inst, stor, val in inst.itemPositioning = val }
-			case .itemSpacing(let x): return x.apply(instance, storage) { inst, stor, val in inst.itemSpacing = val }
-			case .itemWidth(let x): return x.apply(instance, storage) { inst, stor, val in inst.itemWidth = val }
-			case .customizingItems(let x): return x.apply(instance, storage) { inst, stor, val in
-				if let v = val.value {
-					let items = v.compactMap { stor.tabBarItem(for: $0) }
-					inst.beginCustomizingItems(items)
+			case .selectItem(let x): return x.apply(instance, storage) { i, s, v in i.selectedItem = s.tabBarItem(for: v) }
+			case .barStyle(let x): return x.apply(instance) { i, v in i.barStyle = v }
+			case .isTranslucent(let x): return x.apply(instance) { i, v in i.isTranslucent = v }
+			case .barTintColor(let x): return x.apply(instance) { i, v in i.barTintColor = v }
+			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+			case .unselectedItemTintColor(let x):
+				guard #available(iOS 10.0, *) else { return }
+				return x.apply(instance) { i, v in i.unselectedItemTintColor = v }
+			case .backgroundImage(let x): return x.apply(instance) { i, v in i.backgroundImage = v }
+			case .shadowImage(let x): return x.apply(instance) { i, v in i.shadowImage = v }
+			case .selectionIndicatorImage(let x): return x.apply(instance) { i, v in i.selectionIndicatorImage = v }
+			case .itemPositioning(let x): return x.apply(instance) { i, v in i.itemPositioning = v }
+			case .itemSpacing(let x): return x.apply(instance) { i, v in i.itemSpacing = v }
+			case .itemWidth(let x): return x.apply(instance) { i, v in i.itemWidth = v }
+			case .customizingItems(let x): return x.apply(instance, storage) { i, s, v in
+				if let v = v.value {
+					let items = v.compactMap { s.tabBarItem(for: $0) }
+					i.beginCustomizingItems(items)
 				} else {
-					inst.endCustomizing(animated: val.isAnimated)
+					i.endCustomizing(animated: v.isAnimated)
 				}
 			}
 			case .willBeginCustomizing: return nil

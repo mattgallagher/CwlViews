@@ -89,13 +89,13 @@ public class AlertAction: Binder, AlertActionConvertible {
 			}
 		}
 		
-		public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 			let linkedLifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
 			return AggregateLifetime(lifetimes: [linkedLifetime, handler as Optional<Lifetime>].compactMap { $0 })
 		}
 	}
 
-	public typealias Storage = ObjectBinderStorage
+	public typealias Storage = EmbeddedObjectStorage
 }
 
 extension BindingName where Binding: AlertActionBinding {

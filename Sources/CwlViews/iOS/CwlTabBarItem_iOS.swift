@@ -19,31 +19,27 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class TabBarItem: Binder, TabBarItemConvertible {
-	public typealias Instance = UITabBarItem
-	public typealias Inherited = BarItem
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiTabBarItem() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TabBarItem {
 	enum Binding: TabBarItemBinding {
-		public typealias EnclosingBinder = TabBarItem
-		public static func tabBarItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case systemItem(Constant<UITabBarItem.SystemItem?>)
 
 		//	1. Value bindings may be applied at construction and may subsequently change.
+		case badgeValue(Dynamic<String?>)
 		case selectedImage(Dynamic<UIImage?>)
 		case titlePositionAdjustment(Dynamic<UIOffset>)
-		case badgeValue(Dynamic<String?>)
+		
 		@available(iOS 10.0, *) case badgeColor(Dynamic<UIColor?>)
 		@available(iOS 10.0, *) case badgeTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>)
 		
@@ -53,126 +49,138 @@ public class TabBarItem: Binder, TabBarItemConvertible {
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension TabBarItem {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = TabBarItem
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = TabBarItem.Binding
+		public typealias Inherited = BarItem.Preparer
+		public typealias Instance = UITabBarItem
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			let x: UITabBarItem
-			if let si = systemItem {
-				x = subclass.init(tabBarSystemItem: si, tag: tagInitial ?? 0)
-			} else if let si = selectedImageInitial {
-				x = subclass.init(title: titleInitial ?? nil, image: imageInitial ?? nil, selectedImage: si)
-			} else {
-				x = subclass.init(title: titleInitial ?? nil, image: imageInitial ?? nil, tag: tagInitial ?? 0)
-			}
-			return x
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
 		public var systemItem: UITabBarItem.SystemItem?
 		public var title = InitialSubsequent<String>()
-		public var titleInitial: String? = nil
 		public var image = InitialSubsequent<UIImage?>()
-		public var imageInitial: UIImage?? = nil
 		public var selectedImage = InitialSubsequent<UIImage?>()
-		public var selectedImageInitial: UIImage?? = nil
 		public var tag = InitialSubsequent<Int>()
-		public var tagInitial: Int? = nil
-		
-		public init() {}
-		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .systemItem(let x): systemItem = x.value
-			case .selectedImage(let x):
-				selectedImage = x.initialSubsequent()
-				selectedImageInitial = selectedImage.initial()
-			case .inheritedBinding(.tag(let x)):
-				tag = x.initialSubsequent()
-				tagInitial = tag.initial()
-			case .inheritedBinding(.image(let x)):
-				image = x.initialSubsequent()
-				imageInitial = image.initial()
-			case .inheritedBinding(.title(let x)):
-				title = x.initialSubsequent()
-				titleInitial = title.initial()
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension TabBarItem.Preparer {
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
+		let x: UITabBarItem
+		if let si = systemItem {
+			x = type.init(tabBarSystemItem: si, tag: tag.initial ?? 0)
+		} else if let si = selectedImage.initial {
+			x = type.init(title: title.initial ?? nil, image: image.initial ?? nil, selectedImage: si)
+		} else {
+			x = type.init(title: title.initial ?? nil, image: image.initial ?? nil, tag: tag.initial ?? 0)
 		}
+		return x
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(.image(let x)): image = x.initialSubsequent()
+		case .inheritedBinding(.tag(let x)): tag = x.initialSubsequent()
+		case .inheritedBinding(.title(let x)): title = x.initialSubsequent()
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .badgeTextAttributes(let x):
-				if #available(iOS 10.0, *) {
-					var previous: ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>? = nil
-					return x.apply(instance) { i, v in
-						if let p = previous {
-							for c in p.pairs {
-								i.setBadgeTextAttributes(nil, for: c.0)
-							}
-						}
-						previous = v
-						for c in v.pairs {
-							i.setBadgeTextAttributes(c.1, for: c.0)
-						}
-					}
-				} else {
-					return nil
-				}
-			case .titlePositionAdjustment(let x): return x.apply(instance) { i, v in i.titlePositionAdjustment = v }
-			case .badgeValue(let x): return x.apply(instance) { i, v in i.badgeValue = v }
-			case .badgeColor(let x):
-				return x.apply(instance) { i, v in
-					if #available(iOS 10.0, *) {
-						i.badgeColor = v
-					}
-				}
-			case .systemItem: return nil
-			case .selectedImage: return selectedImage.resume()?.apply(instance) { i, v in i.selectedImage = v }
-			case .inheritedBinding(.tag): return tag.resume()?.apply(instance) { i, v in i.tag = v }
-			case .inheritedBinding(.image): return image.resume()?.apply(instance) { i, v in i.image = v }
-			case .inheritedBinding(.title): return title.resume()?.apply(instance) { i, v in i.title = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		case .selectedImage(let x): selectedImage = x.initialSubsequent()
+		case .systemItem(let x): systemItem = x.value
+		default: break
 		}
 	}
 	
-	public typealias Storage = BarItem.Storage
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(.tag): return tag.resume()?.apply(instance) { i, v in i.tag = v }
+		case .inheritedBinding(.image): return image.resume()?.apply(instance) { i, v in i.image = v }
+		case .inheritedBinding(.title): return title.resume()?.apply(instance) { i, v in i.title = v }
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		case .systemItem: return nil
+		
+		case .badgeValue(let x): return x.apply(instance) { i, v in i.badgeValue = v }
+		case .selectedImage: return selectedImage.resume()?.apply(instance) { i, v in i.selectedImage = v }
+		case .titlePositionAdjustment(let x): return x.apply(instance) { i, v in i.titlePositionAdjustment = v }
+		
+		case .badgeColor(let x):
+			guard #available(iOS 10.0, *) else { return nil }
+			return x.apply(instance) { i, v in i.badgeColor = v }
+		case .badgeTextAttributes(let x):
+			guard #available(iOS 10.0, *) else { return nil }
+			var previous: ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>? = nil
+			return x.apply(instance) { i, v in
+				for c in previous?.pairs ?? [] {
+					i.setBadgeTextAttributes(nil, for: c.0)
+				}
+				previous = v
+				for c in v.pairs {
+					i.setBadgeTextAttributes(c.1, for: c.0)
+				}
+			}
+		}
+	}
 }
 
+// MARK: - Binder Part 5: Storage and Delegate
+extension TabBarItem.Preparer {
+	public typealias Storage = BarItem.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TabBarItemBinding {
+	public typealias TabBarItemName<V> = BindingName<V, TabBarItem.Binding, Binding>
+	private typealias B = TabBarItem.Binding
+	private static func name<V>(_ source: @escaping (V) -> TabBarItem.Binding) -> TabBarItemName<V> {
+		return TabBarItemName<V>(source: source, downcast: Binding.tabBarItemBinding)
+	}
+}
+public extension BindingName where Binding: TabBarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .tabBarItemBinding(TabBarItem.Binding.$1(v)) }) }
-	public static var selectedImage: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .tabBarItemBinding(TabBarItem.Binding.selectedImage(v)) }) }
-	public static var titlePositionAdjustment: BindingName<Dynamic<UIOffset>, Binding> { return BindingName<Dynamic<UIOffset>, Binding>({ v in .tabBarItemBinding(TabBarItem.Binding.titlePositionAdjustment(v)) }) }
-	public static var badgeValue: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .tabBarItemBinding(TabBarItem.Binding.badgeValue(v)) }) }
-	@available(iOS 10.0, *)
-	public static var badgeColor: BindingName<Dynamic<UIColor?>, Binding> { return BindingName<Dynamic<UIColor?>, Binding>({ v in .tabBarItemBinding(TabBarItem.Binding.badgeColor(v)) }) }
-	@available(iOS 10.0, *)
-	public static var badgeTextAttributes: BindingName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>, Binding> { return BindingName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>, Binding>({ v in .tabBarItemBinding(TabBarItem.Binding.badgeTextAttributes(v)) }) }
+	// With:    static var $1: TabBarItemName<$2> { return .name(B.$1) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol TabBarItemConvertible: BarItemConvertible {
 	func uiTabBarItem() -> TabBarItem.Instance
 }
 extension TabBarItemConvertible {
 	public func uiBarItem() -> BarItem.Instance { return uiTabBarItem() }
 }
-extension TabBarItem.Instance: TabBarItemConvertible {
+extension UITabBarItem: TabBarItemConvertible {
 	public func uiTabBarItem() -> TabBarItem.Instance { return self }
 }
+public extension TabBarItem {
+	func uiTabBarItem() -> TabBarItem.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol TabBarItemBinding: BarItemBinding {
 	static func tabBarItemBinding(_ binding: TabBarItem.Binding) -> Self
 }
-extension TabBarItemBinding {
-	public static func barItemBinding(_ binding: BarItem.Binding) -> Self {
+public extension TabBarItemBinding {
+	static func barItemBinding(_ binding: BarItem.Binding) -> Self {
 		return tabBarItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension TabBarItem.Binding {
+	public typealias Preparer = TabBarItem.Preparer
+	static func tabBarItemBinding(_ binding: TabBarItem.Binding) -> TabBarItem.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

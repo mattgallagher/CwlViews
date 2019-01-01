@@ -19,6 +19,7 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class RotationGestureRecognizer: Binder, RotationGestureRecognizerConvertible {
 	public var state: BinderState<Preparer>
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {

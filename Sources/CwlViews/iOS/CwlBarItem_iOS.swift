@@ -19,34 +19,29 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class BarItem: Binder, BarItemConvertible {
-	public typealias Instance = UIBarItem
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiBarItem() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension BarItem {
 	enum Binding: BarItemBinding {
-		public typealias EnclosingBinder = BarItem
-		public static func barItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
-		case isEnabled(Dynamic<Bool>)
 		case image(Dynamic<UIImage?>)
-		case landscapeImagePhone(Dynamic<UIImage?>)
 		case imageInsets(Dynamic<UIEdgeInsets>)
+		case isEnabled(Dynamic<Bool>)
+		case landscapeImagePhone(Dynamic<UIImage?>)
 		case landscapeImagePhoneInsets(Dynamic<UIEdgeInsets>)
-		case title(Dynamic<String>)
 		case tag(Dynamic<Int>)
+		case title(Dynamic<String>)
 		case titleTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>)
 
 		//	2. Signal bindings are performed on the object after construction.
@@ -55,74 +50,125 @@ public class BarItem: Binder, BarItemConvertible {
 
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
+// MARK: - Binder Part 3: Preparer
+public extension BarItem {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = BarItem
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = BarItem.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = UIBarItem
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
-			case .image(let x): return x.apply(instance) { i, v in i.image = v }
-			case .landscapeImagePhone(let x): return x.apply(instance) { i, v in i.landscapeImagePhone = v }
-			case .imageInsets(let x): return x.apply(instance) { i, v in i.imageInsets = v }
-			case .landscapeImagePhoneInsets(let x): return x.apply(instance) { i, v in i.landscapeImagePhoneInsets = v }
-			case .title(let x): return x.apply(instance) { i, v in i.title = v }
-			case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
-			case .titleTextAttributes(let x):
-				var previous: ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for c in p.pairs {
-							i.setTitleTextAttributes([:], for: c.0)
-						}
-					}
-					previous = v
-					for c in v.pairs {
-						i.setTitleTextAttributes(c.1, for: c.0)
-					}
-				}
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
-
-	public typealias Storage = ObjectBinderStorage
 }
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension BarItem.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .image(let x): return x.apply(instance) { i, v in i.image = v }
+		case .imageInsets(let x): return x.apply(instance) { i, v in i.imageInsets = v }
+		case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+		case .landscapeImagePhone(let x): return x.apply(instance) { i, v in i.landscapeImagePhone = v }
+		case .landscapeImagePhoneInsets(let x): return x.apply(instance) { i, v in i.landscapeImagePhoneInsets = v }
+		case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .titleTextAttributes(let x):
+			var previous: ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>? = nil
+			return x.apply(instance) { i, v in
+				for c in previous?.pairs ?? [] {
+					i.setTitleTextAttributes([:], for: c.0)
+				}
+				previous = v
+				for c in v.pairs {
+					i.setTitleTextAttributes(c.1, for: c.0)
+				}
+			}
+
+		//	2. Signal bindings are performed on the object after construction.
+
+		//	3. Action bindings are triggered by the object after construction.
+
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension BarItem.Preparer {
+	public typealias Storage = EmbeddedObjectStorage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: BarItemBinding {
+	public typealias BarItemName<V> = BindingName<V, BarItem.Binding, Binding>
+	private typealias B = BarItem.Binding
+	private static func name<V>(_ source: @escaping (V) -> BarItem.Binding) -> BarItemName<V> {
+		return BarItemName<V>(source: source, downcast: Binding.barItemBinding)
+	}
+}
+public extension BindingName where Binding: BarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .barItemBinding(BarItem.Binding.$1(v)) }) }
-	public static var isEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .barItemBinding(BarItem.Binding.isEnabled(v)) }) }
-	public static var image: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .barItemBinding(BarItem.Binding.image(v)) }) }
-	public static var landscapeImagePhone: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .barItemBinding(BarItem.Binding.landscapeImagePhone(v)) }) }
-	public static var imageInsets: BindingName<Dynamic<UIEdgeInsets>, Binding> { return BindingName<Dynamic<UIEdgeInsets>, Binding>({ v in .barItemBinding(BarItem.Binding.imageInsets(v)) }) }
-	public static var landscapeImagePhoneInsets: BindingName<Dynamic<UIEdgeInsets>, Binding> { return BindingName<Dynamic<UIEdgeInsets>, Binding>({ v in .barItemBinding(BarItem.Binding.landscapeImagePhoneInsets(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .barItemBinding(BarItem.Binding.title(v)) }) }
-	public static var tag: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .barItemBinding(BarItem.Binding.tag(v)) }) }
-	public static var titleTextAttributes: BindingName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>, Binding> { return BindingName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>, Binding>({ v in .barItemBinding(BarItem.Binding.titleTextAttributes(v)) }) }
+	// With:    static var $1: BarItemName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var image: BarItemName<Dynamic<UIImage?>> { return .name(B.image) }
+	static var imageInsets: BarItemName<Dynamic<UIEdgeInsets>> { return .name(B.imageInsets) }
+	static var isEnabled: BarItemName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var landscapeImagePhone: BarItemName<Dynamic<UIImage?>> { return .name(B.landscapeImagePhone) }
+	static var landscapeImagePhoneInsets: BarItemName<Dynamic<UIEdgeInsets>> { return .name(B.landscapeImagePhoneInsets) }
+	static var tag: BarItemName<Dynamic<Int>> { return .name(B.tag) }
+	static var title: BarItemName<Dynamic<String>> { return .name(B.title) }
+	static var titleTextAttributes: BarItemName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>> { return .name(B.titleTextAttributes) }
+	
+	//	2. Signal bindings are performed on the object after construction.
+	
+	//	3. Action bindings are triggered by the object after construction.
+	
+	//	4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol BarItemConvertible {
 	func uiBarItem() -> BarItem.Instance
 }
-extension BarItem.Instance: BarItemConvertible {
+extension UIBarItem: BarItemConvertible, DefaultConstructable {
 	public func uiBarItem() -> BarItem.Instance { return self }
 }
+public extension BarItem {
+	func uiBarItem() -> BarItem.Instance { return instance() }
+}
 
-public protocol BarItemBinding: BaseBinding {
+// MARK: - Binder Part 8: Downcast protocols
+public protocol BarItemBinding: BinderBaseBinding {
 	static func barItemBinding(_ binding: BarItem.Binding) -> Self
 }
-extension BarItemBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension BarItemBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return barItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension BarItem.Binding {
+	public typealias Preparer = BarItem.Preparer
+	static func barItemBinding(_ binding: BarItem.Binding) -> BarItem.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

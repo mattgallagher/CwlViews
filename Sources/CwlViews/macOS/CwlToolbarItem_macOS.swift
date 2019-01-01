@@ -124,7 +124,7 @@ public extension ToolbarItem.Preparer {
 		}
 	}
 	
-	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 		// Need to apply the validator *after* the action exists
 		if let v = validator, let target = instance.target as? ToolbarItemTarget {
 			target.validator = v
@@ -136,7 +136,7 @@ public extension ToolbarItem.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension ToolbarItem.Preparer {
-	public typealias Storage = ObjectBinderStorage
+	public typealias Storage = EmbeddedObjectStorage
 }
 
 // MARK: - Binder Part 6: BindingNames

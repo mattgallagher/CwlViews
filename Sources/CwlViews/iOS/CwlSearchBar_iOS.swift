@@ -128,7 +128,7 @@ public class SearchBar: Binder, SearchBarConvertible {
 			}
 		}
 
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = dynamicDelegate
 			if storage.inUse {
@@ -152,31 +152,19 @@ public class SearchBar: Binder, SearchBarConvertible {
 					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
 					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
 					case .textContentType(let y):
-						return y.apply(instance) { i, v in
-							if #available(iOS 10.0, *) {
-								i.textContentType = v
-							}
-						}
+						guard #available(iOS 10.0, *) else { return }
+						return y.apply(instance) { i, v in i.textContentType = v }
 					case .smartDashesType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartDashesType = v
-							}
-						}
+					guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartDashesType = v }
 					case .smartQuotesType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartQuotesType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartQuotesType = v }
 					case .smartInsertDeleteType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartInsertDeleteType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
 					}
-				})
+				)
 			case .placeholder(let x): return x.apply(instance) { i, v in i.placeholder = v }
 			case .prompt(let x): return x.apply(instance) { i, v in i.prompt = v }
 			case .text(let x): return x.apply(instance) { i, v in i.text = v }
@@ -317,51 +305,51 @@ public class SearchBar: Binder, SearchBarConvertible {
 		}
 		
 		open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-			handler(ofType: SignalInput<String>.self).send(value: searchText)
+			handler(ofType: SignalInput<String>.self)!.send(value: searchText)
 		}
 		
 		open func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<String>.self).send(value: searchBar.text ?? "")
+			handler(ofType: SignalInput<String>.self)!.send(value: searchBar.text ?? "")
 		}
 		
 		open func searchBarResultsListButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self).send(value: ())
+			handler(ofType: SignalInput<Void>.self)!.send(value: ())
 		}
 		
 		open func searchBarSelectedScopeButtonIndexDidChange(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-			handler(ofType: SignalInput<Int>.self).send(value: selectedScope)
+			handler(ofType: SignalInput<Int>.self)!.send(value: selectedScope)
 		}
 		
 		open func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-			return handler(ofType: ((_ searchBar: UISearchBar) -> Bool).self)(searchBar)
+			return handler(ofType: ((UISearchBar) -> Bool).self)!(searchBar)
 		}
 		
 		open func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
-			return handler(ofType: ((_ searchBar: UISearchBar) -> Bool).self)(searchBar)
+			return handler(ofType: ((UISearchBar) -> Bool).self)!(searchBar)
 		}
 		
 		open func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return handler(ofType: ((_ range: NSRange, _ replacementString: String) -> Bool).self)(range, text)
+			return handler(ofType: ((NSRange, String) -> Bool).self)!(range, text)
 		}
 		
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)(bar)
+			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)!(bar)
 		}
 	}
 }

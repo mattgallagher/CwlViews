@@ -18,31 +18,31 @@
 //
 
 /// Implementation for `BinderStorage` that wraps Cocoa objects.
-open class ObjectBinderStorage: NSObject {
+open class EmbeddedObjectStorage: NSObject {
 	public typealias Instance = NSObject
 	private var lifetimes: [Lifetime]? = nil
 	
 	private static var associatedStorageKey = NSObject()
 	
-	/// The embed function will avoid embedding and let the ObjectBinderStorage release if this function returns false.
+	/// The embed function will avoid embedding and let the EmbeddedObjectStorage release if this function returns false.
 	/// Override and alter logic if a subclass may require the storage to persist when lifetimes is empty and the dynamic delegate is unused.
 	open var isInUse: Bool {
 		guard let ls = lifetimes else { fatalError("Embed must be called before isInUse") }
 		return ls.isEmpty == false || dynamicDelegate != nil
 	}
 	
-	/// Accessor for any embedded ObjectBinderStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
+	/// Accessor for any embedded EmbeddedObjectStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
 	///
 	/// - Parameter for: an NSObject
-	/// - Returns: the embedded ObjectBinderStorage (if any)
-	public static func embeddedStorage(for object: NSObject) -> ObjectBinderStorage? {
-		return objc_getAssociatedObject(object, &ObjectBinderStorage.associatedStorageKey) as? ObjectBinderStorage
+	/// - Returns: the embedded EmbeddedObjectStorage (if any)
+	public static func embeddedStorage<S: EmbeddedObjectStorage>(subclass: S.Type, for object: NSObject) -> S? {
+		return objc_getAssociatedObject(object, &EmbeddedObjectStorage.associatedStorageKey) as? S
 	}
 	
-	/// Accessor for any embedded ObjectBinderStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
+	/// Accessor for any embedded EmbeddedObjectStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
 	///
-	/// - Parameter newValue: an ObjectBinderStorage or nil (if clearinging storage)
-	public static func setEmbeddedStorage(_ newValue: ObjectBinderStorage?, for object: NSObject) {
+	/// - Parameter newValue: an EmbeddedObjectStorage or nil (if clearinging storage)
+	public static func setEmbeddedStorage(_ newValue: EmbeddedObjectStorage?, for object: NSObject) {
 		objc_setAssociatedObject(object, &associatedStorageKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 	}
 	
@@ -56,8 +56,8 @@ open class ObjectBinderStorage: NSObject {
 		self.lifetimes = lifetimes
 		guard isInUse else { return }
 		
-		assert(ObjectBinderStorage.embeddedStorage(for: instance) == nil, "Bindings should be set once only")
-		ObjectBinderStorage.setEmbeddedStorage(self, for: instance)
+		assert(EmbeddedObjectStorage.embeddedStorage(subclass: EmbeddedObjectStorage.self, for: instance) == nil, "Bindings should be set once only")
+		EmbeddedObjectStorage.setEmbeddedStorage(self, for: instance)
 	}
 	
 	/// Explicitly invoke `cancel` on each of the bindings.
@@ -107,7 +107,7 @@ open class ObjectBinderStorage: NSObject {
 	}
 }
 
-/// Used in conjunction with `ObjectBinderStorage`, subclasses of `DynamicDelegate` can implement all delegate methods at compile time but have the `ObjectBinderStorage` report true to `responds(to:)` only in the cases where the delegate method is selected for enabling.
+/// Used in conjunction with `EmbeddedObjectStorage`, subclasses of `DynamicDelegate` can implement all delegate methods at compile time but have the `EmbeddedObjectStorage` report true to `responds(to:)` only in the cases where the delegate method is selected for enabling.
 open class DynamicDelegate: NSObject, DefaultConstructable {
 	var implementedSelectors = Dictionary<Selector, Any>()
 	var associatedHandler: Any?
@@ -116,13 +116,25 @@ open class DynamicDelegate: NSObject, DefaultConstructable {
 		super.init()
 	}
 	
-	open func handler<Value>(ofType: Value.Type) -> Value {
-		let v = associatedHandler as! Value
-		associatedHandler = nil
-		return v
+	open func handlesSelector(_ selector: Selector) -> Bool {
+		return implementedSelectors[selector] != nil
+	}
+	
+	open func handler<Value>(ofType: Value.Type) -> Value? {
+		if let v = associatedHandler as? Value {
+			associatedHandler = nil
+			return v
+		}
+		return nil
 	}
 	
 	open func addHandler(_ value: Any, _ selector: Selector) {
 		implementedSelectors[selector] = value
+	}
+	
+	open func ensureHandler(for selector: Selector) {
+		if !handlesSelector(selector) {
+			implementedSelectors[selector] = ()
+		}
 	}
 }

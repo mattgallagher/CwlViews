@@ -107,11 +107,15 @@ public extension Button.Preparer {
 		case .imagePosition(let x): return x.apply(instance) { i, v in i.imagePosition = v }
 		case .imageScaling(let x): return x.apply(instance) { i, v in i.imageScaling = v }
 		case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
-		case .isSpringLoaded(let x): return x.apply(instance) { i, v in if #available(macOS 10.10.3, *) { i.isSpringLoaded = v } }
+		case .isSpringLoaded(let x):
+			guard #available(macOS 10.10.3, *) else { return nil }
+			return x.apply(instance) { i, v in i.isSpringLoaded = v }
 		case .isTransparent(let x): return x.apply(instance) { i, v in i.isTransparent = v }
 		case .keyEquivalent(let x): return x.apply(instance) { i, v in i.keyEquivalent = v }
 		case .keyEquivalentModifierMask(let x): return x.apply(instance) { i, v in i.keyEquivalentModifierMask = v }
-		case .maxAcceleratorLevel(let x): return x.apply(instance) { i, v in if #available(macOS 10.10.3, *) { i.maxAcceleratorLevel = v } }
+		case .maxAcceleratorLevel(let x):
+			guard #available(macOS 10.10.3, *) else { return nil }
+			return x.apply(instance) { i, v in i.maxAcceleratorLevel = v }
 		case .performKeyEquivalent(let x): return x.apply(instance) { i, v in i.performKeyEquivalent(with: v) }
 		case .periodicDelay(let x): return x.apply(instance) { i, v in i.setPeriodicDelay(v.delay, interval: v.interval) }
 		case .showsBorderOnlyWhileMouseInside(let x): return x.apply(instance) { i, v in i.showsBorderOnlyWhileMouseInside = v }
@@ -119,8 +123,12 @@ public extension Button.Preparer {
 		case .state(let x): return x.apply(instance) { i, v in i.state = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 
-		case .bezelColor(let x): return x.apply(instance) { i, v in if #available(macOS 10.12.2, *) { i.bezelColor = v } }
-		case .imageHugsTitle(let x): return x.apply(instance) { i, v in if #available(macOS 10.12, *) { i.imageHugsTitle = v } }
+		case .bezelColor(let x):
+			guard #available(macOS 10.12.2, *) else { return }
+			return x.apply(instance) { i, v in i.bezelColor = v }
+		case .imageHugsTitle(let x):
+			guard #available(macOS 10.12, *) else { return }
+			return x.apply(instance) { i, v in i.imageHugsTitle = v }
 
 		//	2. Signal bindings are performed on the object after construction.
 		case .setNextState(let x): return x.apply(instance) { i, v in i.setNextState() }

@@ -18,16 +18,16 @@ protocol TestableBinder: Binder {
 
 extension TestableBinder {
 	static var testInstance: Preparer.Instance.Type { return Preparer.Instance.self }
+	static var shoudPerformReleaseCheck: Bool { return true }
 }
 
 extension TestableBinder where Preparer.Parameters == Void {
 	static var parameters: Preparer.Parameters { return () }
 }
 
-extension TestableBinder where Preparer: BinderConstructor, Preparer.Parameters == Void, Preparer.Instance == Preparer.Output {
-	static var shoudPerformReleaseCheck: Bool { return true }
+extension TestableBinder where Preparer: BinderConstructor, Preparer.Instance == Preparer.Output {
 	static func constructor(binding: Preparer.Binding) -> Preparer.Instance {
-		return Self.init(type: Preparer.Instance.self, parameters: (), bindings: [binding]).instance()
+		return Self.init(type: testInstance, parameters: parameters, bindings: [binding]).instance()
 	}
 }
 
@@ -51,7 +51,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssertEqual(getter(instance), outputs.2, "second condition failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+				EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
 			}
 		}
 		if Self.shoudPerformReleaseCheck {
@@ -78,7 +78,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssertEqual(getter(instance), outputs.2, "second condition failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+				EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
 			}
 		}
 		if Self.shoudPerformReleaseCheck {
@@ -108,7 +108,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssert(first.map { validate($0) } == true, "validation failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+				EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
 			}
 		}
 		withExtendedLifetime(subscriptionLifetime) {}
@@ -132,7 +132,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssert(validate(), "validation failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				ObjectBinderStorage.setEmbeddedStorage(nil, for: instance)
+				EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
 			}
 		}
 		if Self.shoudPerformReleaseCheck {

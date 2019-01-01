@@ -19,6 +19,7 @@
 
 #if os(macOS)
 
+// MARK: - Binder Part 1: Binder
 public class PressGestureRecognizer: Binder, PressGestureRecognizerConvertible {
 	public var state: BinderState<Preparer>
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
@@ -94,7 +95,7 @@ extension BindingName where Binding: PressGestureRecognizerBinding {
 	public typealias PressGestureRecognizerName<V> = BindingName<V, PressGestureRecognizer.Binding, Binding>
 	private typealias B = PressGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> PressGestureRecognizer.Binding) -> PressGestureRecognizerName<V> {
-		return PressGestureRecognizerName<V>(source: source, downcast: Binding.clickGestureRecognizerBinding)
+		return PressGestureRecognizerName<V>(source: source, downcast: Binding.pressGestureRecognizerBinding)
 	}
 }
 public extension BindingName where Binding: PressGestureRecognizerBinding {
@@ -132,16 +133,16 @@ public extension PressGestureRecognizer {
 
 // MARK: - Binder Part 8: Downcast protocols
 public protocol PressGestureRecognizerBinding: GestureRecognizerBinding {
-	static func clickGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> Self
+	static func pressGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> Self
 }
 public extension PressGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
-		return clickGestureRecognizerBinding(.inheritedBinding(binding))
+		return pressGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
 public extension PressGestureRecognizer.Binding {
 	public typealias Preparer = PressGestureRecognizer.Preparer
-	static func clickGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> PressGestureRecognizer.Binding {
+	static func pressGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> PressGestureRecognizer.Binding {
 		return binding
 	}
 }

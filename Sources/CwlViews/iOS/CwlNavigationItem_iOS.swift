@@ -19,35 +19,30 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class NavigationItem: Binder, NavigationItemConvertible {
-	public typealias Instance = UINavigationItem
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiNavigationItem() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension NavigationItem {
 	enum Binding: NavigationItemBinding {
-		public typealias EnclosingBinder = NavigationItem
-		public static func navigationItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case title(Dynamic<String>)
-		case titleView(Dynamic<ViewConvertible?>)
-		case prompt(Dynamic<String?>)
 		case backBarButtonItem(Dynamic<BarButtonItemConvertible?>)
 		case hidesBackButton(Dynamic<SetOrAnimate<Bool>>)
 		case leftBarButtonItems(Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>)
-		case rightBarButtonItems(Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>)
 		case leftItemsSupplementBackButton(Dynamic<Bool>)
+		case prompt(Dynamic<String?>)
+		case rightBarButtonItems(Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>)
+		case title(Dynamic<String>)
+		case titleView(Dynamic<ViewConvertible?>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -55,80 +50,135 @@ public class NavigationItem: Binder, NavigationItemConvertible {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
+// MARK: - Binder Part 3: Preparer
+public extension NavigationItem {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = NavigationItem
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = NavigationItem.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = UINavigationItem
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .title(let x): return x.apply(instance) { i, v in i.title = v }
-			case .titleView(let x): return x.apply(instance) { i, v in i.titleView = v?.uiView() }
-			case .prompt(let x): return x.apply(instance) { i, v in i.prompt = v }
-			case .backBarButtonItem(let x): return x.apply(instance) { i, v in i.backBarButtonItem = v?.uiBarButtonItem() }
-			case .hidesBackButton(let x): return x.apply(instance) { i, v in i.setHidesBackButton(v.value, animated: v.isAnimated) }
-			case .leftBarButtonItems(let x): return x.apply(instance) { i, v in i.setLeftBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
-			case .rightBarButtonItems(let x): return x.apply(instance) { i, v in i.setRightBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
-			case .leftItemsSupplementBackButton(let x): return x.apply(instance) { i, v in i.leftItemsSupplementBackButton = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
+}
+		
+// MARK: - Binder Part 4: Preparer overrides
+public extension NavigationItem.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .backBarButtonItem(let x): return x.apply(instance) { i, v in i.backBarButtonItem = v?.uiBarButtonItem() }
+		case .hidesBackButton(let x): return x.apply(instance) { i, v in i.setHidesBackButton(v.value, animated: v.isAnimated) }
+		case .leftBarButtonItems(let x): return x.apply(instance) { i, v in i.setLeftBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
+		case .leftItemsSupplementBackButton(let x): return x.apply(instance) { i, v in i.leftItemsSupplementBackButton = v }
+		case .prompt(let x): return x.apply(instance) { i, v in i.prompt = v }
+		case .rightBarButtonItems(let x): return x.apply(instance) { i, v in i.setRightBarButtonItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .titleView(let x): return x.apply(instance) { i, v in i.titleView = v?.uiView() }
 
-	public typealias Storage = ObjectBinderStorage
+		//	2. Signal bindings are performed on the object after construction.
+
+		//	3. Action bindings are triggered by the object after construction.
+
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
 }
 
+// MARK: - Binder Part 5: Storage and Delegate
+extension NavigationItem.Preparer {
+	public typealias Storage = EmbeddedObjectStorage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: NavigationItemBinding {
+	public typealias NavigationItemName<V> = BindingName<V, NavigationItem.Binding, Binding>
+	private typealias B = NavigationItem.Binding
+	private static func name<V>(_ source: @escaping (V) -> NavigationItem.Binding) -> NavigationItemName<V> {
+		return NavigationItemName<V>(source: source, downcast: Binding.navigationItemBinding)
+	}
+}
+public extension BindingName where Binding: NavigationItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.$1(v)) }) }
-	public static var title: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.title(v)) }) }
-	public static var titleView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.titleView(v)) }) }
-	public static var prompt: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.prompt(v)) }) }
-	public static var backBarButtonItem: BindingName<Dynamic<BarButtonItemConvertible?>, Binding> { return BindingName<Dynamic<BarButtonItemConvertible?>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.backBarButtonItem(v)) }) }
-	public static var hidesBackButton: BindingName<Dynamic<SetOrAnimate<Bool>>, Binding> { return BindingName<Dynamic<SetOrAnimate<Bool>>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.hidesBackButton(v)) }) }
-	public static var leftBarButtonItems: BindingName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding> { return BindingName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.leftBarButtonItems(v)) }) }
-	public static var rightBarButtonItems: BindingName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding> { return BindingName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.rightBarButtonItems(v)) }) }
-	public static var leftItemsSupplementBackButton: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .navigationItemBinding(NavigationItem.Binding.leftItemsSupplementBackButton(v)) }) }
+	// With:    static var $1: NavigationItemName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var backBarButtonItem: NavigationItemName<Dynamic<BarButtonItemConvertible?>> { return .name(B.backBarButtonItem) }
+	static var hidesBackButton: NavigationItemName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.hidesBackButton) }
+	static var leftBarButtonItems: NavigationItemName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.leftBarButtonItems) }
+	static var leftItemsSupplementBackButton: NavigationItemName<Dynamic<Bool>> { return .name(B.leftItemsSupplementBackButton) }
+	static var prompt: NavigationItemName<Dynamic<String?>> { return .name(B.prompt) }
+	static var rightBarButtonItems: NavigationItemName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.rightBarButtonItems) }
+	static var title: NavigationItemName<Dynamic<String>> { return .name(B.title) }
+	static var titleView: NavigationItemName<Dynamic<ViewConvertible?>> { return .name(B.titleView) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	
+	// Composite binding names
+	public static func leftBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
+		return Binding.compositeName(source: { dynamicArray in 
+			switch dynamicArray {
+			case .constant(let b) where animate == .all: return .constant(.animate(b))
+			case .constant(let b): return .constant(.set(b))
+			case .dynamic(let b): return .dynamic(b.animate(animate))
+			}
+		}, translate: NavigationItem.Binding.leftBarButtonItems, downcast: Binding.navigationItemBinding)
+	}
+	public static func rightBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
+		return Binding.compositeName(source: { dynamicArray in 
+			switch dynamicArray {
+			case .constant(let b) where animate == .all: return .constant(.animate(b))
+			case .constant(let b): return .constant(.set(b))
+			case .dynamic(let b): return .dynamic(b.animate(animate))
+			}
+		}, translate: NavigationItem.Binding.rightBarButtonItems, downcast: Binding.navigationItemBinding)
+	}
 }
 
-extension BindingName where Binding: NavigationItemBinding {
-	// Additional helper binding names
-	public static func leftBarButtonItems(animate: AnimationChoice = .subsequent) -> BindingName<Dynamic<[BarButtonItemConvertible]>, Binding> { return BindingName<Dynamic<[BarButtonItemConvertible]>, Binding>({ (v: Dynamic<[BarButtonItemConvertible]>) -> Binding in
-		switch v {
-		case .constant(let b) where animate == .all: return Binding.navigationItemBinding(NavigationItem.Binding.leftBarButtonItems(Dynamic.constant(.animate(b))))
-		case .constant(let b): return Binding.navigationItemBinding(NavigationItem.Binding.leftBarButtonItems(Dynamic.constant(.set(b))))
-		case .dynamic(let b): return Binding.navigationItemBinding(NavigationItem.Binding.leftBarButtonItems(Dynamic.dynamic(b.animate(animate))))
-		}
-	}) }
-	public static func rightBarButtonItems(animate: AnimationChoice = .subsequent) -> BindingName<Dynamic<[BarButtonItemConvertible]>, Binding> { return BindingName<Dynamic<[BarButtonItemConvertible]>, Binding>({ (v: Dynamic<[BarButtonItemConvertible]>) -> Binding in
-		switch v {
-		case .constant(let b) where animate == .all: return Binding.navigationItemBinding(NavigationItem.Binding.rightBarButtonItems(Dynamic.constant(.animate(b))))
-		case .constant(let b): return Binding.navigationItemBinding(NavigationItem.Binding.rightBarButtonItems(Dynamic.constant(.set(b))))
-		case .dynamic(let b): return Binding.navigationItemBinding(NavigationItem.Binding.rightBarButtonItems(Dynamic.dynamic(b.animate(animate))))
-		}
-	}) }
-}
-
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol NavigationItemConvertible {
 	func uiNavigationItem() -> NavigationItem.Instance
 }
-extension NavigationItem.Instance: NavigationItemConvertible {
+extension UINavigationItem: NavigationItemConvertible, DefaultConstructable {
 	public func uiNavigationItem() -> NavigationItem.Instance { return self }
 }
+public extension NavigationItem {
+	func uiNavigationItem() -> NavigationItem.Instance { return instance() }
+}
 
-public protocol NavigationItemBinding: BaseBinding {
+// MARK: - Binder Part 8: Downcast protocols
+public protocol NavigationItemBinding: BinderBaseBinding {
 	static func navigationItemBinding(_ binding: NavigationItem.Binding) -> Self
 }
-extension NavigationItemBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension NavigationItemBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return navigationItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension NavigationItem.Binding {
+	public typealias Preparer = NavigationItem.Preparer
+	static func navigationItemBinding(_ binding: NavigationItem.Binding) -> NavigationItem.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

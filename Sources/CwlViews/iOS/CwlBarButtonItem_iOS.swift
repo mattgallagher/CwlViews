@@ -19,38 +19,33 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class BarButtonItem: Binder, BarButtonItemConvertible {
-	public typealias Instance = UIBarButtonItem
-	public typealias Inherited = BarItem
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiBarButtonItem() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension BarButtonItem {
 	enum Binding: BarButtonItemBinding {
-		public typealias EnclosingBinder = BarButtonItem
-		public static func barButtonItemBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case barButtonSystemItem(Constant<UIBarButtonItem.SystemItem>)
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
-		case itemStyle(Dynamic<UIBarButtonItem.Style>)
-		case possibleTitles(Dynamic<Set<String>?>)
-		case width(Dynamic<CGFloat>)
-		case customView(Dynamic<ViewConvertible?>)
-		case tintColor(Dynamic<UIColor?>)
-		case backgroundImage(Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>)
 		case backButtonBackgroundImage(Dynamic<ScopedValues<StateAndMetrics, UIImage?>>)
 		case backButtonTitlePositionAdjustment(Dynamic<ScopedValues<UIBarMetrics, UIOffset>>)
+		case backgroundImage(Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>)
 		case backgroundVerticalPositionAdjustment(Dynamic<ScopedValues<UIBarMetrics, CGFloat>>)
+		case customView(Dynamic<ViewConvertible?>)
+		case itemStyle(Dynamic<UIBarButtonItem.Style>)
+		case possibleTitles(Dynamic<Set<String>?>)
+		case tintColor(Dynamic<UIColor?>)
 		case titlePositionAdjustment(Dynamic<ScopedValues<UIBarMetrics, UIOffset>>)
+		case width(Dynamic<CGFloat>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		
@@ -59,216 +54,224 @@ public class BarButtonItem: Binder, BarButtonItemConvertible {
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension BarButtonItem {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = BarButtonItem
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = BarButtonItem.Binding
+		public typealias Inherited = BarItem.Preparer
+		public typealias Instance = UIBarButtonItem
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			let x: UIBarButtonItem
-			if let si = systemItem {
-				x = subclass.init(barButtonSystemItem: si, target: nil, action: nil)
-			} else if case .some(.some(let cv)) = customViewInitial {
-				x = subclass.init(customView: cv.uiView())
-			} else if case .some(.some(let i)) = imageInitial {
-				x = subclass.init(image: i, landscapeImagePhone: landscapeImagePhoneInitial ?? nil, style: itemStyleInitial ?? .plain, target: nil, action: nil)
-			} else {
-				x = subclass.init(title: titleInitial ?? nil, style: itemStyleInitial ?? .plain, target: nil, action: nil)
-			}
-			return x
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
 		public var systemItem: UIBarButtonItem.SystemItem?
 		public var customView = InitialSubsequent<ViewConvertible?>()
-		public var customViewInitial: ViewConvertible?? = nil
 		public var itemStyle = InitialSubsequent<UIBarButtonItem.Style>()
-		public var itemStyleInitial: UIBarButtonItem.Style? = nil
 		public var image = InitialSubsequent<UIImage?>()
-		public var imageInitial: UIImage?? = nil
 		public var landscapeImagePhone = InitialSubsequent<UIImage?>()
-		public var landscapeImagePhoneInitial: UIImage?? = nil
 		public var title = InitialSubsequent<String>()
-		public var titleInitial: String? = nil
-		
-		public init() {}
-		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .barButtonSystemItem(let x): systemItem = x.value
-			case .customView(let x):
-				customView = x.initialSubsequent()
-				customViewInitial = customView.initial()
-			case .itemStyle(let x):
-				itemStyle = x.initialSubsequent()
-				itemStyleInitial = itemStyle.initial()
-			case .inheritedBinding(.image(let x)):
-				image = x.initialSubsequent()
-				imageInitial = image.initial()
-			case .inheritedBinding(.landscapeImagePhone(let x)):
-				landscapeImagePhone = x.initialSubsequent()
-				landscapeImagePhoneInitial = landscapeImagePhone.initial()
-			case .inheritedBinding(.title(let x)):
-				title = x.initialSubsequent()
-				titleInitial = title.initial()
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension BarButtonItem.Preparer {
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
+		let x: UIBarButtonItem
+		if let si = systemItem {
+			x = type.init(barButtonSystemItem: si, target: nil, action: nil)
+		} else if case .some(.some(let cv)) = customView.initial {
+			x = type.init(customView: cv.uiView())
+		} else if case .some(.some(let i)) = image.initial {
+			x = type.init(image: i, landscapeImagePhone: landscapeImagePhone.initial ?? nil, style: itemStyle.initial ?? .plain, target: nil, action: nil)
+		} else {
+			x = type.init(title: title.initial ?? nil, style: itemStyle.initial ?? .plain, target: nil, action: nil)
 		}
+		return x
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(.image(let x)): image = x.initialSubsequent()
+		case .inheritedBinding(.landscapeImagePhone(let x)): landscapeImagePhone = x.initialSubsequent()
+		case .inheritedBinding(.title(let x)): title = x.initialSubsequent()
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .barButtonSystemItem: return nil
-			case .backgroundImage(let x):
-				var previous: ScopedValues<StateStyleAndMetrics, UIImage?>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for conditions in p.pairs {
-							if conditions.value != nil {
-								i.setBackgroundImage(nil, for: conditions.scope.controlState, style: conditions.scope.itemStyle, barMetrics: conditions.scope.barMetrics)
-							}
-						}
-					}
-					previous = v
-					for conditions in v.pairs {
-						if let image = conditions.value {
-							i.setBackgroundImage(image, for: conditions.scope.controlState, style: conditions.scope.itemStyle, barMetrics: conditions.scope.barMetrics)
-						}
-					}
-				}
-			case .backButtonBackgroundImage(let x):
-				var previous: ScopedValues<StateAndMetrics, UIImage?>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for conditions in p.pairs {
-							if conditions.value != nil {
-								i.setBackButtonBackgroundImage(nil, for: conditions.scope.controlState, barMetrics: conditions.scope.barMetrics)
-							}
-						}
-					}
-					previous = v
-					for conditions in v.pairs {
-						if let image = conditions.value {
-							i.setBackButtonBackgroundImage(image, for: conditions.scope.controlState, barMetrics: conditions.scope.barMetrics)
-						}
-					}
-				}
-			case .backButtonTitlePositionAdjustment(let x):
-				var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for c in p.pairs {
-							i.setBackButtonTitlePositionAdjustment(UIOffset(), for: c.scope)
-						}
-					}
-					previous = v
-					for c in v.pairs {
-						i.setBackButtonTitlePositionAdjustment(c.value, for: c.scope)
-					}
-				}
-			case .backgroundVerticalPositionAdjustment(let x):
-				var previous: ScopedValues<UIBarMetrics, CGFloat>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for c in p.pairs {
-							i.setBackgroundVerticalPositionAdjustment(0, for: c.scope)
-						}
-					}
-					previous = v
-					for c in v.pairs {
-						i.setBackgroundVerticalPositionAdjustment(c.value, for: c.scope)
-					}
-				}
-			case .titlePositionAdjustment(let x):
-				var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for c in p.pairs {
-							i.setTitlePositionAdjustment(UIOffset(), for: c.scope)
-						}
-					}
-					previous = v
-					for c in v.pairs {
-						i.setTitlePositionAdjustment(c.value, for: c.scope)
-					}
-				}
-			case .itemStyle:
-				return itemStyle.subsequent.flatMap { $0.apply(instance) { i, v in i.style = v } }
-			case .possibleTitles(let x): return x.apply(instance) { i, v in i.possibleTitles = v }
-			case .width(let x): return x.apply(instance) { i, v in i.width = v }
-			case .customView:
-				return customView.subsequent.flatMap { $0.apply(instance) { i, v in i.customView = v?.uiView() } }
-			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
-			case .action(let x): return x.apply(instance: instance, constructTarget: SignalActionTarget.init, processor: { sender in () })
-				
-			case .inheritedBinding(.image): return image.subsequent.flatMap { $0.apply(instance) { i, v in i.image = v } }
-			case .inheritedBinding(.landscapeImagePhone): return landscapeImagePhone.subsequent.flatMap { $0.apply(instance) { i, v in i.landscapeImagePhone = v } }
-			case .inheritedBinding(.title): return title.subsequent.flatMap { $0.apply(instance) { i, v in i.title = v } }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		case .barButtonSystemItem(let x): systemItem = x.value
+		case .customView(let x): customView = x.initialSubsequent()
+		case .itemStyle(let x): itemStyle = x.initialSubsequent()
+		default: break
 		}
 	}
 	
-	public typealias Storage = BarItem.Storage
-}
-
-extension BindingName where Binding: BarButtonItemBinding {
-	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
-	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.$1(v)) }) }
-	public static var barButtonSystemItem: BindingName<Constant<UIBarButtonItem.SystemItem>, Binding> { return BindingName<Constant<UIBarButtonItem.SystemItem>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.barButtonSystemItem(v)) }) }
-	public static var itemStyle: BindingName<Dynamic<UIBarButtonItem.Style>, Binding> { return BindingName<Dynamic<UIBarButtonItem.Style>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.itemStyle(v)) }) }
-	public static var possibleTitles: BindingName<Dynamic<Set<String>?>, Binding> { return BindingName<Dynamic<Set<String>?>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.possibleTitles(v)) }) }
-	public static var width: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.width(v)) }) }
-	public static var customView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.customView(v)) }) }
-	public static var tintColor: BindingName<Dynamic<UIColor?>, Binding> { return BindingName<Dynamic<UIColor?>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.tintColor(v)) }) }
-	public static var backgroundImage: BindingName<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>, Binding> { return BindingName<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.backgroundImage(v)) }) }
-	public static var backButtonBackgroundImage: BindingName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>, Binding> { return BindingName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.backButtonBackgroundImage(v)) }) }
-	public static var backButtonTitlePositionAdjustment: BindingName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding> { return BindingName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.backButtonTitlePositionAdjustment(v)) }) }
-	public static var backgroundVerticalPositionAdjustment: BindingName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding> { return BindingName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.backgroundVerticalPositionAdjustment(v)) }) }
-	public static var titlePositionAdjustment: BindingName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding> { return BindingName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.titlePositionAdjustment(v)) }) }
-	public static var action: BindingName<TargetAction, Binding> { return BindingName<TargetAction, Binding>({ v in .barButtonItemBinding(BarButtonItem.Binding.action(v)) }) }
-}
-
-extension BindingName where Binding: BarButtonItemBinding, Binding.EnclosingBinder: BinderChain {
-	public static func action<I: SignalInputInterface, Value>(_ keyPath: KeyPath<Binding.EnclosingBinder.Instance, Value>) -> BindingName<I, Binding> where I.InputValue == Value {
-		return BindingName<I, Binding> { (v: I) -> Binding in
-			Binding.barButtonItemBinding(
-				BarButtonItem.Binding.action(
-					TargetAction.singleTarget(
-						Input<Any?>()
-							.map { i -> Value in
-								(i as! Binding.EnclosingBinder.Instance)[keyPath: keyPath]
-							}
-							.bind(to: v.input)
-					)
-				)
-			)
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(.image): return image.resume().flatMap { $0.apply(instance) { i, v in i.image = v } }
+		case .inheritedBinding(.landscapeImagePhone): return landscapeImagePhone.resume().flatMap { $0.apply(instance) { i, v in i.landscapeImagePhone = v } }
+		case .inheritedBinding(.title): return title.resume().flatMap { $0.apply(instance) { i, v in i.title = v } }
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .barButtonSystemItem: return nil
+			
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .backButtonBackgroundImage(let x):
+			var previous: ScopedValues<StateAndMetrics, UIImage?>? = nil
+			return x.apply(instance) { i, v in
+				for conditions in previous?.pairs ?? [] where conditions.value != nil {
+					i.setBackButtonBackgroundImage(nil, for: conditions.scope.controlState, barMetrics: conditions.scope.barMetrics)
+				}
+				previous = v
+				for conditions in v.pairs {
+					if let image = conditions.value {
+						i.setBackButtonBackgroundImage(image, for: conditions.scope.controlState, barMetrics: conditions.scope.barMetrics)
+					}
+				}
+			}
+		case .backButtonTitlePositionAdjustment(let x):
+			var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
+			return x.apply(instance) { i, v in
+				for c in previous?.pairs ?? [] {
+					i.setBackButtonTitlePositionAdjustment(UIOffset(), for: c.scope)
+				}
+				previous = v
+				for c in v.pairs {
+					i.setBackButtonTitlePositionAdjustment(c.value, for: c.scope)
+				}
+			}
+		case .backgroundImage(let x):
+			var previous: ScopedValues<StateStyleAndMetrics, UIImage?>? = nil
+			return x.apply(instance) { i, v in
+				for conditions in previous?.pairs ?? [] where conditions.value != nil {
+					i.setBackgroundImage(nil, for: conditions.scope.controlState, style: conditions.scope.itemStyle, barMetrics: conditions.scope.barMetrics)
+				}
+				previous = v
+				for conditions in v.pairs {
+					if let image = conditions.value {
+						i.setBackgroundImage(image, for: conditions.scope.controlState, style: conditions.scope.itemStyle, barMetrics: conditions.scope.barMetrics)
+					}
+				}
+			}
+		case .backgroundVerticalPositionAdjustment(let x):
+			var previous: ScopedValues<UIBarMetrics, CGFloat>? = nil
+			return x.apply(instance) { i, v in
+				for c in previous?.pairs ?? [] {
+					i.setBackgroundVerticalPositionAdjustment(0, for: c.scope)
+				}
+				previous = v
+				for c in v.pairs {
+					i.setBackgroundVerticalPositionAdjustment(c.value, for: c.scope)
+				}
+			}
+		case .customView: return customView.resume().flatMap { $0.apply(instance) { i, v in i.customView = v?.uiView() } }
+		case .itemStyle: return itemStyle.resume().flatMap { $0.apply(instance) { i, v in i.style = v } }
+		case .possibleTitles(let x): return x.apply(instance) { i, v in i.possibleTitles = v }
+		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+		case .titlePositionAdjustment(let x):
+			var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
+			return x.apply(instance) { i, v in
+				for c in previous?.pairs ?? [] {
+					i.setTitlePositionAdjustment(UIOffset(), for: c.scope)
+				}
+				previous = v
+				for c in v.pairs {
+					i.setTitlePositionAdjustment(c.value, for: c.scope)
+				}
+			}
+		case .width(let x): return x.apply(instance) { i, v in i.width = v }
+			
+		//	2. Signal bindings are performed on the object after construction.
+			
+		//	3. Action bindings are triggered by the object after construction.
+		case .action(let x): return x.apply(to: instance, constructTarget: SignalActionTarget.init)
+			
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		}
 	}
 }
 
+// MARK: - Binder Part 5: Storage and Delegate
+extension BarButtonItem.Preparer {
+	public typealias Storage = BarItem.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
+extension BindingName where Binding: BarButtonItemBinding {
+	public typealias BarButtonItemName<V> = BindingName<V, BarButtonItem.Binding, Binding>
+	private typealias B = BarButtonItem.Binding
+	private static func name<V>(_ source: @escaping (V) -> BarButtonItem.Binding) -> BarButtonItemName<V> {
+		return BarButtonItemName<V>(source: source, downcast: Binding.barButtonItemBinding)
+	}
+}
+public extension BindingName where Binding: BarButtonItemBinding {
+	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
+	// Replace: case ([^\(]+)\((.+)\)$
+	// With:    static var $1: BarButtonItemName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var barButtonSystemItem: BarButtonItemName<Constant<UIBarButtonItem.SystemItem>> { return .name(B.barButtonSystemItem) }
+	
+	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var backButtonBackgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> { return .name(B.backButtonBackgroundImage) }
+	static var backButtonTitlePositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> { return .name(B.backButtonTitlePositionAdjustment) }
+	static var backgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>> { return .name(B.backgroundImage) }
+	static var backgroundVerticalPositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> { return .name(B.backgroundVerticalPositionAdjustment) }
+	static var customView: BarButtonItemName<Dynamic<ViewConvertible?>> { return .name(B.customView) }
+	static var itemStyle: BarButtonItemName<Dynamic<UIBarButtonItem.Style>> { return .name(B.itemStyle) }
+	static var possibleTitles: BarButtonItemName<Dynamic<Set<String>?>> { return .name(B.possibleTitles) }
+	static var tintColor: BarButtonItemName<Dynamic<UIColor?>> { return .name(B.tintColor) }
+	static var titlePositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> { return .name(B.titlePositionAdjustment) }
+	static var width: BarButtonItemName<Dynamic<CGFloat>> { return .name(B.width) }
+	
+	//	2. Signal bindings are performed on the object after construction.
+	
+	//	3. Action bindings are triggered by the object after construction.
+	static var action: BarButtonItemName<TargetAction> { return .name(B.action) }
+	
+	//	4. Delegate bindings require synchronous evaluation within the object's context.
+
+	// Composite binding names
+	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> BarButtonItemName<SignalInput<Value>> {
+		return Binding.keyPathActionName(keyPath, BarButtonItem.Binding.action, Binding.barButtonItemBinding)
+	}
+}
+
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol BarButtonItemConvertible: BarItemConvertible {
 	func uiBarButtonItem() -> BarButtonItem.Instance
 }
 extension BarButtonItemConvertible {
 	public func uiBarItem() -> BarItem.Instance { return uiBarButtonItem() }
 }
-extension BarButtonItem.Instance: BarButtonItemConvertible {
+extension UIBarButtonItem: BarButtonItemConvertible, TargetActionSender {
 	public func uiBarButtonItem() -> BarButtonItem.Instance { return self }
 }
+public extension BarButtonItem {
+	func uiBarButtonItem() -> BarButtonItem.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol BarButtonItemBinding: BarItemBinding {
 	static func barButtonItemBinding(_ binding: BarButtonItem.Binding) -> Self
 }
-extension BarButtonItemBinding {
-	public static func barItemBinding(_ binding: BarItem.Binding) -> Self {
+public extension BarButtonItemBinding {
+	static func barItemBinding(_ binding: BarItem.Binding) -> Self {
 		return barButtonItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension BarButtonItem.Binding {
+	public typealias Preparer = BarButtonItem.Preparer
+	static func barButtonItemBinding(_ binding: BarButtonItem.Binding) -> BarButtonItem.Binding {
+		return binding
+	}
+}
 
-extension UIBarButtonItem: TargetActionSender {}
-
+// MARK: - Binder Part 9: Other supporting types
 public struct StateStyleAndMetrics {
 	public let controlState: UIControl.State
 	public let itemStyle: UIBarButtonItem.Style

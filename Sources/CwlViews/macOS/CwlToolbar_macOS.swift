@@ -140,7 +140,7 @@ public extension Toolbar.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension Toolbar.Preparer {
-	open class Storage: ObjectBinderStorage, NSToolbarDelegate {
+	open class Storage: EmbeddedObjectStorage, NSToolbarDelegate {
 		open override var isInUse: Bool { return true }
 		
 		open var itemDescriptions: [ToolbarItemDescription] = []

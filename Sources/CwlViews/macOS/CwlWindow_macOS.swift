@@ -324,17 +324,11 @@ public extension Window.Preparer {
 		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
 
 		case .minFullScreenContentSize(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.minFullScreenContentSize = v
-				}
-			}
+			guard #available(macOS 10.11, *) else { return }
+			return x.apply(instance) { i, v in i.minFullScreenContentSize = v }
 		case .maxFullScreenContentSize(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.maxFullScreenContentSize = v
-				}
-			}
+			guard #available(macOS 10.11, *) else { return }
+			return x.apply(instance) { i, v in i.maxFullScreenContentSize = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .close(let x):
@@ -423,7 +417,7 @@ public extension Window.Preparer {
 		}
 	}
 
-	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 		var lifetimes = [Lifetime]()
 		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
 		
@@ -476,35 +470,35 @@ extension Window.Preparer {
 
 	open class Delegate: DynamicDelegate, NSWindowDelegate {
 		open func windowWillResize(_ window: NSWindow, to toSize: NSSize) -> NSSize {
-			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)(window, toSize)
+			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)!(window, toSize)
 		}
 		
 		open func windowWillUseStandardFrame(_ window: NSWindow, defaultFrame: NSRect) -> NSRect {
-			return handler(ofType: ((NSWindow, NSRect) -> NSRect).self)(window, defaultFrame)
+			return handler(ofType: ((NSWindow, NSRect) -> NSRect).self)!(window, defaultFrame)
 		}
 		
 		open func windowShouldZoom(_ window: NSWindow, toFrame: NSRect) -> Bool {
-			return handler(ofType: ((NSWindow, NSRect) -> Bool).self)(window, toFrame)
+			return handler(ofType: ((NSWindow, NSRect) -> Bool).self)!(window, toFrame)
 		}
 		
 		open func window(_ window: NSWindow, willUseFullScreenContentSize param: NSSize) -> NSSize {
-			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)(window, param)
+			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)!(window, param)
 		}
 		
 		open func window(_ window: NSWindow, willUseFullScreenPresentationOptions param: NSApplication.PresentationOptions) -> NSApplication.PresentationOptions {
-			return handler(ofType: ((NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions).self)(window, param)
+			return handler(ofType: ((NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions).self)!(window, param)
 		}
 		
 		open func windowShouldClose(_ window: NSWindow) -> Bool {
-			return handler(ofType: ((NSWindow) -> Bool).self)(window)
+			return handler(ofType: ((NSWindow) -> Bool).self)!(window)
 		}
 		
 		open func window(_ window: NSWindow, shouldPopUpDocumentPathMenu param: NSMenu) -> Bool {
-			return handler(ofType: ((NSWindow, NSMenu) -> Bool).self)(window, param)
+			return handler(ofType: ((NSWindow, NSMenu) -> Bool).self)!(window, param)
 		}
 		
 		open func window(_ window: NSWindow, willResizeForVersionBrowserWithMaxPreferredSize: NSSize, maxAllowedSize: NSSize) -> NSSize {
-			return handler(ofType: ((NSWindow, NSSize, NSSize) -> NSSize).self)(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
+			return handler(ofType: ((NSWindow, NSSize, NSSize) -> NSSize).self)!(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
 		}
 	}
 }

@@ -111,10 +111,9 @@ public class TextField: Binder, TextFieldConvertible {
 		mutating func prepareBinding(_ binding: Binding) {
 			switch binding {
 			case .didEndEditingWithReason(let x):
-				if #available(iOS 10.0, *) {
-					let s = #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:))
-					delegate().addSelector(s).didEndEditingWithReason = x
-				}
+				guard #available(iOS 10.0, *) else { return }
+				let s = #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:))
+				delegate().addSelector(s).didEndEditingWithReason = x
 			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
 			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
 			case .shouldChangeCharacters(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
@@ -125,7 +124,7 @@ public class TextField: Binder, TextFieldConvertible {
 			}
 		}
 		
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = dynamicDelegate
 			if storage.inUse {
@@ -149,29 +148,17 @@ public class TextField: Binder, TextFieldConvertible {
 					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
 					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
 					case .textContentType(let y):
-						return y.apply(instance) { i, v in
-							if #available(iOS 10.0, *) {
-								i.textContentType = v
-							}
-						}
+						guard #available(iOS 10.0, *) else { return nil }
+						return y.apply(instance) { i, v in i.textContentType = v }
 					case .smartDashesType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartDashesType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartDashesType = v }
 					case .smartQuotesType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartQuotesType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartQuotesType = v }
 					case .smartInsertDeleteType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartInsertDeleteType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return nil }
+						return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
 					}
 				})
 			case .text(let x): return x.apply(instance) { i, v in i.text = v }
@@ -233,23 +220,23 @@ public class TextField: Binder, TextFieldConvertible {
 		}
 		
 		open func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
 		}
 		
 		open func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
 		}
 		
 		open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-			return handler(ofType: ((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool).self)(textField, range, string)
+			return handler(ofType: ((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool).self)!(textField, range, string)
 		}
 		
 		open func textFieldShouldClear(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
 		}
 		
 		open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)(textField)
+			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
 		}
 		
 		open var didEndEditingWithReason: Any?

@@ -84,13 +84,11 @@ public extension GestureRecognizer.Preparer {
 		case .shouldRequireFailure(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
 		case .shouldRequireToFail(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
 		case .shouldAttemptToRecognize(let x):
-			if #available(macOS 10.11, *) {
-				delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
-			}
+			guard #available(macOS 10.11, *) else { return }
+			delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
 		case .shouldReceiveTouch(let x):
-			if #available(macOS 10.12.2, *) {
-				delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
-			}
+			guard #available(macOS 10.12.2, *) else { return }
+			delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
 		default: break
 		}
 	}
@@ -103,17 +101,11 @@ public extension GestureRecognizer.Preparer {
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .allowedTouchTypes(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.12.2, *) {
-					i.allowedTouchTypes = v
-				}
-			}
+			guard #available(macOS 10.12.2, *) else { return nil }
+			return x.apply(instance) { i, v in i.allowedTouchTypes = v }
 		case .pressureConfiguration(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.pressureConfiguration = v
-				}
-			}
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.pressureConfiguration = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
@@ -134,31 +126,31 @@ public extension GestureRecognizer.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension GestureRecognizer.Preparer {
-	open class Storage: ObjectBinderStorage, NSGestureRecognizerDelegate {}
+	open class Storage: EmbeddedObjectStorage, NSGestureRecognizerDelegate {}
 	
 	open class Delegate: DynamicDelegate, NSGestureRecognizerDelegate {
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldAttemptToRecognizeWith event: NSEvent) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSEvent) -> Bool).self)(gestureRecognizer, event)
+			return handler(ofType: ((NSGestureRecognizer, NSEvent) -> Bool).self)!(gestureRecognizer, event)
 		}
 		
 		open func gestureRecognizerShouldBegin(_ gestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer) -> Bool).self)(gestureRecognizer)
+			return handler(ofType: ((NSGestureRecognizer) -> Bool).self)!(gestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)(gestureRecognizer, otherGestureRecognizer)
+			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)(gestureRecognizer, otherGestureRecognizer)
+			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		@objc(gestureRecognizer: shouldBeRequiredToFailByGestureRecognizer:) open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)(gestureRecognizer, otherGestureRecognizer)
+			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldReceive touch: NSTouch) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSTouch) -> Bool).self)(gestureRecognizer, touch)
+			return handler(ofType: ((NSGestureRecognizer, NSTouch) -> Bool).self)!(gestureRecognizer, touch)
 		}
 	}
 }

@@ -113,19 +113,19 @@ extension Layer.Preparer {
 	
 	open class Delegate: DynamicDelegate, CALayerDelegate {
 		open func display(_ layer: CALayer) {
-			handler(ofType: ((CALayer) -> Void).self)(layer)
+			handler(ofType: ((CALayer) -> Void).self)!(layer)
 		}
 		
 		@objc(drawLayer:inContext:) open func draw(_ layer: CALayer, in ctx: CGContext) {
-			handler(ofType: ((CALayer, CGContext) -> Void).self)(layer, ctx)
+			handler(ofType: ((CALayer, CGContext) -> Void).self)!(layer, ctx)
 		}
 		
 		open func layoutSublayers(of layer: CALayer) {
-			handler(ofType: ((CALayer) -> Void).self)(layer)
+			handler(ofType: ((CALayer) -> Void).self)!(layer)
 		}
 		
 		open func action(for layer: CALayer, forKey event: String) -> CAAction? {
-			return handler(ofType: ((CALayer, String) -> CAAction?).self)(layer, event)
+			return handler(ofType: ((CALayer, String) -> CAAction?).self)!(layer, event)
 		}
 	}
 }

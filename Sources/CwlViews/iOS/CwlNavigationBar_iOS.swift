@@ -101,7 +101,7 @@ public class NavigationBar: Binder, NavigationBarConvertible {
 			}
 		}
 		
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			// Don't steal the delegate from the navigation controller
 			if dynamicDelegate != nil {
 				precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
@@ -174,23 +174,23 @@ public class NavigationBar: Binder, NavigationBarConvertible {
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPop item: UINavigationItem) -> Bool {
-			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)(navigationBar, item)
+			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)!(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPush item: UINavigationItem) -> Bool {
-			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)(navigationBar, item)
+			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)!(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, didPop item: UINavigationItem) {
-			handler(ofType: SignalInput<UINavigationItem>.self).send(value: item)
+			handler(ofType: SignalInput<UINavigationItem>.self)!.send(value: item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, didPush item: UINavigationItem) {
-			handler(ofType: SignalInput<UINavigationItem>.self).send(value: item)
+			handler(ofType: SignalInput<UINavigationItem>.self)!.send(value: item)
 		}
 		
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)(bar)
+			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)!(bar)
 		}
 	}
 }

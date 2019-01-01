@@ -1,9 +1,9 @@
 //
-//  CwlRotationGestureRecognizer_iOS.swift
+//  CwlRotationGestureRecognizer_macOS.swift
 //  CwlViews
 //
-//  Created by Matt Gallagher on 2017/03/26.
-//  Copyright © 2017 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
+//  Created by Matt Gallagher on 11/3/16.
+//  Copyright © 2016 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 //  Permission to use, copy, modify, and/or distribute this software for any purpose with or without
 //  fee is hereby granted, provided that the above copyright notice and this permission notice
@@ -19,22 +19,17 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class RotationGestureRecognizer: Binder, RotationGestureRecognizerConvertible {
-	public typealias Instance = UIRotationGestureRecognizer
-	public typealias Inherited = GestureRecognizer
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiRotationGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension RotationGestureRecognizer {
 	enum Binding: RotationGestureRecognizerBinding {
-		public typealias EnclosingBinder = RotationGestureRecognizer
-		public static func rotationGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -48,51 +43,104 @@ public class RotationGestureRecognizer: Binder, RotationGestureRecognizerConvert
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension RotationGestureRecognizer {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = RotationGestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = RotationGestureRecognizer.Binding
+		public typealias Inherited = GestureRecognizer.Preparer
+		public typealias Instance = UIRotationGestureRecognizer
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .rotation(let x): return x.apply(instance) { i, v in i.rotation = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
-	
-	public typealias Storage = GestureRecognizer.Storage
 }
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension RotationGestureRecognizer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .rotation(let x): return x.apply(instance) { i, v in i.rotation = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+			
+		// 3. Action bindings are triggered by the object after construction.
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension RotationGestureRecognizer.Preparer {
+	public typealias Storage = GestureRecognizer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: RotationGestureRecognizerBinding {
+	public typealias RotationGestureRecognizerName<V> = BindingName<V, RotationGestureRecognizer.Binding, Binding>
+	private typealias B = RotationGestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> RotationGestureRecognizer.Binding) -> RotationGestureRecognizerName<V> {
+		return RotationGestureRecognizerName<V>(source: source, downcast: Binding.rotationGestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: RotationGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .rotationGestureRecognizerBinding(RotationGestureRecognizer.Binding.$1(v)) }) }
-	public static var rotation: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .rotationGestureRecognizerBinding(RotationGestureRecognizer.Binding.rotation(v)) }) }
+	// With:    static var $1: RotationGestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var rotation: RotationGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.rotation) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol RotationGestureRecognizerConvertible: GestureRecognizerConvertible {
 	func uiRotationGestureRecognizer() -> RotationGestureRecognizer.Instance
 }
 extension RotationGestureRecognizerConvertible {
 	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return uiRotationGestureRecognizer() }
 }
-extension RotationGestureRecognizer.Instance: RotationGestureRecognizerConvertible {
+extension UIRotationGestureRecognizer: RotationGestureRecognizerConvertible {
 	public func uiRotationGestureRecognizer() -> RotationGestureRecognizer.Instance { return self }
 }
+public extension RotationGestureRecognizer {
+	func uiRotationGestureRecognizer() -> RotationGestureRecognizer.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol RotationGestureRecognizerBinding: GestureRecognizerBinding {
 	static func rotationGestureRecognizerBinding(_ binding: RotationGestureRecognizer.Binding) -> Self
 }
-extension RotationGestureRecognizerBinding {
-	public static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
+public extension RotationGestureRecognizerBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return rotationGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension RotationGestureRecognizer.Binding {
+	public typealias Preparer = RotationGestureRecognizer.Preparer
+	static func rotationGestureRecognizerBinding(_ binding: RotationGestureRecognizer.Binding) -> RotationGestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

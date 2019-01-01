@@ -207,7 +207,7 @@ public extension OutlineView.Preparer {
 		}
 	}
 	
-	public func prepareInstance(_ instance: Instance, storage: Storage) {
+	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
 		prepareDelegate(instance: instance, storage: storage)
 		instance.dataSource = storage
@@ -253,11 +253,8 @@ public extension OutlineView.Preparer {
 		case .verticalMotionCanBeginDrag(let x): return x.apply(instance) { i, v in i.verticalMotionCanBeginDrag = v }
 
 		case .stronglyReferencesItems(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.12, *) {
-					i.stronglyReferencesItems = v
-				}
-			}
+			guard #available(macOS 10.12, *) else { return nil }
+			return x.apply(instance) { i, v in i.stronglyReferencesItems = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .collapseTreePath(let x):
@@ -337,27 +334,17 @@ public extension OutlineView.Preparer {
 		case .sizeLastColumnToFit(let x): return x.apply(instance) { i, v in i.sizeLastColumnToFit() }
 		case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
 		
+		case .hideRowActions(let x):
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.rowActionsVisible = false }
+		case .hideRows(let x):
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.hideRows(at: v.indexes, withAnimation: v.withAnimation) }
+		case .unhideRows(let x):
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.unhideRows(at: v.indexes, withAnimation: v.withAnimation) }
 
 		// 3. Action bindings are triggered by the object after construction.
-		case .hideRowActions(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.rowActionsVisible = false
-				}
-			}
-		case .hideRows(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.hideRows(at: v.indexes, withAnimation: v.withAnimation)
-				}
-			}
-		case .unhideRows(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.unhideRows(at: v.indexes, withAnimation: v.withAnimation)
-				}
-			}
-		
 		case .columnMoved(let x):
 			return Signal.notifications(name: NSTableView.columnDidMoveNotification, object: instance).compactMap { [weak instance] notification -> (column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)? in
 				guard let index = (notification.userInfo?["NSNewColumn"] as? NSNumber)?.intValue, let column = instance?.tableColumns.at(index) else {
@@ -673,15 +660,15 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didDrag tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self).send(value: tableColumn.identifier)
+			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didClick tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self).send(value: tableColumn.identifier)
+			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, mouseDownInHeaderOf tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self).send(value: tableColumn.identifier)
+			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
 		}
 		
 		open var rowView: ((_ treePath: TreePath<NodeData>) -> TableRowViewConvertible?)?
@@ -702,20 +689,20 @@ extension OutlineView.Preparer {
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldReorderColumn columnIndex: Int, toColumn newColumnIndex: Int) -> Bool {
 			if let column = outlineView.tableColumns.at(columnIndex) {
-				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier, Int) -> Bool).self)(outlineView, column.identifier, newColumnIndex)
+				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier, Int) -> Bool).self)!(outlineView, column.identifier, newColumnIndex)
 			}
 			return false
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, sizeToFitWidthOfColumn column: Int) -> CGFloat {
 			if let column = outlineView.tableColumns.at(column) {
-				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier) -> CGFloat).self)(outlineView, column.identifier)
+				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier) -> CGFloat).self)!(outlineView, column.identifier)
 			}
 			return 0
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldTypeSelectFor event: NSEvent, withCurrentSearch searchString: String?) -> Bool {
-			return handler(ofType: ((NSOutlineView, NSEvent, String?) -> Bool).self)(outlineView, event, searchString)
+			return handler(ofType: ((NSOutlineView, NSEvent, String?) -> Bool).self)!(outlineView, event, searchString)
 		}
 		
 		open var typeSelectString: ((_ outlineView: NSOutlineView, _ tableColumn: NSTableColumn?, _ treePath: TreePath<NodeData>) -> String?)?
@@ -737,7 +724,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldSelect tableColumn: NSTableColumn?) -> Bool {
-			return handler(ofType: ((NSOutlineView, NSTableColumn?) -> Bool).self)(outlineView, tableColumn)
+			return handler(ofType: ((NSOutlineView, NSTableColumn?) -> Bool).self)!(outlineView, tableColumn)
 		}
 		
 		open var selectionIndexesForProposedSelection: ((_ proposedSelectionIndexes: Set<TreePath<NodeData>>) -> Set<TreePath<NodeData>>)?
@@ -767,7 +754,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func selectionShouldChange(in outlineView: NSOutlineView) -> Bool {
-			return handler(ofType: ((NSOutlineView) -> Bool).self)(outlineView)
+			return handler(ofType: ((NSOutlineView) -> Bool).self)!(outlineView)
 		}
 		
 		open var shouldExpand: ((_ treePath: TreePath<NodeData>) -> Bool)?
@@ -799,11 +786,11 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
-			handler(ofType: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>.self).send(value: (new: outlineView.sortDescriptors, old: oldDescriptors))
+			handler(ofType: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>.self)!.send(value: (new: outlineView.sortDescriptors, old: oldDescriptors))
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-			return handler(ofType: ((NSOutlineView, NSDraggingSession, NSPoint, NSDragOperation) -> Void).self)(outlineView, session, screenPoint, operation)
+			return handler(ofType: ((NSOutlineView, NSDraggingSession, NSPoint, NSDragOperation) -> Void).self)!(outlineView, session, screenPoint, operation)
 		}
 		
 		open var draggingSessionWillBegin: ((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [TreePath<NodeData>]) -> Void)?
@@ -821,7 +808,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, itemForPersistentObject object: Any) -> Any? {
-			return handler(ofType: ((Any) -> IndexPath?).self)(object).flatMap { storage(for: outlineView)?.item(forIndexPath: $0, in: outlineView) }
+			return handler(ofType: ((Any) -> IndexPath?).self)!(object).flatMap { storage(for: outlineView)?.item(forIndexPath: $0, in: outlineView) }
 		}
 		
 		open var persistentObjectForTreePath: ((_ treePath: TreePath<NodeData>) -> Any?)?
@@ -841,7 +828,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, updateDraggingItemsForDrag draggingInfo: NSDraggingInfo) {
-			handler(ofType: ((NSOutlineView, NSDraggingInfo) -> Void).self)(outlineView, draggingInfo)
+			handler(ofType: ((NSOutlineView, NSDraggingInfo) -> Void).self)!(outlineView, draggingInfo)
 		}
 		
 		open var validateDrop: ((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedTreePath: TreePath<NodeData>?, _ proposedChildIndex: Int) -> NSDragOperation)?

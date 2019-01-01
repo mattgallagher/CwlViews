@@ -251,7 +251,7 @@ func binderContent() -> String {
 
 				func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
 					switch binding {
-					// e.g. case .someProperty(let x): return x.apply(instance, storage) { inst, stor, val in inst.someProperty = val }
+					// e.g. case .someProperty(let x): return x.apply(instance, storage) { i, s, v in inst.someProperty = val }
 					case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
 					}
 				}

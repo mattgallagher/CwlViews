@@ -19,31 +19,26 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class Window: Binder, WindowConvertible {
-	public typealias Instance = UIWindow
-	public typealias Inherited = View
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiWindow() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension Window {
 	enum Binding: WindowBinding {
-		public typealias EnclosingBinder = Window
-		public static func windowBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case rootViewController(Dynamic<ViewControllerConvertible>)
-		case windowLevel(Dynamic<UIWindow.Level>)
-		case screen(Dynamic<UIScreen>)
 		case frame(Dynamic<CGRect>)
+		case rootViewController(Dynamic<ViewControllerConvertible>)
+		case screen(Dynamic<UIScreen>)
+		case windowLevel(Dynamic<UIWindow.Level>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case makeKey(Signal<Void>)
@@ -62,107 +57,137 @@ public class Window: Binder, WindowConvertible {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = Window
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
+}
 
-		public var isHidden: InitialSubsequent<Bool>? = nil
+// MARK: - Binder Part 3: Preparer
+public extension Window {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = Window.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = UIWindow
 		
-		mutating func prepareBinding(_ binding: Window.Binding) {
-			switch binding {
-			case .inheritedBinding(.isHidden(let x)): isHidden = x.initialSubsequent()
-			case .inheritedBinding(let s): inherited.prepareBinding(s)
-			default: break
-			}
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .frame(let x): return x.apply(instance) { i, v in i.frame = v }
-			case .rootViewController(let x):
-				return x.apply(instance) { i, v in
-					let rootViewController = v.uiViewController()
-					i.rootViewController = rootViewController
-					if rootViewController.restorationIdentifier == nil {
-						rootViewController.restorationIdentifier = "cwlviews.root"
-					}
-				}
-			case .windowLevel(let x): return x.apply(instance) { i, v in i.windowLevel = v }
-			case .screen(let x): return x.apply(instance) { i, v in i.screen = v }
-			case .makeKey(let x): return x.apply(instance) { i, v in i.makeKey() }
-			case .didBecomeVisible(let x): return Signal.notifications(n: UIWindow.didBecomeVisibleNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .didBecomeHidden(let x): return Signal.notifications(n: UIWindow.didBecomeHiddenNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .didBecomeKey(let x): return Signal.notifications(n: UIWindow.didBecomeKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .didResignKey(let x): return Signal.notifications(n: UIWindow.didResignKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-			case .keyboardWillShow(let x): return Signal.notifications(n: UIResponder.keyboardWillShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardDidShow(let x): return Signal.notifications(n: UIResponder.keyboardDidShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardWillHide(let x): return Signal.notifications(n: UIResponder.keyboardWillHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardDidHide(let x): return Signal.notifications(n: UIResponder.keyboardDidHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardWillChangeFrame(let x): return Signal.notifications(n: UIResponder.keyboardWillChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .keyboardDidChangeFrame(let x): return Signal.notifications(n: UIResponder.keyboardDidChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
-			case .inheritedBinding(.isHidden): return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-		
-		public func finalizeInstance(_ instance: Instance, storage: View.Preparer.Storage) -> Lifetime? {
-			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
-			if let h = isHidden?.resume() {
-				if let c2 = inherited.applyBinding(.isHidden(.dynamic(h)), instance: instance, storage: storage) {
-					return lifetime.map { c1 in AggregateLifetime(lifetimes: [c2, c1]) } ?? c2
-				}
-			}
-			return lifetime
+
+		var isHidden: InitialSubsequent<Bool>? = nil
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension Window.Preparer {
+	mutating func prepareBinding(_ binding: Window.Binding) {
+		switch binding {
+		case .inheritedBinding(.isHidden(let x)): isHidden = x.initialSubsequent()
+		case .inheritedBinding(let s): inherited.prepareBinding(s)
+		default: break
 		}
 	}
 	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(.isHidden): return nil
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .frame(let x): return x.apply(instance) { i, v in i.frame = v }
+		case .rootViewController(let x):
+			return x.apply(instance) { i, v in
+				let rootViewController = v.uiViewController()
+				i.rootViewController = rootViewController
+				if rootViewController.restorationIdentifier == nil {
+					rootViewController.restorationIdentifier = "cwlviews.root"
+				}
+			}
+		case .screen(let x): return x.apply(instance) { i, v in i.screen = v }
+		case .windowLevel(let x): return x.apply(instance) { i, v in i.windowLevel = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+		case .makeKey(let x): return x.apply(instance) { i, v in i.makeKey() }
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .didBecomeHidden(let x): return Signal.notifications(name: UIWindow.didBecomeHiddenNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+		case .didBecomeKey(let x): return Signal.notifications(name: UIWindow.didBecomeKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+		case .didBecomeVisible(let x): return Signal.notifications(name: UIWindow.didBecomeVisibleNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+		case .didResignKey(let x): return Signal.notifications(name: UIWindow.didResignKeyNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
+		case .keyboardDidChangeFrame(let x): return Signal.notifications(name: UIResponder.keyboardDidChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+		case .keyboardDidHide(let x): return Signal.notifications(name: UIResponder.keyboardDidHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+		case .keyboardDidShow(let x): return Signal.notifications(name: UIResponder.keyboardDidShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+		case .keyboardWillChangeFrame(let x): return Signal.notifications(name: UIResponder.keyboardWillChangeFrameNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+		case .keyboardWillHide(let x): return Signal.notifications(name: UIResponder.keyboardWillHideNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+		case .keyboardWillShow(let x): return Signal.notifications(name: UIResponder.keyboardWillShowNotification, object: instance).map { notification -> [AnyHashable: Any]? in notification.userInfo }.cancellableBind(to: x)
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+	
+	func finalizeInstance(_ instance: Instance, storage: View.Preparer.Storage) -> Lifetime? {
+		var lifetimes = [Lifetime]()
+		lifetimes += inherited.inheritedFinalizedInstance(instance, storage: storage)
+		
+		// `isHidden` needs to be applied after everything else
+		lifetimes += (isHidden?.resume()).flatMap {
+			inherited.applyBinding(.isHidden(.dynamic($0)), instance: instance, storage: storage)
+		}
+		
+		return AggregateLifetime(lifetimes: lifetimes)
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension Window.Preparer {
 	public typealias Storage = View.Preparer.Storage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: WindowBinding {
+	public typealias WindowName<V> = BindingName<V, Window.Binding, Binding>
+	private typealias B = Window.Binding
+	private static func name<V>(_ source: @escaping (V) -> Window.Binding) -> WindowName<V> {
+		return WindowName<V>(source: source, downcast: Binding.windowBinding)
+	}
+}
+public extension BindingName where Binding: WindowBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .windowBinding(Window.Binding.$1(v)) }) }
-	public static var frame: BindingName<Dynamic<CGRect>, Binding> { return BindingName<Dynamic<CGRect>, Binding>({ v in .windowBinding(Window.Binding.frame(v)) }) }
-	public static var rootViewController: BindingName<Dynamic<ViewControllerConvertible>, Binding> { return BindingName<Dynamic<ViewControllerConvertible>, Binding>({ v in .windowBinding(Window.Binding.rootViewController(v)) }) }
-	public static var windowLevel: BindingName<Dynamic<UIWindow.Level>, Binding> { return BindingName<Dynamic<UIWindow.Level>, Binding>({ v in .windowBinding(Window.Binding.windowLevel(v)) }) }
-	public static var screen: BindingName<Dynamic<UIScreen>, Binding> { return BindingName<Dynamic<UIScreen>, Binding>({ v in .windowBinding(Window.Binding.screen(v)) }) }
-	public static var makeKey: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .windowBinding(Window.Binding.makeKey(v)) }) }
-	public static var didBecomeVisible: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didBecomeVisible(v)) }) }
-	public static var didBecomeHidden: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didBecomeHidden(v)) }) }
-	public static var didBecomeKey: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didBecomeKey(v)) }) }
-	public static var didResignKey: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .windowBinding(Window.Binding.didResignKey(v)) }) }
-	public static var keyboardWillShow: BindingName<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]?>, Binding>({ v in .windowBinding(Window.Binding.keyboardWillShow(v)) }) }
-	public static var keyboardDidShow: BindingName<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]?>, Binding>({ v in .windowBinding(Window.Binding.keyboardDidShow(v)) }) }
-	public static var keyboardWillHide: BindingName<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]?>, Binding>({ v in .windowBinding(Window.Binding.keyboardWillHide(v)) }) }
-	public static var keyboardDidHide: BindingName<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]?>, Binding>({ v in .windowBinding(Window.Binding.keyboardDidHide(v)) }) }
-	public static var keyboardWillChangeFrame: BindingName<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]?>, Binding>({ v in .windowBinding(Window.Binding.keyboardWillChangeFrame(v)) }) }
-	public static var keyboardDidChangeFrame: BindingName<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingName<SignalInput<[AnyHashable: Any]?>, Binding>({ v in .windowBinding(Window.Binding.keyboardDidChangeFrame(v)) }) }
+	// With:    static var $1: WindowName<$2> { return .name(B.$1) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol WindowConvertible: ViewConvertible {
 	func uiWindow() -> Window.Instance
 }
 extension WindowConvertible {
 	public func uiView() -> View.Instance { return uiWindow() }
 }
-extension Window.Instance: WindowConvertible {
+extension UIWindow: WindowConvertible {
 	public func uiWindow() -> Window.Instance { return self }
 }
+public extension Window {
+	func uiWindow() -> Window.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol WindowBinding: ViewBinding {
 	static func windowBinding(_ binding: Window.Binding) -> Self
 }
-extension WindowBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension WindowBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return windowBinding(.inheritedBinding(binding))
 	}
 }
+public extension Window.Binding {
+	public typealias Preparer = Window.Preparer
+	static func windowBinding(_ binding: Window.Binding) -> Window.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

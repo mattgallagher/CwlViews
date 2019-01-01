@@ -102,15 +102,13 @@ public class TextView: Binder, TextViewConvertible {
 			case .didChange(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
 			case .didChangeSelection(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
 			case .shouldInteractWithAttachment(let x):
-				if #available(iOS 10.0, *) {
-					let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?)
-					delegate().addSelector(s).shouldInteractWithAttachment = x
-				}
+				guard #available(iOS 10.0, *) else { return }
+				let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?)
+				delegate().addSelector(s).shouldInteractWithAttachment = x
 			case .shouldInteractWithURL(let x):
-				if #available(iOS 10.0, *) {
-					let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?)
-					delegate().addSelector(s).shouldInteractWithAttachment = x
-				}
+				guard #available(iOS 10.0, *) else { return }
+				let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?)
+				delegate().addSelector(s).shouldInteractWithAttachment = x
 			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 			default: break
 			}
@@ -130,29 +128,17 @@ public class TextView: Binder, TextViewConvertible {
 					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
 					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
 					case .textContentType(let y):
-						return y.apply(instance) { i, v in
-							if #available(iOS 10.0, *) {
-								i.textContentType = v
-							}
-						}
+						guard #available(iOS 10.0, *) else { return }
+						return y.apply(instance) { i, v in i.textContentType = v }
 					case .smartDashesType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartDashesType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartDashesType = v }
 					case .smartQuotesType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartQuotesType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartQuotesType = v }
 					case .smartInsertDeleteType(let x):
-						return x.apply(instance) { i, v in
-							if #available(iOS 11.0, *) {
-								i.smartInsertDeleteType = v
-							}
-						}
+						guard #available(iOS 11.0, *) else { return }
+						return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
 					}
 				})
 			case .text(let x): return x.apply(instance) { i, v in i.text = v }
@@ -194,31 +180,31 @@ public class TextView: Binder, TextViewConvertible {
 		}
 		
 		open func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
-			return handler(ofType: ((UITextView) -> Bool).self)(textView)
+			return handler(ofType: ((UITextView) -> Bool).self)!(textView)
 		}
 		
 		open func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
-			return handler(ofType: ((UITextView) -> Bool).self)(textView)
+			return handler(ofType: ((UITextView) -> Bool).self)!(textView)
 		}
 		
 		open func textViewDidBeginEditing(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
 		}
 		
 		open func textViewDidEndEditing(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
 		}
 		
 		open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return handler(ofType: ((UITextView, NSRange, String) -> Bool).self)(textView, range, text)
+			return handler(ofType: ((UITextView, NSRange, String) -> Bool).self)!(textView, range, text)
 		}
 		
 		open func textViewDidChange(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
 		}
 		
 		open func textViewDidChangeSelection(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self).send(value: textView)
+			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
 		}
 		
 		open var shouldInteractWithAttachment: Any?

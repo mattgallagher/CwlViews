@@ -1,9 +1,9 @@
 //
-//  CwlLongPressGestureRecognizer_iOS.swift
+//  CwlLongPressGestureRecognizer_macOS.swift
 //  CwlViews
 //
-//  Created by Matt Gallagher on 2017/03/26.
-//  Copyright © 2017 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
+//  Created by Matt Gallagher on 11/3/16.
+//  Copyright © 2016 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 //  Permission to use, copy, modify, and/or distribute this software for any purpose with or without
 //  fee is hereby granted, provided that the above copyright notice and this permission notice
@@ -19,31 +19,26 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class LongPressGestureRecognizer: Binder, LongPressGestureRecognizerConvertible {
-	public typealias Instance = UILongPressGestureRecognizer
-	public typealias Inherited = GestureRecognizer
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiLongPressGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension LongPressGestureRecognizer {
 	enum Binding: LongPressGestureRecognizerBinding {
-		public typealias EnclosingBinder = LongPressGestureRecognizer
-		public static func longPressGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case minimumPressDuration(Dynamic<CFTimeInterval>)
-		case numberOfTouchesRequired(Dynamic<Int>)
-		case numberOfTapsRequired(Dynamic<Int>)
 		case allowableMovement(Dynamic<CGFloat>)
+		case minimumPressDuration(Dynamic<CFTimeInterval>)
+		case numberOfTapsRequired(Dynamic<Int>)
+		case numberOfTouchesRequired(Dynamic<Int>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
@@ -51,58 +46,110 @@ public class LongPressGestureRecognizer: Binder, LongPressGestureRecognizerConve
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension LongPressGestureRecognizer {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = LongPressGestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = LongPressGestureRecognizer.Binding
+		public typealias Inherited = GestureRecognizer.Preparer
+		public typealias Instance = UILongPressGestureRecognizer
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .minimumPressDuration(let x): return x.apply(instance) { i, v in i.minimumPressDuration = v }
-			case .numberOfTouchesRequired(let x): return x.apply(instance) { i, v in i.numberOfTouchesRequired = v }
-			case .numberOfTapsRequired(let x): return x.apply(instance) { i, v in i.numberOfTapsRequired = v }
-			case .allowableMovement(let x): return x.apply(instance) { i, v in i.allowableMovement = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
-	
-	public typealias Storage = GestureRecognizer.Storage
 }
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension LongPressGestureRecognizer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .allowableMovement(let x): return x.apply(instance) { i, v in i.allowableMovement = v }
+		case .minimumPressDuration(let x): return x.apply(instance) { i, v in i.minimumPressDuration = v }
+		case .numberOfTapsRequired(let x): return x.apply(instance) { i, v in i.numberOfTapsRequired = v }
+		case .numberOfTouchesRequired(let x): return x.apply(instance) { i, v in i.numberOfTouchesRequired = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+			
+		// 3. Action bindings are triggered by the object after construction.
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension LongPressGestureRecognizer.Preparer {
+	public typealias Storage = GestureRecognizer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: LongPressGestureRecognizerBinding {
+	public typealias LongPressGestureRecognizerName<V> = BindingName<V, LongPressGestureRecognizer.Binding, Binding>
+	private typealias B = LongPressGestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> LongPressGestureRecognizer.Binding) -> LongPressGestureRecognizerName<V> {
+		return LongPressGestureRecognizerName<V>(source: source, downcast: Binding.longPressGestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: LongPressGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .longPressGestureRecognizerBinding(LongPressGestureRecognizer.Binding.$1(v)) }) }
-	public static var minimumPressDuration: BindingName<Dynamic<CFTimeInterval>, Binding> { return BindingName<Dynamic<CFTimeInterval>, Binding>({ v in .longPressGestureRecognizerBinding(LongPressGestureRecognizer.Binding.minimumPressDuration(v)) }) }
-	public static var numberOfTouchesRequired: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .longPressGestureRecognizerBinding(LongPressGestureRecognizer.Binding.numberOfTouchesRequired(v)) }) }
-	public static var numberOfTapsRequired: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .longPressGestureRecognizerBinding(LongPressGestureRecognizer.Binding.numberOfTapsRequired(v)) }) }
-	public static var allowableMovement: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .longPressGestureRecognizerBinding(LongPressGestureRecognizer.Binding.allowableMovement(v)) }) }
+	// With:    static var $1: LongPressGestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var allowableMovement: LongPressGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.allowableMovement) }
+	static var minimumPressDuration: LongPressGestureRecognizerName<Dynamic<CFTimeInterval>> { return .name(B.minimumPressDuration) }
+	static var numberOfTapsRequired: LongPressGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTapsRequired) }
+	static var numberOfTouchesRequired: LongPressGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTouchesRequired) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol LongPressGestureRecognizerConvertible: GestureRecognizerConvertible {
 	func uiLongPressGestureRecognizer() -> LongPressGestureRecognizer.Instance
 }
 extension LongPressGestureRecognizerConvertible {
 	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return uiLongPressGestureRecognizer() }
 }
-extension LongPressGestureRecognizer.Instance: LongPressGestureRecognizerConvertible {
+extension UILongPressGestureRecognizer: LongPressGestureRecognizerConvertible {
 	public func uiLongPressGestureRecognizer() -> LongPressGestureRecognizer.Instance { return self }
 }
+public extension LongPressGestureRecognizer {
+	func uiLongPressGestureRecognizer() -> LongPressGestureRecognizer.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol LongPressGestureRecognizerBinding: GestureRecognizerBinding {
 	static func longPressGestureRecognizerBinding(_ binding: LongPressGestureRecognizer.Binding) -> Self
 }
-
-extension LongPressGestureRecognizerBinding {
-	public static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
+public extension LongPressGestureRecognizerBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return longPressGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension LongPressGestureRecognizer.Binding {
+	public typealias Preparer = LongPressGestureRecognizer.Preparer
+	static func longPressGestureRecognizerBinding(_ binding: LongPressGestureRecognizer.Binding) -> LongPressGestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

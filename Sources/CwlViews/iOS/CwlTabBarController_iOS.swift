@@ -107,7 +107,7 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 			}
 		}
 		
-		public func prepareInstance(_ instance: Instance, storage: Storage) {
+		func prepareInstance(_ instance: Instance, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 
 			storage.dynamicDelegate = dynamicDelegate
@@ -127,18 +127,18 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 				x.value.applyBindings(to: instance.tabBar)
 				return nil
 			case .items(let x):
-				return x.apply(instance, storage) { inst, stor, val in
-					let items = val.value.compactMap { stor.viewController(for: $0) }
-					inst.setViewControllers(items, animated: val.isAnimated)
+				return x.apply(instance, storage) { i, s, v in
+					let items = v.value.compactMap { s.viewController(for: $0) }
+					i.setViewControllers(items, animated: v.isAnimated)
 				}
 			case .customizableItems(let x):
-				return x.apply(instance, storage) { inst, stor, val in
-					inst.customizableViewControllers = val.compactMap { stor.viewController(for: $0) }
+				return x.apply(instance, storage) { i, s, v in
+					i.customizableViewControllers = v.compactMap { s.viewController(for: $0) }
 				}
 			case .selectItem(let x):
-				return x.apply(instance, storage) { inst, stor, val in
-					if let vc = stor.viewController(for: val), let index = inst.viewControllers?.index(of: vc) {
-						inst.selectedIndex = index
+				return x.apply(instance, storage) { i, s, v in
+					if let vc = s.viewController(for: v), let index = i.viewControllers?.index(of: vc) {
+						i.selectedIndex = index
 					}
 				}
 			case .tabConstructor: return nil
@@ -228,19 +228,19 @@ public class TabBarController<ItemIdentifier: Hashable>: Binder, TabBarControlle
 		}
 		
 		open func tabBarControllerSupportedInterfaceOrientations(_ tabBarController: UITabBarController) -> UIInterfaceOrientationMask {
-			return handler(ofType: (() -> UIInterfaceOrientationMask).self)()
+			return handler(ofType: (() -> UIInterfaceOrientationMask).self)!()
 		}
 		
 		open func tabBarControllerPreferredInterfaceOrientationForPresentation(_ tabBarController: UITabBarController) -> UIInterfaceOrientation {
-			return handler(ofType: (() -> UIInterfaceOrientation).self)()
+			return handler(ofType: (() -> UIInterfaceOrientation).self)!()
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-			return handler(ofType: ((UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)(animationController)
+			return handler(ofType: ((UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)!(animationController)
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, animationControllerForTransitionFrom fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-			return handler(ofType: ((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)(fromVC, toVC)
+			return handler(ofType: ((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)!(fromVC, toVC)
 		}
 	}
 }

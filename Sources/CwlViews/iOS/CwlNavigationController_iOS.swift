@@ -107,7 +107,7 @@ public class NavigationController: Binder, NavigationControllerConvertible {
 			}
 		}
 		
-		public func prepareInstance(_ instance: UINavigationController, storage: Storage) {
+		func prepareInstance(_ instance: UINavigationController, storage: Storage) {
 			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
 			storage.dynamicDelegate = dynamicDelegate
 			instance.delegate = storage

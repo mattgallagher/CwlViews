@@ -135,11 +135,11 @@ public extension BackingLayer.Preparer {
 				var actions = i.actions ?? [String: CAAction]()
 				for (key, input) in v {
 					if let i = input {
-						actions[key] = storage
+						actions[key] = s
 						storage.layerActions[key] = i
 					} else {
 						actions[key] = NSNull()
-						storage.layerActions.removeValue(forKey: key)
+						s.layerActions.removeValue(forKey: key)
 					}
 				}
 				i.actions = actions
@@ -230,7 +230,7 @@ public extension BackingLayer.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension BackingLayer.Preparer {
-	open class Storage: ObjectBinderStorage, CAAction {
+	open class Storage: EmbeddedObjectStorage, CAAction {
 		// LayerBinderStorage implementation
 		open var layerActions = [String: SignalInput<[AnyHashable: Any]?>]()
 		@objc open func run(forKey event: String, object anObject: Any, arguments dict: [AnyHashable: Any]?) {

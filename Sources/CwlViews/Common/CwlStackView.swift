@@ -55,10 +55,10 @@ public extension StackView {
 		case distribution(Dynamic<NSUIStackViewDistribution>)
 		case spacing(Dynamic<CGFloat>)
 		
-		@available(macOS 10.13, *) @available(iOS, unavailable) case edgeInsets(Dynamic<NSEdgeInsets>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case edgeInsets(Dynamic<EdgeInsets>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
-		@available(macOS, unavailable) @available(iOS 11, *) case isLayoutMarginsRelativeArrangement(())
+		@available(macOS, unavailable) @available(iOS 11, *) case isLayoutMarginsRelativeArrangement(Dynamic<Bool>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case verticalClippingResistance(Dynamic<NSUILayoutPriority>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case verticalHuggingPriority(Dynamic<NSUILayoutPriority>)
 		
@@ -68,6 +68,12 @@ public extension StackView {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+	
+	#if os(macOS)
+		public typealias EdgeInsets = NSEdgeInsets
+	#else
+		public typealias EdgeInsets = UIEdgeInsets
+	#endif
 }
 
 // MARK: - Binder Part 3: Preparer
@@ -195,10 +201,10 @@ public extension BindingName where Binding: StackViewBinding {
 	static var distribution: StackViewName<Dynamic<StackView.NSUIStackViewDistribution>> { return .name(B.distribution) }
 	static var spacing: StackViewName<Dynamic<CGFloat>> { return .name(B.spacing) }
 	
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<NSEdgeInsets>> { return .name(B.edgeInsets) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<StackView.EdgeInsets>> { return .name(B.edgeInsets) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalClippingResistance) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalHuggingPriority) }
-	@available(macOS, unavailable) @available(iOS 11, *) static var isLayoutMarginsRelativeArrangement: StackViewName<()> { return .name(B.isLayoutMarginsRelativeArrangement) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var isLayoutMarginsRelativeArrangement: StackViewName<Dynamic<Bool>> { return .name(B.isLayoutMarginsRelativeArrangement) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalClippingResistance) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalHuggingPriority) }
 	

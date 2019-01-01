@@ -141,7 +141,7 @@ public extension TableColumn.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension TableColumn.Preparer {
-	open class Storage: ObjectBinderStorage {
+	open class Storage: EmbeddedObjectStorage {
 		public let tableColumn: NSTableColumn
 		public let cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
 		public let cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?

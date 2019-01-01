@@ -1,9 +1,9 @@
 //
-//  CwlScreenEdgePanGestureRecognizer_iOS.swift
+//  CwlScreenEdgePanGestureRecognizer_macOS.swift
 //  CwlViews
 //
-//  Created by Matt Gallagher on 2017/03/26.
-//  Copyright © 2017 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
+//  Created by Matt Gallagher on 11/3/16.
+//  Copyright © 2016 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 //  Permission to use, copy, modify, and/or distribute this software for any purpose with or without
 //  fee is hereby granted, provided that the above copyright notice and this permission notice
@@ -19,92 +19,128 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class ScreenEdgePanGestureRecognizer: Binder, ScreenEdgePanGestureRecognizerConvertible {
-	public typealias Instance = UIScreenEdgePanGestureRecognizer
-	public typealias Inherited = GestureRecognizer
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiScreenEdgePanGestureRecognizer() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension ScreenEdgePanGestureRecognizer {
 	enum Binding: ScreenEdgePanGestureRecognizerBinding {
-		public typealias EnclosingBinder = ScreenEdgePanGestureRecognizer
-		public static func screenEdgePanGestureRecognizerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case edges(Dynamic<UIRectEdge>)
+		case screenEdge(Dynamic<UIRectEdge>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
 		// 3. Action bindings are triggered by the object after construction.
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		
-		public struct Name<Value> {
-			// You can easily convert the `Binding` cases to `Binding.Name` using the following Xcode-style regex:
-			// Replace: case ([^\(]+)\((.+)\)$
-			// With:    public static var $1: Name<$2> { return Name<$2>(Binding.$1) }
-			public static var edges: Name<Dynamic<UIRectEdge>> { return Name<Dynamic<UIRectEdge>>(Binding.edges) }
-			
-			let binding: (Value) -> Binding
-			init(_ binding: @escaping (Value) -> Binding) {
-				self.binding = binding
-			}
-		}
 	}
-	
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = ScreenEdgePanGestureRecognizer
-		public var linkedPreparer = Inherited.Preparer()
-		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .edges(let x): return x.apply(instance) { i, v in i.edges = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-	}
-	
-	public typealias Storage = GestureRecognizer.Storage
 }
 
+// MARK: - Binder Part 3: Preparer
+public extension ScreenEdgePanGestureRecognizer {
+	struct Preparer: BinderEmbedderConstructor {
+		public typealias Binding = ScreenEdgePanGestureRecognizer.Binding
+		public typealias Inherited = GestureRecognizer.Preparer
+		public typealias Instance = UIScreenEdgePanGestureRecognizer
+		
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
+		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension ScreenEdgePanGestureRecognizer.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .screenEdge(let x): return x.apply(instance) { i, v in i.edges = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+			
+		// 3. Action bindings are triggered by the object after construction.
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension ScreenEdgePanGestureRecognizer.Preparer {
+	public typealias Storage = GestureRecognizer.Preparer.Storage
+}
+
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ScreenEdgePanGestureRecognizerBinding {
+	public typealias ScreenEdgePanGestureRecognizerName<V> = BindingName<V, ScreenEdgePanGestureRecognizer.Binding, Binding>
+	private typealias B = ScreenEdgePanGestureRecognizer.Binding
+	private static func name<V>(_ source: @escaping (V) -> ScreenEdgePanGestureRecognizer.Binding) -> ScreenEdgePanGestureRecognizerName<V> {
+		return ScreenEdgePanGestureRecognizerName<V>(source: source, downcast: Binding.screenEdgePanGestureRecognizerBinding)
+	}
+}
+public extension BindingName where Binding: ScreenEdgePanGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .screenEdgePanGestureRecognizerBinding(ScreenEdgePanGestureRecognizer.Binding.$1(v)) }) }
-	public static var edges: BindingName<Dynamic<UIRectEdge>, Binding> { return BindingName<Dynamic<UIRectEdge>, Binding>({ v in .screenEdgePanGestureRecognizerBinding(ScreenEdgePanGestureRecognizer.Binding.edges(v)) }) }
+	// With:    static var $1: ScreenEdgePanGestureRecognizerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var screenEdge: ScreenEdgePanGestureRecognizerName<Dynamic<UIRectEdge>> { return .name(B.screenEdge) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol ScreenEdgePanGestureRecognizerConvertible: GestureRecognizerConvertible {
 	func uiScreenEdgePanGestureRecognizer() -> ScreenEdgePanGestureRecognizer.Instance
 }
 extension ScreenEdgePanGestureRecognizerConvertible {
 	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return uiScreenEdgePanGestureRecognizer() }
 }
-extension ScreenEdgePanGestureRecognizer.Instance: ScreenEdgePanGestureRecognizerConvertible {
+extension UIScreenEdgePanGestureRecognizer: ScreenEdgePanGestureRecognizerConvertible {
 	public func uiScreenEdgePanGestureRecognizer() -> ScreenEdgePanGestureRecognizer.Instance { return self }
 }
+public extension ScreenEdgePanGestureRecognizer {
+	func uiScreenEdgePanGestureRecognizer() -> ScreenEdgePanGestureRecognizer.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol ScreenEdgePanGestureRecognizerBinding: GestureRecognizerBinding {
 	static func screenEdgePanGestureRecognizerBinding(_ binding: ScreenEdgePanGestureRecognizer.Binding) -> Self
 }
-extension ScreenEdgePanGestureRecognizerBinding {
-	public static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
+public extension ScreenEdgePanGestureRecognizerBinding {
+	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return screenEdgePanGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ScreenEdgePanGestureRecognizer.Binding {
+	public typealias Preparer = ScreenEdgePanGestureRecognizer.Preparer
+	static func screenEdgePanGestureRecognizerBinding(_ binding: ScreenEdgePanGestureRecognizer.Binding) -> ScreenEdgePanGestureRecognizer.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

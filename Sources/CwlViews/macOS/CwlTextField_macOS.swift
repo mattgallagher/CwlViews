@@ -147,29 +147,17 @@ public extension TextField.Preparer {
 		case .usesSingleLineMode(let x): return x.apply(instance) { i, v in i.usesSingleLineMode = v }
 
 		case .allowsCharacterPickerTouchBarItem(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.12.2, *) {
-					i.allowsCharacterPickerTouchBarItem = v
-				}
-			}
+			guard #available(macOS 10.12.2, *) else { return nil }
+			return x.apply(instance) { i, v in i.allowsCharacterPickerTouchBarItem = v }
 		case .allowsDefaultTighteningForTruncation(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.allowsDefaultTighteningForTruncation = v
-				}
-			}
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.allowsDefaultTighteningForTruncation = v }
 		case .isAutomaticTextCompletionEnabled(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.12.2, *) {
-					i.isAutomaticTextCompletionEnabled = v
-				}
-			}
+			guard #available(macOS 10.12.2, *) else { return nil }
+			return x.apply(instance) { i, v in i.isAutomaticTextCompletionEnabled = v }
 		case .maximumNumberOfLines(let x):
-			return x.apply(instance) { i, v in
-				if #available(macOS 10.11, *) {
-					i.maximumNumberOfLines = v
-				}
-			}
+			guard #available(macOS 10.11, *) else { return nil }
+			return x.apply(instance) { i, v in i.maximumNumberOfLines = v }
 
 		// 2. Signal bindings are performed on the object after construction.
 		case .selectText(let x): return x.apply(instance) { i, v in i.selectText(nil) }
@@ -194,31 +182,31 @@ extension TextField.Preparer {
 
 	open class Delegate: DynamicDelegate, NSTextFieldDelegate {
 		open func control(_ control: NSControl, isValidObject obj: Any?) -> Bool {
-			return handler(ofType: ((NSTextField, AnyObject) -> Bool).self)(control as! NSTextField, obj as AnyObject)
+			return handler(ofType: ((NSTextField, AnyObject) -> Bool).self)!(control as! NSTextField, obj as AnyObject)
 		}
 		
 		open func control(_ control: NSControl, didFailToValidatePartialString string: String, errorDescription error: String?) {
-			handler(ofType: SignalInput<(string: String, errorDescription: String?)>.self).send((string: string, errorDescription: error))
+			handler(ofType: SignalInput<(string: String, errorDescription: String?)>.self)!.send((string: string, errorDescription: error))
 		}
 		
 		open func control(_ control: NSControl, didFailToFormatString string: String, errorDescription error: String?) -> Bool {
-			return handler(ofType: ((NSTextField, String, String?) -> Bool).self)(control as! NSTextField, string, error)
+			return handler(ofType: ((NSTextField, String, String?) -> Bool).self)!(control as! NSTextField, string, error)
 		}
 		
 		open func control(_ control: NSControl, textShouldBeginEditing fieldEditor: NSText) -> Bool {
-			return handler(ofType: ((NSTextField, NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
+			return handler(ofType: ((NSTextField, NSText) -> Bool).self)!(control as! NSTextField, fieldEditor)
 		}
 		
 		open func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
-			return handler(ofType: ((NSTextField, NSText) -> Bool).self)(control as! NSTextField, fieldEditor)
+			return handler(ofType: ((NSTextField, NSText) -> Bool).self)!(control as! NSTextField, fieldEditor)
 		}
 		
 		open func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange charRange: NSRange, indexOfSelectedItem index: UnsafeMutablePointer<Int>) -> [String] {
-			return handler(ofType: ((NSTextField,  NSTextView, [String], NSRange, UnsafeMutablePointer<Int>) -> [String]).self)(control as! NSTextField, textView, words, charRange, index)
+			return handler(ofType: ((NSTextField,  NSTextView, [String], NSRange, UnsafeMutablePointer<Int>) -> [String]).self)!(control as! NSTextField, textView, words, charRange, index)
 		}
 		
 		open func control(_ control: NSControl, textView: NSTextView, doCommandBy doCommandBySelector: Selector) -> Bool {
-			return handler(ofType: ((NSTextField,  NSTextView, Selector) -> Bool).self)(control as! NSTextField, textView, doCommandBySelector)
+			return handler(ofType: ((NSTextField,  NSTextView, Selector) -> Bool).self)!(control as! NSTextField, textView, doCommandBySelector)
 		}
 	}
 }

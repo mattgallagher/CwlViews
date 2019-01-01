@@ -38,9 +38,9 @@ public class AlertController: Binder, AlertControllerConvertible {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case actions(Constant<[AlertActionConvertible]>)
 		case preferredStyle(Constant<UIAlertController.Style>)
 		case textFields(Constant<[TextField]>)
-		case actions(Constant<[AlertActionConvertible]>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case message(Dynamic<String?>)

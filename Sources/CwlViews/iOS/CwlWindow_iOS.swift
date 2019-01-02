@@ -156,6 +156,31 @@ public extension BindingName where Binding: WindowBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: WindowName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var frame: WindowName<Dynamic<CGRect>> { return .name(B.frame) }
+	static var rootViewController: WindowName<Dynamic<ViewControllerConvertible>> { return .name(B.rootViewController) }
+	static var screen: WindowName<Dynamic<UIScreen>> { return .name(B.screen) }
+	static var windowLevel: WindowName<Dynamic<UIWindow.Level>> { return .name(B.windowLevel) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	static var makeKey: WindowName<Signal<Void>> { return .name(B.makeKey) }
+	
+	// 3. Action bindings are triggered by the object after construction.
+	static var didBecomeVisible: WindowName<SignalInput<Void>> { return .name(B.didBecomeVisible) }
+	static var didBecomeHidden: WindowName<SignalInput<Void>> { return .name(B.didBecomeHidden) }
+	static var didBecomeKey: WindowName<SignalInput<Void>> { return .name(B.didBecomeKey) }
+	static var didResignKey: WindowName<SignalInput<Void>> { return .name(B.didResignKey) }
+	static var keyboardWillShow: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardWillShow) }
+	static var keyboardDidShow: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardDidShow) }
+	static var keyboardWillHide: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardWillHide) }
+	static var keyboardDidHide: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardDidHide) }
+	static var keyboardWillChangeFrame: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardWillChangeFrame) }
+	static var keyboardDidChangeFrame: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardDidChangeFrame) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -19,178 +19,182 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class SplitViewController: Binder, SplitViewControllerConvertible {
-	public typealias Instance = UISplitViewController
-	public typealias Inherited = ViewController
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiSplitViewController() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension SplitViewController {
 	enum Binding: SplitViewControllerBinding {
-		public typealias EnclosingBinder = SplitViewController
-		public static func splitViewControllerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case primaryViewController(Dynamic<ViewControllerConvertible>)
-		case secondaryViewController(Dynamic<ViewControllerConvertible>)
-		case presentsWithGesture(Dynamic<Bool>)
+		case maximumPrimaryColumnWidth(Dynamic<CGFloat>)
+		case minimumPrimaryColumnWidth(Dynamic<CGFloat>)
 		case preferredDisplayMode(Dynamic<UISplitViewController.DisplayMode>)
 		case preferredPrimaryColumnWidthFraction(Dynamic<CGFloat>)
-		case minimumPrimaryColumnWidth(Dynamic<CGFloat>)
-		case maximumPrimaryColumnWidth(Dynamic<CGFloat>)
+		case presentsWithGesture(Dynamic<Bool>)
+		case primaryViewController(Dynamic<ViewControllerConvertible>)
+		case secondaryViewController(Dynamic<ViewControllerConvertible>)
 		case shouldShowSecondary(Dynamic<Bool>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
 		// 3. Action bindings are triggered by the object after construction.
+		case dismissedSecondary(SignalInput<Void>)
 		case displayModeButton(SignalInput<BarButtonItemConvertible?>)
 		case willChangeDisplayMode(SignalInput<UISplitViewController.DisplayMode>)
-		case dismissedSecondary(SignalInput<Void>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case targetDisplayModeForAction((UISplitViewController) -> UISplitViewController.DisplayMode)
-		case preferredInterfaceOrientation((UISplitViewController) -> UIInterfaceOrientation)
-		case supportedInterfaceOrientations((UISplitViewController) -> UIInterfaceOrientationMask)
-		case primaryViewControllerForCollapsing((UISplitViewController) -> UIViewController?)
 		case collapseSecondary((UISplitViewController, _ secondaryViewController: UIViewController, _ ontoPrimaryViewController: UIViewController) -> Bool)
+		case preferredInterfaceOrientation((UISplitViewController) -> UIInterfaceOrientation)
+		case primaryViewControllerForCollapsing((UISplitViewController) -> UIViewController?)
 		case primaryViewControllerForExpanding((UISplitViewController) -> UIViewController?)
 		case separateSecondary((UISplitViewController, _ fromPrimaryViewController: UIViewController) -> UIViewController?)
 		case showPrimaryViewController((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool)
 		case showSecondaryViewController((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool)
+		case supportedInterfaceOrientations((UISplitViewController) -> UIInterfaceOrientationMask)
+		case targetDisplayModeForAction((UISplitViewController) -> UISplitViewController.DisplayMode)
 	}
+}
 
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = SplitViewController
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension SplitViewController {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = SplitViewController.Binding
+		public typealias Inherited = ViewController.Preparer
+		public typealias Instance = UISplitViewController
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init(nibName: nil, bundle: nil) }
-
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var dynamicDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = dynamicDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				dynamicDelegate = d
-				return d
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
 		public var primary = InitialSubsequent<ViewControllerConvertible>()
 		public var secondary = InitialSubsequent<ViewControllerConvertible>()
+	}
+}
 
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .primaryViewController(let x): primary = x.initialSubsequent()
-			case .secondaryViewController(let x): secondary = x.initialSubsequent()
-			case .willChangeDisplayMode(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:willChangeTo:)))
-			case .targetDisplayModeForAction(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.targetDisplayModeForAction(in:)))
-			case .preferredInterfaceOrientation(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerPreferredInterfaceOrientationForPresentation(_:)))
-			case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerSupportedInterfaceOrientations(_:)))
-			case .primaryViewControllerForCollapsing(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.primaryViewController(forCollapsing:)))
-			case .primaryViewControllerForExpanding(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.primaryViewController(forExpanding:)))
-			case .showPrimaryViewController(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:show:sender:)))
-			case .showSecondaryViewController(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:showDetail:sender:)))
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
-		}
+// MARK: - Binder Part 4: Preparer overrides
+public extension SplitViewController.Preparer {
+	var delegateIsRequired: Bool { return true }
+	
+	func constructInstance(type: Instance.Type, parameters: Void) -> Instance { return type.init(nibName: nil, bundle: nil) }
+
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		func prepareInstance(_ instance: Instance, storage: Storage) {
-			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = dynamicDelegate
-			if storage.inUse {
-				instance.delegate = storage
-			}
+		case .primaryViewController(let x): primary = x.initialSubsequent()
+		case .secondaryViewController(let x): secondary = x.initialSubsequent()
+		case .willChangeDisplayMode(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:willChangeTo:)))
+		case .targetDisplayModeForAction(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.targetDisplayModeForAction(in:)))
+		case .preferredInterfaceOrientation(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerSupportedInterfaceOrientations(_:)))
+		case .primaryViewControllerForCollapsing(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.primaryViewController(forCollapsing:)))
+		case .primaryViewControllerForExpanding(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.primaryViewController(forExpanding:)))
+		case .showPrimaryViewController(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:show:sender:)))
+		case .showSecondaryViewController(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:showDetail:sender:)))
+		default: break
+		}
+	}
+	
+	func prepareInstance(_ instance: Instance, storage: Storage) {
+		inheritedPrepareInstance(instance, storage: storage)
+		prepareDelegate(instance: instance, storage: storage)
 
-			storage.secondaryViewController = secondary.initial()?.uiViewController()
-			instance.viewControllers = [primary.initial()?.uiViewController() ?? UIViewController()]
+		storage.secondaryViewController = secondary.initial?.uiViewController()
+		instance.viewControllers = [primary.initial?.uiViewController() ?? UIViewController()]
+	}
+
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+
+		//	0. Static bindings are applied at construction and are subsequently immutable.
 			
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .primaryViewController: return primary.resume()?.apply(instance) { i, v in i.show(v.uiViewController(), sender: nil) }
-			case .secondaryViewController:
-				return secondary.resume()?.apply(instance) { i, v in
-					let vc = v.uiViewController()
-					s.secondaryViewController = vc
-					i.showDetailViewController(vc, sender: nil)
-				}
-			case .presentsWithGesture(let x): return x.apply(instance) { i, v in i.presentsWithGesture = v }
-			case .preferredDisplayMode(let x): return x.apply(instance) { i, v in i.preferredDisplayMode = v }
-			case .preferredPrimaryColumnWidthFraction(let x): return x.apply(instance) { i, v in i.preferredPrimaryColumnWidthFraction = v }
-			case .minimumPrimaryColumnWidth(let x): return x.apply(instance) { i, v in i.minimumPrimaryColumnWidth = v }
-			case .maximumPrimaryColumnWidth(let x): return x.apply(instance) { i, v in i.maximumPrimaryColumnWidth = v }
-			case .displayModeButton(let x):
-				storage.displayModeButton = x
-				return nil
-			case .dismissedSecondary(let x):
-				storage.dismissedSecondary = x
-				return nil
-			case .shouldShowSecondary(let x):
-				return x.apply(instance) { i, v in
-					if v == true && s.shouldShowSecondary == false, let svc = s.secondaryViewController {
-						i.showDetailViewController(svc, sender: nil)
-					}
-					s.shouldShowSecondary = v
-				}
-			case .willChangeDisplayMode: return nil
-			case .targetDisplayModeForAction: return nil
-			case .preferredInterfaceOrientation: return nil
-			case .supportedInterfaceOrientations: return nil
-			case .primaryViewControllerForCollapsing: return nil
-			case .collapseSecondary(let x):
-				storage.collapseSecondary = x
-				return nil
-			case .primaryViewControllerForExpanding: return nil
-			case .separateSecondary(let x):
-				storage.separateSecondary = x
-				return nil
-			case .showPrimaryViewController: return nil
-			case .showSecondaryViewController: return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .maximumPrimaryColumnWidth(let x): return x.apply(instance) { i, v in i.maximumPrimaryColumnWidth = v }
+		case .minimumPrimaryColumnWidth(let x): return x.apply(instance) { i, v in i.minimumPrimaryColumnWidth = v }
+		case .preferredDisplayMode(let x): return x.apply(instance) { i, v in i.preferredDisplayMode = v }
+		case .preferredPrimaryColumnWidthFraction(let x): return x.apply(instance) { i, v in i.preferredPrimaryColumnWidthFraction = v }
+		case .presentsWithGesture(let x): return x.apply(instance) { i, v in i.presentsWithGesture = v }
+		case .primaryViewController: return primary.resume()?.apply(instance) { i, v in i.show(v.uiViewController(), sender: nil) }
+		case .secondaryViewController:
+			return secondary.resume()?.apply(instance, storage) { i, s, v in
+				let vc = v.uiViewController()
+				s.secondaryViewController = vc
+				i.showDetailViewController(vc, sender: nil)
 			}
-		}
-
-		func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-			let lifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
-			if !instance.isCollapsed {
-				storage.displayModeButton?.send(value: instance.displayModeButtonItem)
+		case .shouldShowSecondary(let x):
+			return x.apply(instance, storage) { i, s, v in
+				if v == true && s.shouldShowSecondary == false, let svc = s.secondaryViewController {
+					i.showDetailViewController(svc, sender: nil)
+				}
+				s.shouldShowSecondary = v
 			}
-			return lifetime
+
+		// 2. Signal bindings are performed on the object after construction.
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .dismissedSecondary(let x):
+			storage.dismissedSecondary = x
+			return nil
+		case .displayModeButton(let x):
+			storage.displayModeButton = x
+			return nil
+		case .willChangeDisplayMode: return nil
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .collapseSecondary(let x):
+			storage.collapseSecondary = x
+			return nil
+		case .preferredInterfaceOrientation: return nil
+		case .primaryViewControllerForCollapsing: return nil
+		case .primaryViewControllerForExpanding: return nil
+		case .separateSecondary(let x):
+			storage.separateSecondary = x
+			return nil
+		case .showPrimaryViewController: return nil
+		case .showSecondaryViewController: return nil
+		case .supportedInterfaceOrientations: return nil
+		case .targetDisplayModeForAction: return nil
 		}
 	}
 
-	open class Storage: ViewController.Storage, UISplitViewControllerDelegate {
+	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		if !instance.isCollapsed {
+			storage.displayModeButton?.send(value: instance.displayModeButtonItem)
+		}
+		return inheritedFinalizedInstance(instance, storage: storage)
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension SplitViewController.Preparer {
+	open class Storage: ViewController.Preparer.Storage, UISplitViewControllerDelegate {
 		open var secondaryViewController: UIViewController? = nil
 		open var shouldShowSecondary: Bool = true
 		open var displayModeButton: SignalInput<BarButtonItemConvertible?>?
 		open var dismissedSecondary: SignalInput<Void>?
 		
-		open override var inUse: Bool {
+		open override var isInUse: Bool {
 			return true
 		}
 		
-		open func collapsedController(_ controller: UINavigationController) {
+		open func collapsedController(_ controller: UISplitViewController) {
 			if let svc = secondaryViewController, svc === controller {
 				dismissedSecondary?.send(value: ())
 			}
@@ -217,10 +221,6 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 	}
 
 	open class Delegate: DynamicDelegate, UISplitViewControllerDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func splitViewController(_ svc: UISplitViewController, willChangeTo displayMode: UISplitViewController.DisplayMode) {
 			handler(ofType: SignalInput<UISplitViewController.DisplayMode>.self)!.send(value: displayMode)
 		}
@@ -246,59 +246,89 @@ public class SplitViewController: Binder, SplitViewControllerConvertible {
 		}
 		
 		open func splitViewController(_ splitViewController: UISplitViewController, show vc: UIViewController, sender: Any?) -> Bool {
-			return handler(ofType: ((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool).self)!(splitViewController, vc, sender)
+			return handler(ofType: ((UISplitViewController, UIViewController, Any?) -> Bool).self)!(splitViewController, vc, sender)
 		}
 		
 		open func splitViewController(_ splitViewController: UISplitViewController, showDetail vc: UIViewController, sender: Any?) -> Bool {
-			return handler(ofType: ((UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool).self)!(splitViewController, vc, sender)
+			return handler(ofType: ((UISplitViewController, UIViewController, Any?) -> Bool).self)!(splitViewController, vc, sender)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SplitViewControllerBinding {
+	public typealias SplitViewControllerName<V> = BindingName<V, SplitViewController.Binding, Binding>
+	private typealias B = SplitViewController.Binding
+	private static func name<V>(_ source: @escaping (V) -> SplitViewController.Binding) -> SplitViewControllerName<V> {
+		return SplitViewControllerName<V>(source: source, downcast: Binding.splitViewControllerBinding)
+	}
+}
+public extension BindingName where Binding: SplitViewControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.$1(v)) }) }
-	public static var primaryViewController: BindingName<Dynamic<ViewControllerConvertible>, Binding> { return BindingName<Dynamic<ViewControllerConvertible>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.primaryViewController(v)) }) }
-	public static var secondaryViewController: BindingName<Dynamic<ViewControllerConvertible>, Binding> { return BindingName<Dynamic<ViewControllerConvertible>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.secondaryViewController(v)) }) }
-	public static var presentsWithGesture: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.presentsWithGesture(v)) }) }
-	public static var preferredDisplayMode: BindingName<Dynamic<UISplitViewController.DisplayMode>, Binding> { return BindingName<Dynamic<UISplitViewController.DisplayMode>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.preferredDisplayMode(v)) }) }
-	public static var preferredPrimaryColumnWidthFraction: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.preferredPrimaryColumnWidthFraction(v)) }) }
-	public static var minimumPrimaryColumnWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.minimumPrimaryColumnWidth(v)) }) }
-	public static var maximumPrimaryColumnWidth: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.maximumPrimaryColumnWidth(v)) }) }
-	public static var shouldShowSecondary: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.shouldShowSecondary(v)) }) }
-	public static var displayModeButton: BindingName<SignalInput<BarButtonItemConvertible?>, Binding> { return BindingName<SignalInput<BarButtonItemConvertible?>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.displayModeButton(v)) }) }
-	public static var willChangeDisplayMode: BindingName<SignalInput<UISplitViewController.DisplayMode>, Binding> { return BindingName<SignalInput<UISplitViewController.DisplayMode>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.willChangeDisplayMode(v)) }) }
-	public static var dismissedSecondary: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.dismissedSecondary(v)) }) }
-	public static var targetDisplayModeForAction: BindingName<(UISplitViewController) -> UISplitViewController.DisplayMode, Binding> { return BindingName<(UISplitViewController) -> UISplitViewController.DisplayMode, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.targetDisplayModeForAction(v)) }) }
-	public static var preferredInterfaceOrientation: BindingName<(UISplitViewController) -> UIInterfaceOrientation, Binding> { return BindingName<(UISplitViewController) -> UIInterfaceOrientation, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.preferredInterfaceOrientation(v)) }) }
-	public static var supportedInterfaceOrientations: BindingName<(UISplitViewController) -> UIInterfaceOrientationMask, Binding> { return BindingName<(UISplitViewController) -> UIInterfaceOrientationMask, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.supportedInterfaceOrientations(v)) }) }
-	public static var primaryViewControllerForCollapsing: BindingName<(UISplitViewController) -> UIViewController?, Binding> { return BindingName<(UISplitViewController) -> UIViewController?, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.primaryViewControllerForCollapsing(v)) }) }
-	public static var collapseSecondary: BindingName<(UISplitViewController, _ secondaryViewController: UIViewController, _ ontoPrimaryViewController: UIViewController) -> Bool, Binding> { return BindingName<(UISplitViewController, _ secondaryViewController: UIViewController, _ ontoPrimaryViewController: UIViewController) -> Bool, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.collapseSecondary(v)) }) }
-	public static var primaryViewControllerForExpanding: BindingName<(UISplitViewController) -> UIViewController?, Binding> { return BindingName<(UISplitViewController) -> UIViewController?, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.primaryViewControllerForExpanding(v)) }) }
-	public static var separateSecondary: BindingName<(UISplitViewController, _ fromPrimaryViewController: UIViewController) -> UIViewController?, Binding> { return BindingName<(UISplitViewController, _ fromPrimaryViewController: UIViewController) -> UIViewController?, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.separateSecondary(v)) }) }
-	public static var showPrimaryViewController: BindingName<(UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool, Binding> { return BindingName<(UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.showPrimaryViewController(v)) }) }
-	public static var showSecondaryViewController: BindingName<(UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool, Binding> { return BindingName<(UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool, Binding>({ v in .splitViewControllerBinding(SplitViewController.Binding.showSecondaryViewController(v)) }) }
+	// With:    static var $1: SplitViewControllerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var maximumPrimaryColumnWidth: SplitViewControllerName<Dynamic<CGFloat>> { return .name(B.maximumPrimaryColumnWidth) }
+	static var minimumPrimaryColumnWidth: SplitViewControllerName<Dynamic<CGFloat>> { return .name(B.minimumPrimaryColumnWidth) }
+	static var preferredDisplayMode: SplitViewControllerName<Dynamic<UISplitViewController.DisplayMode>> { return .name(B.preferredDisplayMode) }
+	static var preferredPrimaryColumnWidthFraction: SplitViewControllerName<Dynamic<CGFloat>> { return .name(B.preferredPrimaryColumnWidthFraction) }
+	static var presentsWithGesture: SplitViewControllerName<Dynamic<Bool>> { return .name(B.presentsWithGesture) }
+	static var primaryViewController: SplitViewControllerName<Dynamic<ViewControllerConvertible>> { return .name(B.primaryViewController) }
+	static var secondaryViewController: SplitViewControllerName<Dynamic<ViewControllerConvertible>> { return .name(B.secondaryViewController) }
+	static var shouldShowSecondary: SplitViewControllerName<Dynamic<Bool>> { return .name(B.shouldShowSecondary) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	static var dismissedSecondary: SplitViewControllerName<SignalInput<Void>> { return .name(B.dismissedSecondary) }
+	static var displayModeButton: SplitViewControllerName<SignalInput<BarButtonItemConvertible?>> { return .name(B.displayModeButton) }
+	static var willChangeDisplayMode: SplitViewControllerName<SignalInput<UISplitViewController.DisplayMode>> { return .name(B.willChangeDisplayMode) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var collapseSecondary: SplitViewControllerName<(UISplitViewController, _ secondaryViewController: UIViewController, _ ontoPrimaryViewController: UIViewController) -> Bool> { return .name(B.collapseSecondary) }
+	static var preferredInterfaceOrientation: SplitViewControllerName<(UISplitViewController) -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientation) }
+	static var primaryViewControllerForCollapsing: SplitViewControllerName<(UISplitViewController) -> UIViewController?> { return .name(B.primaryViewControllerForCollapsing) }
+	static var primaryViewControllerForExpanding: SplitViewControllerName<(UISplitViewController) -> UIViewController?> { return .name(B.primaryViewControllerForExpanding) }
+	static var separateSecondary: SplitViewControllerName<(UISplitViewController, _ fromPrimaryViewController: UIViewController) -> UIViewController?> { return .name(B.separateSecondary) }
+	static var showPrimaryViewController: SplitViewControllerName<(UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool> { return .name(B.showPrimaryViewController) }
+	static var showSecondaryViewController: SplitViewControllerName<(UISplitViewController, _ show: UIViewController, _ sender: Any?) -> Bool> { return .name(B.showSecondaryViewController) }
+	static var supportedInterfaceOrientations: SplitViewControllerName<(UISplitViewController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
+	static var targetDisplayModeForAction: SplitViewControllerName<(UISplitViewController) -> UISplitViewController.DisplayMode> { return .name(B.targetDisplayModeForAction) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol SplitViewControllerConvertible: ViewControllerConvertible {
 	func uiSplitViewController() -> SplitViewController.Instance
 }
 extension SplitViewControllerConvertible {
 	public func uiViewController() -> ViewController.Instance { return uiSplitViewController() }
 }
-extension SplitViewController.Instance: SplitViewControllerConvertible {
+extension UISplitViewController: SplitViewControllerConvertible, HasDelegate {
 	public func uiSplitViewController() -> SplitViewController.Instance { return self }
 }
+public extension SplitViewController {
+	func uiSplitViewController() -> SplitViewController.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol SplitViewControllerBinding: ViewControllerBinding {
 	static func splitViewControllerBinding(_ binding: SplitViewController.Binding) -> Self
 }
-
-extension SplitViewControllerBinding {
-	public static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
+public extension SplitViewControllerBinding {
+	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return splitViewControllerBinding(.inheritedBinding(binding))
 	}
 }
+public extension SplitViewController.Binding {
+	public typealias Preparer = SplitViewController.Preparer
+	static func splitViewControllerBinding(_ binding: SplitViewController.Binding) -> SplitViewController.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

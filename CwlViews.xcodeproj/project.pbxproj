@@ -108,6 +108,28 @@
 		C97B16E921DB6BE500F72DB9 /* CwlNavigationItem_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C945561E80DABE00325F12 /* CwlNavigationItem_iOS.swift */; };
 		C97B16EA21DB6BE500F72DB9 /* CwlTabBarItem_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F397A71FD2602200BEE049 /* CwlTabBarItem_iOS.swift */; };
 		C97B16EB21DB6C0400F72DB9 /* CwlBarItem_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62261EA59F560059D152 /* CwlBarItem_iOS.swift */; };
+		C97B16ED21DC429C00F72DB9 /* CwlTextInputTraits_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62321EA5EB6F0059D152 /* CwlTextInputTraits_iOS.swift */; };
+		C985C9B021DC57A800E8FF8B /* CwlControl_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B311E827F9D00ADDCD4 /* CwlControl_iOS.swift */; };
+		C985C9B521DC7CB600E8FF8B /* CwlTextField_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A62301EA5E5550059D152 /* CwlTextField_iOS.swift */; };
+		C985C9B621DC83A200E8FF8B /* CwlAlertAction_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90AAA511EBCA83000E2C0EE /* CwlAlertAction_iOS.swift */; };
+		C985C9B721DC84D600E8FF8B /* CwlAlertController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90AAA4F1EBCA12400E2C0EE /* CwlAlertController_iOS.swift */; };
+		C985C9B821DC868000E8FF8B /* CwlButton_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B331E82BCCD00ADDCD4 /* CwlButton_iOS.swift */; };
+		C985C9B921DC879100E8FF8B /* CwlImageView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C978CCF41E8747BE00A0BF05 /* CwlImageView_iOS.swift */; };
+		C985C9BA21DC879100E8FF8B /* CwlLabel_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B351E838B5900ADDCD4 /* CwlLabel_iOS.swift */; };
+		C985C9BB21DC91B200E8FF8B /* CwlNavigationBar_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95D21761EC967020082A31E /* CwlNavigationBar_iOS.swift */; };
+		C985C9BC21DCC54000E8FF8B /* CwlNavigationController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F35BB61E7ABA8900D948D2 /* CwlNavigationController_iOS.swift */; };
+		C985C9BD21DCC78000E8FF8B /* CwlSplitViewController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9785B961EB9BC4B00B29F64 /* CwlSplitViewController_iOS.swift */; };
+		C985C9BE21DCCD8600E8FF8B /* CwlPageViewController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C997F858206600B0001A7BF8 /* CwlPageViewController_iOS.swift */; };
+		C985C9BF21DCD78500E8FF8B /* CwlSearchBar_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C926D0611FF07348002BF020 /* CwlSearchBar_iOS.swift */; };
+		C985C9C021DCDBB500E8FF8B /* CwlSlider_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CFB0C1EE505DD00C18737 /* CwlSlider_iOS.swift */; };
+		C985C9C121DCDC2E00E8FF8B /* CwlSwitch_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639F01FEA38C10047C273 /* CwlSwitch_iOS.swift */; };
+		C985C9C221DCDCD300E8FF8B /* CwlTabBar_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91683FB203FC1BA00B4D40E /* CwlTabBar_iOS.swift */; };
+		C985C9C321DCE2F200E8FF8B /* CwlTabBarController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C945207B205152CE00693C43 /* CwlTabBarController_iOS.swift */; };
+		C985C9C421DCE5EA00E8FF8B /* CwlTableSection_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB56921EAC49F8000EC5F4 /* CwlTableSection_iOS.swift */; };
+		C985C9C521DCE5FB00E8FF8B /* CwlTableViewCell_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193CA1E89140000ED86D4 /* CwlTableViewCell_iOS.swift */; };
+		C985C9C621DCEA3200E8FF8B /* CwlTableView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */; };
+		C985C9C721DCF79A00E8FF8B /* CwlTextView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95D897F1ED9934E008A5753 /* CwlTextView_iOS.swift */; };
+		C985C9C821DCF8A300E8FF8B /* CwlArrayMutation+TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97B16DC21DB1CC900F72DB9 /* CwlArrayMutation+TableView.swift */; };
 		C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */; };
 		C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */; };
 		C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */; };
@@ -1205,31 +1227,40 @@
 				C97B16C921D7B36E00F72DB9 /* CwlButton_macOS.swift in Sources */,
 				C95FABC221D49841007CCE78 /* CwlBinderDelegate.swift in Sources */,
 				C9C868611FEE83D200865A60 /* CwlArrayMutationUtilities.swift in Sources */,
+				C985C9B721DC84D600E8FF8B /* CwlAlertController_iOS.swift in Sources */,
+				C985C9BE21DCCD8600E8FF8B /* CwlPageViewController_iOS.swift in Sources */,
 				C95FABC521D4A0C0007CCE78 /* CwlBackingLayer.swift in Sources */,
 				C97B16E321DB30D400F72DB9 /* CwlRotationGestureRecognizer_iOS.swift in Sources */,
 				C97B16C121D745DC00F72DB9 /* CwlTableColumn_macOS.swift in Sources */,
 				C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */,
 				C9F3979B1FD0CA3E00BEE049 /* CwlStackAdapter.swift in Sources */,
+				C985C9BF21DCD78500E8FF8B /* CwlSearchBar_iOS.swift in Sources */,
 				C952BB341F3DCAE200B61DF1 /* CwlLayout.swift in Sources */,
 				C97A5B6621D6DEBB001D98DD /* CwlWindow_macOS.swift in Sources */,
 				C95FABC421D49AA3007CCE78 /* CwlBinderBase.swift in Sources */,
 				C97A5B5021D589DE001D98DD /* CwlGestureRecognizer_macOS.swift in Sources */,
+				C985C9C821DCF8A300E8FF8B /* CwlArrayMutation+TableView.swift in Sources */,
 				C91CC2D1206F0DD7006FFF97 /* CwlBinder.swift in Sources */,
+				C985C9BB21DC91B200E8FF8B /* CwlNavigationBar_iOS.swift in Sources */,
 				C97B16E521DB30D400F72DB9 /* CwlSwipeGestureRecognizer_iOS.swift in Sources */,
 				C97A5B5821D5B221001D98DD /* CwlApplication_macOS.swift in Sources */,
 				C97B16D621D9C20D00F72DB9 /* CwlBinderEmbedderConstructor.swift in Sources */,
 				C93A2C0F1F567B2A005C3E7B /* CwlTableRowMutation.swift in Sources */,
 				C97B16CB21D8D1E600F72DB9 /* CwlTextField_macOS.swift in Sources */,
 				C97B16E721DB3CB700F72DB9 /* CwlViewController_iOS.swift in Sources */,
+				C985C9B821DC868000E8FF8B /* CwlButton_iOS.swift in Sources */,
 				C937E76E20046BE000E63965 /* CwlStateContainer.swift in Sources */,
 				C97B16D221D8E13800F72DB9 /* CwlRotationGestureRecognizer_macOS.swift in Sources */,
+				C985C9B621DC83A200E8FF8B /* CwlAlertAction_iOS.swift in Sources */,
 				C9FDAD301F3AB30900154DA8 /* CwlStateAdapter.swift in Sources */,
 				C95FABC921D5182F007CCE78 /* CwlView_macOS.swift in Sources */,
 				C9EC312C1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */,
+				C985C9C721DCF79A00E8FF8B /* CwlTextView_iOS.swift in Sources */,
 				C97B16E121DB30D400F72DB9 /* CwlPanGestureRecognizer_iOS.swift in Sources */,
 				C926D0601FF058D4002BF020 /* CwlSetMutation.swift in Sources */,
 				C9A18B3C1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */,
 				C9ADA3A81EE3BFEC00C29925 /* CwlEmbeddedObjectStorage.swift in Sources */,
+				C985C9B921DC879100E8FF8B /* CwlImageView_iOS.swift in Sources */,
 				C97B16D021D8E13800F72DB9 /* CwlPanGestureRecognizer_macOS.swift in Sources */,
 				C97B16CF21D8E13800F72DB9 /* CwlMagnificationGestureRecognizer_macOS.swift in Sources */,
 				C97A5B6021D657AF001D98DD /* CwlBinding.swift in Sources */,
@@ -1243,33 +1274,46 @@
 				C97B16D921DB11D100F72DB9 /* CwlView_iOS.swift in Sources */,
 				C97B16E621DB30D400F72DB9 /* CwlTapGestureRecognizer_iOS.swift in Sources */,
 				C97B16D721DAEB2800F72DB9 /* CwlApplication_iOS.swift in Sources */,
+				C985C9C121DCDC2E00E8FF8B /* CwlSwitch_iOS.swift in Sources */,
 				C97A5B6421D6DEBB001D98DD /* CwlToolbar_macOS.swift in Sources */,
 				C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */,
+				C985C9BD21DCC78000E8FF8B /* CwlSplitViewController_iOS.swift in Sources */,
+				C985C9C521DCE5FB00E8FF8B /* CwlTableViewCell_iOS.swift in Sources */,
 				C97B16CE21D8E13800F72DB9 /* CwlClickGestureRecognizer_macOS.swift in Sources */,
+				C985C9C221DCDCD300E8FF8B /* CwlTabBar_iOS.swift in Sources */,
 				C97B16E421DB30D400F72DB9 /* CwlScreenEdgePanGestureRecognizer_iOS.swift in Sources */,
 				C9B27EA91E51D34300265580 /* CwlArrayMutation.swift in Sources */,
 				C95FABC721D5009C007CCE78 /* CwlGradientLayer.swift in Sources */,
 				C97B16CC21D8D65900F72DB9 /* CwlOutlineView_macOS.swift in Sources */,
+				C985C9B021DC57A800E8FF8B /* CwlControl_iOS.swift in Sources */,
 				C97B16DF21DB206400F72DB9 /* CwlSetOrAnimate_iOS.swift in Sources */,
+				C985C9C321DCE2F200E8FF8B /* CwlTabBarController_iOS.swift in Sources */,
 				C97A5B5621D59DA8001D98DD /* CwlScrollView_macOS.swift in Sources */,
 				C97B16DE21DB201C00F72DB9 /* CwlScrollView_iOS.swift in Sources */,
 				C97B16CA21D8350500F72DB9 /* CwlPopUpButton_macOS.swift in Sources */,
+				C985C9BC21DCC54000E8FF8B /* CwlNavigationController_iOS.swift in Sources */,
 				C9287EE5202D3FE50046732C /* CwlScopedValues.swift in Sources */,
+				C985C9C421DCE5EA00E8FF8B /* CwlTableSection_iOS.swift in Sources */,
 				C97A5B5721D59F03001D98DD /* CwlClipView_macOS.swift in Sources */,
 				C97B16EA21DB6BE500F72DB9 /* CwlTabBarItem_iOS.swift in Sources */,
 				C97B16E221DB30D400F72DB9 /* CwlPinchGestureRecognizer_iOS.swift in Sources */,
 				C97A5B5A21D5BE8A001D98DD /* CwlMenuItem_macOS.swift in Sources */,
 				C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
+				C985C9C621DCEA3200E8FF8B /* CwlTableView_iOS.swift in Sources */,
 				C97B16C221D745DC00F72DB9 /* CwlTableHeaderView_macOS.swift in Sources */,
 				C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
 				C97A5B5921D5BE8A001D98DD /* CwlMenu_macOS.swift in Sources */,
+				C985C9B521DC7CB600E8FF8B /* CwlTextField_iOS.swift in Sources */,
+				C985C9BA21DC879100E8FF8B /* CwlLabel_iOS.swift in Sources */,
 				C97B16D421D9C1E200F72DB9 /* CwlBinderApplyable.swift in Sources */,
 				C97B16D821DB11D100F72DB9 /* CwlGestureRecognizer_iOS.swift in Sources */,
 				C95FABC821D511AA007CCE78 /* CwlStackView.swift in Sources */,
+				C985C9C021DCDBB500E8FF8B /* CwlSlider_iOS.swift in Sources */,
 				C97B16E921DB6BE500F72DB9 /* CwlNavigationItem_iOS.swift in Sources */,
 				C97A5B5B21D5CE8E001D98DD /* CwlControl_macOS.swift in Sources */,
 				C97B16DA21DB11D100F72DB9 /* CwlWindow_iOS.swift in Sources */,
 				C95FABC621D4A1C6007CCE78 /* CwlLayer.swift in Sources */,
+				C97B16ED21DC429C00F72DB9 /* CwlTextInputTraits_iOS.swift in Sources */,
 				C97A5B5521D59656001D98DD /* CwlWebView.swift in Sources */,
 				C97B16D121D8E13800F72DB9 /* CwlPressGestureRecognizer_macOS.swift in Sources */,
 				C91307411F66384200174902 /* CwlCoder.swift in Sources */,

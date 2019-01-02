@@ -165,7 +165,7 @@ public extension BindingName where Binding: MenuItemBinding {
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 
 	// Composite binding names
-	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> MenuItemName<SignalInput<Value>> {
+	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> MenuItemName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, MenuItem.Binding.action, Binding.menuItemBinding)
 	}
 }

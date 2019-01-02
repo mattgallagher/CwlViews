@@ -19,166 +19,136 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class NavigationBar: Binder, NavigationBarConvertible {
-	public typealias Instance = UINavigationBar
-	public typealias Inherited = View
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiNavigationBar() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension NavigationBar {
 	enum Binding: NavigationBarBinding {
-		public typealias EnclosingBinder = NavigationBar
-		public static func navigationBarBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case items(Dynamic<SetOrAnimate<[NavigationItemConvertible]>>)
+		case backgroundImage(Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>)
 		case backIndicatorImage(Dynamic<UIImage?>)
 		case backIndicatorTransitionMaskImage(Dynamic<UIImage?>)
 		case barStyle(Dynamic<UIBarStyle>)
 		case barTintColor(Dynamic<UIColor?>)
+		case isTranslucent(Dynamic<Bool>)
+		case items(Dynamic<SetOrAnimate<[NavigationItemConvertible]>>)
 		case shadowImage(Dynamic<UIImage?>)
 		case tintColor(Dynamic<UIColor?>)
-		case isTranslucent(Dynamic<Bool>)
 		case titleTextAttributes(Dynamic<[NSAttributedString.Key: Any]>)
 		case titleVerticalPositionAdjustment(Dynamic<ScopedValues<UIBarMetrics, CGFloat>>)
-		case backgroundImage(Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
 		//	3. Action bindings are triggered by the object after construction.
-		case didPush(SignalInput<UINavigationItem>)
 		case didPop(SignalInput<UINavigationItem>)
+		case didPush(SignalInput<UINavigationItem>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case shouldPush((UINavigationBar, UINavigationItem) -> Bool)
-		case shouldPop((UINavigationBar, UINavigationItem) -> Bool)
 		case position((UIBarPositioning) -> UIBarPosition)
+		case shouldPop((UINavigationBar, UINavigationItem) -> Bool)
+		case shouldPush((UINavigationBar, UINavigationItem) -> Bool)
 	}
+}
 
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = NavigationBar
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension NavigationBar {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = NavigationBar.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = UINavigationBar
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var dynamicDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = dynamicDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				dynamicDelegate = d
-				return d
-			}
-		}
-		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .shouldPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
-			case .shouldPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
-			case .position(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.position(for:)))
-			case .didPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
-			case .didPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
-		}
-		
-		func prepareInstance(_ instance: Instance, storage: Storage) {
-			// Don't steal the delegate from the navigation controller
-			if dynamicDelegate != nil {
-				precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-				storage.dynamicDelegate = dynamicDelegate
-				instance.delegate = storage
-			}
-			
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .backgroundImage(let x):
-				var previous: ScopedValues<PositionAndMetrics, UIImage?>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for conditions in p.pairs {
-							if conditions.value != nil {
-								i.setBackgroundImage(nil, for: conditions.scope.barPosition, barMetrics: conditions.scope.barMetrics)
-							}
-						}
-					}
-					previous = v
-					for conditions in v.pairs {
-						if let image = conditions.value {
-							i.setBackgroundImage(image, for: conditions.scope.barPosition, barMetrics: conditions.scope.barMetrics)
-						}
-					}
-				}
-			case .titleVerticalPositionAdjustment(let x):
-				var previous: ScopedValues<UIBarMetrics, CGFloat>? = nil
-				return x.apply(instance) { i, v in
-					if let p = previous {
-						for c in p.pairs {
-							i.setTitleVerticalPositionAdjustment(0, for: c.0)
-						}
-					}
-					previous = v
-					for c in v.pairs {
-						i.setTitleVerticalPositionAdjustment(c.1, for: c.0)
-					}
-				}
-			case .items(let x): return x.apply(instance) { i, v in i.setItems(v.value.map { $0.uiNavigationItem() }, animated: v.isAnimated) }
-			case .backIndicatorImage(let x): return x.apply(instance) { i, v in i.backIndicatorImage = v }
-			case .backIndicatorTransitionMaskImage(let x): return x.apply(instance) { i, v in i.backIndicatorTransitionMaskImage = v }
-			case .barStyle(let x): return x.apply(instance) { i, v in i.barStyle = v }
-			case .barTintColor(let x): return x.apply(instance) { i, v in i.barTintColor = v }
-			case .shadowImage(let x): return x.apply(instance) { i, v in i.shadowImage = v }
-			case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
-			case .isTranslucent(let x): return x.apply(instance) { i, v in i.isTranslucent = v }
-			case .titleTextAttributes(let x):
-				return x.apply(instance) { i, v in
-					i.titleTextAttributes = v
-				}
-			case .didPush: return nil
-			case .didPop: return nil
-			case .shouldPush: return nil
-			case .shouldPop: return nil
-			case .position: return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
+}
 
+// MARK: - Binder Part 4: Preparer overrides
+public extension NavigationBar.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		
+		case .didPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
+		case .didPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
+		case .position(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.position(for:)))
+		case .shouldPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
+		case .shouldPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
+		default: break
+		}
+	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .backgroundImage(let x):
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setBackgroundImage(nil, for: scope.barPosition, barMetrics: scope.barMetrics) },
+				applyNew: { i, scope, v in i.setBackgroundImage(v, for: scope.barPosition, barMetrics: scope.barMetrics) }
+			)
+		case .backIndicatorImage(let x): return x.apply(instance) { i, v in i.backIndicatorImage = v }
+		case .backIndicatorTransitionMaskImage(let x): return x.apply(instance) { i, v in i.backIndicatorTransitionMaskImage = v }
+		case .barStyle(let x): return x.apply(instance) { i, v in i.barStyle = v }
+		case .barTintColor(let x): return x.apply(instance) { i, v in i.barTintColor = v }
+		case .isTranslucent(let x): return x.apply(instance) { i, v in i.isTranslucent = v }
+		case .items(let x): return x.apply(instance) { i, v in i.setItems(v.value.map { $0.uiNavigationItem() }, animated: v.isAnimated) }
+		case .shadowImage(let x): return x.apply(instance) { i, v in i.shadowImage = v }
+		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+		case .titleTextAttributes(let x): return x.apply(instance) { i, v in i.titleTextAttributes = v }
+		case .titleVerticalPositionAdjustment(let x):
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setTitleVerticalPositionAdjustment(0, for: scope) },
+				applyNew: { i, scope, v in i.setTitleVerticalPositionAdjustment(v, for: scope) }
+			)
+			
+		// 2. Signal bindings are performed on the object after construction.
+			
+		//	3. Action bindings are triggered by the object after construction.
+		case .didPush: return nil
+		case .didPop: return nil
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .position: return nil
+		case .shouldPop: return nil
+		case .shouldPush: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension NavigationBar.Preparer {
 	open class Storage: View.Preparer.Storage, UINavigationBarDelegate {}
 
 	open class Delegate: DynamicDelegate, UINavigationBarDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPop item: UINavigationItem) -> Bool {
-			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)!(navigationBar, item)
+			return handler(ofType: ((UINavigationBar, UINavigationItem) -> Bool).self)!(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPush item: UINavigationItem) -> Bool {
-			return handler(ofType: ((_ navigationBar: UINavigationBar, _ item: UINavigationItem) -> Bool).self)!(navigationBar, item)
+			return handler(ofType: ((UINavigationBar, UINavigationItem) -> Bool).self)!(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, didPop item: UINavigationItem) {
@@ -195,46 +165,77 @@ public class NavigationBar: Binder, NavigationBarConvertible {
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: NavigationBarBinding {
+	public typealias NavigationBarName<V> = BindingName<V, NavigationBar.Binding, Binding>
+	private typealias B = NavigationBar.Binding
+	private static func name<V>(_ source: @escaping (V) -> NavigationBar.Binding) -> NavigationBarName<V> {
+		return NavigationBarName<V>(source: source, downcast: Binding.scrollViewBinding)
+	}
+}
+public extension BindingName where Binding: NavigationBarBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.$1(v)) }) }
-	public static var items: BindingName<Dynamic<SetOrAnimate<[NavigationItemConvertible]>>, Binding> { return BindingName<Dynamic<SetOrAnimate<[NavigationItemConvertible]>>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.items(v)) }) }
-	public static var backIndicatorImage: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.backIndicatorImage(v)) }) }
-	public static var backIndicatorTransitionMaskImage: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.backIndicatorTransitionMaskImage(v)) }) }
-	public static var barStyle: BindingName<Dynamic<UIBarStyle>, Binding> { return BindingName<Dynamic<UIBarStyle>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.barStyle(v)) }) }
-	public static var barTintColor: BindingName<Dynamic<UIColor?>, Binding> { return BindingName<Dynamic<UIColor?>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.barTintColor(v)) }) }
-	public static var shadowImage: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.shadowImage(v)) }) }
-	public static var tintColor: BindingName<Dynamic<UIColor?>, Binding> { return BindingName<Dynamic<UIColor?>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.tintColor(v)) }) }
-	public static var isTranslucent: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.isTranslucent(v)) }) }
-	public static var titleTextAttributes: BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding> { return BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.titleTextAttributes(v)) }) }
-	public static var titleVerticalPositionAdjustment: BindingName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding> { return BindingName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.titleVerticalPositionAdjustment(v)) }) }
-	public static var backgroundImage: BindingName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>, Binding> { return BindingName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.backgroundImage(v)) }) }
-	public static var didPush: BindingName<SignalInput<UINavigationItem>, Binding> { return BindingName<SignalInput<UINavigationItem>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.didPush(v)) }) }
-	public static var didPop: BindingName<SignalInput<UINavigationItem>, Binding> { return BindingName<SignalInput<UINavigationItem>, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.didPop(v)) }) }
-	public static var shouldPush: BindingName<(UINavigationBar, UINavigationItem) -> Bool, Binding> { return BindingName<(UINavigationBar, UINavigationItem) -> Bool, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.shouldPush(v)) }) }
-	public static var shouldPop: BindingName<(UINavigationBar, UINavigationItem) -> Bool, Binding> { return BindingName<(UINavigationBar, UINavigationItem) -> Bool, Binding>({ v in .navigationBarBinding(NavigationBar.Binding.shouldPop(v)) }) }
+	// With:    static var $1: NavigationBarName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var backgroundImage: NavigationBarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(B.backgroundImage) }
+	static var backIndicatorImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.backIndicatorImage) }
+	static var backIndicatorTransitionMaskImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.backIndicatorTransitionMaskImage) }
+	static var barStyle: NavigationBarName<Dynamic<UIBarStyle>> { return .name(B.barStyle) }
+	static var barTintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(B.barTintColor) }
+	static var isTranslucent: NavigationBarName<Dynamic<Bool>> { return .name(B.isTranslucent) }
+	static var items: NavigationBarName<Dynamic<SetOrAnimate<[NavigationItemConvertible]>>> { return .name(B.items) }
+	static var shadowImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.shadowImage) }
+	static var tintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(B.tintColor) }
+	static var titleTextAttributes: NavigationBarName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.titleTextAttributes) }
+	static var titleVerticalPositionAdjustment: NavigationBarName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> { return .name(B.titleVerticalPositionAdjustment) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	//	3. Action bindings are triggered by the object after construction.
+	static var didPop: NavigationBarName<SignalInput<UINavigationItem>> { return .name(B.didPop) }
+	static var didPush: NavigationBarName<SignalInput<UINavigationItem>> { return .name(B.didPush) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var position: NavigationBarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
+	static var shouldPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(B.shouldPop) }
+	static var shouldPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(B.shouldPush) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol NavigationBarConvertible: ViewConvertible {
 	func uiNavigationBar() -> NavigationBar.Instance
 }
 extension NavigationBarConvertible {
 	public func uiView() -> View.Instance { return uiNavigationBar() }
 }
-extension NavigationBar.Instance: NavigationBarConvertible {
+extension UINavigationBar: NavigationBarConvertible, HasDelegate {
 	public func uiNavigationBar() -> NavigationBar.Instance { return self }
 }
-
-public protocol NavigationBarBinding: ViewBinding {
-	static func navigationBarBinding(_ binding: NavigationBar.Binding) -> Self
+public extension NavigationBar {
+	func uiNavigationBar() -> NavigationBar.Instance { return instance() }
 }
-extension NavigationBarBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
-		return navigationBarBinding(.inheritedBinding(binding))
+
+// MARK: - Binder Part 8: Downcast protocols
+public protocol NavigationBarBinding: ViewBinding {
+	static func scrollViewBinding(_ binding: NavigationBar.Binding) -> Self
+}
+public extension NavigationBarBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
+		return scrollViewBinding(.inheritedBinding(binding))
+	}
+}
+public extension NavigationBar.Binding {
+	public typealias Preparer = NavigationBar.Preparer
+	static func scrollViewBinding(_ binding: NavigationBar.Binding) -> NavigationBar.Binding {
+		return binding
 	}
 }
 
+// MARK: - Binder Part 9: Other supporting types
 public struct PositionAndMetrics {
 	public let barPosition: UIBarPosition
 	public let barMetrics: UIBarMetrics

@@ -19,22 +19,17 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class ImageView: Binder, ImageViewConvertible {
-	public typealias Instance = UIImageView
-	public typealias Inherited = View
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiImageView() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension ImageView {
 	enum Binding: ImageViewBinding {
-		public typealias EnclosingBinder = ImageView
-		public static func imageViewBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -55,93 +50,141 @@ public class ImageView: Binder, ImageViewConvertible {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension ImageView {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = ImageView
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = ImageView.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = UIImageView
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			return subclass.init(image: initialImage ?? nil, highlightedImage: initialHighlightedImage ?? nil)
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
 		var image = InitialSubsequent<UIImage?>()
-		var initialImage: UIImage?? = nil
 		var highlightedImage = InitialSubsequent<UIImage?>()
-		var initialHighlightedImage: UIImage?? = nil
-		
-		public init() {}
-		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .image(let x):
-				image = x.initialSubsequent()
-				initialImage = image.initial()
-			case .highlightedImage(let x):
-				highlightedImage = x.initialSubsequent()
-				initialHighlightedImage = highlightedImage.initial()
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
-		}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .image: return image.subsequent.flatMap { $0.apply(instance) { i, v in i.image = v } }
-			case .highlightedImage: return highlightedImage.subsequent.flatMap { $0.apply(instance) { i, v in i.highlightedImage = v } }
-			case .animationImages(let x): return x.apply(instance) { i, v in i.animationImages = v }
-			case .highlightedAnimationImages(let x): return x.apply(instance) { i, v in i.highlightedAnimationImages = v }
-			case .animationDuration(let x): return x.apply(instance) { i, v in i.animationDuration = v }
-			case .animationRepeatCount(let x): return x.apply(instance) { i, v in i.animationRepeatCount = v }
-			case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
-			case .animating(let x):
-				return x.apply(instance) { i, v in
-					if v && !i.isAnimating {
-						i.startAnimating()
-					} else if !v && i.isAnimating {
-						i.stopAnimating()
-					}
-				}
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension ImageView.Preparer {
+	func constructInstance(type: UIImageView.Type, parameters: Void) -> UIImageView {
+		return type.init(image: image.initial ?? nil, highlightedImage: highlightedImage.initial ?? nil)
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		case .image(let x): image = x.initialSubsequent()
+		case .highlightedImage(let x): highlightedImage = x.initialSubsequent()
+		default: break
 		}
 	}
 	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .animationDuration(let x): return x.apply(instance) { i, v in i.animationDuration = v }
+		case .animationImages(let x): return x.apply(instance) { i, v in i.animationImages = v }
+		case .animationRepeatCount(let x): return x.apply(instance) { i, v in i.animationRepeatCount = v }
+		case .highlightedAnimationImages(let x): return x.apply(instance) { i, v in i.highlightedAnimationImages = v }
+		case .highlightedImage: return highlightedImage.apply(instance) { i, v in i.highlightedImage = v }
+		case .image: return image.apply(instance) { i, v in i.image = v }
+		case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+		case .animating(let x):
+			return x.apply(instance) { i, v in
+				if v && !i.isAnimating {
+					i.startAnimating()
+				} else if !v && i.isAnimating {
+					i.stopAnimating()
+				}
+			}
+		
+		// 3. Action bindings are triggered by the object after construction.
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension ImageView.Preparer {
 	public typealias Storage = View.Preparer.Storage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ImageViewBinding {
+	public typealias ImageViewName<V> = BindingName<V, ImageView.Binding, Binding>
+	private typealias B = ImageView.Binding
+	private static func name<V>(_ source: @escaping (V) -> ImageView.Binding) -> ImageViewName<V> {
+		return ImageViewName<V>(source: source, downcast: Binding.imageViewBinding)
+	}
+}
+public extension BindingName where Binding: ImageViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .imageViewBinding(ImageView.Binding.$1(v)) }) }
-	public static var image: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .imageViewBinding(ImageView.Binding.image(v)) }) }
-	public static var highlightedImage: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .imageViewBinding(ImageView.Binding.highlightedImage(v)) }) }
-	public static var animationImages: BindingName<Dynamic<[UIImage]?>, Binding> { return BindingName<Dynamic<[UIImage]?>, Binding>({ v in .imageViewBinding(ImageView.Binding.animationImages(v)) }) }
-	public static var highlightedAnimationImages: BindingName<Dynamic<[UIImage]?>, Binding> { return BindingName<Dynamic<[UIImage]?>, Binding>({ v in .imageViewBinding(ImageView.Binding.highlightedAnimationImages(v)) }) }
-	public static var animationDuration: BindingName<Dynamic<TimeInterval>, Binding> { return BindingName<Dynamic<TimeInterval>, Binding>({ v in .imageViewBinding(ImageView.Binding.animationDuration(v)) }) }
-	public static var animationRepeatCount: BindingName<Dynamic<Int>, Binding> { return BindingName<Dynamic<Int>, Binding>({ v in .imageViewBinding(ImageView.Binding.animationRepeatCount(v)) }) }
-	public static var isHighlighted: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .imageViewBinding(ImageView.Binding.isHighlighted(v)) }) }
-	public static var animating: BindingName<Signal<Bool>, Binding> { return BindingName<Signal<Bool>, Binding>({ v in .imageViewBinding(ImageView.Binding.animating(v)) }) }
+	// With:    static var $1: ImageViewName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var image: ImageViewName<Dynamic<UIImage?>> { return .name(B.image) }
+	static var highlightedImage: ImageViewName<Dynamic<UIImage?>> { return .name(B.highlightedImage) }
+	static var animationImages: ImageViewName<Dynamic<[UIImage]?>> { return .name(B.animationImages) }
+	static var highlightedAnimationImages: ImageViewName<Dynamic<[UIImage]?>> { return .name(B.highlightedAnimationImages) }
+	static var animationDuration: ImageViewName<Dynamic<TimeInterval>> { return .name(B.animationDuration) }
+	static var animationRepeatCount: ImageViewName<Dynamic<Int>> { return .name(B.animationRepeatCount) }
+	static var isHighlighted: ImageViewName<Dynamic<Bool>> { return .name(B.isHighlighted) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	static var animating: ImageViewName<Signal<Bool>> { return .name(B.animating) }
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol ImageViewConvertible: ViewConvertible {
 	func uiImageView() -> ImageView.Instance
 }
 extension ImageViewConvertible {
 	public func uiView() -> View.Instance { return uiImageView() }
 }
-extension ImageView.Instance: ImageViewConvertible {
+extension UIImageView: ImageViewConvertible {
 	public func uiImageView() -> ImageView.Instance { return self }
 }
+public extension ImageView {
+	func uiImageView() -> ImageView.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol ImageViewBinding: ViewBinding {
 	static func imageViewBinding(_ binding: ImageView.Binding) -> Self
 }
-
-extension ImageViewBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension ImageViewBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return imageViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ImageView.Binding {
+	public typealias Preparer = ImageView.Preparer
+	static func imageViewBinding(_ binding: ImageView.Binding) -> ImageView.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

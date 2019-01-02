@@ -245,7 +245,7 @@ func binderContent() -> String {
 				public var linkedPreparer = Inherited.Preparer()
 
 				public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-				public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
+				func constructInstance(type: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
 
 				public init() {}
 

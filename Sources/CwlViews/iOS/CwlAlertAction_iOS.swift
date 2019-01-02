@@ -19,27 +19,22 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class AlertAction: Binder, AlertActionConvertible {
-	public typealias Instance = UIAlertAction
-	public typealias Inherited = BaseBinder
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiAlertAction() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension AlertAction {
 	enum Binding: AlertActionBinding {
-		public typealias EnclosingBinder = AlertAction
-		public static func alertActionBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case title(Constant<String>)
 		case style(Constant<UIAlertAction.Style>)
+		case title(Constant<String>)
 
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case isEnabled(Dynamic<Bool>)
@@ -51,77 +46,129 @@ public class AlertAction: Binder, AlertActionConvertible {
 
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+}
 
+// MARK: - Binder Part 3: Preparer
+public extension AlertAction {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = AlertAction
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = AlertAction.Binding
+		public typealias Inherited = BinderBase
+		public typealias Instance = UIAlertAction
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance {
-			return subclass.init(title: title, style: style, handler: handler.map { h in
-				{ _ in h.send(value: ()) }
-			})
+		public var inherited = Inherited()
+		public init() {}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
-		
+
 		public var title: String? = nil
 		public var style: UIAlertAction.Style = .default
 		public var handler: SignalInput<Void>? = nil
+	}
+}
 
-		public init() {}
+// MARK: - Binder Part 4: Preparer overrides
+public extension AlertAction.Preparer {
+	func constructInstance(subclass: Instance.Type, parameters: Void) -> Instance {
+		return subclass.init(title: title, style: style, handler: handler.map { h in
+			{ _ in h.send(value: ()) }
+		})
+	}
+	
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let s): return inherited.prepareBinding(s)
 		
-		mutating func prepareBinding(_ binding: AlertAction.Binding) {
-			switch binding {
-			case .title(let x): title = x.value
-			case .style(let x): style = x.value
-			case .handler(let x): handler = x
-			case .inheritedBinding(let s): return inherited.prepareBinding(s)
-			default: break
-			}
-		}
+		case .style(let x): style = x.value
+		case .title(let x): title = x.value
 		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .title: return nil
-			case .style: return nil
-			case .handler: return nil
-			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
-		}
-		
-		func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-			let linkedLifetime = linkedPreparer.finalizeInstance(instance, storage: storage)
-			return AggregateLifetime(lifetimes: [linkedLifetime, handler as Optional<Lifetime>].compactMap { $0 })
+		case .handler(let x): handler = x
+		default: break
 		}
 	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .style: return nil
+		case .title: return nil
+			
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
 
+		//	2. Signal bindings are performed on the object after construction.
+
+		//	3. Action bindings are triggered by the object after construction.
+		case .handler: return handler
+
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension AlertAction.Preparer {
 	public typealias Storage = EmbeddedObjectStorage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: AlertActionBinding {
+	public typealias AlertActionName<V> = BindingName<V, AlertAction.Binding, Binding>
+	private typealias B = AlertAction.Binding
+	private static func name<V>(_ source: @escaping (V) -> AlertAction.Binding) -> AlertActionName<V> {
+		return AlertActionName<V>(source: source, downcast: Binding.alertActionBinding)
+	}
+}
+public extension BindingName where Binding: AlertActionBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .alertActionBinding(AlertAction.Binding.$1(v)) }) }
-	public static var title: BindingName<Constant<String>, Binding> { return BindingName<Constant<String>, Binding>({ v in .alertActionBinding(AlertAction.Binding.title(v)) }) }
-	public static var style: BindingName<Constant<UIAlertAction.Style>, Binding> { return BindingName<Constant<UIAlertAction.Style>, Binding>({ v in .alertActionBinding(AlertAction.Binding.style(v)) }) }
-	public static var handler: BindingName<SignalInput<Void>, Binding> { return BindingName<SignalInput<Void>, Binding>({ v in .alertActionBinding(AlertAction.Binding.handler(v)) }) }
-	public static var isEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .alertActionBinding(AlertAction.Binding.isEnabled(v)) }) }
+	// With:    static var $1: AlertActionName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var style: AlertActionName<Constant<UIAlertAction.Style>> { return .name(B.style) }
+	static var title: AlertActionName<Constant<String>> { return .name(B.title) }
+	
+	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var isEnabled: AlertActionName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	
+	//	2. Signal bindings are performed on the object after construction.
+	
+	//	3. Action bindings are triggered by the object after construction.
+	static var handler: AlertActionName<SignalInput<Void>> { return .name(B.handler) }
+	
+	//	4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol AlertActionConvertible {
 	func uiAlertAction() -> AlertAction.Instance
 }
-extension AlertAction.Instance: AlertActionConvertible {
+extension UIAlertAction: AlertActionConvertible, DefaultConstructable {
 	public func uiAlertAction() -> AlertAction.Instance { return self }
 }
+public extension AlertAction {
+	func uiAlertAction() -> AlertAction.Instance { return instance() }
+}
 
-public protocol AlertActionBinding: BaseBinding {
+// MARK: - Binder Part 8: Downcast protocols
+public protocol AlertActionBinding: BinderBaseBinding {
 	static func alertActionBinding(_ binding: AlertAction.Binding) -> Self
 }
-extension AlertActionBinding {
-	public static func baseBinding(_ binding: BaseBinder.Binding) -> Self {
+public extension AlertActionBinding {
+	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return alertActionBinding(.inheritedBinding(binding))
 	}
 }
+public extension AlertAction.Binding {
+	public typealias Preparer = AlertAction.Preparer
+	static func alertActionBinding(_ binding: AlertAction.Binding) -> AlertAction.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

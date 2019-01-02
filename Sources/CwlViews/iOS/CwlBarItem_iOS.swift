@@ -85,16 +85,11 @@ public extension BarItem.Preparer {
 		case .tag(let x): return x.apply(instance) { i, v in i.tag = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 		case .titleTextAttributes(let x):
-			var previous: ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>? = nil
-			return x.apply(instance) { i, v in
-				for c in previous?.pairs ?? [] {
-					i.setTitleTextAttributes([:], for: c.0)
-				}
-				previous = v
-				for c in v.pairs {
-					i.setTitleTextAttributes(c.1, for: c.0)
-				}
-			}
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setTitleTextAttributes([:], for: scope) },
+				applyNew: { i, scope, v in i.setTitleTextAttributes(v, for: scope) }
+			)
 
 		//	2. Signal bindings are performed on the object after construction.
 

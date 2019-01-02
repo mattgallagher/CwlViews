@@ -717,7 +717,7 @@ public extension BindingName where Binding: TableViewBinding {
 	@available(macOS 10.11, *) static var rowActionsForRow: TableViewName<(_ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(B.rowActionsForRow) }
 
 	// Composite binding names
-	public static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
+	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, TableView.Binding.doubleAction, Binding.tableViewBinding)
 	}
 }

@@ -87,6 +87,14 @@ public struct InitialSubsequent<Value> {
 	public func resume() -> Signal<Value>? {
 		return subsequent?.resume()
 	}
+
+	public func apply<I: AnyObject>(_ instance: I, handler: @escaping (I, Value) -> Void) -> Lifetime? {
+		return resume().flatMap { $0.apply(instance, handler: handler) }
+	}
+
+	public func apply<I: AnyObject, Storage: AnyObject>(_ instance: I, _ storage: Storage, handler: @escaping (I, Storage, Value) -> Void) -> Lifetime? {
+		return resume().flatMap { $0.apply(instance, storage, handler: handler) }
+	}
 }
 
 extension Signal {

@@ -13,29 +13,37 @@ public protocol Binding {
 }
 
 extension Binding {
-	public static func compositeName<Value, Param, Intermediate>(source: @escaping (Value) -> Param, translate: @escaping (Param) -> Intermediate, downcast: @escaping (Intermediate) -> Self) -> BindingName<Value, Intermediate, Self> {
+	public static func compositeName<Value, Param, Intermediate>(value: @escaping (Value) -> Param, binding: @escaping (Param) -> Intermediate, downcast: @escaping (Intermediate) -> Self) -> BindingName<Value, Intermediate, Self> {
 		return BindingName<Value, Intermediate, Self>(
-			source: { v in translate(source(v)) },
+			source: { v in binding(value(v)) },
 			downcast: downcast
 		)
 	}
 	
-	public static func keyPathActionName<Instance, Value, Intermediate>(_ keyPath: KeyPath<Instance, Value>, _ constructor: @escaping (TargetAction) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Value>, Intermediate, Self> {
+	public static func keyPathActionName<Instance, Value, Intermediate>(_ keyPath: KeyPath<Instance, Value>, _ binding: @escaping (TargetAction) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Value>, Intermediate, Self> {
 		return compositeName(
-			source: { input in
+			value: { input in
 				TargetAction.singleTarget(
 					Input<Any?>().map { v in (v as! Instance)[keyPath: keyPath] }.bind(to: input)
 				)
 			},
-			translate: constructor,
+			binding: binding,
 			downcast: downcast
 		)
 	}
 	
-	public static func mappedInputName<Value, Mapped, Intermediate>(_ constructor: @escaping (SignalInput<Value>) -> Intermediate, _ downcast: @escaping (Intermediate) -> Self, _ valueToMapped: @escaping (Value) -> Mapped) -> BindingName<SignalInput<Mapped>, Intermediate, Self> {
+	public static func mappedInputName<Value, Mapped, Intermediate>(map: @escaping (Value) -> Mapped, binding: @escaping (SignalInput<Value>) -> Intermediate, downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Mapped>, Intermediate, Self> {
 		return compositeName(
-			source: { Input<Value>().map(valueToMapped).bind(to: $0) },
-			translate: constructor,
+			value: { Input<Value>().map(map).bind(to: $0) },
+			binding: binding,
+			downcast: downcast
+		)
+	}
+	
+	public static func mappedWrappedInputName<Value, Mapped, Param, Intermediate>(map: @escaping (Value) -> Mapped, wrap: @escaping (SignalInput<Value>) -> Param, binding: @escaping (Param) -> Intermediate, downcast: @escaping (Intermediate) -> Self) -> BindingName<SignalInput<Mapped>, Intermediate, Self> {
+		return compositeName(
+			value: { wrap(Input<Value>().map(map).bind(to: $0)) },
+			binding: binding,
 			downcast: downcast
 		)
 	}

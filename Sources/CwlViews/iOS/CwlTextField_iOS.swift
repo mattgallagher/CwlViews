@@ -19,52 +19,47 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class TextField: Binder, TextFieldConvertible {
-	public typealias Instance = UITextField
-	public typealias Inherited = Control
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiTextField() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TextField {
 	enum Binding: TextFieldBinding {
-		public typealias EnclosingBinder = TextField
-		public static func textFieldBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case textInputTraits(Constant<TextInputTraits>)
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
-		case text(Dynamic<String>)
-		case attributedText(Dynamic<NSAttributedString?>)
-		case placeholder(Dynamic<String?>)
-		case attributedPlaceholder(Dynamic<NSAttributedString?>)
-		case defaultTextAttributes(Dynamic<[NSAttributedString.Key: Any]>)
-		case font(Dynamic<UIFont?>)
-		case textColor(Dynamic<UIColor?>)
-		case textAlignment(Dynamic<NSTextAlignment>)
-		case typingAttributes(Dynamic<[NSAttributedString.Key: Any]?>)
 		case adjustsFontSizeToFitWidth(Dynamic<Bool>)
-		case minimumFontSize(Dynamic<CGFloat>)
+		case allowsEditingTextAttributes(Dynamic<Bool>)
+		case attributedPlaceholder(Dynamic<NSAttributedString?>)
+		case attributedText(Dynamic<NSAttributedString?>)
+		case background(Dynamic<UIImage?>)
+		case borderStyle(Dynamic<UITextField.BorderStyle>)
+		case clearButtonMode(Dynamic<UITextField.ViewMode>)
 		case clearsOnBeginEditing(Dynamic<Bool>)
 		case clearsOnInsertion(Dynamic<Bool>)
-		case allowsEditingTextAttributes(Dynamic<Bool>)
-		case borderStyle(Dynamic<UITextField.BorderStyle>)
-		case background(Dynamic<UIImage?>)
+		case defaultTextAttributes(Dynamic<[NSAttributedString.Key: Any]>)
 		case disabledBackground(Dynamic<UIImage?>)
-		case clearButtonMode(Dynamic<UITextField.ViewMode>)
+		case font(Dynamic<UIFont?>)
+		case inputAccessoryView(Dynamic<ViewConvertible?>)
+		case inputView(Dynamic<ViewConvertible?>)
 		case leftView(Dynamic<ViewConvertible?>)
 		case leftViewMode(Dynamic<UITextField.ViewMode>)
+		case minimumFontSize(Dynamic<CGFloat>)
+		case placeholder(Dynamic<String?>)
 		case rightView(Dynamic<ViewConvertible?>)
 		case rightViewMode(Dynamic<UITextField.ViewMode>)
-		case inputView(Dynamic<ViewConvertible?>)
-		case inputAccessoryView(Dynamic<ViewConvertible?>)
+		case text(Dynamic<String>)
+		case textAlignment(Dynamic<NSTextAlignment>)
+		case textColor(Dynamic<UIColor?>)
+		case typingAttributes(Dynamic<[NSAttributedString.Key: Any]?>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		case resignFirstResponder(Signal<Void>)
@@ -75,249 +70,245 @@ public class TextField: Binder, TextFieldConvertible {
 		case didBeginEditing((_ textField: UITextField) -> Void)
 		case didChange((_ textField: UITextField) -> Void)
 		case didEndEditing((_ textField: UITextField) -> Void)
-		@available(iOS 10.0, *) case didEndEditingWithReason((_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void)
 		case shouldBeginEditing((_ textField: UITextField) -> Bool)
-		case shouldEndEditing((_ textField: UITextField) -> Bool)
 		case shouldChangeCharacters((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool)
 		case shouldClear((_ textField: UITextField) -> Bool)
+		case shouldEndEditing((_ textField: UITextField) -> Bool)
 		case shouldReturn((_ textField: UITextField) -> Bool)
+
+		@available(iOS 10.0, *) case didEndEditingWithReason((_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void)
 	}
+}
 	
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = TextField
-		public var linkedPreparer = Inherited.Preparer()
+// MARK: - Binder Part 3: Preparer
+public extension TextField {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = TextField.Binding
+		public typealias Inherited = Control.Preparer
+		public typealias Instance = UITextField
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var dynamicDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = dynamicDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				dynamicDelegate = d
-				return d
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension TextField.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .didEndEditingWithReason(let x):
-				guard #available(iOS 10.0, *) else { return }
-				let s = #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:))
-				delegate().addSelector(s).didEndEditingWithReason = x
-			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
-			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
-			case .shouldChangeCharacters(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
-			case .shouldClear(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
-			case .shouldReturn(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
-			case .inheritedBinding(let x): inherited.prepareBinding(x)
-			default: break
-			}
-		}
-		
-		func prepareInstance(_ instance: Instance, storage: Storage) {
-			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
-			storage.dynamicDelegate = dynamicDelegate
-			if storage.inUse {
-				instance.delegate = storage
-			}
-			
-			linkedPreparer.prepareInstance(instance, storage: storage)
-		}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .textInputTraits(let x):
-				return AggregateLifetime(lifetimes: x.value.bindings.lazy.compactMap { trait in
-					switch trait {
-					case .autocapitalizationType(let y): return y.apply(instance) { i, v in i.autocapitalizationType = v }
-					case .autocorrectionType(let y): return y.apply(instance) { i, v in i.autocorrectionType = v }
-					case .spellCheckingType(let y): return y.apply(instance) { i, v in i.spellCheckingType = v }
-					case .enablesReturnKeyAutomatically(let y): return y.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
-					case .keyboardAppearance(let y): return y.apply(instance) { i, v in i.keyboardAppearance = v }
-					case .keyboardType(let y): return y.apply(instance) { i, v in i.keyboardType = v }
-					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
-					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
-					case .textContentType(let y):
-						guard #available(iOS 10.0, *) else { return nil }
-						return y.apply(instance) { i, v in i.textContentType = v }
-					case .smartDashesType(let x):
-						guard #available(iOS 11.0, *) else { return }
-						return x.apply(instance) { i, v in i.smartDashesType = v }
-					case .smartQuotesType(let x):
-						guard #available(iOS 11.0, *) else { return }
-						return x.apply(instance) { i, v in i.smartQuotesType = v }
-					case .smartInsertDeleteType(let x):
-						guard #available(iOS 11.0, *) else { return nil }
-						return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
-					}
-				})
-			case .text(let x): return x.apply(instance) { i, v in i.text = v }
-			case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
-			case .placeholder(let x): return x.apply(instance) { i, v in i.placeholder = v }
-			case .attributedPlaceholder(let x): return x.apply(instance) { i, v in i.attributedPlaceholder = v }
-			case .defaultTextAttributes(let x): return x.apply(instance) { i, v in i.defaultTextAttributes = v }
-			case .font(let x): return x.apply(instance) { i, v in i.font = v }
-			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
-			case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
-			case .typingAttributes(let x): return x.apply(instance) { i, v in i.typingAttributes = v }
-			case .adjustsFontSizeToFitWidth(let x): return x.apply(instance) { i, v in i.adjustsFontSizeToFitWidth = v }
-			case .minimumFontSize(let x): return x.apply(instance) { i, v in i.minimumFontSize = v }
-			case .clearsOnBeginEditing(let x): return x.apply(instance) { i, v in i.clearsOnBeginEditing = v }
-			case .clearsOnInsertion(let x): return x.apply(instance) { i, v in i.clearsOnInsertion = v }
-			case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
-			case .borderStyle(let x): return x.apply(instance) { i, v in i.borderStyle = v }
-			case .background(let x): return x.apply(instance) { i, v in i.background = v }
-			case .disabledBackground(let x): return x.apply(instance) { i, v in i.disabledBackground = v }
-			case .clearButtonMode(let x): return x.apply(instance) { i, v in i.clearButtonMode = v }
-			case .leftView(let x): return x.apply(instance) { i, v in i.leftView = v?.uiView() }
-			case .leftViewMode(let x): return x.apply(instance) { i, v in i.leftViewMode = v }
-			case .rightView(let x): return x.apply(instance) { i, v in i.rightView = v?.uiView() }
-			case .rightViewMode(let x): return x.apply(instance) { i, v in i.rightViewMode = v }
-			case .inputView(let x): return x.apply(instance) { i, v in i.inputView = v?.uiView() }
-			case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v?.uiView() }
-			case .resignFirstResponder(let x): return x.apply(instance) { i, v in i.resignFirstResponder() }
-			case .didBeginEditing(let x):
-				return Signal
-					.notifications(n: UITextField.textDidBeginEditingNotification, object: instance)
-					.compactMap { notification in return notification.object as? UITextField }
-					.subscribeValues { field in x(field) }
-			case .didEndEditing(let x):
-				return Signal
-					.notifications(n: UITextField.textDidEndEditingNotification, object: instance)
-					.compactMap { notification in return notification.object as? UITextField }
-					.subscribeValues { field in x(field) }
-			case .didChange(let x):
-				return Signal
-					.notifications(n: UITextField.textDidChangeNotification, object: instance)
-					.compactMap { notification in return notification.object as? UITextField }
-					.subscribeValues { field in x(field) }
-			case .didEndEditingWithReason: return nil
-			case .shouldBeginEditing: return nil
-			case .shouldEndEditing: return nil
-			case .shouldChangeCharacters: return nil
-			case .shouldClear: return nil
-			case .shouldReturn: return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		case .didEndEditingWithReason(let x):
+			guard #available(iOS 10.0, *) else { return }
+			delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
+		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
+		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
+		case .shouldChangeCharacters(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
+		case .shouldClear(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
+		case .shouldReturn(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
+		default: break
 		}
 	}
 	
-	open class Storage: Control.Storage, UITextFieldDelegate {}
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .textInputTraits(let x): return x.value.apply(to: instance)
+			
+		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .adjustsFontSizeToFitWidth(let x): return x.apply(instance) { i, v in i.adjustsFontSizeToFitWidth = v }
+		case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
+		case .attributedPlaceholder(let x): return x.apply(instance) { i, v in i.attributedPlaceholder = v }
+		case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
+		case .background(let x): return x.apply(instance) { i, v in i.background = v }
+		case .borderStyle(let x): return x.apply(instance) { i, v in i.borderStyle = v }
+		case .clearButtonMode(let x): return x.apply(instance) { i, v in i.clearButtonMode = v }
+		case .clearsOnBeginEditing(let x): return x.apply(instance) { i, v in i.clearsOnBeginEditing = v }
+		case .clearsOnInsertion(let x): return x.apply(instance) { i, v in i.clearsOnInsertion = v }
+		case .defaultTextAttributes(let x): return x.apply(instance) { i, v in i.defaultTextAttributes = v }
+		case .disabledBackground(let x): return x.apply(instance) { i, v in i.disabledBackground = v }
+		case .font(let x): return x.apply(instance) { i, v in i.font = v }
+		case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v?.uiView() }
+		case .inputView(let x): return x.apply(instance) { i, v in i.inputView = v?.uiView() }
+		case .leftView(let x): return x.apply(instance) { i, v in i.leftView = v?.uiView() }
+		case .leftViewMode(let x): return x.apply(instance) { i, v in i.leftViewMode = v }
+		case .minimumFontSize(let x): return x.apply(instance) { i, v in i.minimumFontSize = v }
+		case .placeholder(let x): return x.apply(instance) { i, v in i.placeholder = v }
+		case .rightView(let x): return x.apply(instance) { i, v in i.rightView = v?.uiView() }
+		case .rightViewMode(let x): return x.apply(instance) { i, v in i.rightViewMode = v }
+		case .text(let x): return x.apply(instance) { i, v in i.text = v }
+		case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
+		case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+		case .typingAttributes(let x): return x.apply(instance) { i, v in i.typingAttributes = v }
+		
+		//	2. Signal bindings are performed on the object after construction.
+		case .resignFirstResponder(let x): return x.apply(instance) { i, v in i.resignFirstResponder() }
+		
+		//	3. Action bindings are triggered by the object after construction.
+		
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
+		case .didBeginEditing(let x): return Signal.notifications(name: UITextField.textDidBeginEditingNotification, object: instance).compactMap { notification in return notification.object as? UITextField }.subscribeValues { field in x(field) }
+		case .didChange(let x): return Signal.notifications(name: UITextField.textDidChangeNotification, object: instance).compactMap { notification in return notification.object as? UITextField }.subscribeValues { field in x(field) }
+		case .didEndEditing(let x): return Signal.notifications(name: UITextField.textDidEndEditingNotification, object: instance).compactMap { notification in return notification.object as? UITextField }.subscribeValues { field in x(field) }
+		case .shouldBeginEditing: return nil
+		case .shouldChangeCharacters: return nil
+		case .shouldClear: return nil
+		case .shouldEndEditing: return nil
+		case .shouldReturn: return nil
+
+		case .didEndEditingWithReason: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension TextField.Preparer {
+	open class Storage: Control.Preparer.Storage, UITextFieldDelegate {}
 	
 	open class Delegate: DynamicDelegate, UITextFieldDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
+			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
 		}
 		
 		open func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
+			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
 		}
 		
 		open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-			return handler(ofType: ((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool).self)!(textField, range, string)
+			return handler(ofType: ((UITextField, NSRange, String) -> Bool).self)!(textField, range, string)
 		}
 		
 		open func textFieldShouldClear(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
+			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
 		}
 		
 		open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((_ textField: UITextField) -> Bool).self)!(textField)
+			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
 		}
 		
-		open var didEndEditingWithReason: Any?
-		@available(iOS 10.0, *)
-		open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
-			(didEndEditingWithReason as! (UITextField, UITextField.DidEndEditingReason) -> Void)(textField, reason)
+		@available(iOS 10.0, *) open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
+			handler(ofType: ((UITextField, UITextField.DidEndEditingReason) -> Void).self)!(textField, reason)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextFieldBinding {
+	public typealias TextFieldName<V> = BindingName<V, TextField.Binding, Binding>
+	private typealias B = TextField.Binding
+	private static func name<V>(_ source: @escaping (V) -> TextField.Binding) -> TextFieldName<V> {
+		return TextFieldName<V>(source: source, downcast: Binding.textFieldBinding)
+	}
+}
+public extension BindingName where Binding: TextFieldBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .textFieldBinding(TextField.Binding.$1(v)) }) }
-	public static var textInputTraits: BindingName<Constant<TextInputTraits>, Binding> { return BindingName<Constant<TextInputTraits>, Binding>({ v in .textFieldBinding(TextField.Binding.textInputTraits(v)) }) }
-	public static var text: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .textFieldBinding(TextField.Binding.text(v)) }) }
-	public static var attributedText: BindingName<Dynamic<NSAttributedString?>, Binding> { return BindingName<Dynamic<NSAttributedString?>, Binding>({ v in .textFieldBinding(TextField.Binding.attributedText(v)) }) }
-	public static var placeholder: BindingName<Dynamic<String?>, Binding> { return BindingName<Dynamic<String?>, Binding>({ v in .textFieldBinding(TextField.Binding.placeholder(v)) }) }
-	public static var attributedPlaceholder: BindingName<Dynamic<NSAttributedString?>, Binding> { return BindingName<Dynamic<NSAttributedString?>, Binding>({ v in .textFieldBinding(TextField.Binding.attributedPlaceholder(v)) }) }
-	public static var defaultTextAttributes: BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding> { return BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding>({ v in .textFieldBinding(TextField.Binding.defaultTextAttributes(v)) }) }
-	public static var font: BindingName<Dynamic<UIFont?>, Binding> { return BindingName<Dynamic<UIFont?>, Binding>({ v in .textFieldBinding(TextField.Binding.font(v)) }) }
-	public static var textColor: BindingName<Dynamic<UIColor?>, Binding> { return BindingName<Dynamic<UIColor?>, Binding>({ v in .textFieldBinding(TextField.Binding.textColor(v)) }) }
-	public static var textAlignment: BindingName<Dynamic<NSTextAlignment>, Binding> { return BindingName<Dynamic<NSTextAlignment>, Binding>({ v in .textFieldBinding(TextField.Binding.textAlignment(v)) }) }
-	public static var typingAttributes: BindingName<Dynamic<[NSAttributedString.Key: Any]?>, Binding> { return BindingName<Dynamic<[NSAttributedString.Key: Any]?>, Binding>({ v in .textFieldBinding(TextField.Binding.typingAttributes(v)) }) }
-	public static var adjustsFontSizeToFitWidth: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.adjustsFontSizeToFitWidth(v)) }) }
-	public static var minimumFontSize: BindingName<Dynamic<CGFloat>, Binding> { return BindingName<Dynamic<CGFloat>, Binding>({ v in .textFieldBinding(TextField.Binding.minimumFontSize(v)) }) }
-	public static var clearsOnBeginEditing: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.clearsOnBeginEditing(v)) }) }
-	public static var clearsOnInsertion: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.clearsOnInsertion(v)) }) }
-	public static var allowsEditingTextAttributes: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textFieldBinding(TextField.Binding.allowsEditingTextAttributes(v)) }) }
-	public static var borderStyle: BindingName<Dynamic<UITextField.BorderStyle>, Binding> { return BindingName<Dynamic<UITextField.BorderStyle>, Binding>({ v in .textFieldBinding(TextField.Binding.borderStyle(v)) }) }
-	public static var background: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .textFieldBinding(TextField.Binding.background(v)) }) }
-	public static var disabledBackground: BindingName<Dynamic<UIImage?>, Binding> { return BindingName<Dynamic<UIImage?>, Binding>({ v in .textFieldBinding(TextField.Binding.disabledBackground(v)) }) }
-	public static var clearButtonMode: BindingName<Dynamic<UITextField.ViewMode>, Binding> { return BindingName<Dynamic<UITextField.ViewMode>, Binding>({ v in .textFieldBinding(TextField.Binding.clearButtonMode(v)) }) }
-	public static var leftView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .textFieldBinding(TextField.Binding.leftView(v)) }) }
-	public static var leftViewMode: BindingName<Dynamic<UITextField.ViewMode>, Binding> { return BindingName<Dynamic<UITextField.ViewMode>, Binding>({ v in .textFieldBinding(TextField.Binding.leftViewMode(v)) }) }
-	public static var rightView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .textFieldBinding(TextField.Binding.rightView(v)) }) }
-	public static var rightViewMode: BindingName<Dynamic<UITextField.ViewMode>, Binding> { return BindingName<Dynamic<UITextField.ViewMode>, Binding>({ v in .textFieldBinding(TextField.Binding.rightViewMode(v)) }) }
-	public static var inputView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .textFieldBinding(TextField.Binding.inputView(v)) }) }
-	public static var inputAccessoryView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .textFieldBinding(TextField.Binding.inputAccessoryView(v)) }) }
-	public static var resignFirstResponder: BindingName<Signal<Void>, Binding> { return BindingName<Signal<Void>, Binding>({ v in .textFieldBinding(TextField.Binding.resignFirstResponder(v)) }) }
-	public static var didBeginEditing: BindingName<(_ textField: UITextField) -> Void, Binding> { return BindingName<(_ textField: UITextField) -> Void, Binding>({ v in .textFieldBinding(TextField.Binding.didBeginEditing(v)) }) }
-	public static var didChange: BindingName<(_ textField: UITextField) -> Void, Binding> { return BindingName<(_ textField: UITextField) -> Void, Binding>({ v in .textFieldBinding(TextField.Binding.didChange(v)) }) }
-	public static var didEndEditing: BindingName<(_ textField: UITextField) -> Void, Binding> { return BindingName<(_ textField: UITextField) -> Void, Binding>({ v in .textFieldBinding(TextField.Binding.didEndEditing(v)) }) }
-	@available(iOS 10.0, *)
-	public static var didEndEditingWithReason: BindingName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void, Binding> { return BindingName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void, Binding>({ v in .textFieldBinding(TextField.Binding.didEndEditingWithReason(v)) }) }
-	public static var shouldBeginEditing: BindingName<(_ textField: UITextField) -> Bool, Binding> { return BindingName<(_ textField: UITextField) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldBeginEditing(v)) }) }
-	public static var shouldEndEditing: BindingName<(_ textField: UITextField) -> Bool, Binding> { return BindingName<(_ textField: UITextField) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldEndEditing(v)) }) }
-	public static var shouldChangeCharacters: BindingName<(_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool, Binding> { return BindingName<(_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldChangeCharacters(v)) }) }
-	public static var shouldClear: BindingName<(_ textField: UITextField) -> Bool, Binding> { return BindingName<(_ textField: UITextField) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldClear(v)) }) }
-	public static var shouldReturn: BindingName<(_ textField: UITextField) -> Bool, Binding> { return BindingName<(_ textField: UITextField) -> Bool, Binding>({ v in .textFieldBinding(TextField.Binding.shouldReturn(v)) }) }
+	// With:    static var $1: TextFieldName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var textInputTraits: TextFieldName<Constant<TextInputTraits>> { return .name(B.textInputTraits) }
+	
+	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var adjustsFontSizeToFitWidth: TextFieldName<Dynamic<Bool>> { return .name(B.adjustsFontSizeToFitWidth) }
+	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
+	static var attributedPlaceholder: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.attributedPlaceholder) }
+	static var attributedText: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.attributedText) }
+	static var background: TextFieldName<Dynamic<UIImage?>> { return .name(B.background) }
+	static var borderStyle: TextFieldName<Dynamic<UITextField.BorderStyle>> { return .name(B.borderStyle) }
+	static var clearButtonMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(B.clearButtonMode) }
+	static var clearsOnBeginEditing: TextFieldName<Dynamic<Bool>> { return .name(B.clearsOnBeginEditing) }
+	static var clearsOnInsertion: TextFieldName<Dynamic<Bool>> { return .name(B.clearsOnInsertion) }
+	static var defaultTextAttributes: TextFieldName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.defaultTextAttributes) }
+	static var disabledBackground: TextFieldName<Dynamic<UIImage?>> { return .name(B.disabledBackground) }
+	static var font: TextFieldName<Dynamic<UIFont?>> { return .name(B.font) }
+	static var inputAccessoryView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.inputAccessoryView) }
+	static var inputView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.inputView) }
+	static var leftView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.leftView) }
+	static var leftViewMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(B.leftViewMode) }
+	static var minimumFontSize: TextFieldName<Dynamic<CGFloat>> { return .name(B.minimumFontSize) }
+	static var placeholder: TextFieldName<Dynamic<String?>> { return .name(B.placeholder) }
+	static var rightView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.rightView) }
+	static var rightViewMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(B.rightViewMode) }
+	static var text: TextFieldName<Dynamic<String>> { return .name(B.text) }
+	static var textAlignment: TextFieldName<Dynamic<NSTextAlignment>> { return .name(B.textAlignment) }
+	static var textColor: TextFieldName<Dynamic<UIColor?>> { return .name(B.textColor) }
+	static var typingAttributes: TextFieldName<Dynamic<[NSAttributedString.Key: Any]?>> { return .name(B.typingAttributes) }
+	
+	//	2. Signal bindings are performed on the object after construction.
+	static var resignFirstResponder: TextFieldName<Signal<Void>> { return .name(B.resignFirstResponder) }
+	
+	//	3. Action bindings are triggered by the object after construction.
+	
+	//	4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didBeginEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didBeginEditing) }
+	static var didChange: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didChange) }
+	static var didEndEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didEndEditing) }
+	static var shouldBeginEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldBeginEditing) }
+	static var shouldChangeCharacters: TextFieldName<(_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool> { return .name(B.shouldChangeCharacters) }
+	static var shouldClear: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldClear) }
+	static var shouldEndEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldEndEditing) }
+	static var shouldReturn: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldReturn) }
+	
+	@available(iOS 10.0, *) static var didEndEditingWithReason: TextFieldName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void> { return .name(B.didEndEditingWithReason) }
+	
+	// Composite binding names
+	static var textChanged: TextFieldName<SignalInput<String>> {
+		return Binding.compositeName(
+			value: { input in { textField in textField.text.map { _ = input.send(value: $0) } } },
+			binding: TextField.Binding.didChange,
+			downcast: Binding.textFieldBinding
+		)
+	}
+	static var attributedTextChanged: TextFieldName<SignalInput<NSAttributedString>> {
+		return Binding.compositeName(
+			value: { input in { textField in textField.attributedText.map { _ = input.send(value: $0) } } },
+			binding: TextField.Binding.didChange,
+			downcast: Binding.textFieldBinding
+		)
+	}
 }
 
-extension BindingName where Binding: TextFieldBinding {
-	// Additional helper binding names
-	public static var textChanged: BindingName<SignalInput<String>, Binding> {
-		return BindingName<SignalInput<String>, Binding>({ v in .textFieldBinding(TextField.Binding.didChange { textField in if let t = textField.text { v.send(value: t) } }) })
-	}
-	public static var attributedTextChanged: BindingName<SignalInput<NSAttributedString>, Binding> {
-		return BindingName<SignalInput<NSAttributedString>, Binding>({ v in .textFieldBinding(TextField.Binding.didChange { textField in if let t = textField.attributedText { v.send(value: t) } }) })
-	}
-}
-
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol TextFieldConvertible: ControlConvertible {
 	func uiTextField() -> TextField.Instance
 }
 extension TextFieldConvertible {
 	public func uiControl() -> Control.Instance { return uiTextField() }
 }
-extension TextField.Instance: TextFieldConvertible {
+extension UITextField: TextFieldConvertible, HasDelegate {
 	public func uiTextField() -> TextField.Instance { return self }
 }
+public extension TextField {
+	func uiTextField() -> TextField.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol TextFieldBinding: ControlBinding {
 	static func textFieldBinding(_ binding: TextField.Binding) -> Self
 }
-extension TextFieldBinding {
-	public static func controlBinding(_ binding: Control.Binding) -> Self {
+public extension TextFieldBinding {
+	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return textFieldBinding(.inheritedBinding(binding))
 	}
 }
+public extension TextField.Binding {
+	public typealias Preparer = TextField.Preparer
+	static func textFieldBinding(_ binding: TextField.Binding) -> TextField.Binding {
+		return binding
+	}
+}
 
+// MARK: - Binder Part 9: Other supporting types
 public func textFieldResignOnReturn(condition: @escaping (UITextField) -> Bool = { _ in return true }) -> (UITextField) -> Bool {
 	return { tf in
 		if condition(tf) {

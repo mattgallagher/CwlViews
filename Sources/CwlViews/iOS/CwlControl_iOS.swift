@@ -19,22 +19,17 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class Control: Binder, ControlConvertible {
-	public typealias Instance = UIControl
-	public typealias Inherited = View
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiControl() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension Control {
 	enum Binding: ControlBinding {
-		public typealias EnclosingBinder = Control
-		public static func controlBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -45,128 +40,153 @@ public class Control: Binder, ControlConvertible {
 		case isHighlighted(Dynamic<Bool>)
 		case contentVerticalAlignment(Dynamic<UIControl.ContentVerticalAlignment>)
 		case contentHorizontalAlignment(Dynamic<UIControl.ContentHorizontalAlignment>)
-		case actions(Dynamic<ControlActions>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
 		// 3. Action bindings are triggered by the object after construction.
+		case actions(ControlActions)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
-	
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension Control {
 	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = Control
-		public var linkedPreparer = Inherited.Preparer()
+		public typealias Binding = Control.Binding
+		public typealias Inherited = View.Preparer
+		public typealias Instance = UIControl
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
+		public var inherited = Inherited()
 		public init() {}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
-			case .isSelected(let x): return x.apply(instance) { i, v in i.isSelected = v }
-			case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
-			case .contentVerticalAlignment(let x): return x.apply(instance) { i, v in i.contentVerticalAlignment = v }
-			case .contentHorizontalAlignment(let x): return x.apply(instance) { i, v in i.contentHorizontalAlignment = v }
-			case .actions(let x):
-				var previous: ScopedValues<UIControl.Event, ControlAction>? = nil
-				var junctions = [Lifetime]()
-				var lifetime = x.apply(instance) { i, v in
-					if let p = previous {
-						for c in p.pairs {
-							i.removeTarget(nil, action: nil, for: c.0)
-						}
-					}
-					previous = v
-					junctions.removeAll()
-					for c in v.pairs {
-						switch c.1 {
-						case .firstResponder(let s):
-							i.addTarget(nil, action: s, for: c.0)
-						case .singleTarget(let s):
-							let target = SignalControlEventActionTarget()
-							i.addTarget(target, action: target.selector, for: c.0)
-							junctions += target.signal.cancellableBind(to: s)
-						}
-					}
-				}
-				return OnDelete {
-					for var j in junctions {
-						j.cancel()
-					}
-					lifetime?.cancel()
-				}
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 	}
-	
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension Control.Preparer {
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .contentHorizontalAlignment(let x): return x.apply(instance) { i, v in i.contentHorizontalAlignment = v }
+		case .contentVerticalAlignment(let x): return x.apply(instance) { i, v in i.contentVerticalAlignment = v }
+		case .isEnabled(let x): return x.apply(instance) { i, v in i.isEnabled = v }
+		case .isHighlighted(let x): return x.apply(instance) { i, v in i.isHighlighted = v }
+		case .isSelected(let x): return x.apply(instance) { i, v in i.isSelected = v }
+		
+		// 2. Signal bindings are performed on the object after construction.
+		
+		// 3. Action bindings are triggered by the object after construction.
+		case .actions(let x):
+			var lifetimes = [Lifetime]()
+			for (scope, value) in x.pairs {
+				switch value {
+				case .firstResponder(let s):
+					instance.addTarget(nil, action: s, for: scope)
+				case .singleTarget(let s):
+					let target = SignalControlEventActionTarget()
+					instance.addTarget(target, action: target.selector, for: scope)
+					lifetimes += target.signal.cancellableBind(to: s)
+				}
+			}
+			return AggregateLifetime(lifetimes: lifetimes)
+		
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension Control.Preparer {
 	public typealias Storage = View.Preparer.Storage
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ControlBinding {
+	public typealias ControlName<V> = BindingName<V, Control.Binding, Binding>
+	private typealias B = Control.Binding
+	private static func name<V>(_ source: @escaping (V) -> Control.Binding) -> ControlName<V> {
+		return ControlName<V>(source: source, downcast: Binding.controlBinding)
+	}
+}
+public extension BindingName where Binding: ControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .controlBinding(Control.Binding.$1(v)) }) }
-	public static var isEnabled: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.isEnabled(v)) }) }
-	public static var isSelected: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.isSelected(v)) }) }
-	public static var isHighlighted: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .controlBinding(Control.Binding.isHighlighted(v)) }) }
-	public static var contentVerticalAlignment: BindingName<Dynamic<UIControl.ContentVerticalAlignment>, Binding> { return BindingName<Dynamic<UIControl.ContentVerticalAlignment>, Binding>({ v in .controlBinding(Control.Binding.contentVerticalAlignment(v)) }) }
-	public static var contentHorizontalAlignment: BindingName<Dynamic<UIControl.ContentHorizontalAlignment>, Binding> { return BindingName<Dynamic<UIControl.ContentHorizontalAlignment>, Binding>({ v in .controlBinding(Control.Binding.contentHorizontalAlignment(v)) }) }
-	public static var actions: BindingName<Dynamic<ControlActions>, Binding> { return BindingName<Dynamic<ControlActions>, Binding>({ v in .controlBinding(Control.Binding.actions(v)) }) }
-}
-
-extension BindingName where Binding: ControlBinding, Binding.EnclosingBinder: BinderChain {
-	// Additional helper binding names
+	// With:    static var $1: ControlName<$2> { return .name(B.$1) }
 	
-	// This is the *preferred* construction of actions.
-	public static func action<I: SignalInputInterface>(_ scope: UIControl.Event) -> BindingName<I, Binding> where I.InputValue == Void {
-		return BindingName<I, Binding>({ (v: I) -> Binding in
-			Binding.controlBinding(Control.Binding.actions(.constant(ControlActions.value(.singleTarget(Input<(UIControl, UIEvent)>().map { c, e in () }.bind(to: v.input)), for: scope))))
-		})
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var isSelected: ControlName<Dynamic<Bool>> { return .name(B.isSelected) }
+	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(B.isHighlighted) }
+	static var contentVerticalAlignment: ControlName<Dynamic<UIControl.ContentVerticalAlignment>> { return .name(B.contentVerticalAlignment) }
+	static var contentHorizontalAlignment: ControlName<Dynamic<UIControl.ContentHorizontalAlignment>> { return .name(B.contentHorizontalAlignment) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	static var actions: ControlName<ControlActions> { return .name(B.actions) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	
+	// Composite binding names
+	static func action(_ scope: UIControl.Event) -> ControlName<SignalInput<UIControl>> {
+		return Binding.mappedWrappedInputName(
+			map: { tuple in tuple.0 },
+			wrap: { input in ControlActions(scope: scope, value: ControlAction.singleTarget(input)) },
+			binding: Control.Binding.actions,
+			downcast: Binding.controlBinding
+		)
 	}
-	public static func action<I: SignalInputInterface, Value>(_ scope: UIControl.Event, _ keyPath: KeyPath<Binding.EnclosingBinder.Instance, Value>) -> BindingName<I, Binding> where I.InputValue == Value {
-		return BindingName<I, Binding> { (v: I) -> Binding in
-			Binding.controlBinding(
-				Control.Binding.actions(
-					.constant(
-						ControlActions.value(
-							.singleTarget(
-								Input<(UIControl, UIEvent)>()
-									.map { c, e -> Value in
-										(c as! Binding.EnclosingBinder.Instance)[keyPath: keyPath]
-									}.bind(to: v.input)
-							),
-							for: scope
-						)
-					)
-				)
-			)
-		}
+	static func action<Value>(_ scope: UIControl.Event, _ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
+		return Binding.mappedWrappedInputName(
+			map: { tuple in (tuple.0 as! Binding.Preparer.Instance)[keyPath: keyPath] },
+			wrap: { input in ControlActions(scope: scope, value: ControlAction.singleTarget(input)) },
+			binding: Control.Binding.actions,
+			downcast: Binding.controlBinding
+		)
 	}
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol ControlConvertible: ViewConvertible {
 	func uiControl() -> Control.Instance
 }
 extension ControlConvertible {
 	public func uiView() -> View.Instance { return uiControl() }
 }
-extension Control.Instance: ControlConvertible {
+extension UIControl: ControlConvertible {
 	public func uiControl() -> Control.Instance { return self }
 }
+public extension Control {
+	func uiControl() -> Control.Instance { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol ControlBinding: ViewBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self
 }
-extension ControlBinding {
-	public static func viewBinding(_ binding: View.Binding) -> Self {
+public extension ControlBinding {
+	static func viewBinding(_ binding: View.Binding) -> Self {
 		return controlBinding(.inheritedBinding(binding))
 	}
 }
+public extension Control.Binding {
+	public typealias Preparer = Control.Preparer
+	static func controlBinding(_ binding: Control.Binding) -> Control.Binding {
+		return binding
+	}
+}
 
+// MARK: - Binder Part 9: Other supporting types
 public enum ControlAction {
 	case firstResponder(Selector)
 	case singleTarget(SignalInput<(UIControl, UIEvent)>)
@@ -212,21 +232,7 @@ open class SignalControlEventActionTarget: NSObject {
 			return so
 		}
 		
-		// Otherwise, create a new one
-		let (i, s) = Signal<(UIControl, UIEvent)>.create { s in
-			// Instead of using a `isContinuous` transform, use a `buffer` to do the same thing while capturing `self` so that we're owned by the signal.
-			s.customActivation { (b: inout Array<(UIControl, UIEvent)>, e: inout Error?, r: Result<(UIControl, UIEvent)>) in
-				withExtendedLifetime(self) {}
-				switch r {
-				case .success(let v):
-					b.removeAll(keepingCapacity: true)
-					b.append(v)
-				case .failure(let err):
-					e = err
-				}
-			}
-		}
-		self.signalInput = i
+		let s = Signal<(UIControl, UIEvent)>.generate { i in self.signalInput = i }.continuous()
 		self.signalOutput = s
 		return s
 	}

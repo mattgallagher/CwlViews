@@ -132,23 +132,30 @@ public extension BindingName where Binding: NavigationItemBinding {
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	
 	// Composite binding names
-	public static func leftBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
-		return Binding.compositeName(source: { dynamicArray in 
-			switch dynamicArray {
-			case .constant(let b) where animate == .all: return .constant(.animate(b))
-			case .constant(let b): return .constant(.set(b))
-			case .dynamic(let b): return .dynamic(b.animate(animate))
-			}
-		}, translate: NavigationItem.Binding.leftBarButtonItems, downcast: Binding.navigationItemBinding)
+	static func leftBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
+		return Binding.compositeName(
+			value: { dynamicArray in 
+				switch dynamicArray {
+				case .constant(let b) where animate == .all: return .constant(.animate(b))
+				case .constant(let b): return .constant(.set(b))
+				case .dynamic(let b): return .dynamic(b.animate(animate))
+				}
+			},
+			binding: NavigationItem.Binding.leftBarButtonItems,
+			downcast: Binding.navigationItemBinding
+		)
 	}
-	public static func rightBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
-		return Binding.compositeName(source: { dynamicArray in 
-			switch dynamicArray {
-			case .constant(let b) where animate == .all: return .constant(.animate(b))
-			case .constant(let b): return .constant(.set(b))
-			case .dynamic(let b): return .dynamic(b.animate(animate))
-			}
-		}, translate: NavigationItem.Binding.rightBarButtonItems, downcast: Binding.navigationItemBinding)
+	static func rightBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
+		return Binding.compositeName(
+			value: { dynamicArray in 
+				switch dynamicArray {
+				case .constant(let b) where animate == .all: return .constant(.animate(b))
+				case .constant(let b): return .constant(.set(b))
+				case .dynamic(let b): return .dynamic(b.animate(animate))
+				}
+			},
+			binding: NavigationItem.Binding.rightBarButtonItems,
+			downcast: Binding.navigationItemBinding)
 	}
 }
 

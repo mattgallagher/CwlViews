@@ -19,35 +19,29 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class PageViewController<PageData>: Binder, PageViewControllerConvertible {
-	public typealias Instance = UIPageViewController
-	public typealias Inherited = ViewController
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiPageViewController() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension PageViewController {
 	enum Binding: PageViewControllerBinding {
 		public typealias PageDataType = PageData
-		
-		public typealias EnclosingBinder = PageViewController
-		public static func pageViewControllerBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		// 0. Static bindings are applied at construction and are subsequently immutable.
-		case transitionStyle(Constant<UIPageViewController.TransitionStyle>)
 		case navigationOrientation(Constant<UIPageViewController.NavigationOrientation>)
-		case spineLocation(Constant<UIPageViewController.SpineLocation>)
 		case pageSpacing(Constant<CGFloat>)
+		case spineLocation(Constant<UIPageViewController.SpineLocation>)
+		case transitionStyle(Constant<UIPageViewController.TransitionStyle>)
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case pageData(Dynamic<SetAnimatable<[PageData], UIPageViewController.NavigationDirection>>)
 		case isDoubleSided(Dynamic<Bool>)
+		case pageData(Dynamic<SetAnimatable<[PageData], UIPageViewController.NavigationDirection>>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -55,36 +49,30 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case constructPage((PageData) -> ViewControllerConvertible)
-		case willTransitionTo(([UIViewController]) -> Void)
 		case didFinishAnimating((Bool, [UIViewController], Bool) -> Void)
+		case interfaceOrientationForPresentation(() -> UIInterfaceOrientation)
 		case spineLocationFor((UIInterfaceOrientation) -> UIPageViewController.SpineLocation)
 		case supportedInterfaceOrientations(() -> UIInterfaceOrientationMask)
-		case interfaceOrientationForPresentation(() -> UIInterfaceOrientation)
+		case willTransitionTo(([UIViewController]) -> Void)
 	}
+}
 
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = PageViewController
-		public var linkedPreparer = Inherited.Preparer()
-
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
+// MARK: - Binder Part 3: Preparer
+public extension PageViewController {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = PageViewController.Binding
+		public typealias Inherited = ViewController.Preparer
+		public typealias Instance = UIPageViewController
 		
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
-		public init<Value>(delegateClass: Value.Type) where Value: Delegate {
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
+		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public let delegateClass: Delegate.Type
-		var dynamicDelegate: Delegate? = nil
-		mutating func delegate() -> Delegate {
-			if let d = dynamicDelegate {
-				return d
-			} else {
-				let d = delegateClass.init()
-				dynamicDelegate = d
-				return d
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
 		var transitionStyle = UIPageViewController.TransitionStyle.scroll
@@ -92,47 +80,68 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 		var spineLocation = UIPageViewController.SpineLocation.min
 		var pageSpacing = CGFloat(0)
 		var pageConstructor: ((PageData) -> ViewControllerConvertible)?
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension PageViewController.Preparer {
+	mutating func prepareBinding(_ binding: PageViewController<PageData>.Binding) {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.prepareBinding(x)
 		
-		mutating func prepareBinding(_ binding: PageViewController<PageData>.Binding) {
-			switch binding {
-			case .constructPage(let x): pageConstructor = x
-			case .transitionStyle(let x): transitionStyle = x.value
-			case .navigationOrientation(let x): navigationOrientation = x.value
-			case .spineLocation(let x): spineLocation = x.value
-			case .pageSpacing(let x): pageSpacing = x.value
-			case .inheritedBinding(let x): return inherited.prepareBinding(x)
-			case .willTransitionTo(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
-			case .didFinishAnimating(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
-			case .spineLocationFor(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
-			case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
-			case .interfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
-			default: break
-			}
-		}
-		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			case .pageData(let x):
-				return x.apply(instance, storage) { i, s, v in
-					s.changePageData(v.value, in: i, animation: v.animation)
-				}
-			case .isDoubleSided(let x): return x.apply(instance) { i, s, v in i.isDoubleSided = v }
-			case .constructPage: return nil
-			case .transitionStyle: return nil
-			case .navigationOrientation: return nil
-			case .spineLocation: return nil
-			case .pageSpacing: return nil
-			case .willTransitionTo: return nil
-			case .didFinishAnimating: return nil
-			case .spineLocationFor: return nil
-			case .supportedInterfaceOrientations: return nil
-			case .interfaceOrientationForPresentation: return nil
-			}
+		case .constructPage(let x): pageConstructor = x
+		case .transitionStyle(let x): transitionStyle = x.value
+		case .navigationOrientation(let x): navigationOrientation = x.value
+		case .spineLocation(let x): spineLocation = x.value
+		case .pageSpacing(let x): pageSpacing = x.value
+		case .willTransitionTo(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
+		case .didFinishAnimating(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
+		case .spineLocationFor(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
+		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
+		case .interfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
+		default: break
 		}
 	}
+	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		// 0. Static bindings are applied at construction and are subsequently immutable.
+		case .navigationOrientation: return nil
+		case .pageSpacing: return nil
+		case .spineLocation: return nil
+		case .transitionStyle: return nil
 
-	open class Storage: ViewController.Storage, UIPageViewControllerDelegate, UIPageViewControllerDataSource {
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .isDoubleSided(let x): return x.apply(instance) { i, v in i.isDoubleSided = v }
+		case .pageData(let x):
+			return x.apply(instance, storage) { i, s, v in
+				s.changePageData(v.value, in: i, animation: v.animation)
+			}
+
+		// 2. Signal bindings are performed on the object after construction.
+
+		// 3. Action bindings are triggered by the object after construction.
+
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .constructPage: return nil
+		case .didFinishAnimating: return nil
+		case .interfaceOrientationForPresentation: return nil
+		case .spineLocationFor: return nil
+		case .supportedInterfaceOrientations: return nil
+		case .willTransitionTo: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension PageViewController.Preparer {
+	open class Storage: ViewController.Preparer.Storage, UIPageViewControllerDelegate, UIPageViewControllerDataSource {
+		open var activeViewControllers: [(Int, Weak<UIViewController>)] = []
+		open var pageConstructor: ((PageData) -> ViewControllerConvertible)?
+		open var pageData: [PageData] = []
+		
 		public func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
 			if let i = index(of: viewController) {
 				return self.viewController(at: i - 1)
@@ -146,10 +155,6 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 			}
 			return nil
 		}
-		
-		open var pageData: [PageData] = []
-		open var activeViewControllers: [(Int, Weak<UIViewController>)] = []
-		open var pageConstructor: ((PageData) -> ViewControllerConvertible)?
 		
 		open func changePageData(_ newPageData: [PageData], in pvc: UIPageViewController, animation: UIPageViewController.NavigationDirection?) {
 			let indexes = pvc.viewControllers?.compactMap { self.index(of: $0) }.sorted() ?? (newPageData.isEmpty ? [] : [0])
@@ -201,10 +206,6 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 	}
 
 	open class Delegate: DynamicDelegate, UIPageViewControllerDelegate {
-		public required override init() {
-			super.init()
-		}
-		
 		open func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
 			handler(ofType: (([UIViewController]) -> Void).self)!(pendingViewControllers)
 		}
@@ -227,42 +228,73 @@ public class PageViewController<PageData>: Binder, PageViewControllerConvertible
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PageViewControllerBinding {
-	// You can easily convert the `Binding` cases to `BindingName` by copying them to here and using the following Xcode-style regex:
-	// Find:    case ([^\(]+)\((.+)\)$
-	// Replace: public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.$1(v)) }) }
-	public static var transitionStyle: BindingName<Constant<UIPageViewController.TransitionStyle>, Binding> { return BindingName<Constant<UIPageViewController.TransitionStyle>, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.transitionStyle(v)) }) }
-	public static var navigationOrientation: BindingName<Constant<UIPageViewController.NavigationOrientation>, Binding> { return BindingName<Constant<UIPageViewController.NavigationOrientation>, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.navigationOrientation(v)) }) }
-	public static var spineLocation: BindingName<Constant<UIPageViewController.SpineLocation>, Binding> { return BindingName<Constant<UIPageViewController.SpineLocation>, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.spineLocation(v)) }) }
-	public static var pageSpacing: BindingName<Constant<CGFloat>, Binding> { return BindingName<Constant<CGFloat>, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.pageSpacing(v)) }) }
-	public static var pageData: BindingName<Dynamic<SetAnimatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>, Binding> { return BindingName<Dynamic<SetAnimatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.pageData(v)) }) }
-	public static var isDoubleSided: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.isDoubleSided(v)) }) }
-	public static var constructPage: BindingName<(Binding.PageDataType) -> ViewControllerConvertible, Binding> { return BindingName<(Binding.PageDataType) -> ViewControllerConvertible, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.constructPage(v)) }) }
-	public static var willTransitionTo: BindingName<([UIViewController]) -> Void, Binding> { return BindingName<([UIViewController]) -> Void, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.willTransitionTo(v)) }) }
-	public static var didFinishAnimating: BindingName<(Bool, [UIViewController], Bool) -> Void, Binding> { return BindingName<(Bool, [UIViewController], Bool) -> Void, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.didFinishAnimating(v)) }) }
-	public static var spineLocationFor: BindingName<(UIInterfaceOrientation) -> UIPageViewController.SpineLocation, Binding> { return BindingName<(UIInterfaceOrientation) -> UIPageViewController.SpineLocation, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.spineLocationFor(v)) }) }
-	public static var supportedInterfaceOrientations: BindingName<() -> UIInterfaceOrientationMask, Binding> { return BindingName<() -> UIInterfaceOrientationMask, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.supportedInterfaceOrientations(v)) }) }
-	public static var interfaceOrientationForPresentation: BindingName<() -> UIInterfaceOrientation, Binding> { return BindingName<() -> UIInterfaceOrientation, Binding>({ v in .pageViewControllerBinding(PageViewController.Binding.interfaceOrientationForPresentation(v)) }) }
+	public typealias PageViewControllerName<V> = BindingName<V, PageViewController<Binding.PageDataType>.Binding, Binding>
+	private typealias B = PageViewController<Binding.PageDataType>.Binding
+	private static func name<V>(_ source: @escaping (V) -> PageViewController<Binding.PageDataType>.Binding) -> PageViewControllerName<V> {
+		return PageViewControllerName<V>(source: source, downcast: Binding.pageViewControllerBinding)
+	}
+}
+public extension BindingName where Binding: PageViewControllerBinding {
+	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
+	// Replace: case ([^\(]+)\((.+)\)$
+	// With:    static var $1: PageViewControllerName<$2> { return .name(B.$1) }
+	
+	// 0. Static bindings are applied at construction and are subsequently immutable.
+	static var navigationOrientation: PageViewControllerName<Constant<UIPageViewController.NavigationOrientation>> { return .name(B.navigationOrientation) }
+	static var pageSpacing: PageViewControllerName<Constant<CGFloat>> { return .name(B.pageSpacing) }
+	static var spineLocation: PageViewControllerName<Constant<UIPageViewController.SpineLocation>> { return .name(B.spineLocation) }
+	static var transitionStyle: PageViewControllerName<Constant<UIPageViewController.TransitionStyle>> { return .name(B.transitionStyle) }
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var isDoubleSided: PageViewControllerName<Dynamic<Bool>> { return .name(B.isDoubleSided) }
+	static var pageData: PageViewControllerName<Dynamic<SetAnimatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>> { return .name(B.pageData) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	// 3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var constructPage: PageViewControllerName<(Binding.PageDataType) -> ViewControllerConvertible> { return .name(B.constructPage) }
+	static var didFinishAnimating: PageViewControllerName<(Bool, [UIViewController], Bool) -> Void> { return .name(B.didFinishAnimating) }
+	static var interfaceOrientationForPresentation: PageViewControllerName<() -> UIInterfaceOrientation> { return .name(B.interfaceOrientationForPresentation) }
+	static var spineLocationFor: PageViewControllerName<(UIInterfaceOrientation) -> UIPageViewController.SpineLocation> { return .name(B.spineLocationFor) }
+	static var supportedInterfaceOrientations: PageViewControllerName<() -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
+	static var willTransitionTo: PageViewControllerName<([UIViewController]) -> Void> { return .name(B.willTransitionTo) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol PageViewControllerConvertible: ViewControllerConvertible {
 	func uiPageViewController() -> UIPageViewController
 }
 extension PageViewControllerConvertible {
 	public func uiViewController() -> ViewController.Instance { return uiPageViewController() }
 }
-extension PageViewController.Instance: PageViewControllerConvertible {
+extension UIPageViewController: PageViewControllerConvertible, HasDelegate {
 	public func uiPageViewController() -> UIPageViewController { return self }
 }
+public extension PageViewController {
+	func uiPageViewController() -> UIPageViewController { return instance() }
+}
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol PageViewControllerBinding: ViewControllerBinding {
 	associatedtype PageDataType
 	static func pageViewControllerBinding(_ binding: PageViewController<PageDataType>.Binding) -> Self
 }
-extension PageViewControllerBinding {
-	public static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
-		return pageViewControllerBinding(.inheritedBinding(binding))
+public extension PageViewControllerBinding {
+	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
+		return pageViewControllerBinding(PageViewController<PageDataType>.Binding.inheritedBinding(binding))
 	}
 }
+public extension PageViewController.Binding {
+	public typealias Preparer = PageViewController.Preparer
+	static func pageViewControllerBinding(_ binding: PageViewController<PageDataType>.Binding) -> PageViewController.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

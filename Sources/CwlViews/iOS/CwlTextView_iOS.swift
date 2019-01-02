@@ -19,166 +19,162 @@
 
 #if os(iOS)
 
+// MARK: - Binder Part 1: Binder
 public class TextView: Binder, TextViewConvertible {
-	public typealias Instance = UITextView
-	public typealias Inherited = ScrollView
-	
-	public var state: BinderState<Instance, Binding>
-	public required init(state: BinderState<Instance, Binding>) {
-		self.state = state
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-	public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-		if case .inheritedBinding(let s) = binding { return s } else { return nil }
-	}
-	public func uiTextView() -> Instance { return instance() }
-	
+}
+
+// MARK: - Binder Part 2: Binding
+public extension TextView {
 	enum Binding: TextViewBinding {
-		public typealias EnclosingBinder = TextView
-		public static func textViewBinding(_ binding: Binding) -> Binding { return binding }
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case textInputTraits(Constant<TextInputTraits>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case text(Dynamic<String>)
-		case attributedText(Dynamic<NSAttributedString>)
-		case font(Dynamic<UIFont?>)
-		case textColor(Dynamic<UIColor?>)
-		case isEditable(Dynamic<Bool>)
 		case allowsEditingTextAttributes(Dynamic<Bool>)
-		case dataDetectorTypes(Dynamic<UIDataDetectorTypes>)
-		case textAlignment(Dynamic<NSTextAlignment>)
-		case typingAttributes(Dynamic<[NSAttributedString.Key: Any]>)
-		case linkTextAttributes(Dynamic<[NSAttributedString.Key: Any]>)
-		case textContainerInset(Dynamic<UIEdgeInsets>)
-		case selectedRange(Dynamic<NSRange>)
+		case attributedText(Dynamic<NSAttributedString>)
 		case clearsOnInsertion(Dynamic<Bool>)
-		case isSelectable(Dynamic<Bool>)
-		case inputView(Dynamic<ViewConvertible?>)
+		case dataDetectorTypes(Dynamic<UIDataDetectorTypes>)
+		case font(Dynamic<UIFont?>)
 		case inputAccessoryView(Dynamic<ViewConvertible?>)
+		case inputView(Dynamic<ViewConvertible?>)
+		case isEditable(Dynamic<Bool>)
+		case isSelectable(Dynamic<Bool>)
+		case linkTextAttributes(Dynamic<[NSAttributedString.Key: Any]>)
+		case selectedRange(Dynamic<NSRange>)
+		case text(Dynamic<String>)
+		case textAlignment(Dynamic<NSTextAlignment>)
+		case textColor(Dynamic<UIColor?>)
+		case textContainerInset(Dynamic<UIEdgeInsets>)
+		case typingAttributes(Dynamic<[NSAttributedString.Key: Any]>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case scrollRangeToVisible(Signal<NSRange>)
 		
 		//	3. Action bindings are triggered by the object after construction.
 		case didBeginEditing(SignalInput<UITextView>)
-		case didEndEditing(SignalInput<UITextView>)
 		case didChange(SignalInput<UITextView>)
 		case didChangeSelection(SignalInput<UITextView>)
+		case didEndEditing(SignalInput<UITextView>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case shouldBeginEditing((UITextView) -> Bool)
-		case shouldEndEditing((UITextView) -> Bool)
 		case shouldChangeText((UITextView, NSRange, String) -> Bool)
+		case shouldEndEditing((UITextView) -> Bool)
+		
 		@available(iOS 10.0, *) case shouldInteractWithAttachment((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)
 		@available(iOS 10.0, *) case shouldInteractWithURL((UITextView, URL, NSRange, UITextItemInteraction) -> Bool)
 	}
-	
-	struct Preparer: BinderEmbedderConstructor {
-		public typealias EnclosingBinder = TextView
-		public var linkedPreparer = Inherited.Preparer()
+}
+
+// MARK: - Binder Part 3: Preparer
+public extension TextView {
+	struct Preparer: BinderDelegateEmbedderConstructor {
+		public typealias Binding = TextView.Binding
+		public typealias Inherited = ScrollView.Preparer
+		public typealias Instance = UITextView
 		
-		public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-		public func constructInstance(subclass: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-		
-		// Actual delegate construction is handled by the scroll view preparer
-		public init() {
-			self.init(delegateClass: Delegate.self)
-		}
+		public var inherited = Inherited()
+		public var dynamicDelegate: Delegate? = nil
+		public let delegateClass: Delegate.Type
 		public init(delegateClass: Delegate.Type) {
-			linkedPreparer = Inherited.Preparer(delegateClass: delegateClass)
+			self.delegateClass = delegateClass
 		}
-		var dynamicDelegate: Delegate? { return linkedPreparer.dynamicDelegate as? Delegate }
-		mutating func delegate() -> Delegate { return linkedPreparer.delegate() as! Delegate }
-		
-		mutating func prepareBinding(_ binding: Binding) {
-			switch binding {
-			case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
-			case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
-			case .didBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
-			case .didEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
-			case .shouldChangeText(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
-			case .didChange(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
-			case .didChangeSelection(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
-			case .shouldInteractWithAttachment(let x):
-				guard #available(iOS 10.0, *) else { return }
-				let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?)
-				delegate().addSelector(s).shouldInteractWithAttachment = x
-			case .shouldInteractWithURL(let x):
-				guard #available(iOS 10.0, *) else { return }
-				let s = #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?)
-				delegate().addSelector(s).shouldInteractWithAttachment = x
-			case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-			default: break
-			}
+		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+	}
+}
+
+// MARK: - Binder Part 4: Preparer overrides
+public extension TextView.Preparer {
+	mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-			switch binding {
-			case .textInputTraits(let x):
-				return AggregateLifetime(lifetimes: x.value.bindings.lazy.compactMap { trait in
-					switch trait {
-					case .autocapitalizationType(let y): return y.apply(instance) { i, v in i.autocapitalizationType = v }
-					case .autocorrectionType(let y): return y.apply(instance) { i, v in i.autocorrectionType = v }
-					case .spellCheckingType(let y): return y.apply(instance) { i, v in i.spellCheckingType = v }
-					case .enablesReturnKeyAutomatically(let y): return y.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
-					case .keyboardAppearance(let y): return y.apply(instance) { i, v in i.keyboardAppearance = v }
-					case .keyboardType(let y): return y.apply(instance) { i, v in i.keyboardType = v }
-					case .returnKeyType(let y): return y.apply(instance) { i, v in i.returnKeyType = v }
-					case .isSecureTextEntry(let y): return y.apply(instance) { i, v in i.isSecureTextEntry = v }
-					case .textContentType(let y):
-						guard #available(iOS 10.0, *) else { return }
-						return y.apply(instance) { i, v in i.textContentType = v }
-					case .smartDashesType(let x):
-						guard #available(iOS 11.0, *) else { return }
-						return x.apply(instance) { i, v in i.smartDashesType = v }
-					case .smartQuotesType(let x):
-						guard #available(iOS 11.0, *) else { return }
-						return x.apply(instance) { i, v in i.smartQuotesType = v }
-					case .smartInsertDeleteType(let x):
-						guard #available(iOS 11.0, *) else { return }
-						return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
-					}
-				})
-			case .text(let x): return x.apply(instance) { i, v in i.text = v }
-			case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
-			case .font(let x): return x.apply(instance) { i, v in i.font = v }
-			case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
-			case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
-			case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
-			case .dataDetectorTypes(let x): return x.apply(instance) { i, v in i.dataDetectorTypes = v }
-			case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
-			case .typingAttributes(let x): return x.apply(instance) { i, v in i.typingAttributes = v }
-			case .linkTextAttributes(let x): return x.apply(instance) { i, v in i.linkTextAttributes = v }
-			case .textContainerInset(let x): return x.apply(instance) { i, v in i.textContainerInset = v }
-			case .selectedRange(let x): return x.apply(instance) { i, v in i.selectedRange = v }
-			case .clearsOnInsertion(let x): return x.apply(instance) { i, v in i.clearsOnInsertion = v }
-			case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
-			case .inputView(let x): return x.apply(instance) { i, v in i.inputView = v?.uiView() }
-			case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v?.uiView() }
-			case .scrollRangeToVisible(let x): return x.apply(instance) { i, v in i.scrollRangeToVisible(v) }
-			case .shouldBeginEditing: return nil
-			case .didBeginEditing: return nil
-			case .shouldEndEditing: return nil
-			case .didEndEditing: return nil
-			case .shouldChangeText: return nil
-			case .didChange: return nil
-			case .didChangeSelection: return nil
-			case .shouldInteractWithAttachment: return nil
-			case .shouldInteractWithURL: return nil
-			case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-			}
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+
+		// 2. Signal bindings are performed on the object after construction.
+			
+		//	3. Action bindings are triggered by the object after construction.
+		case .didBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
+		case .didChange(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
+		case .didChangeSelection(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
+		case .didEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
+		case .shouldChangeText(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
+		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
+		
+		case .shouldInteractWithAttachment(let x):
+			guard #available(iOS 10.0, *) else { return }
+			delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithURL(let x):
+			guard #available(iOS 10.0, *) else { return }
+			delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
+		default: break
 		}
 	}
 	
+	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		switch binding {
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .textInputTraits(let x): return x.value.apply(to: instance)
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
+		case .attributedText(let x): return x.apply(instance) { i, v in i.attributedText = v }
+		case .clearsOnInsertion(let x): return x.apply(instance) { i, v in i.clearsOnInsertion = v }
+		case .dataDetectorTypes(let x): return x.apply(instance) { i, v in i.dataDetectorTypes = v }
+		case .font(let x): return x.apply(instance) { i, v in i.font = v }
+		case .inputAccessoryView(let x): return x.apply(instance) { i, v in i.inputAccessoryView = v?.uiView() }
+		case .inputView(let x): return x.apply(instance) { i, v in i.inputView = v?.uiView() }
+		case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
+		case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
+		case .linkTextAttributes(let x): return x.apply(instance) { i, v in i.linkTextAttributes = v }
+		case .selectedRange(let x): return x.apply(instance) { i, v in i.selectedRange = v }
+		case .text(let x): return x.apply(instance) { i, v in i.text = v }
+		case .textAlignment(let x): return x.apply(instance) { i, v in i.textAlignment = v }
+		case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
+		case .textContainerInset(let x): return x.apply(instance) { i, v in i.textContainerInset = v }
+		case .typingAttributes(let x): return x.apply(instance) { i, v in i.typingAttributes = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+		case .scrollRangeToVisible(let x): return x.apply(instance) { i, v in i.scrollRangeToVisible(v) }
+			
+		//	3. Action bindings are triggered by the object after construction.
+		case .didBeginEditing: return nil
+		case .didChange: return nil
+		case .didChangeSelection: return nil
+		case .didEndEditing: return nil
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .shouldBeginEditing: return nil
+		case .shouldChangeText: return nil
+		case .shouldEndEditing: return nil
+		
+		case .shouldInteractWithAttachment: return nil
+		case .shouldInteractWithURL: return nil
+		}
+	}
+}
+
+// MARK: - Binder Part 5: Storage and Delegate
+extension TextView.Preparer {
 	open class Storage: ScrollView.Preparer.Storage, UITextViewDelegate {}
 	
-	open class Delegate: ScrollView.Delegate, UITextViewDelegate {
-		public required init() {
-			super.init()
-		}
-		
+	open class Delegate: ScrollView.Preparer.Delegate, UITextViewDelegate {
 		open func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
 			return handler(ofType: ((UITextView) -> Bool).self)!(textView)
 		}
@@ -207,72 +203,98 @@ public class TextView: Binder, TextViewConvertible {
 			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
 		}
 		
-		open var shouldInteractWithAttachment: Any?
-		@available(iOS 10.0, *)
-		open func textView(_ textView: UITextView, shouldInteractWith textAttachment: NSTextAttachment, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-			return (shouldInteractWithAttachment as! (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)(textView, textAttachment, characterRange, interaction)
+		@available(iOS 10.0, *) open func textView(_ textView: UITextView, shouldInteractWith textAttachment: NSTextAttachment, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+			return handler(ofType: ((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool).self)!(textView, textAttachment, characterRange, interaction)
 		}
 		
-		open var shouldInteractWithURL: Any?
-		@available(iOS 10.0, *)
-		open func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-			return (shouldInteractWithAttachment as! (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)(textView, url, characterRange, interaction)
+		@available(iOS 10.0, *) open func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+			return handler(ofType: ((UITextView, URL, NSRange, UITextItemInteraction) -> Bool).self)!(textView, url, characterRange, interaction)
 		}
 	}
 }
 
+// MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextViewBinding {
+	public typealias TextViewName<V> = BindingName<V, TextView.Binding, Binding>
+	private typealias B = TextView.Binding
+	private static func name<V>(_ source: @escaping (V) -> TextView.Binding) -> TextViewName<V> {
+		return TextViewName<V>(source: source, downcast: Binding.textViewBinding)
+	}
+}
+public extension BindingName where Binding: TextViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .textViewBinding(TextView.Binding.$1(v)) }) }
-	public static var textInputTraits: BindingName<Constant<TextInputTraits>, Binding> { return BindingName<Constant<TextInputTraits>, Binding>({ v in .textViewBinding(TextView.Binding.textInputTraits(v)) }) }
-	public static var text: BindingName<Dynamic<String>, Binding> { return BindingName<Dynamic<String>, Binding>({ v in .textViewBinding(TextView.Binding.text(v)) }) }
-	public static var attributedText: BindingName<Dynamic<NSAttributedString>, Binding> { return BindingName<Dynamic<NSAttributedString>, Binding>({ v in .textViewBinding(TextView.Binding.attributedText(v)) }) }
-	public static var font: BindingName<Dynamic<UIFont?>, Binding> { return BindingName<Dynamic<UIFont?>, Binding>({ v in .textViewBinding(TextView.Binding.font(v)) }) }
-	public static var textColor: BindingName<Dynamic<UIColor?>, Binding> { return BindingName<Dynamic<UIColor?>, Binding>({ v in .textViewBinding(TextView.Binding.textColor(v)) }) }
-	public static var isEditable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textViewBinding(TextView.Binding.isEditable(v)) }) }
-	public static var allowsEditingTextAttributes: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textViewBinding(TextView.Binding.allowsEditingTextAttributes(v)) }) }
-	public static var dataDetectorTypes: BindingName<Dynamic<UIDataDetectorTypes>, Binding> { return BindingName<Dynamic<UIDataDetectorTypes>, Binding>({ v in .textViewBinding(TextView.Binding.dataDetectorTypes(v)) }) }
-	public static var textAlignment: BindingName<Dynamic<NSTextAlignment>, Binding> { return BindingName<Dynamic<NSTextAlignment>, Binding>({ v in .textViewBinding(TextView.Binding.textAlignment(v)) }) }
-	public static var typingAttributes: BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding> { return BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding>({ v in .textViewBinding(TextView.Binding.typingAttributes(v)) }) }
-	public static var linkTextAttributes: BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding> { return BindingName<Dynamic<[NSAttributedString.Key: Any]>, Binding>({ v in .textViewBinding(TextView.Binding.linkTextAttributes(v)) }) }
-	public static var textContainerInset: BindingName<Dynamic<UIEdgeInsets>, Binding> { return BindingName<Dynamic<UIEdgeInsets>, Binding>({ v in .textViewBinding(TextView.Binding.textContainerInset(v)) }) }
-	public static var selectedRange: BindingName<Dynamic<NSRange>, Binding> { return BindingName<Dynamic<NSRange>, Binding>({ v in .textViewBinding(TextView.Binding.selectedRange(v)) }) }
-	public static var clearsOnInsertion: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textViewBinding(TextView.Binding.clearsOnInsertion(v)) }) }
-	public static var isSelectable: BindingName<Dynamic<Bool>, Binding> { return BindingName<Dynamic<Bool>, Binding>({ v in .textViewBinding(TextView.Binding.isSelectable(v)) }) }
-	public static var inputView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .textViewBinding(TextView.Binding.inputView(v)) }) }
-	public static var inputAccessoryView: BindingName<Dynamic<ViewConvertible?>, Binding> { return BindingName<Dynamic<ViewConvertible?>, Binding>({ v in .textViewBinding(TextView.Binding.inputAccessoryView(v)) }) }
-	public static var scrollRangeToVisible: BindingName<Signal<NSRange>, Binding> { return BindingName<Signal<NSRange>, Binding>({ v in .textViewBinding(TextView.Binding.scrollRangeToVisible(v)) }) }
-	public static var didBeginEditing: BindingName<SignalInput<UITextView>, Binding> { return BindingName<SignalInput<UITextView>, Binding>({ v in .textViewBinding(TextView.Binding.didBeginEditing(v)) }) }
-	public static var didEndEditing: BindingName<SignalInput<UITextView>, Binding> { return BindingName<SignalInput<UITextView>, Binding>({ v in .textViewBinding(TextView.Binding.didEndEditing(v)) }) }
-	public static var didChange: BindingName<SignalInput<UITextView>, Binding> { return BindingName<SignalInput<UITextView>, Binding>({ v in .textViewBinding(TextView.Binding.didChange(v)) }) }
-	public static var didChangeSelection: BindingName<SignalInput<UITextView>, Binding> { return BindingName<SignalInput<UITextView>, Binding>({ v in .textViewBinding(TextView.Binding.didChangeSelection(v)) }) }
-	public static var shouldBeginEditing: BindingName<(UITextView) -> Bool, Binding> { return BindingName<(UITextView) -> Bool, Binding>({ v in .textViewBinding(TextView.Binding.shouldBeginEditing(v)) }) }
-	public static var shouldEndEditing: BindingName<(UITextView) -> Bool, Binding> { return BindingName<(UITextView) -> Bool, Binding>({ v in .textViewBinding(TextView.Binding.shouldEndEditing(v)) }) }
-	public static var shouldChangeText: BindingName<(UITextView, NSRange, String) -> Bool, Binding> { return BindingName<(UITextView, NSRange, String) -> Bool, Binding>({ v in .textViewBinding(TextView.Binding.shouldChangeText(v)) }) }
-	@available(iOS 10.0, *)
-	public static var shouldInteractWithAttachment: BindingName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool, Binding> { return BindingName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool, Binding>({ v in .textViewBinding(TextView.Binding.shouldInteractWithAttachment(v)) }) }
-	@available(iOS 10.0, *)
-	public static var shouldInteractWithURL: BindingName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool, Binding> { return BindingName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool, Binding>({ v in .textViewBinding(TextView.Binding.shouldInteractWithURL(v)) }) }
+	// With:    static var $1: TextViewName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var textInputTraits: TextViewName<Constant<TextInputTraits>> { return .name(B.textInputTraits) }
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var allowsEditingTextAttributes: TextViewName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
+	static var attributedText: TextViewName<Dynamic<NSAttributedString>> { return .name(B.attributedText) }
+	static var clearsOnInsertion: TextViewName<Dynamic<Bool>> { return .name(B.clearsOnInsertion) }
+	static var dataDetectorTypes: TextViewName<Dynamic<UIDataDetectorTypes>> { return .name(B.dataDetectorTypes) }
+	static var font: TextViewName<Dynamic<UIFont?>> { return .name(B.font) }
+	static var inputAccessoryView: TextViewName<Dynamic<ViewConvertible?>> { return .name(B.inputAccessoryView) }
+	static var inputView: TextViewName<Dynamic<ViewConvertible?>> { return .name(B.inputView) }
+	static var isEditable: TextViewName<Dynamic<Bool>> { return .name(B.isEditable) }
+	static var isSelectable: TextViewName<Dynamic<Bool>> { return .name(B.isSelectable) }
+	static var linkTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.linkTextAttributes) }
+	static var selectedRange: TextViewName<Dynamic<NSRange>> { return .name(B.selectedRange) }
+	static var text: TextViewName<Dynamic<String>> { return .name(B.text) }
+	static var textAlignment: TextViewName<Dynamic<NSTextAlignment>> { return .name(B.textAlignment) }
+	static var textColor: TextViewName<Dynamic<UIColor?>> { return .name(B.textColor) }
+	static var textContainerInset: TextViewName<Dynamic<UIEdgeInsets>> { return .name(B.textContainerInset) }
+	static var typingAttributes: TextViewName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.typingAttributes) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	static var scrollRangeToVisible: TextViewName<Signal<NSRange>> { return .name(B.scrollRangeToVisible) }
+	
+	//	3. Action bindings are triggered by the object after construction.
+	static var didBeginEditing: TextViewName<SignalInput<UITextView>> { return .name(B.didBeginEditing) }
+	static var didChange: TextViewName<SignalInput<UITextView>> { return .name(B.didChange) }
+	static var didChangeSelection: TextViewName<SignalInput<UITextView>> { return .name(B.didChangeSelection) }
+	static var didEndEditing: TextViewName<SignalInput<UITextView>> { return .name(B.didEndEditing) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var shouldBeginEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldBeginEditing) }
+	static var shouldChangeText: TextViewName<(UITextView, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
+	static var shouldEndEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldEndEditing) }
+	
+	@available(iOS 10.0, *) static var shouldInteractWithAttachment: TextViewName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithAttachment) }
+	@available(iOS 10.0, *) static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithURL) }
 }
 
+// MARK: - Binder Part 7: Convertible protocols (if constructible)
 public protocol TextViewConvertible: ScrollViewConvertible {
-	func uiTextView() -> TextView.Instance
+	func uiTextView() -> UITextView
 }
 extension TextViewConvertible {
 	public func uiScrollView() -> ScrollView.Instance { return uiTextView() }
 }
-extension TextView.Instance: TextViewConvertible {
-	public func uiTextView() -> TextView.Instance { return self }
+extension UITextView: TextViewConvertible {
+	public func uiTextView() -> UITextView { return self }
+}
+public extension TextView {
+	func uiTextView() -> UITextView { return instance() }
 }
 
+// MARK: - Binder Part 8: Downcast protocols
 public protocol TextViewBinding: ScrollViewBinding {
 	static func textViewBinding(_ binding: TextView.Binding) -> Self
 }
-extension TextViewBinding {
-	public static func scrollViewBinding(_ binding: ScrollView.Binding) -> Self {
+public extension TextViewBinding {
+	static func scrollViewBinding(_ binding: ScrollView.Binding) -> Self {
 		return textViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TextView.Binding {
+	public typealias Preparer = TextView.Preparer
+	static func textViewBinding(_ binding: TextView.Binding) -> TextView.Binding {
+		return binding
+	}
+}
+
+// MARK: - Binder Part 9: Other supporting types
 
 #endif

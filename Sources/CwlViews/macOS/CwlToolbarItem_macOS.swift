@@ -176,7 +176,7 @@ public extension BindingName where Binding: ToolbarItemBinding {
 	static var validate: ToolbarItemName<(NSToolbarItem) -> Bool> { return .name(B.validate) }
 
 	// Composite binding names
-	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ToolbarItemName<SignalInput<Value>> {
+	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ToolbarItemName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, ToolbarItem.Binding.action, Binding.toolbarItemBinding)
 	}
 }

@@ -9,14 +9,17 @@
 import XCTest
 @testable import CwlViews
 
-func appConstructor(_ binding: Application.Binding) -> Application.Instance {
-	let storedConstruction = Application.Storage.storedBinderConstruction { Application(binding) }
-	let storage = Application.Storage()
-	withExtendedLifetime(storage) {
-		UIApplication.shared.delegate = storage
-		Application.Storage.applyStoredBinderConstructionToGlobalDelegate(storedConstruction)
+extension Application: TestableBinder {
+	static func constructor(binding: Application.Binding) -> Preparer.Instance {
+		Application.Preparer.Storage.storedApplicationConstructor = { Application(binding) }
+		let storage = Application.Preparer.Storage()
+		withExtendedLifetime(storage) {
+			UIApplication.shared.delegate = storage
+			storage.applyToSharedApplication()
+		}
+		return UIApplication.shared
 	}
-	return UIApplication.shared
+	static var shoudPerformReleaseCheck: Bool { return false }
 }
 
 class CwlApplicationTests: XCTestCase {
@@ -25,143 +28,100 @@ class CwlApplicationTests: XCTestCase {
 	
 	// MARK: - 1. Value bindings
 	
-	func testAdditionalWindows() {
-		testValueBinding(
-			name: .additionalWindows,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: ([Window()], 1),
-			second: ([], 0),
-			getter: { $0.windows.count }
-		)
-	}
 	func testIconBadgeNumber() {
-		testValueBinding(
+		Application.testValueBinding(
 			name: .iconBadgeNumber,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: (1, 1),
-			second: (0, 0),
+			inputs: (1, 0),
+			outputs: (0, 1, 0),
 			getter: { $0.applicationIconBadgeNumber }
 		)
 	}
 	func testIsIdleTimerDisabled() {
-		testValueBinding(
+		Application.testValueBinding(
 			name: .isIdleTimerDisabled,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isIdleTimerDisabled }
 		)
 	}
 	func testIsNetworkActivityIndicatorVisible() {
-		testValueBinding(
+		Application.testValueBinding(
 			name: .isNetworkActivityIndicatorVisible,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isNetworkActivityIndicatorVisible }
 		)
 	}
 	func testShortcutItems() {
 		UIApplication.shared.shortcutItems = []
-		testValueBinding(
+		Application.testValueBinding(
 			name: .shortcutItems,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: 0,
-			first: ([UIApplicationShortcutItem(type: "a", localizedTitle: "b")], 1),
-			second: ([], 0),
+			inputs: ([UIApplicationShortcutItem(type: "a", localizedTitle: "b")], []),
+			outputs: (0, 1, 0),
 			getter: { $0.shortcutItems?.count ?? 0 }
 		)
 	}
 	func testSupportShakeToEdit() {
-		testValueBinding(
+		Application.testValueBinding(
 			name: .supportShakeToEdit,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: true,
-			first: (false, false),
-			second: (true, true),
+			inputs: (false, true),
+			outputs: (true, false, true),
 			getter: { $0.applicationSupportsShakeToEdit }
 		)
 	}
 	func testWindow() {
-		testValueBinding(
+		Application.testValueBinding(
 			name: .window,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: nil,
-			first: (Window(.tag -- 1234), 1234),
-			second: (nil, nil),
-			getter: { ($0.delegate as? Application.Storage)?.window?.tag }
+			inputs: (Window(.tag -- 1234), nil) as (WindowConvertible?, WindowConvertible?),
+			outputs: (nil, 1234, nil),
+			getter: { ($0.delegate as? Application.Preparer.Storage)?.window?.tag }
 		)
 	}
 	
 	// MARK: - 2. Signal bindings
 	
 	func testIgnoreInteractionEvents() {
-		testSignalBinding(
+		Application.testSignalBinding(
 			name: .ignoreInteractionEvents,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isIgnoringInteractionEvents }
 		)
 	}
 	func testRegisterForRemoteNotifications() {
-		testSignalBinding(
+		Application.testSignalBinding(
 			name: .registerForRemoteNotifications,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			initial: false,
-			first: (true, true),
-			second: (false, false),
+			inputs: (true, false),
+			outputs: (false, true, false),
 			getter: { $0.isRegisteredForRemoteNotifications }
 		)
 	}
 
 	// MARK: - 3. Action bindings
 	func testDidBecomeActive() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .didBecomeActive,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationDidBecomeActive?($0) },
 			validate: { _ in true }
 		)
 	}
 	func testDidEnterBackground() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .didEnterBackground,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationDidEnterBackground?($0) },
 			validate: { _ in true }
 		)
 	}
 	func testDidFailToContinueUserActivity() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .didFailToContinueUserActivity,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, didFailToContinueUserActivityWithType: "abcd", error: TestError("efgh")) },
 			validate: { tuple in tuple.0 == "abcd" && (tuple.1 as? TestError) == TestError("efgh") }
 		)
 	}
 	func testDidReceiveMemoryWarning() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .didReceiveMemoryWarning,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationDidReceiveMemoryWarning?($0) },
 			validate: { _ in true }
 		)
@@ -171,10 +131,8 @@ class CwlApplicationTests: XCTestCase {
 		let callback = { (r: UIBackgroundFetchResult) in
 			result = r
 		}
-		testActionBinding(
+		Application.testActionBinding(
 			name: .didReceiveRemoteNotification,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, didReceiveRemoteNotification: ["a": "b"], fetchCompletionHandler: callback) },
 			validate: { tuple in
 				tuple.callback.send(value: UIBackgroundFetchResult.noData)
@@ -183,10 +141,8 @@ class CwlApplicationTests: XCTestCase {
 		)
 	}
 	func testDidRegisterRemoteNotifications() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .didRegisterRemoteNotifications,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, didRegisterForRemoteNotificationsWithDeviceToken: Data(base64Encoded: "1234")!) },
 			validate: { token in token.value == Data(base64Encoded: "1234")! }
 		)
@@ -196,10 +152,8 @@ class CwlApplicationTests: XCTestCase {
 		let callback = { () -> Void in
 			received = true
 		}
-		testActionBinding(
+		Application.testActionBinding(
 			name: .handleEventsForBackgroundURLSession,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, handleEventsForBackgroundURLSession: "abcd", completionHandler: callback) },
 			validate: { tuple in
 				tuple.callback.send(value: ())
@@ -212,10 +166,8 @@ class CwlApplicationTests: XCTestCase {
 		let callback = { (r: [AnyHashable: Any]?) -> Void in
 			result = r
 		}
-		testActionBinding(
+		Application.testActionBinding(
 			name: .handleWatchKitExtensionRequest,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, handleWatchKitExtensionRequest: ["b": "c"], reply: callback) },
 			validate: { tuple in
 				tuple.callback.send(value: ["d": "e"])
@@ -228,10 +180,8 @@ class CwlApplicationTests: XCTestCase {
 		let callback = { (r: Bool) -> Void in
 			result = r
 		}
-		testActionBinding(
+		Application.testActionBinding(
 			name: .performAction,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, performActionFor: UIApplicationShortcutItem(type: "a", localizedTitle: "b"), completionHandler: callback) },
 			validate: { tuple in
 				tuple.callback.send(value: true)
@@ -244,10 +194,8 @@ class CwlApplicationTests: XCTestCase {
 		let callback = { (r: UIBackgroundFetchResult) -> Void in
 			result = r
 		}
-		testActionBinding(
+		Application.testActionBinding(
 			name: .performFetch,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.application?($0, performFetchWithCompletionHandler: callback) },
 			validate: { input in
 				input.send(value: UIBackgroundFetchResult.noData)
@@ -256,46 +204,36 @@ class CwlApplicationTests: XCTestCase {
 		)
 	}
 	func testProtectedDataDidBecomeAvailable() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .protectedDataDidBecomeAvailable,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationProtectedDataDidBecomeAvailable?($0) },
 			validate: { _ in true }
 		)
 	}
 	func testProtectedDataWillBecomeUnavailable() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .protectedDataWillBecomeUnavailable,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationProtectedDataWillBecomeUnavailable?($0) },
 			validate: { _ in true }
 		)
 	}
 	func testSignificantTimeChange() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .significantTimeChange,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { NotificationCenter.default.post(Notification(name: UIApplication.significantTimeChangeNotification, object: $0)) },
 			validate: { _ in true }
 		)
 	}
 	func testWillEnterForeground() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .willEnterForeground,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationWillEnterForeground?($0) },
 			validate: { _ in true }
 		)
 	}
 	func testWillResignActive() {
-		testActionBinding(
+		Application.testActionBinding(
 			name: .willResignActive,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			trigger: { $0.delegate?.applicationWillResignActive?($0) },
 			validate: { _ in true }
 		)
@@ -313,10 +251,8 @@ class CwlApplicationTests: XCTestCase {
 			received = r
 			return true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .continueUserActivity,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, continue: NSUserActivity(activityType: "asdf"), restorationHandler: callbackHandler) },
 			validate: {
@@ -329,17 +265,15 @@ class CwlApplicationTests: XCTestCase {
 		let archiver = NSKeyedArchiver(requiringSecureCoding: false)
 		try! archiver.encodeEncodable("asdf", forKey: "qwer")
 		
-		var received: NSCoder? = nil
-		let handler = { (r: NSCoder) -> Void in
+		var received: NSKeyedUnarchiver? = nil
+		let handler = { (r: NSKeyedUnarchiver) -> Void in
 			received = r
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .didDecodeRestorableState,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { try! $0.delegate?.application?($0, didDecodeRestorableStateWith: NSKeyedUnarchiver(forReadingFrom: archiver.encodedData)) },
-			validate: { try! (received as? NSKeyedUnarchiver)?.decodeTopLevelDecodable(String.self, forKey: "qwer") == "asdf" }
+			validate: { try! received?.decodeTopLevelDecodable(String.self, forKey: "qwer") == "asdf" }
 		)
 	}
 	func testDidFinishLaunching() {
@@ -348,10 +282,8 @@ class CwlApplicationTests: XCTestCase {
 			received = r
 			return true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .didFinishLaunching,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, didFinishLaunchingWithOptions: [.url: URL(fileURLWithPath: "qwer")]) },
 			validate: { received?[.url] as? URL == URL(fileURLWithPath: "qwer") }
@@ -362,10 +294,8 @@ class CwlApplicationTests: XCTestCase {
 		let handler = { (r: NSUserActivity) -> Void in
 			received = r
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .didUpdate,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, didUpdate: NSUserActivity(activityType: "xcvb")) },
 			validate: { received?.activityType == "xcvb" }
@@ -379,10 +309,8 @@ class CwlApplicationTests: XCTestCase {
 			options = o
 			return true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .open,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, open: URL(fileURLWithPath: "asdf"), options: [UIApplication.OpenURLOptionsKey.annotation: "qwer"]) },
 			validate: { url == URL(fileURLWithPath: "asdf") && options?[.annotation] as? String == "qwer" }
@@ -394,10 +322,8 @@ class CwlApplicationTests: XCTestCase {
 			received = r
 			return true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .shouldAllowExtensionPointIdentifier,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, shouldAllowExtensionPointIdentifier: .keyboard) },
 			validate: { received == .keyboard }
@@ -408,43 +334,11 @@ class CwlApplicationTests: XCTestCase {
 		let handler = { () -> Void in
 			received = true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .shouldRequestHealthAuthorization,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { $0.delegate?.applicationShouldRequestHealthAuthorization?($0) },
 			validate: { received }
-		)
-	}
-	func testShouldRestoreApplicationState() {
-		var received: NSCoder? = nil
-		let handler = { (r: NSCoder) -> Bool in
-			received = r
-			return true
-		}
-		testDelegateBinding(
-			name: .shouldRestoreApplicationState,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			handler: handler,
-			trigger: { _ = $0.delegate?.application?($0, shouldRestoreApplicationState: NSKeyedArchiver(forWritingWith: NSMutableData())) },
-			validate: { received != nil }
-		)
-	}
-	func testShouldSaveApplicationState() {
-		var received: NSCoder? = nil
-		let handler = { (r: NSCoder) -> Bool in
-			received = r
-			return true
-		}
-		testDelegateBinding(
-			name: .shouldSaveApplicationState,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
-			handler: handler,
-			trigger: { _ = $0.delegate?.application?($0, shouldSaveApplicationState: NSKeyedArchiver(forWritingWith: NSMutableData())) },
-			validate: { received != nil }
 		)
 	}
 	func testViewControllerWithRestorationPath() {
@@ -453,10 +347,8 @@ class CwlApplicationTests: XCTestCase {
 			received = path
 			return UIViewController(nibName: nil, bundle: nil)
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .viewControllerWithRestorationPath,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, viewControllerWithRestorationIdentifierPath: ["asdf"], coder: NSKeyedArchiver(forWritingWith: NSMutableData())) },
 			validate: { received == ["asdf"] }
@@ -468,10 +360,8 @@ class CwlApplicationTests: XCTestCase {
 			received = r
 			return true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .willContinueUserActivity,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, willContinueUserActivityWithType: "asdf") },
 			validate: { received == "asdf" }
@@ -479,14 +369,12 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testWillEncodeRestorableState() {
 		let archiver = NSKeyedArchiver(requiringSecureCoding: false)
-		var received: NSCoder? = nil
-		let handler = { (r: NSCoder) -> Void in
+		var received: NSKeyedArchiver? = nil
+		let handler = { (r: NSKeyedArchiver) -> Void in
 			received = r
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .willEncodeRestorableState,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { $0.delegate?.application?($0, willEncodeRestorableStateWith: archiver) },
 			validate: { received != nil }
@@ -498,10 +386,8 @@ class CwlApplicationTests: XCTestCase {
 			received = r?[.url] as? URL
 			return true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .willFinishLaunching,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { _ = $0.delegate?.application?($0, willFinishLaunchingWithOptions: [UIApplication.LaunchOptionsKey.url: URL(fileURLWithPath: "asdf")]) },
 			validate: { received == URL(fileURLWithPath: "asdf") }
@@ -512,10 +398,8 @@ class CwlApplicationTests: XCTestCase {
 		let handler = { () -> Void in
 			received = true
 		}
-		testDelegateBinding(
+		Application.testDelegateBinding(
 			name: .willTerminate,
-			constructor: appConstructor,
-			skipReleaseCheck: true,
 			handler: handler,
 			trigger: { $0.delegate?.applicationWillTerminate?($0) },
 			validate: { received }

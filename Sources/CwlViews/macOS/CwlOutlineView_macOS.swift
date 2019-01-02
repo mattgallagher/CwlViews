@@ -957,7 +957,7 @@ public extension BindingName where Binding: OutlineViewBinding {
 	static var validateDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedTreePath: TreePath<Binding.NodeDataType>?, _ proposedChildIndex: Int) -> NSDragOperation> { return .name(B.validateDrop) }
 
 	// Composite binding names
-	public static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> OutlineViewName<SignalInput<Value>> {
+	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> OutlineViewName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, OutlineView.Binding.doubleAction, Binding.outlineViewBinding)
 	}
 }

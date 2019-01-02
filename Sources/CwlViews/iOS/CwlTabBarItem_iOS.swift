@@ -118,16 +118,11 @@ public extension TabBarItem.Preparer {
 			return x.apply(instance) { i, v in i.badgeColor = v }
 		case .badgeTextAttributes(let x):
 			guard #available(iOS 10.0, *) else { return nil }
-			var previous: ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>? = nil
-			return x.apply(instance) { i, v in
-				for c in previous?.pairs ?? [] {
-					i.setBadgeTextAttributes(nil, for: c.0)
-				}
-				previous = v
-				for c in v.pairs {
-					i.setBadgeTextAttributes(c.1, for: c.0)
-				}
-			}
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setBadgeTextAttributes(nil, for: scope) },
+				applyNew: { i, scope, v in i.setBadgeTextAttributes(v, for: scope) }
+			)
 		}
 	}
 }

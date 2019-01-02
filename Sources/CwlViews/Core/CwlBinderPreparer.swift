@@ -65,34 +65,36 @@ public protocol BinderPreparer: DefaultConstructable {
 }
 
 public extension BinderPreparer {
+	mutating func inheritedPrepareBinding(_ binding: Binding) {
+		guard let ls = inheritedBinding(from: binding) else { return }
+		inherited.prepareBinding(ls)
+	}
+
 	mutating func prepareBinding(_ binding: Binding) {
-		if let ls = inheritedBinding(from: binding) {
-			inherited.prepareBinding(ls)
-		}
+		inheritedPrepareBinding(binding)
 	}
 	
 	func inheritedPrepareInstance(_ instance: Instance, storage: Storage) {
-		if let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage {
-			inherited.prepareInstance(i, storage: s)
-		}
+		guard let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage else { return }
+		inherited.prepareInstance(i, storage: s)
 	}
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
 	}
+	
+	func inheritedApplyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+		guard let ls = inheritedBinding(from: binding), let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage else { return nil }
+		return inherited.applyBinding(ls, instance: i, storage: s)
+	}
 
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
-		if let ls = inheritedBinding(from: binding), let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage {
-			return inherited.applyBinding(ls, instance: i, storage: s)
-		}
-		return nil
+		return inheritedApplyBinding(binding, instance: instance, storage: storage)
 	}
 	
 	func inheritedFinalizedInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-		if let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage {
-			return inherited.finalizeInstance(i, storage: s)
-		}
-		return nil
+		guard let i = instance as? Inherited.Instance, let s = storage as? Inherited.Storage else { return nil }
+		return inherited.finalizeInstance(i, storage: s)
 	}
 	
 	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {

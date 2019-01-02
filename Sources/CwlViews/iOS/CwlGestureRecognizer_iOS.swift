@@ -199,8 +199,12 @@ public extension BindingName where Binding: GestureRecognizerBinding {
 	static var shouldRequireFailure: GestureRecognizerName<(UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool> { return .name(B.shouldRequireFailure) }
 
 	// Composite binding names
-	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {
-		return Binding.mappedInputName(GestureRecognizer.Binding.action, Binding.gestureRecognizerBinding) { sender in (sender as! Binding.Preparer.Instance)[keyPath: keyPath] }
+	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {
+		return Binding.mappedInputName(
+			map: { sender in (sender as! Binding.Preparer.Instance)[keyPath: keyPath] },
+			binding: GestureRecognizer.Binding.action,
+			downcast: Binding.gestureRecognizerBinding
+		)
 	}
 }
 

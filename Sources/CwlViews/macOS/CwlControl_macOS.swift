@@ -207,10 +207,10 @@ public extension BindingName where Binding: ControlBinding {
 	static var textDidEndEditing: ControlName<(NSText) -> Void> { return .name(B.textDidEndEditing) }
 
 	// Composite binding names
-	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
+	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, Control.Binding.action, Binding.controlBinding)
 	}
-	public static var stringChanged: ControlName<SignalInput<String>> {
+	static var stringChanged: ControlName<SignalInput<String>> {
 		return Binding.compositeName(
 			source: { input in { text in _ = input.send(value: text.string) } },
 			translate: Control.Binding.textDidChange,

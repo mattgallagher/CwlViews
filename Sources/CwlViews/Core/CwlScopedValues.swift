@@ -39,3 +39,19 @@ public struct ScopedValues<Scope, Value>: ExpressibleByArrayLiteral {
 		return ScopedValues(scope: scope, value: value)
 	}
 }
+
+extension Dynamic {
+	// Gets the subsequent (i.e. after construction) values from the `Dynamic`
+	public func apply<I: AnyObject, Scope, V>(instance: I, removeOld: @escaping (I, Scope, V) -> Void, applyNew: @escaping (I, Scope, V) -> Void) -> Lifetime? where ScopedValues<Scope, V> == Value {
+		var previous: ScopedValues<Scope, V>? = nil
+		return apply(instance) { i, v in
+			for (scope, value) in previous?.pairs ?? [] {
+				removeOld(instance, scope, value)
+			}
+			previous = v
+			for (scope, value) in v.pairs {
+				applyNew(instance, scope, value)
+			}
+		}
+	}
+}

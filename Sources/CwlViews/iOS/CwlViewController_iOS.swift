@@ -36,38 +36,38 @@ public extension ViewController {
 		case navigationItem(Constant<NavigationItem>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case view(Dynamic<ViewConvertible>)
-		case title(Dynamic<String>)
-		case preferredContentSize(Dynamic<CGSize>)
-		case modalPresentationStyle(Dynamic<UIModalPresentationStyle>)
-		case modalTransitionStyle(Dynamic<UIModalTransitionStyle>)
-		case isModalInPopover(Dynamic<Bool>)
 		case definesPresentationContext(Dynamic<Bool>)
-		case providesPresentationContextTransitionStyle(Dynamic<Bool>)
-		case transitioningDelegate(Dynamic<UIViewControllerTransitioningDelegate>)
 		case edgesForExtendedLayout(Dynamic<UIRectEdge>)
 		case extendedLayoutIncludesOpaqueBars(Dynamic<Bool>)
-		case restorationIdentifier(Dynamic<String?>)
-		case restorationClass(Dynamic<UIViewControllerRestoration.Type?>)
-		case modalPresentationCapturesStatusBarAppearance(Dynamic<Bool>)
 		case hidesBottomBarWhenPushed(Dynamic<Bool>)
-		case toolbarItems(Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>)
-		case tabBarItem(Dynamic<TabBarItemConvertible>)
 		case isEditing(Signal<SetOrAnimate<Bool>>)
+		case isModalInPopover(Dynamic<Bool>)
+		case modalPresentationCapturesStatusBarAppearance(Dynamic<Bool>)
+		case modalPresentationStyle(Dynamic<UIModalPresentationStyle>)
+		case modalTransitionStyle(Dynamic<UIModalTransitionStyle>)
+		case preferredContentSize(Dynamic<CGSize>)
+		case providesPresentationContextTransitionStyle(Dynamic<Bool>)
+		case restorationClass(Dynamic<UIViewControllerRestoration.Type?>)
+		case restorationIdentifier(Dynamic<String?>)
+		case tabBarItem(Dynamic<TabBarItemConvertible>)
+		case title(Dynamic<String>)
+		case toolbarItems(Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>)
+		case transitioningDelegate(Dynamic<UIViewControllerTransitioningDelegate>)
+		case view(Dynamic<ViewConvertible>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case present(Signal<ModalPresentation>)
 		
 		// 3. Action bindings are triggered by the object after construction.
-		case traitCollectionDidChange(SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>)
-		case willAppear(SignalInput<Bool>)
 		case didAppear(SignalInput<Bool>)
 		case didDisappear(SignalInput<Bool>)
+		case traitCollectionDidChange(SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>)
+		case willAppear(SignalInput<Bool>)
 		case willDisappear(SignalInput<Bool>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case loadView(() -> ViewConvertible)
 		case didReceiveMemoryWarning(() -> Void)
+		case loadView(() -> ViewConvertible)
 	}
 }
 
@@ -94,13 +94,15 @@ public extension ViewController {
 public extension ViewController.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
-		case .loadView(let x):
-			assert(view == nil, "Construct the view using either .loadView or .view, not both.")
-			loadView = x
+		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+		
 		case .view(let x):
 			assert(loadView == nil, "Construct the view using either .loadView or .view, not both.")
 			view = x.initialSubsequent()
-		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
+
+		case .loadView(let x):
+			assert(view == nil, "Construct the view using either .loadView or .view, not both.")
+			loadView = x
 		default: break
 		}
 	}
@@ -121,58 +123,68 @@ public extension ViewController.Preparer {
 	
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
-		case .loadView: return nil
+		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+			
+		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .navigationItem(let x):
+			x.value.apply(to: instance.navigationItem)
+			return nil
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .definesPresentationContext(let x): return x.apply(instance) { i, v in i.definesPresentationContext = v }
+		case .edgesForExtendedLayout(let x): return x.apply(instance) { i, v in i.edgesForExtendedLayout = v }
+		case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance) { i, v in i.extendedLayoutIncludesOpaqueBars = v }
+		case .hidesBottomBarWhenPushed(let x): return x.apply(instance) { i, v in i.hidesBottomBarWhenPushed = v }
+		case .isEditing(let x): return x.apply(instance) { i, v in i.setEditing(v.value, animated: v.isAnimated) }
+		case .isModalInPopover(let x): return x.apply(instance) { i, v in i.isModalInPopover = v }
+		case .modalPresentationCapturesStatusBarAppearance(let x): return x.apply(instance) { i, v in i.modalPresentationCapturesStatusBarAppearance = v }
+		case .modalPresentationStyle(let x): return x.apply(instance) { i, v in i.modalPresentationStyle = v }
+		case .modalTransitionStyle(let x): return x.apply(instance) { i, v in i.modalTransitionStyle = v }
+		case .preferredContentSize(let x): return x.apply(instance) { i, v in i.preferredContentSize = v }
+		case .providesPresentationContextTransitionStyle(let x): return x.apply(instance) { i, v in i.providesPresentationContextTransitionStyle = v }
+		case .restorationClass(let x): return x.apply(instance) { i, v in i.restorationClass = v }
+		case .restorationIdentifier(let x): return x.apply(instance) { i, v in i.restorationIdentifier = v }
+		case .tabBarItem(let x): return x.apply(instance) { i, v in i.tabBarItem = v.uiTabBarItem() }
+		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .toolbarItems(let x): return x.apply(instance) { i, v in i.setToolbarItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
+		case .transitioningDelegate(let x): return x.apply(instance) { i, v in i.transitioningDelegate = v }
 		case .view:
-			return view?.resume().flatMap { $0.apply(instance, storage) { i, s, v in
+			return view?.apply(instance, storage) { i, s, v in
 				s.view = v
 				if i.isViewLoaded {
 					i.view = v.uiView()
 				}
-			} }
-		case .title(let x): return x.apply(instance) { i, v in i.title = v }
-		case .preferredContentSize(let x): return x.apply(instance) { i, v in i.preferredContentSize = v }
-		case .modalPresentationStyle(let x): return x.apply(instance) { i, v in i.modalPresentationStyle = v }
-		case .modalTransitionStyle(let x): return x.apply(instance) { i, v in i.modalTransitionStyle = v }
-		case .isModalInPopover(let x): return x.apply(instance) { i, v in i.isModalInPopover = v }
-		case .definesPresentationContext(let x): return x.apply(instance) { i, v in i.definesPresentationContext = v }
-		case .providesPresentationContextTransitionStyle(let x): return x.apply(instance) { i, v in i.providesPresentationContextTransitionStyle = v }
-		case .transitioningDelegate(let x): return x.apply(instance) { i, v in i.transitioningDelegate = v }
-		case .edgesForExtendedLayout(let x): return x.apply(instance) { i, v in i.edgesForExtendedLayout = v }
-		case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance) { i, v in i.extendedLayoutIncludesOpaqueBars = v }
-		case .restorationIdentifier(let x): return x.apply(instance) { i, v in i.restorationIdentifier = v }
-		case .restorationClass(let x): return x.apply(instance) { i, v in i.restorationClass = v }
-		case .modalPresentationCapturesStatusBarAppearance(let x): return x.apply(instance) { i, v in i.modalPresentationCapturesStatusBarAppearance = v }
-		case .hidesBottomBarWhenPushed(let x): return x.apply(instance) { i, v in i.hidesBottomBarWhenPushed = v }
-		case .toolbarItems(let x): return x.apply(instance) { i, v in i.setToolbarItems(v.value.map { $0.uiBarButtonItem() }, animated: v.isAnimated) }
-		case .tabBarItem(let x): return x.apply(instance) { i, v in i.tabBarItem = v.uiTabBarItem() }
-		case .isEditing(let x): return x.apply(instance) { i, v in i.setEditing(v.value, animated: v.isAnimated) }
+			}
+			
+		// 2. Signal bindings are performed on the object after construction.
 		case .present(let x):
 			return x.apply(instance, storage) { i, s, v in
 				s.queuedModalPresentations.append(v)
 				s.processModalPresentations(viewController: i)
 			}
-		case .navigationItem(let x):
-			x.value.apply(to: instance.navigationItem)
-			return nil
+			
+		// 3. Action bindings are triggered by the object after construction.
+		case .didAppear(let x):
+			storage.didAppear = x
+			return x
+		case .didDisappear(let x):
+			storage.didDisappear = x
+			return x
 		case .traitCollectionDidChange(let x):
 			storage.traitCollectionDidChange = x
 			return x
 		case .willAppear(let x):
 			storage.willAppear = x
 			return x
-		case .didDisappear(let x):
-			storage.didDisappear = x
-			return x
-		case .didAppear(let x):
-			storage.didAppear = x
-			return x
 		case .willDisappear(let x):
 			storage.willDisappear = x
 			return x
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .didReceiveMemoryWarning(let x):
 			storage.didReceiveMemoryWarning = x
 			return nil
-		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		case .loadView: return nil
 		}
 	}
 	
@@ -454,6 +466,43 @@ public extension BindingName where Binding: ViewControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: ViewControllerName<$2> { return .name(B.$1) }
+	
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var navigationItem: ViewControllerName<Constant<NavigationItem>> { return .name(B.navigationItem) }
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var definesPresentationContext: ViewControllerName<Dynamic<Bool>> { return .name(B.definesPresentationContext) }
+	static var edgesForExtendedLayout: ViewControllerName<Dynamic<UIRectEdge>> { return .name(B.edgesForExtendedLayout) }
+	static var extendedLayoutIncludesOpaqueBars: ViewControllerName<Dynamic<Bool>> { return .name(B.extendedLayoutIncludesOpaqueBars) }
+	static var hidesBottomBarWhenPushed: ViewControllerName<Dynamic<Bool>> { return .name(B.hidesBottomBarWhenPushed) }
+	static var isEditing: ViewControllerName<Signal<SetOrAnimate<Bool>>> { return .name(B.isEditing) }
+	static var isModalInPopover: ViewControllerName<Dynamic<Bool>> { return .name(B.isModalInPopover) }
+	static var modalPresentationCapturesStatusBarAppearance: ViewControllerName<Dynamic<Bool>> { return .name(B.modalPresentationCapturesStatusBarAppearance) }
+	static var modalPresentationStyle: ViewControllerName<Dynamic<UIModalPresentationStyle>> { return .name(B.modalPresentationStyle) }
+	static var modalTransitionStyle: ViewControllerName<Dynamic<UIModalTransitionStyle>> { return .name(B.modalTransitionStyle) }
+	static var preferredContentSize: ViewControllerName<Dynamic<CGSize>> { return .name(B.preferredContentSize) }
+	static var providesPresentationContextTransitionStyle: ViewControllerName<Dynamic<Bool>> { return .name(B.providesPresentationContextTransitionStyle) }
+	static var restorationClass: ViewControllerName<Dynamic<UIViewControllerRestoration.Type?>> { return .name(B.restorationClass) }
+	static var restorationIdentifier: ViewControllerName<Dynamic<String?>> { return .name(B.restorationIdentifier) }
+	static var tabBarItem: ViewControllerName<Dynamic<TabBarItemConvertible>> { return .name(B.tabBarItem) }
+	static var title: ViewControllerName<Dynamic<String>> { return .name(B.title) }
+	static var toolbarItems: ViewControllerName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.toolbarItems) }
+	static var transitioningDelegate: ViewControllerName<Dynamic<UIViewControllerTransitioningDelegate>> { return .name(B.transitioningDelegate) }
+	static var view: ViewControllerName<Dynamic<ViewConvertible>> { return .name(B.view) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	static var present: ViewControllerName<Signal<ModalPresentation>> { return .name(B.present) }
+	
+	// 3. Action bindings are triggered by the object after construction.
+	static var didAppear: ViewControllerName<SignalInput<Bool>> { return .name(B.didAppear) }
+	static var didDisappear: ViewControllerName<SignalInput<Bool>> { return .name(B.didDisappear) }
+	static var traitCollectionDidChange: ViewControllerName<SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>> { return .name(B.traitCollectionDidChange) }
+	static var willAppear: ViewControllerName<SignalInput<Bool>> { return .name(B.willAppear) }
+	static var willDisappear: ViewControllerName<SignalInput<Bool>> { return .name(B.willDisappear) }
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didReceiveMemoryWarning: ViewControllerName<() -> Void> { return .name(B.didReceiveMemoryWarning) }
+	static var loadView: ViewControllerName<() -> ViewConvertible> { return .name(B.loadView) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

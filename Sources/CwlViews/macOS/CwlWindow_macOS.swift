@@ -314,12 +314,12 @@ public extension Window.Preparer {
 			}
 		case .restorationClass(let x): return x.apply(instance) { i, v in i.restorationClass = v }
 		case .screen:
-			return screen.resume().flatMap { $0.apply(instance) { i, v in
+			return screen.apply(instance) { i, v in
 				let r = i.constrainFrameRect(i.frame, to:v)
 				i.setFrameOrigin(r.origin)
-			} }
+			}
 		case .sharingType(let x): return x.apply(instance) { i, v in i.sharingType = v }
-		case .styleMask: return styleMask.resume().flatMap { $0.apply(instance) { i, v in i.styleMask = v } }
+		case .styleMask: return styleMask.apply(instance) { i, v in i.styleMask = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
 

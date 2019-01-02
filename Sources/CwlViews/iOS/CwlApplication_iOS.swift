@@ -79,7 +79,7 @@ public extension Application {
 		case open((_ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool)
 		case shouldAllowExtensionPointIdentifier((UIApplication.ExtensionPointIdentifier) -> Bool)
 		case shouldRequestHealthAuthorization(() -> Void)
-		case viewControllerWithRestorationPath((_ path: [String], _ coder: NSCoder) -> UIViewController)
+		case viewControllerWithRestorationPath((_ path: [String], _ coder: NSCoder) -> UIViewController?)
 		case willContinueUserActivity((String) -> Bool)
 		case willEncodeRestorableState((NSKeyedArchiver) -> Void)
 		case willFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
@@ -223,8 +223,8 @@ public extension Application.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension Application.Preparer {
 	open class Storage: EmbeddedObjectStorage, UIApplicationDelegate {
-		fileprivate static var storedApplicationConstructor: (() -> Application)? = nil
-		fileprivate static var storedStorage: Storage? = nil
+		static var storedApplicationConstructor: (() -> Application)? = nil
+		static var storedStorage: Storage? = nil
 		
 		open override var isInUse: Bool {
 			return true
@@ -233,14 +233,13 @@ extension Application.Preparer {
 		open var window: UIWindow? = nil
 		open var additionalWindows: [UIWindow] = []
 		
-		open var willFinishLaunching: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
-		public func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-			let application = Storage.storedApplicationConstructor!
-			let storage = UIApplication.shared.delegate as! Application.Preparer.Storage
+		open func applyToSharedApplication() {
+			// If the storageApplicationConstructor is not set, this function is a no-op. This is useful during testing.
+			guard let application = Storage.storedApplicationConstructor else { return }
 			
 			// Disconnect the delegate since we're about to change the handled delegate methods
-			Application.Preparer.Storage.storedStorage = storage
 			UIApplication.shared.delegate = nil
+			Application.Preparer.Storage.storedStorage = self
 			
 			// Apply the styles to the application and delegate.
 			application().apply(to: UIApplication.shared)
@@ -249,10 +248,15 @@ extension Application.Preparer {
 			Application.Preparer.Storage.storedStorage = nil
 			
 			// Ensure that the delegate was reapplied
-			assert(UIApplication.shared.delegate === storage, "Failed to reconnect delegate")
+			assert(UIApplication.shared.delegate === self, "Failed to reconnect delegate")
 			
 			// Apply the view hierarchy
 			window?.makeKeyAndVisible()
+		}
+		
+		open var willFinishLaunching: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
+		public func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+			applyToSharedApplication()
 			
 			// Invoke any user-supplied code
 			return willFinishLaunching?(launchOptions) ?? true
@@ -304,7 +308,6 @@ extension Application.Preparer {
 			return handler(ofType: ((NSKeyedUnarchiver) -> Void).self)!(coder as! NSKeyedUnarchiver)
 		}
 		
-		open var performFetch: SignalInput<SignalInput<UIBackgroundFetchResult>>?
 		open func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
 			let (input, _) = Signal<UIBackgroundFetchResult>.create { s in
 				s.subscribeUntilEnd { r in
@@ -314,35 +317,32 @@ extension Application.Preparer {
 					}
 				}
 			}
-			performFetch!.send(value: input)
+			handler(ofType: SignalInput<SignalInput<UIBackgroundFetchResult>>.self)!.send(value: input)
 		}
 		
-		open var handleEventsForBackgroundURLSession: SignalInput<Callback<String, ()>>?
 		open func application(_ application: UIApplication, handleEventsForBackgroundURLSession session: String, completionHandler: @escaping () -> Void) {
 			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handleEventsForBackgroundURLSession!.send(value: Callback(session, input))
+			handler(ofType: SignalInput<Callback<String, ()>>.self)!.send(value: Callback(session, input))
 		}
 		
-		open var didRegisterUserNotifications: Any?
 		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
 		open func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
-			(didRegisterUserNotifications as! SignalInput<UIUserNotificationSettings>).send(value: notificationSettings)
+			handler(ofType: SignalInput<UIUserNotificationSettings>.self)!.send(value: notificationSettings)
 		}
 		
 		open func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 			handler(ofType: SignalInput<Result<Data, Error>>.self)!.send(value: Result.success(deviceToken))
 		}
+		
 		open func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
 			handler(ofType: SignalInput<Result<Data, Error>>.self)!.send(value: Result.failure(error))
 		}
 		
-		open var didReceiveLocalNotification: Any?
 		@available(iOS, introduced: 4.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
 		open func application(_ application: UIApplication, didReceive: UILocalNotification) {
-			(didReceiveLocalNotification as! SignalInput<UILocalNotification>).send(value: didReceive)
+			handler(ofType: SignalInput<UILocalNotification>.self)!.send(value: didReceive)
 		}
 		
-		open var didReceiveRemoteNotification: SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>?
 		open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
 			let (input, _) = Signal<UIBackgroundFetchResult>.create { s in
 				s.subscribeUntilEnd { r in
@@ -352,58 +352,51 @@ extension Application.Preparer {
 					}
 				}
 			}
-			didReceiveRemoteNotification!.send(value: Callback(userInfo, input))
+			handler(ofType: SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>.self)!.send(value: Callback(userInfo, input))
 		}
 		
-		open var handleLocalNotificationAction: Any?
 		@available(iOS, introduced: 4.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
 		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for localNotification: UILocalNotification, completionHandler: @escaping () -> Void) {
 			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			(handleLocalNotificationAction as! SignalInput<Callback<(String?, UILocalNotification), ()>>).send(value: Callback((identifier, localNotification), input))
+			handler(ofType: SignalInput<Callback<(String?, UILocalNotification), ()>>.self)!.send(value: Callback((identifier, localNotification), input))
 		}
 		
-		open var handleRemoteNotificationAction: SignalInput<Callback<(String?, [AnyHashable: Any]), ()>>?
 		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
 			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handleRemoteNotificationAction!.send(value: Callback((identifier, userInfo), input))
+			handler(ofType: SignalInput<Callback<(String?, [AnyHashable: Any]), ()>>.self)!.send(value: Callback((identifier, userInfo), input))
 		}
 		
-		open var handleLocalNotificationResponseInfoAction: Any?
 		@available(iOS, introduced: 4.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
 		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for localNotification: UILocalNotification, withResponseInfo responseInfo: [AnyHashable : Any], completionHandler: @escaping () -> Void) {
 			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			(handleLocalNotificationResponseInfoAction as! SignalInput<Callback<(String?, UILocalNotification, [AnyHashable : Any]), ()>>).send(value: Callback((identifier, localNotification, responseInfo), input))
+			handler(ofType: SignalInput<Callback<(String?, UILocalNotification, [AnyHashable : Any]), ()>>.self)!.send(value: Callback((identifier, localNotification, responseInfo), input))
 		}
 		
-		open var handleRemoteNotificationResponseInfoAction: SignalInput<Callback<(String?, [AnyHashable: Any], [AnyHashable : Any]), ()>>?
 		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], withResponseInfo responseInfo: [AnyHashable : Any], completionHandler: @escaping () -> Void) {
 			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handleRemoteNotificationResponseInfoAction!.send(value: Callback((identifier, userInfo, responseInfo), input))
+			handler(ofType: SignalInput<Callback<(String?, [AnyHashable: Any], [AnyHashable : Any]), ()>>.self)!.send(value: Callback((identifier, userInfo, responseInfo), input))
 		}
 		
 		open func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
 			handler(ofType: SignalInput<(String, Error)>.self)!.send(value: (userActivityType, error))
 		}
 		
-		open var handleWatchKitExtensionRequest: SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>?
 		open func application(_ application: UIApplication, handleWatchKitExtensionRequest userInfo: [AnyHashable : Any]?, reply: @escaping ([AnyHashable : Any]?) -> Void) {
 			let (input, _) = Signal<[AnyHashable: Any]?>.create { s in s.subscribeWhile { r in reply(r.value ?? nil); return false } }
-			handleWatchKitExtensionRequest!.send(value: Callback(userInfo, input))
+			handler(ofType: SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>.self)!.send(value: Callback(userInfo, input))
 		}
 		
-		open var shouldRequestHealthAuthorization: (() -> Void)?
 		open func applicationShouldRequestHealthAuthorization(_ application: UIApplication) {
-			shouldRequestHealthAuthorization!()
+			handler(ofType: (() -> Void).self)!()
 		}
 		
 		open func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
 			return handler(ofType: ((String) -> Bool).self)!(userActivityType)
 		}
 		
-		open var continueUserActivity: ((Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool)?
 		open func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
 			let (input, _) = Signal<[UIUserActivityRestoring]?>.create { s in s.subscribeWhile { r in restorationHandler(r.value ?? nil); return false } }
-			return continueUserActivity!(Callback(userActivity, input))
+			return handler(ofType: ((Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool).self)!(Callback(userActivity, input))
 		}
 		
 		open func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) {
@@ -432,10 +425,9 @@ extension Application.Preparer {
 			return handler(ofType: ((UIApplication.ExtensionPointIdentifier) -> Bool).self)!(extensionPointIdentifier)
 		}
 		
-		open var performAction: SignalInput<Callback<UIApplicationShortcutItem, Bool>>?
 		open func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
 			let (input, _) = Signal<Bool>.create { s in s.subscribeWhile { r in completionHandler(r.value ?? false); return false } }
-			performAction!.send(value: Callback(shortcutItem, input))
+			handler(ofType: SignalInput<Callback<UIApplicationShortcutItem, Bool>>.self)!.send(value: Callback(shortcutItem, input))
 		}
 	}
 }

@@ -189,7 +189,7 @@ public extension BindingName where Binding: GestureRecognizerBinding {
 	@available(macOS 10.12.2, *) static var shouldReceiveTouch: GestureRecognizerName<(NSGestureRecognizer, NSTouch) -> Bool> { return .name(B.shouldReceiveTouch) }
 
 	// Composite binding names
-	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {
+	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, GestureRecognizer.Binding.action, Binding.gestureRecognizerBinding)
 	}
 }

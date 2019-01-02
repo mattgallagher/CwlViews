@@ -111,9 +111,9 @@ public extension BarButtonItem.Preparer {
 	
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
-		case .inheritedBinding(.image): return image.resume().flatMap { $0.apply(instance) { i, v in i.image = v } }
-		case .inheritedBinding(.landscapeImagePhone): return landscapeImagePhone.resume().flatMap { $0.apply(instance) { i, v in i.landscapeImagePhone = v } }
-		case .inheritedBinding(.title): return title.resume().flatMap { $0.apply(instance) { i, v in i.title = v } }
+		case .inheritedBinding(.image): return image.apply(instance) { i, v in i.image = v }
+		case .inheritedBinding(.landscapeImagePhone): return landscapeImagePhone.apply(instance) { i, v in i.landscapeImagePhone = v }
+		case .inheritedBinding(.title): return title.apply(instance) { i, v in i.title = v }
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			
 		//	0. Static bindings are applied at construction and are subsequently immutable.
@@ -121,68 +121,39 @@ public extension BarButtonItem.Preparer {
 			
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case .backButtonBackgroundImage(let x):
-			var previous: ScopedValues<StateAndMetrics, UIImage?>? = nil
-			return x.apply(instance) { i, v in
-				for conditions in previous?.pairs ?? [] where conditions.value != nil {
-					i.setBackButtonBackgroundImage(nil, for: conditions.scope.controlState, barMetrics: conditions.scope.barMetrics)
-				}
-				previous = v
-				for conditions in v.pairs {
-					if let image = conditions.value {
-						i.setBackButtonBackgroundImage(image, for: conditions.scope.controlState, barMetrics: conditions.scope.barMetrics)
-					}
-				}
-			}
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setBackButtonBackgroundImage(nil, for: scope.controlState, barMetrics: scope.barMetrics) },
+				applyNew: { i, scope, v in i.setBackButtonBackgroundImage(v, for: scope.controlState, barMetrics: scope.barMetrics) }
+			)
 		case .backButtonTitlePositionAdjustment(let x):
-			var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
-			return x.apply(instance) { i, v in
-				for c in previous?.pairs ?? [] {
-					i.setBackButtonTitlePositionAdjustment(UIOffset(), for: c.scope)
-				}
-				previous = v
-				for c in v.pairs {
-					i.setBackButtonTitlePositionAdjustment(c.value, for: c.scope)
-				}
-			}
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setBackButtonTitlePositionAdjustment(UIOffset(), for: scope) },
+				applyNew: { i, scope, v in i.setBackButtonTitlePositionAdjustment(v, for: scope) }
+			)
 		case .backgroundImage(let x):
-			var previous: ScopedValues<StateStyleAndMetrics, UIImage?>? = nil
-			return x.apply(instance) { i, v in
-				for conditions in previous?.pairs ?? [] where conditions.value != nil {
-					i.setBackgroundImage(nil, for: conditions.scope.controlState, style: conditions.scope.itemStyle, barMetrics: conditions.scope.barMetrics)
-				}
-				previous = v
-				for conditions in v.pairs {
-					if let image = conditions.value {
-						i.setBackgroundImage(image, for: conditions.scope.controlState, style: conditions.scope.itemStyle, barMetrics: conditions.scope.barMetrics)
-					}
-				}
-			}
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setBackgroundImage(nil, for: scope.controlState, style: scope.itemStyle, barMetrics: scope.barMetrics) },
+				applyNew: { i, scope, v in i.setBackgroundImage(v, for: scope.controlState, style: scope.itemStyle, barMetrics: scope.barMetrics) }
+			)
 		case .backgroundVerticalPositionAdjustment(let x):
-			var previous: ScopedValues<UIBarMetrics, CGFloat>? = nil
-			return x.apply(instance) { i, v in
-				for c in previous?.pairs ?? [] {
-					i.setBackgroundVerticalPositionAdjustment(0, for: c.scope)
-				}
-				previous = v
-				for c in v.pairs {
-					i.setBackgroundVerticalPositionAdjustment(c.value, for: c.scope)
-				}
-			}
-		case .customView: return customView.resume().flatMap { $0.apply(instance) { i, v in i.customView = v?.uiView() } }
-		case .itemStyle: return itemStyle.resume().flatMap { $0.apply(instance) { i, v in i.style = v } }
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setBackgroundVerticalPositionAdjustment(0, for: scope) },
+				applyNew: { i, scope, v in i.setBackgroundVerticalPositionAdjustment(v, for: scope) }
+			)
+		case .customView: return customView.apply(instance) { i, v in i.customView = v?.uiView() }
+		case .itemStyle: return itemStyle.apply(instance) { i, v in i.style = v }
 		case .possibleTitles(let x): return x.apply(instance) { i, v in i.possibleTitles = v }
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
 		case .titlePositionAdjustment(let x):
-			var previous: ScopedValues<UIBarMetrics, UIOffset>? = nil
-			return x.apply(instance) { i, v in
-				for c in previous?.pairs ?? [] {
-					i.setTitlePositionAdjustment(UIOffset(), for: c.scope)
-				}
-				previous = v
-				for c in v.pairs {
-					i.setTitlePositionAdjustment(c.value, for: c.scope)
-				}
-			}
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setTitlePositionAdjustment(UIOffset(), for: scope) },
+				applyNew: { i, scope, v in i.setTitlePositionAdjustment(v, for: scope) }
+			)
 		case .width(let x): return x.apply(instance) { i, v in i.width = v }
 			
 		//	2. Signal bindings are performed on the object after construction.
@@ -236,7 +207,7 @@ public extension BindingName where Binding: BarButtonItemBinding {
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 
 	// Composite binding names
-	public static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> BarButtonItemName<SignalInput<Value>> {
+	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> BarButtonItemName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, BarButtonItem.Binding.action, Binding.barButtonItemBinding)
 	}
 }

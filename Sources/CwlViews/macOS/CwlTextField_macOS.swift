@@ -186,7 +186,7 @@ extension TextField.Preparer {
 		}
 		
 		open func control(_ control: NSControl, didFailToValidatePartialString string: String, errorDescription error: String?) {
-			handler(ofType: SignalInput<(string: String, errorDescription: String?)>.self)!.send((string: string, errorDescription: error))
+			handler(ofType: SignalInput<(string: String, errorDescription: String?)>.self)!.send(value: (string: string, errorDescription: error))
 		}
 		
 		open func control(_ control: NSControl, didFailToFormatString string: String, errorDescription error: String?) -> Bool {

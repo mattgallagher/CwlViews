@@ -17,18 +17,6 @@
 //  OF THIS SOFTWARE.
 //
 
-/// A simple wrapper around a value used to identify "static" bindings (bindings which are applied only at construction time)
-public struct Constant<Value> {
-	public typealias ValueType = Value
-	public let value: Value
-	public init(_ value: Value) {
-		self.value = value
-	}
-	public static func constant(_ value: Value) -> Constant<Value> {
-		return Constant<Value>(value)
-	}
-}
-
 /// An either type for a value or a signal emitting values of that type. Used for "value" bindings (bindings which set a property on the underlying instance)
 public enum Dynamic<Value> {
 	public typealias ValueType = Value
@@ -69,34 +57,6 @@ public enum Dynamic<Value> {
 	}
 }
 
-public struct InitialSubsequent<Value> {
-	public let initial: Value?
-	public let subsequent: SignalCapture<Value>?
-	
-	init<Interface: SignalInterface>(signal: Interface) where Interface.OutputValue == Value {
-		let capture = signal.capture()
-		let values = capture.values
-		self.init(initial: values.last, subsequent: capture)
-	}
-	
-	init(initial: Value? = nil, subsequent: SignalCapture<Value>? = nil) {
-		self.initial = initial
-		self.subsequent = subsequent
-	}
-	
-	public func resume() -> Signal<Value>? {
-		return subsequent?.resume()
-	}
-
-	public func apply<I: AnyObject>(_ instance: I, handler: @escaping (I, Value) -> Void) -> Lifetime? {
-		return resume().flatMap { $0.apply(instance, handler: handler) }
-	}
-
-	public func apply<I: AnyObject, Storage: AnyObject>(_ instance: I, _ storage: Storage, handler: @escaping (I, Storage, Value) -> Void) -> Lifetime? {
-		return resume().flatMap { $0.apply(instance, storage, handler: handler) }
-	}
-}
-
 extension Signal {
 	public func apply<I: AnyObject, B: AnyObject>(_ instance: I, _ storage: B, _ onError: OutputValue? = nil, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
 		return signal.subscribe(context: .main) { [unowned instance, unowned storage] r in
@@ -110,13 +70,5 @@ extension Signal {
 
 	public func apply<I: AnyObject>(_ instance: I, handler: @escaping (I, OutputValue) -> Void) -> Lifetime? {
 		return signal.subscribeValues(context: .main) { [unowned instance] v in handler(instance, v) }
-	}
-}
-
-extension SignalCapture {
-	public func apply<I: AnyObject, B: AnyObject>(_ instance: I, _ storage: B, handler: @escaping (I, B, OutputValue) -> Void) -> Lifetime? {
-		return subscribeValues(context: .main) { [unowned instance, unowned storage] v in
-			handler(instance, storage, v)
-		}
 	}
 }

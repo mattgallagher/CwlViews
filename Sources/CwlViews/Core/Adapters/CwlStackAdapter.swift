@@ -19,38 +19,6 @@
 
 import Foundation
 
-/// An "Either" type for use in scenarios where "Equatable" and "Codable" are required but there's only ever a single "Master" instance so equality is implied. This is common in Navigation Controller stacks and Split Views.
-public enum MasterOrDetail<Master: StateContainer, Detail: StateContainer>: StateContainer {
-	case master(Master)
-	case detail(Detail)
-	
-	public var childValues: [StateContainer] {
-		switch self {
-		case .master(let tvm): return [tvm]
-		case .detail(let dvm): return [dvm]
-		}
-	}
-
-	enum Keys: CodingKey { case master, detail }
-	
-	public func encode(to encoder: Encoder) throws {
-		var c = encoder.container(keyedBy: Keys.self)
-		switch self {
-		case .master(let tvm): try c.encode(tvm, forKey: .master)
-		case .detail(let dvm): try c.encode(dvm, forKey: .detail)
-		}
-	}
-	
-	public init(from decoder: Decoder) throws {
-		let c = try decoder.container(keyedBy: Keys.self)
-		if let tvm = try c.decodeIfPresent(Master.self, forKey: .master) {
-			self = .master(tvm)
-		} else {
-			self = .detail(try c.decode(Detail.self, forKey: .detail))
-		}
-	}
-}
-
 /// This "StateAdapter" is a `ModelSignalValue` that manages a stack of navigation items as might be used by a UINavigationController. The adapter converts `push`, `popToCount` and `reload` messages into updates to the array of `PathElement`. The adapter includes convenient input signals, animated output signals and includes automatic implementation of coding and notification protocols.
 public struct StackAdapterBehavior<PathElement: Codable>: StateAdapterBehavior {
 	public typealias State = [PathElement]

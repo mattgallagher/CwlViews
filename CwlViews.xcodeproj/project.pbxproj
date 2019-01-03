@@ -130,10 +130,16 @@
 		C985C9C621DCEA3200E8FF8B /* CwlTableView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */; };
 		C985C9C721DCF79A00E8FF8B /* CwlTextView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95D897F1ED9934E008A5753 /* CwlTextView_iOS.swift */; };
 		C985C9C821DCF8A300E8FF8B /* CwlArrayMutation+TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97B16DC21DB1CC900F72DB9 /* CwlArrayMutation+TableView.swift */; };
+		C985C9CC21DDC4ED00E8FF8B /* CwlConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = C985C9CB21DDC4ED00E8FF8B /* CwlConstant.swift */; };
+		C985C9CE21DDC50C00E8FF8B /* CwlInitialSubsequent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C985C9CD21DDC50C00E8FF8B /* CwlInitialSubsequent.swift */; };
+		C985C9D521DDC67100E8FF8B /* CwlVar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C985C9D421DDC67100E8FF8B /* CwlVar.swift */; };
+		C985C9D721DDC69800E8FF8B /* CwlTempVar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C985C9D621DDC69800E8FF8B /* CwlTempVar.swift */; };
+		C985C9D921DDC6B600E8FF8B /* CwlToggleVar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C985C9D821DDC6B600E8FF8B /* CwlToggleVar.swift */; };
+		C985C9DB21DDC70E00E8FF8B /* CwlMasterDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C985C9DA21DDC70E00E8FF8B /* CwlMasterDetail.swift */; };
 		C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */; };
 		C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */; };
 		C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */; };
-		C9A18B3C1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */; };
+		C9A18B3C1E83E52800ADDCD4 /* CwlDynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3A1E83E52800ADDCD4 /* CwlDynamic.swift */; };
 		C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */; };
 		C9ADA3A81EE3BFEC00C29925 /* CwlEmbeddedObjectStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9ADA3A61EE3BFEC00C29925 /* CwlEmbeddedObjectStorage.swift */; };
 		C9B02DF12197A2EB00527843 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B02DF02197A2EB00527843 /* AppDelegate.swift */; };
@@ -350,6 +356,12 @@
 		C97CFB0C1EE505DD00C18737 /* CwlSlider_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSlider_iOS.swift; sourceTree = "<group>"; };
 		C981E3401E2E33E2003A5A55 /* CwlApplication_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlApplication_macOS.swift; sourceTree = "<group>"; };
 		C984984A1DC8AB66001F12B2 /* CwlLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLayer.swift; sourceTree = "<group>"; };
+		C985C9CB21DDC4ED00E8FF8B /* CwlConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlConstant.swift; sourceTree = "<group>"; };
+		C985C9CD21DDC50C00E8FF8B /* CwlInitialSubsequent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlInitialSubsequent.swift; sourceTree = "<group>"; };
+		C985C9D421DDC67100E8FF8B /* CwlVar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlVar.swift; sourceTree = "<group>"; };
+		C985C9D621DDC69800E8FF8B /* CwlTempVar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTempVar.swift; sourceTree = "<group>"; };
+		C985C9D821DDC6B600E8FF8B /* CwlToggleVar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlToggleVar.swift; sourceTree = "<group>"; };
+		C985C9DA21DDC70E00E8FF8B /* CwlMasterDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlMasterDetail.swift; sourceTree = "<group>"; };
 		C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBindingName.swift; sourceTree = "<group>"; };
 		C98639F01FEA38C10047C273 /* CwlSwitch_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSwitch_iOS.swift; sourceTree = "<group>"; };
 		C9924B3A1E6E8058006CD314 /* CwlWindow_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindow_iOS.swift; sourceTree = "<group>"; };
@@ -360,7 +372,7 @@
 		C9A18B331E82BCCD00ADDCD4 /* CwlButton_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlButton_iOS.swift; sourceTree = "<group>"; };
 		C9A18B351E838B5900ADDCD4 /* CwlLabel_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLabel_iOS.swift; sourceTree = "<group>"; };
 		C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBinderPreparer.swift; sourceTree = "<group>"; };
-		C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlDynamicValue.swift; sourceTree = "<group>"; };
+		C9A18B3A1E83E52800ADDCD4 /* CwlDynamic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlDynamic.swift; sourceTree = "<group>"; };
 		C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTargetAction.swift; sourceTree = "<group>"; };
 		C9A4CC9C1EA658EC0096F68D /* CwlWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWebView.swift; sourceTree = "<group>"; };
 		C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStackAdapter.swift; sourceTree = "<group>"; };
@@ -574,12 +586,10 @@
 		C94853C21DC4E306009CC145 /* CwlViews */ = {
 			isa = PBXGroup;
 			children = (
-				C9924B3E1E6F81CA006CD314 /* Common */,
 				C94854101DC58FF5009CC145 /* Core */,
 				C9B040871EDBF35B0088A3CC /* CwlViews.h */,
 				C94853C41DC4E306009CC145 /* Info.plist */,
-				C9B27EAB1E51DA5100265580 /* iOS */,
-				C948540D1DC4E8D1009CC145 /* macOS */,
+				C985C9D321DDC5D600E8FF8B /* Implementations */,
 			);
 			path = CwlViews;
 			sourceTree = "<group>";
@@ -640,8 +650,18 @@
 		C94854101DC58FF5009CC145 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */,
-				C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */,
+				C985C9D021DDC53900E8FF8B /* Adapters */,
+				C985C9C921DDC47C00E8FF8B /* Binder */,
+				C985C9CA21DDC4A300E8FF8B /* BindingValues */,
+				C985C9D121DDC56200E8FF8B /* Mutation */,
+				C985C9D221DDC5A400E8FF8B /* Utilities */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		C985C9C921DDC47C00E8FF8B /* Binder */ = {
+			isa = PBXGroup;
+			children = (
 				C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */,
 				C97B16D321D9C1E200F72DB9 /* CwlBinderApplyable.swift */,
 				C95FABC321D49AA3007CCE78 /* CwlBinderBase.swift */,
@@ -650,22 +670,68 @@
 				C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */,
 				C97A5B5F21D657AF001D98DD /* CwlBinding.swift */,
 				C98639ED1FE9DCE80047C273 /* CwlBindingName.swift */,
-				C913073F1F66384200174902 /* CwlCoder.swift */,
-				C9A18B3A1E83E52800ADDCD4 /* CwlDynamicValue.swift */,
 				C9ADA3A61EE3BFEC00C29925 /* CwlEmbeddedObjectStorage.swift */,
-				C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */,
-				C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */,
+			);
+			path = Binder;
+			sourceTree = "<group>";
+		};
+		C985C9CA21DDC4A300E8FF8B /* BindingValues */ = {
+			isa = PBXGroup;
+			children = (
+				C985C9CB21DDC4ED00E8FF8B /* CwlConstant.swift */,
+				C9A18B3A1E83E52800ADDCD4 /* CwlDynamic.swift */,
+				C985C9CD21DDC50C00E8FF8B /* CwlInitialSubsequent.swift */,
 				C9287EE3202D3FE50046732C /* CwlScopedValues.swift */,
-				C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */,
 				C925223920957D3400CA39A4 /* CwlSignalCallback.swift */,
-				C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */,
-				C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */,
-				C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */,
-				C937E76C20046BE000E63965 /* CwlStateContainer.swift */,
-				C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */,
 				C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */,
 			);
-			path = Core;
+			path = BindingValues;
+			sourceTree = "<group>";
+		};
+		C985C9D021DDC53900E8FF8B /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */,
+				C985C9DA21DDC70E00E8FF8B /* CwlMasterDetail.swift */,
+				C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */,
+				C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */,
+				C937E76C20046BE000E63965 /* CwlStateContainer.swift */,
+				C985C9D621DDC69800E8FF8B /* CwlTempVar.swift */,
+				C985C9D821DDC6B600E8FF8B /* CwlToggleVar.swift */,
+				C985C9D421DDC67100E8FF8B /* CwlVar.swift */,
+			);
+			path = Adapters;
+			sourceTree = "<group>";
+		};
+		C985C9D121DDC56200E8FF8B /* Mutation */ = {
+			isa = PBXGroup;
+			children = (
+				C9AD96A11DF8415500D66AD9 /* CwlArrayMutation.swift */,
+				C9C8685F1FEE83D200865A60 /* CwlArrayMutationUtilities.swift */,
+				C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */,
+				C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */,
+				C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */,
+			);
+			path = Mutation;
+			sourceTree = "<group>";
+		};
+		C985C9D221DDC5A400E8FF8B /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				C913073F1F66384200174902 /* CwlCoder.swift */,
+				C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		C985C9D321DDC5D600E8FF8B /* Implementations */ = {
+			isa = PBXGroup;
+			children = (
+				C9924B3E1E6F81CA006CD314 /* Common */,
+				C9B27EAB1E51DA5100265580 /* iOS */,
+				C948540D1DC4E8D1009CC145 /* macOS */,
+			);
+			path = Implementations;
 			sourceTree = "<group>";
 		};
 		C98C45162160FB040028B2AC /* Dependencies */ = {
@@ -1258,11 +1324,12 @@
 				C985C9C721DCF79A00E8FF8B /* CwlTextView_iOS.swift in Sources */,
 				C97B16E121DB30D400F72DB9 /* CwlPanGestureRecognizer_iOS.swift in Sources */,
 				C926D0601FF058D4002BF020 /* CwlSetMutation.swift in Sources */,
-				C9A18B3C1E83E52800ADDCD4 /* CwlDynamicValue.swift in Sources */,
+				C9A18B3C1E83E52800ADDCD4 /* CwlDynamic.swift in Sources */,
 				C9ADA3A81EE3BFEC00C29925 /* CwlEmbeddedObjectStorage.swift in Sources */,
 				C985C9B921DC879100E8FF8B /* CwlImageView_iOS.swift in Sources */,
 				C97B16D021D8E13800F72DB9 /* CwlPanGestureRecognizer_macOS.swift in Sources */,
 				C97B16CF21D8E13800F72DB9 /* CwlMagnificationGestureRecognizer_macOS.swift in Sources */,
+				C985C9D721DDC69800E8FF8B /* CwlTempVar.swift in Sources */,
 				C97A5B6021D657AF001D98DD /* CwlBinding.swift in Sources */,
 				C97B16EB21DB6C0400F72DB9 /* CwlBarItem_iOS.swift in Sources */,
 				C97B16C321D745DC00F72DB9 /* CwlTableRowView_macOS.swift in Sources */,
@@ -1276,6 +1343,7 @@
 				C97B16D721DAEB2800F72DB9 /* CwlApplication_iOS.swift in Sources */,
 				C985C9C121DCDC2E00E8FF8B /* CwlSwitch_iOS.swift in Sources */,
 				C97A5B6421D6DEBB001D98DD /* CwlToolbar_macOS.swift in Sources */,
+				C985C9CE21DDC50C00E8FF8B /* CwlInitialSubsequent.swift in Sources */,
 				C98639EF1FE9DCE80047C273 /* CwlBindingName.swift in Sources */,
 				C985C9BD21DCC78000E8FF8B /* CwlSplitViewController_iOS.swift in Sources */,
 				C985C9C521DCE5FB00E8FF8B /* CwlTableViewCell_iOS.swift in Sources */,
@@ -1284,12 +1352,14 @@
 				C97B16E421DB30D400F72DB9 /* CwlScreenEdgePanGestureRecognizer_iOS.swift in Sources */,
 				C9B27EA91E51D34300265580 /* CwlArrayMutation.swift in Sources */,
 				C95FABC721D5009C007CCE78 /* CwlGradientLayer.swift in Sources */,
+				C985C9CC21DDC4ED00E8FF8B /* CwlConstant.swift in Sources */,
 				C97B16CC21D8D65900F72DB9 /* CwlOutlineView_macOS.swift in Sources */,
 				C985C9B021DC57A800E8FF8B /* CwlControl_iOS.swift in Sources */,
 				C97B16DF21DB206400F72DB9 /* CwlSetOrAnimate_iOS.swift in Sources */,
 				C985C9C321DCE2F200E8FF8B /* CwlTabBarController_iOS.swift in Sources */,
 				C97A5B5621D59DA8001D98DD /* CwlScrollView_macOS.swift in Sources */,
 				C97B16DE21DB201C00F72DB9 /* CwlScrollView_iOS.swift in Sources */,
+				C985C9DB21DDC70E00E8FF8B /* CwlMasterDetail.swift in Sources */,
 				C97B16CA21D8350500F72DB9 /* CwlPopUpButton_macOS.swift in Sources */,
 				C985C9BC21DCC54000E8FF8B /* CwlNavigationController_iOS.swift in Sources */,
 				C9287EE5202D3FE50046732C /* CwlScopedValues.swift in Sources */,
@@ -1298,6 +1368,8 @@
 				C97B16EA21DB6BE500F72DB9 /* CwlTabBarItem_iOS.swift in Sources */,
 				C97B16E221DB30D400F72DB9 /* CwlPinchGestureRecognizer_iOS.swift in Sources */,
 				C97A5B5A21D5BE8A001D98DD /* CwlMenuItem_macOS.swift in Sources */,
+				C985C9D521DDC67100E8FF8B /* CwlVar.swift in Sources */,
+				C985C9D921DDC6B600E8FF8B /* CwlToggleVar.swift in Sources */,
 				C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
 				C985C9C621DCEA3200E8FF8B /* CwlTableView_iOS.swift in Sources */,
 				C97B16C221D745DC00F72DB9 /* CwlTableHeaderView_macOS.swift in Sources */,

@@ -208,12 +208,12 @@ extension Menu.Preparer {
 			if let h = willHighlight {
 				for (index, item) in menu.items.enumerated() {
 					if h == item {
-						input.send(value: index)
+						input?.send(value: index)
 						return
 					}
 				}
 			}
-			input.send(value: nil)
+			input?.send(value: nil)
 		}
 	}
 }

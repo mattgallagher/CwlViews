@@ -1,4 +1,4 @@
-import UIKit
+import CwlViews
 
 public class TestApplication: UIApplication {
 	var mockRegisteredForRemoteNotifications: Bool = false
@@ -15,7 +15,10 @@ public class TestApplication: UIApplication {
 	}
 }
 
-public class TestApplicationDelegate: NSObject, UIApplicationDelegate {
+applicationMain(type: TestApplication.self) {
+	Application(
+		.window -- Window(
+			.rootViewController -- ViewController()
+		)
+	)
 }
-
-UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(TestApplication.self), NSStringFromClass(TestApplicationDelegate.self))

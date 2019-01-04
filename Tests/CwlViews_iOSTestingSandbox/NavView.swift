@@ -19,7 +19,7 @@
 
 import CwlViews
 
-typealias NavPathElement = MasterOrDetail<TableViewState, DetailViewState>
+typealias NavPathElement = MasterDetail<TableViewState, DetailViewState>
 struct NavViewState: StateContainer {
 	let navStack: StackAdapter<NavPathElement>
 	init () {

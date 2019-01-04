@@ -324,10 +324,10 @@ public extension Window.Preparer {
 		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
 
 		case .minFullScreenContentSize(let x):
-			guard #available(macOS 10.11, *) else { return }
+			guard #available(macOS 10.11, *) else { return nil }
 			return x.apply(instance) { i, v in i.minFullScreenContentSize = v }
 		case .maxFullScreenContentSize(let x):
-			guard #available(macOS 10.11, *) else { return }
+			guard #available(macOS 10.11, *) else { return nil }
 			return x.apply(instance) { i, v in i.maxFullScreenContentSize = v }
 		
 		// 2. Signal bindings are performed on the object after construction.

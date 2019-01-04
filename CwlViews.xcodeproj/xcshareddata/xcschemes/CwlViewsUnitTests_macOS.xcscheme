@@ -17,12 +17,21 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C94853C81DC4E306009CC145"
-               BuildableName = "CwlViews_macOSTests.xctest"
-               BlueprintName = "CwlViews_macOSTests"
+               BuildableName = "CwlViewsTests_macOS.xctest"
+               BlueprintName = "CwlViewsTests_macOS"
                ReferencedContainer = "container:CwlViews.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "C9B02DED2197A2EB00527843"
+            BuildableName = "CwlViewsUnitTestHarness_macOS.app"
+            BlueprintName = "CwlViewsUnitTestHarness_macOS"
+            ReferencedContainer = "container:CwlViews.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -36,6 +45,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "C9B02DED2197A2EB00527843"
+            BuildableName = "CwlViewsUnitTestHarness_macOS.app"
+            BlueprintName = "CwlViewsUnitTestHarness_macOS"
+            ReferencedContainer = "container:CwlViews.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

@@ -21,11 +21,11 @@ import CwlViews
 
 struct DetailViewState: StateContainer {
 	let row: String
-	let showChild: ToggleAdapter
+	let showChild: ToggleVar
 	
 	init(row: String) {
 		self.row = row
-		self.showChild = ToggleAdapter(false)
+		self.showChild = ToggleVar(false)
 	}
 	
 	var childValues: [StateContainer] { return [showChild] }

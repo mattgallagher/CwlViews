@@ -212,8 +212,8 @@ public extension BindingName where Binding: ControlBinding {
 	}
 	static var stringChanged: ControlName<SignalInput<String>> {
 		return Binding.compositeName(
-			source: { input in { text in _ = input.send(value: text.string) } },
-			translate: Control.Binding.textDidChange,
+			value: { input in { text in _ = input.send(value: text.string) } },
+			binding: Control.Binding.textDidChange,
 			downcast: Binding.controlBinding
 		)
 	}

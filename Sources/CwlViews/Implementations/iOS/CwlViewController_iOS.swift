@@ -202,7 +202,7 @@ public extension ViewController.Preparer {
 	func combine(lifetimes: [Lifetime], instance: UIViewController, storage: ViewController.Preparer.Storage) -> UIViewController {
 		
 		// We previously set the embedded storage but we haven't added the lifetimes. We need to *clear* the storage so the embed function doesn't complain that the storage is already set.
-		EmbeddedObjectStorage.setEmbeddedStorage(storage, for: instance)
+		EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
 		
 		storage.embed(lifetimes: lifetimes, in: instance)
 		return instance

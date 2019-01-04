@@ -1,5 +1,5 @@
 //
-//  CwlBindingTestHelpers.swift
+//  CwlTestableBinder.swift
 //  CwlViews_iOSTests
 //
 //  Created by Matt Gallagher on 4/11/18.

@@ -89,7 +89,7 @@ public extension WebView {
 		typealias UIViewController = ()
 		typealias WKPreviewElementInfo = ()
 		typealias WKPreviewActionItem = ()
-		typealias WKOpenPanelParameters = WKOpenPanelParameters
+		typealias WKOpenPanelParameters = WebKit.WKOpenPanelParameters
 	#else
 		typealias UIViewController = UIKit.UIViewController
 		typealias WKOpenPanelParameters = ()

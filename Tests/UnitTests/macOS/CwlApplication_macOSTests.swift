@@ -8,7 +8,7 @@
 
 import CloudKit
 import XCTest
-import CwlViews_macOSTestsHarness
+import CwlViewsUnitTestHarness_macOS
 @testable import CwlViews
 
 extension Application: TestableBinder {

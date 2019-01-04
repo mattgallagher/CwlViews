@@ -124,10 +124,10 @@ public extension Button.Preparer {
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 
 		case .bezelColor(let x):
-			guard #available(macOS 10.12.2, *) else { return }
+			guard #available(macOS 10.12.2, *) else { return nil }
 			return x.apply(instance) { i, v in i.bezelColor = v }
 		case .imageHugsTitle(let x):
-			guard #available(macOS 10.12, *) else { return }
+			guard #available(macOS 10.12, *) else { return nil }
 			return x.apply(instance) { i, v in i.imageHugsTitle = v }
 
 		//	2. Signal bindings are performed on the object after construction.

@@ -22,15 +22,19 @@
 import CloudKit
 import simd
 
-public func applicationMain(application: @escaping () -> Application) {
-	application().apply(to: NSApplication.shared)
-	NSApplication.shared.run()
+public func applicationMain(type: NSApplication.Type = NSApplication.self, application: @escaping () -> Application) {
+	let instance = type.shared
+	let bindings = application().consume().bindings
+	let (preparer, _, storage, lifetimes) = Application.Preparer.bind(bindings, to: { _ in instance })
+	let application = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
+	application.run()
 }
 
 // MARK: - Binder Part 1: Binder
 public class Application: Binder {
 	public var state: BinderState<Preparer>
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		precondition(type == Preparer.Instance.self, "Custom application subclass must be specified as parameter to `applicationMain`")
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
 }

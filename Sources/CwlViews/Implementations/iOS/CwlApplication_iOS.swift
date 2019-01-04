@@ -21,9 +21,9 @@
 
 import UIKit
 
-public func applicationMain(subclass: UIApplication.Type = UIApplication.self, application: @escaping () -> Application) -> Never {
+public func applicationMain(type: UIApplication.Type = UIApplication.self, application: @escaping () -> Application) -> Never {
 	Application.Preparer.Storage.storedApplicationConstructor = application
-	_ = UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(subclass), NSStringFromClass(Application.Preparer.Storage.self))
+	_ = UIApplicationMain(CommandLine.argc, CommandLine.unsafeArgv, NSStringFromClass(type), NSStringFromClass(Application.Preparer.Storage.self))
 	fatalError("UIApplicationMain completed unexpectedly")
 }
 
@@ -31,6 +31,7 @@ public func applicationMain(subclass: UIApplication.Type = UIApplication.self, a
 public class Application: Binder {
 	public var state: BinderState<Preparer>
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		precondition(type == Preparer.Instance.self, "Custom application subclass must be specified as parameter to `applicationMain`")
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
 }

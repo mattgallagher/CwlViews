@@ -17,12 +17,21 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C9B27E6C1E51CA9700265580"
-               BuildableName = "CwlViews_iOSTests.xctest"
-               BlueprintName = "CwlViews_iOSTests"
+               BuildableName = "CwlViewsTests_iOS.xctest"
+               BlueprintName = "CwlViewsTests_iOS"
                ReferencedContainer = "container:CwlViews.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "C9216989218D5F0200396AB0"
+            BuildableName = "CwlViewsUnitTestHarness_iOS.app"
+            BlueprintName = "CwlViewsUnitTestHarness_iOS"
+            ReferencedContainer = "container:CwlViews.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -36,6 +45,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "C9216989218D5F0200396AB0"
+            BuildableName = "CwlViewsUnitTestHarness_iOS.app"
+            BlueprintName = "CwlViewsUnitTestHarness_iOS"
+            ReferencedContainer = "container:CwlViews.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -45,6 +64,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "C9216989218D5F0200396AB0"
+            BuildableName = "CwlViewsUnitTestHarness_iOS.app"
+            BlueprintName = "CwlViewsUnitTestHarness_iOS"
+            ReferencedContainer = "container:CwlViews.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

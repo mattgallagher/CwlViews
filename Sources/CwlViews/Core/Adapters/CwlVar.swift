@@ -18,7 +18,7 @@ public struct VarBehavior<Value: Codable>: StateAdapterBehavior {
 	public typealias Notification = Value
 	public typealias PersistentState = Value
 	
-	public static func reducer(state: inout State, message: Message) -> Notification? {
+	public static func reduce(state: inout State, message: Message) -> Notification? {
 		switch message {
 		case .set(let v):
 			state = v
@@ -79,7 +79,7 @@ public struct Var<Value: Codable>: StateContainer, SignalInputInterface, SignalI
 	public func logJson(prefix: String = "") -> SignalOutput<Var<Value>> {
 		return persistentValueChanged.map { _ in
 			self
-			}.startWith(self).logJson(prefix: prefix)
+		}.startWith(self).logJson(prefix: prefix)
 	}
 	
 	public var childValues: [StateContainer] {

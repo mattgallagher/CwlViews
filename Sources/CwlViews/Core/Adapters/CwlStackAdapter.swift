@@ -26,7 +26,7 @@ public struct StackAdapterBehavior<PathElement: Codable>: StateAdapterBehavior {
 	public typealias Notification = StackMutation<PathElement>
 	public typealias PersistentState = State
 	
-	public static func reducer(state: inout State, message: Message) -> Notification? {
+	public static func reduce(state: inout State, message: Message) -> Notification? {
 		switch message {
 		case .push(let e):
 			state.append(e)
@@ -52,7 +52,7 @@ public struct StackAdapterBehavior<PathElement: Codable>: StateAdapterBehavior {
 	
 	public static func initialize(message: Message) -> (State?, Notification?) {
 		var state = [PathElement]()
-		let n = reducer(state: &state, message: message)
+		let n = reduce(state: &state, message: message)
 		return (state, n)
 	}
 }

@@ -12,7 +12,7 @@ public struct ToggleBehavior: StateAdapterBehavior {
 	public typealias Notification = Bool
 	public typealias PersistentState = Bool
 	
-	public static func reducer(state: inout State, message: Message) -> Notification? {
+	public static func reduce(state: inout State, message: Message) -> Notification? {
 		state = !state
 		return state
 	}

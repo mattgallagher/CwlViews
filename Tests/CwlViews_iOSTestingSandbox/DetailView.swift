@@ -59,6 +59,7 @@ func layoutWithAnimation(_ detailState: DetailViewState) -> Signal<Layout> {
 		.space(),
 		.view(Button(
 			.title -- .normal(.toggleLabel),
+			.titleColor -- .normal(.blue),
 			.action(.primaryActionTriggered) --> Input().map { _ in () }.bind(to: detailState.showChild)
 		)),
 		.space()

@@ -196,16 +196,10 @@ public extension ViewController.Preparer {
 			tcdc.send(value: (previous: nil, new: instance.traitCollection))
 		}
 		
-		return lifetime
-	}
-	
-	func combine(lifetimes: [Lifetime], instance: UIViewController, storage: ViewController.Preparer.Storage) -> UIViewController {
-		
-		// We previously set the embedded storage but we haven't added the lifetimes. We need to *clear* the storage so the embed function doesn't complain that the storage is already set.
+		// We previously set the embedded storage so that any delegate methods triggered during setup would be able to resolve the storage. Now that we're done setting up, we need to *clear* the storage so the embed function doesn't complain that the storage is already set.
 		EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
 		
-		storage.embed(lifetimes: lifetimes, in: instance)
-		return instance
+		return lifetime
 	}
 }
 

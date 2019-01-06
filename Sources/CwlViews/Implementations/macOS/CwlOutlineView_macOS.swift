@@ -207,6 +207,17 @@ public extension OutlineView.Preparer {
 		}
 	}
 	
+	// NOTE: due to the fact that `NSOutlineView` is a subclass of `NSTableView` but uses an *unrelated* delegate protocol type, we need to manually re-implement `prepareDelegate` here since the delegate does *not* conform to the `NSTableViewDelegate` protocol specified in the `HasDelegate` conformance.
+	func prepareDelegate(instance: Instance, storage: Storage) {
+		if delegateIsRequired {
+			precondition(instance.delegate == nil, "Conflicting delegate applied to instance")
+			if dynamicDelegate != nil {
+				storage.dynamicDelegate = dynamicDelegate
+			}
+			instance.delegate = storage
+		}
+	}
+	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
 		prepareDelegate(instance: instance, storage: storage)

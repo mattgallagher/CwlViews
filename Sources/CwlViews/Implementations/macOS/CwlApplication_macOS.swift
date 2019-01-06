@@ -26,8 +26,8 @@ public func applicationMain(type: NSApplication.Type = NSApplication.self, appli
 	let instance = type.shared
 	let bindings = application().consume().bindings
 	let (preparer, _, storage, lifetimes) = Application.Preparer.bind(bindings, to: { _ in instance })
-	let application = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
-	application.run()
+	_ = preparer.combine(lifetimes: lifetimes, instance: instance, storage: storage)
+	_ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)
 }
 
 // MARK: - Binder Part 1: Binder

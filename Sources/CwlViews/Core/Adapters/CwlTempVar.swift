@@ -11,7 +11,7 @@ public struct TempBehavior<Value>: StateAdapterBehavior {
 	public typealias Message = Value
 	public typealias Notification = Value
 	
-	public static func reducer(state: inout State, message: Message) -> Notification? {
+	public static func reduce(state: inout State, message: Message) -> Notification? {
 		state = message
 		return state
 	}

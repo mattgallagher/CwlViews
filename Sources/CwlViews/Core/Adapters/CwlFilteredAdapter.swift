@@ -18,7 +18,7 @@
 //
 
 /// Instead of offering a single "notification" output signal, like a plain `StateAdapter`, the `FilteredAdapter` is optimized around the idea of multiple filtered views of the output, with subtle questions like "whether to notify immediately upon connecting" handled by the filtered view, rather than a behavior baked into the adapter.
-/// A single shared `State` is shared between the `reducer` and filter stages of the pipeline using a manual synchronization context to ensure this remains threadsafe. The `withMutableState` function offers synchronous, threadsafe access to the same storage for serialization and other concerns that might require immediate access.
+/// A single shared `State` is shared between the `reduce` and filter stages of the pipeline using a manual synchronization context to ensure this remains threadsafe. The `withMutableState` function offers synchronous, threadsafe access to the same storage for serialization and other concerns that might require immediate access.
 /// However, there are also some omissions. Unlike `StateAdapter`, this *requires* an initial `State`. There is also no built-in support for `Codable`, since this `FilteredAdapter` would typically be used on data where serialization and persistence are manually handled.
 public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInputInterface {	
 	public typealias InputValue = Message
@@ -35,21 +35,21 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	private let context: DispatchQueueContext
 	private let state: MutableBox<State>
 	
-	/// Construction where the `reducer` function includes a `loopback` parameter
+	/// Construction where the `reduce` function includes a `loopback` parameter
 	///
 	/// - Parameters:
 	///   - initialState: used to initialize the adapter state
 	///   - sync: the adapter's execution context can be synchronous or asychronous but otherwise can't be directly specified (true, by default)
 	///   - cacheNotification: the last emitted notification can be cached for new observers (false, by default)
-	///   - reducer: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state). A `loopback` parameter is provided which allows the reducing function to schedule asynchronous tasks that may call back into the adapter at a later time.
-	public init(initialState: State, sync: Bool = true, cacheNotification: Bool = false, reducer: @escaping (_ state: inout State, _ message: Message, _ loopback: SignalMultiInput<Message>) throws -> Notification?) {
+	///   - reduce: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state). A `loopback` parameter is provided which allows the reducing function to schedule asynchronous tasks that may call back into the adapter at a later time.
+	public init(initialState: State, sync: Bool = true, cacheNotification: Bool = false, reduce: @escaping (_ state: inout State, _ message: Message, _ loopback: SignalMultiInput<Message>) throws -> Notification?) {
 		state = MutableBox<State>(initialState)
 		context = DispatchQueueContext(sync: sync)
 		let channel = Signal<Message>.multiChannel()
 		let loopback = channel.input
 		pair = channel.reduce(initialState: .never, context: .custom(context)) { [state, loopback] (cache: inout PossibleNotification, message: Message) -> Signal<PossibleNotification>.Result in
 			do {
-				let notification = try reducer(&state.value, message, loopback)
+				let notification = try reduce(&state.value, message, loopback)
 				if let n = notification {
 					if cacheNotification {
 						cache = .value(n)
@@ -64,16 +64,16 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	}
 	
 	
-	/// Construction where the `reducer` function omits the `loopback` parameter
+	/// Construction where the `reduce` function omits the `loopback` parameter
 	///
 	/// - Parameters:
 	///   - initialState: used to initialize the adapter state
 	///   - sync: the adapter's execution context can be synchronous or asychronous but otherwise can't be directly specified (true, by default)
 	///   - cacheNotification: the last emitted notification can be cached for new observers (false, by default)
-	///   - reducer: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state).
-	public init(initialState: State, sync: Bool = true, cacheNotification: Bool = false, reducer: @escaping (_ state: inout State, _ input: Message) throws -> Notification?) {
+	///   - reduce: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state).
+	public init(initialState: State, sync: Bool = true, cacheNotification: Bool = false, reduce: @escaping (_ state: inout State, _ input: Message) throws -> Notification?) {
 		self.init(initialState: initialState, sync: sync, cacheNotification: cacheNotification) { (state: inout State, input: Message, collector: SignalMultiInput<Message>) -> Notification? in
-			return try reducer(&state, input)
+			return try reduce(&state, input)
 		}
 	}
 	
@@ -82,7 +82,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 		pair.input.cancel()
 	}
 	
-	/// Filters the `PossibleNotification` output signal down to `Notification`, turning the initial `never` into a value using the provided `initial` function. When `PossibleNotification` is `suppress` (i.e. the last reducer invocation returned `nil`) no notification signal will be emitted.
+	/// Filters the `PossibleNotification` output signal down to `Notification`, turning the initial `never` into a value using the provided `initial` function. When `PossibleNotification` is `suppress` (i.e. the last reduce invocation returned `nil`) no notification signal will be emitted.
 	///
 	/// - Returns: the notificationSignal
 	public func notificationSignal(initial: @escaping (State) -> Notification? = { _ in nil }) -> Signal<Notification> {

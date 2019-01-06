@@ -12,6 +12,7 @@ public protocol BinderDelegateEmbedder: BinderEmbedder where Instance: HasDelega
 	var delegateClass: Delegate.Type { get }
 	var dynamicDelegate: Delegate? { get set }
 	var delegateIsRequired: Bool { get }
+	func prepareDelegate(instance: Instance, storage: Storage)
 }
 
 public typealias BinderDelegateEmbedderConstructor = BinderDelegateEmbedder & BinderConstructor

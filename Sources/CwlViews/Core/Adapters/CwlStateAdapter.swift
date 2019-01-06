@@ -25,7 +25,7 @@ public protocol StateAdapterBehavior {
 	associatedtype Notification
 	associatedtype PersistentState: Codable = NonPersistentStateAdapterState
 	
-	static func reducer(state: inout State, message: Message) -> Notification?
+	static func reduce(state: inout State, message: Message) -> Notification?
 	static func resume(state: State) -> Notification?
 	static func initialize(message: Message) -> (State?, Notification?)
 	static func persistentState(_ state: State) -> PersistentState
@@ -87,11 +87,11 @@ public struct StateAdapter<RB: StateAdapterBehavior>: StateContainer, SignalInpu
 				}
 				return .success(Content.notification(possibleState, notification))
 			case .state(var s):
-				let n = RB.reducer(state: &s, message: message)
+				let n = RB.reduce(state: &s, message: message)
 				content = Content.state(s)
 				return .success(Content.notification(s, n))
 			case .notification(.some(var s), _):
-				let n = RB.reducer(state: &s, message: message)
+				let n = RB.reduce(state: &s, message: message)
 				content = Content.state(s)
 				return .success(Content.notification(s, n))
 			}

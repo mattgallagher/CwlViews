@@ -40,26 +40,18 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	/// - Parameters:
 	///   - initialState: used to initialize the adapter state
 	///   - sync: the adapter's execution context can be synchronous or asychronous but otherwise can't be directly specified (true, by default)
-	///   - cacheNotification: the last emitted notification can be cached for new observers (false, by default)
 	///   - reduce: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state). A `loopback` parameter is provided which allows the reducing function to schedule asynchronous tasks that may call back into the adapter at a later time.
-	public init(initialState: State, sync: Bool = true, cacheNotification: Bool = false, reduce: @escaping (_ state: inout State, _ message: Message, _ loopback: SignalMultiInput<Message>) throws -> Notification?) {
+	public init(initialState: State, sync: Bool = true, reduce: @escaping (_ state: inout State, _ message: Message, _ loopback: SignalMultiInput<Message>) throws -> Notification?) {
 		state = MutableBox<State>(initialState)
 		context = DispatchQueueContext(sync: sync)
 		let channel = Signal<Message>.multiChannel()
 		let loopback = channel.input
-		pair = channel.reduce(initialState: .never, context: .custom(context)) { [state, loopback] (cache: inout PossibleNotification, message: Message) -> Signal<PossibleNotification>.Result in
-			do {
-				let notification = try reduce(&state.value, message, loopback)
-				if let n = notification {
-					if cacheNotification {
-						cache = .value(n)
-					}
-					return .success(.value(n))
-				}
-				return .success(.suppress)
-			} catch {
-				return .failure(.error(error))
+		pair = channel.reduce(initialState: .never, context: .custom(context)) { [state, loopback] (cache: PossibleNotification, message: Message) throws -> PossibleNotification in
+			let notification = try reduce(&state.value, message, loopback)
+			if let n = notification {
+				return .value(n)
 			}
+			return .suppress
 		}
 	}
 	
@@ -69,10 +61,9 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	/// - Parameters:
 	///   - initialState: used to initialize the adapter state
 	///   - sync: the adapter's execution context can be synchronous or asychronous but otherwise can't be directly specified (true, by default)
-	///   - cacheNotification: the last emitted notification can be cached for new observers (false, by default)
 	///   - reduce: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state).
-	public init(initialState: State, sync: Bool = true, cacheNotification: Bool = false, reduce: @escaping (_ state: inout State, _ input: Message) throws -> Notification?) {
-		self.init(initialState: initialState, sync: sync, cacheNotification: cacheNotification) { (state: inout State, input: Message, collector: SignalMultiInput<Message>) -> Notification? in
+	public init(initialState: State, sync: Bool = true, reduce: @escaping (_ state: inout State, _ input: Message) throws -> Notification?) {
+		self.init(initialState: initialState, sync: sync) { (state: inout State, input: Message, collector: SignalMultiInput<Message>) -> Notification? in
 			return try reduce(&state, input)
 		}
 	}

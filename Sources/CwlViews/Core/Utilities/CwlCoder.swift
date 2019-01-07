@@ -45,7 +45,7 @@ extension NSCoder {
 
 extension SignalInterface where OutputValue == Data {
 	public func decode<Target: Decodable>(as decodableType: Target.Type) -> Signal<Target> {
-		return transformValues { v, n in n.send(result: Result<Target, Error> { try JSONDecoder().decode(decodableType, from: v) }.mapFailure(SignalEnd.error)) }
+		return transformValues { v, n in _ = n.send(result: Result<Target, Error> { try JSONDecoder().decode(decodableType, from: v) }.mapFailure(SignalEnd.other)) }
 	}
 }
 
@@ -55,7 +55,7 @@ extension SignalInterface where OutputValue: Encodable {
 	}
 
 	public func data() -> Signal<Data> {
-		return transformValues { v, n in n.send(result: Result<Data, Error> { try JSONEncoder().encode(v) }.mapFailure(SignalEnd.error)) }
+		return transformValues { v, n in _ = n.send(result: Result<Data, Error> { try JSONEncoder().encode(v) }.mapFailure(SignalEnd.other)) }
 	}
 
 	/// This function subscribes to the signal and logs emitted values as JSON data to the console

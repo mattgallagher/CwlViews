@@ -173,7 +173,6 @@
 		C9F9A34A21DF6FBE00026DC1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9F9A34821DF6FBE00026DC1 /* LaunchScreen.storyboard */; };
 		C9F9A35021DF70F100026DC1 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F9A34F21DF70F100026DC1 /* main.swift */; };
 		C9F9A35121DF723200026DC1 /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
-		C9F9A35221E1C32800026DC1 /* CwlTestableBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BC218EFA8400396AB0 /* CwlTestableBinder.swift */; };
 		C9FDAD301F3AB30900154DA8 /* CwlStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FDAD2E1F3AB30900154DA8 /* CwlStateAdapter.swift */; };
 /* End PBXBuildFile section */
 
@@ -298,7 +297,6 @@
 		C9216993218D5F0200396AB0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C9216996218D5F0200396AB0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C9216998218D5F0200396AB0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C92169BC218EFA8400396AB0 /* CwlTestableBinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTestableBinder.swift; sourceTree = "<group>"; };
 		C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBackingLayerTests.swift; sourceTree = "<group>"; };
 		C925223920957D3400CA39A4 /* CwlSignalCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSignalCallback.swift; sourceTree = "<group>"; };
 		C926D05E1FF058D4002BF020 /* CwlSetMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSetMutation.swift; sourceTree = "<group>"; };
@@ -832,7 +830,6 @@
 				C9DF3DD51FF5B6DA0058E427 /* main.swift */,
 				C9F143961FF5BB8A002BBB13 /* NavView.swift */,
 				C9F143981FF5BB98002BBB13 /* TableView.swift */,
-				C92169BC218EFA8400396AB0 /* CwlTestableBinder.swift */,
 				C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */,
 				C9DF3DD21FF5B6DA0058E427 /* Document.swift */,
 				C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */,
@@ -1538,7 +1535,6 @@
 				C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */,
 				C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */,
 				C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */,
-				C9F9A35221E1C32800026DC1 /* CwlTestableBinder.swift in Sources */,
 				C9DF3DDA1FF5B6DB0058E427 /* Document.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

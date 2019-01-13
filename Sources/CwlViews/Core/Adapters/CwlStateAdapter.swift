@@ -87,10 +87,13 @@ public struct StateAdapter<RB: StateAdapterBehavior>: StateContainer, SignalInpu
 	
 	private let channel: SignalChannel<SignalMultiInput<RB.Message>, SignalMulti<Content>>
 	
-	public var input: SignalInput<RB.Message> { return channel.input }
+	public var input: SignalInput<RB.Message> {
+		return channel.input
+	}
+	
 	public var signal: Signal<RB.Notification> {
-		return channel.signal.map(
-			activation: { $0.state.map(RB.resume) },
+		return channel.signal.mapActivationRemainder(
+			activation: { $0.state.flatMap(RB.resume) },
 			remainder: { $0.notification }
 		).compact()
 	}

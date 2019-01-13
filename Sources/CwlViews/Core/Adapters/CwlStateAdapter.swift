@@ -80,22 +80,20 @@ public struct StateAdapter<RB: StateAdapterBehavior>: StateContainer, SignalInpu
 	public typealias OutputValue = RB.Notification
 	public typealias InputValue = RB.Message
 	
-	private enum Content {
-		case none
-		case state(RB.State)
-		case notification(RB.State?, RB.Notification?)
+	private struct Content {
+		let state: RB.State?
+		let notification: RB.Notification?
 	}
 	
 	private let channel: SignalChannel<SignalMultiInput<RB.Message>, SignalMulti<Content>>
 	
 	public var input: SignalInput<RB.Message> { return channel.input }
-	public var signal: Signal<RB.Notification> { return channel.signal.compactMap {
-		switch $0 {
-		case .none: return nil
-		case .state(let s): return RB.resume(state: s)
-		case .notification(_, let n): return n
-		}
-	} }
+	public var signal: Signal<RB.Notification> {
+		return channel.signal.map(
+			activation: { $0.state.map(RB.resume) },
+			remainder: { $0.notification }
+		).compact()
+	}
 	
 	private init(initialState: Content) {
 		channel = Signal<RB.Message>.multiChannel().reduce(initialState: initialState) { (content: Content, message: RB.Message) -> Content in

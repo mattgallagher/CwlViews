@@ -17,6 +17,26 @@
 //  OF THIS SOFTWARE.
 //
 
+
+public protocol Adapter: SignalInputInterface, SignalInterface {
+	associatedtype Behavior: AdapterState
+	init(input: SignalMultiInput<Self.InputValue>, output: SignalMulti<Self.OutputValue>)
+}
+
+public protocol AdapterState {
+	associatedtype Message
+	associatedtype Notification
+	
+	static func intialize(message: Message) -> (Self?, Notification?)
+	mutating func reduce(message: Message) -> Notification?
+	func resume() -> Notification?
+}
+
+public protocol CodableContainer: Lifetime, Codable {
+	var codableValueChanged: Signal<Void> { get }
+	var childCodableContainers: [StateContainer] { get }
+}
+
 public struct NonPersistentStateAdapterState: Codable, Error {}
 
 public protocol StateAdapterBehavior {

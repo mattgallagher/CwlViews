@@ -6,23 +6,26 @@
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 
-public struct TempBehavior<Value>: StateAdapterBehavior {
-	public typealias State = Value
+public struct TempValue<Value>: AdapterState {
 	public typealias Message = Value
 	public typealias Notification = Value
 	
-	public static func reduce(state: inout State, message: Message) -> Notification? {
-		state = message
-		return state
+	let temporaryValue: Value
+	init(temporaryValue: Value) {
+		self.temporaryValue = temporaryValue
 	}
 	
-	public static func resume(state: State) -> Notification? {
-		return state
+	public func reduce(message: Value, feedback: SignalMultiInput<Message>) -> Output {
+		return Output(state: TempValue(temporaryValue: message), notification: message)
 	}
 	
-	public static func initialize(message: Message) -> (Value?, Value?) {
-		return (message, message)
+	public func resume() -> Notification? {
+		return temporaryValue
+	}
+	
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output {
+		return Output(state: TempValue(temporaryValue: message), notification: message)
 	}
 }
 
-public typealias TempVar<Value> = StateAdapter<TempBehavior<Value>>
+public typealias TempVar<Value> = Adapter<TempValue<Value>>

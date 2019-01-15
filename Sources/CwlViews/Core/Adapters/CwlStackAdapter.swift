@@ -19,52 +19,52 @@
 
 import Foundation
 
-/// This "StateAdapter" is a `ModelSignalValue` that manages a stack of navigation items as might be used by a UINavigationController. The adapter converts `push`, `popToCount` and `reload` messages into updates to the array of `PathElement`. The adapter includes convenient input signals, animated output signals and includes automatic implementation of coding and notification protocols.
-public struct StackAdapterBehavior<PathElement: Codable>: StateAdapterBehavior {
-	public typealias State = [PathElement]
+/// This "Adapter" is a `ModelSignalValue` that manages a stack of navigation items as might be used by a UINavigationController. The adapter converts `push`, `popToCount` and `reload` messages into updates to the array of `PathElement`. The adapter includes convenient input signals, animated output signals and includes automatic implementation of coding and notification protocols.
+public struct StackAdapterState<PathElement: Codable>: AdapterState {
 	public typealias Message = StackMutation<PathElement>
 	public typealias Notification = StackMutation<PathElement>
-	public typealias PersistentState = State
+	public typealias PersistentValue = [PathElement]
 	
-	public static func reduce(state: inout State, message: Message) -> Notification? {
+	public let persistentValue: [PathElement]
+	public init(persistentValue: [PathElement]) {
+		self.persistentValue = persistentValue
+	}
+	
+	public func reduce(message: Message, feedback: SignalMultiInput<Message>) -> Output {
 		switch message {
 		case .push(let e):
-			state.append(e)
-			return message
+			let next = StackAdapterState<PathElement>(persistentValue: persistentValue.appending(e))
+			return Output(state: next, notification: message)
 		case .pop:
-			_ = state.popLast()
-			return message
+			let next = StackAdapterState<PathElement>(persistentValue: Array(persistentValue.dropLast()))
+			return Output(state: next, notification: message)
 		case .popToCount(let i):
-			if i >= 1, i < state.count {
-				state.removeLast(state.count - i)
-				return message
-			}
-			return nil
+			guard i >= 1 else { return Output(state: self, notification: nil) }
+			let next = StackAdapterState<PathElement>(persistentValue: Array(persistentValue.prefix(i)))
+			return Output(state: next, notification: message)
 		case .reload(let newStack):
-			state = newStack
-			return message
+			let next = StackAdapterState<PathElement>(persistentValue: newStack)
+			return Output(state: next, notification: message)
 		}
 	}
 	
-	public static func resume(state: State) -> Notification? {
-		return .reload(state)
+	public func resume() -> Notification? {
+		return Message.reload(persistentValue)
 	}
 	
-	public static func initialize(message: Message) -> (State?, Notification?) {
-		var state = [PathElement]()
-		let n = reduce(state: &state, message: message)
-		return (state, n)
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output {
+		return StackAdapterState<PathElement>(persistentValue: []).reduce(message: message, feedback: feedback)
 	}
 }
 
-extension StateAdapter where RB.State: Collection, RB.Message == StackMutation<RB.State.Element> {
-	public var pushInput: SignalInput<RB.State.Element> {
-		return Signal<RB.State.Element>.channel().map { RB.Message.push($0) }.bind(to: input)
-	}
+public typealias StackAdapter<PathElement: Codable> = Adapter<StackAdapterState<PathElement>>
 
-	public var poppedToCount: SignalInput<Int> {
-		return Signal<Int>.channel().map { RB.Message.popToCount($0) }.bind(to: input)
+extension Adapter {
+	public func pushInput<PathElement>() -> SignalInput<PathElement> where State.Message == StackMutation<PathElement> {
+		return Signal<PathElement>.channel().map { State.Message.push($0) }.bind(to: input)
+	}
+	
+	public func poppedToCount<PathElement>() -> SignalInput<Int> where State.Message == StackMutation<PathElement> {
+		return Signal<Int>.channel().map { State.Message.popToCount($0) }.bind(to: input)
 	}
 }
-
-public typealias StackAdapter<PathElement: Codable> = StateAdapter<StackAdapterBehavior<PathElement>>

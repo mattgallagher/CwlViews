@@ -17,6 +17,7 @@
 //  OF THIS SOFTWARE.
 //
 
+
 public protocol StateContainer: Lifetime, Codable {
 	var persistentValueChanged: Signal<Void> { get }
 	var childValues: [StateContainer] { get }

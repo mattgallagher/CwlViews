@@ -13,8 +13,8 @@ public protocol AdapterState {
 	
 	typealias Output = (state: Self, notification: Notification?)
 	
-	static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output
-	func reduce(message: Message, feedback: SignalMultiInput<Message>) -> Output
+	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
+	func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> Output
 	func resume() -> Notification?
 	
 	init(persistentValue: PersistentValue)

@@ -32,11 +32,11 @@ public struct VarState<Value: Codable>: AdapterState {
 		return persistentValue
 	}
 	
-	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output {
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
 		switch message {
 		case .set(let v): return Output(state: VarState<Value>(persistentValue: v), notification: v)
 		case .update(let v): return Output(state: VarState<Value>(persistentValue: v), notification: nil)
-		case .notify: return Output(state: nil, notification: nil)
+		case .notify: return nil
 		}
 	}
 }

@@ -23,7 +23,7 @@ public struct TempValue<Value>: AdapterState {
 		return temporaryValue
 	}
 	
-	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output {
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
 		return Output(state: TempValue(temporaryValue: message), notification: message)
 	}
 }

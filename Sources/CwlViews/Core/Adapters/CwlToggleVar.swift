@@ -22,8 +22,8 @@ public struct ToggleValue: AdapterState {
 	
 	public func resume() -> Notification? { return persistentValue }
 	
-	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output {
-		return Output(nil, nil)
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
+		return nil
 	}
 }
 

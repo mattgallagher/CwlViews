@@ -52,7 +52,7 @@ public struct StackAdapterState<PathElement: Codable>: AdapterState {
 		return Message.reload(persistentValue)
 	}
 	
-	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output {
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
 		return StackAdapterState<PathElement>(persistentValue: []).reduce(message: message, feedback: feedback)
 	}
 }

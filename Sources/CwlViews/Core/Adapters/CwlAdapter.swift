@@ -25,7 +25,7 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 	public let multiInput: SignalMultiInput<State.Message>
 	public var input: SignalInput<State.Message> { return multiInput }
 	
-	private let multiSignal: SignalMulti<State.Output?>
+	public let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
 		return combinedSignal.compactMap { content in content.notification }
 	}
@@ -33,12 +33,11 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 	private init(content: State.Output?) {
 		let (i, sig) = Signal<State.Message>.multiChannel().tuple
 		multiInput = i
-		multiSignal = sig.reduce(initialState: content) { (content: State.Output?, message: State.Message) -> State.Output? in
-			if let state = content?.state {
-				return state.reduce(message: message, feedback: i)
-			} else {
-				return State.initialize(message: message, feedback: i)
-			}
+		let initializer = { (message: State.Message) throws -> State.Output? in
+			try State.initialize(message: message, feedback: i)
+		}
+		combinedSignal = sig.reduce(initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
+			try content.state.reduce(message: message, feedback: i)
 		}
 	}
 	
@@ -95,42 +94,10 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 		}
 		
 		// Persistent value with child persistent values. FlatMap over all child changes. NOTE: since the child will not emit its initial value, we must start with one.
-		return multiSignal.flatMapLatest { (content: State.Output) -> Signal<Void> in
+		return combinedSignal.flatMapLatest { (content: State.Output) -> Signal<Void> in
 			guard let state = content.state as? StateContainer else { return .preclosed(()) }
 			return state.persistentValueChanged.startWith(())
 		}.dropActivation()
-	}
-
-	/// Access to `state` values emitted from `combinedSignal`.
-	public var stateSignal: Signal<State> {
-		return combinedSignal.compactMap { content in content.state }
-	}
-	
-	/// The `combinedSignal` provides access to the `State` and `State.Notification` values emitted from reducer.
-	public var combinedSignal: Signal<State.Output> {
-		return multiSignal.signal.transform(initialState: false) { initialized, result, next in
-			let output: State.Output
-			switch result {
-			case .failure(let e): next.send(end: e); return
-			case .success(let v): output = v
-			}
-			guard initialized else {
-				guard let s = output.state else { return }
-				initialized = true
-				if let n = s.resume() {
-					next.send(value: (s, n))
-				}
-				return
-			}
-			guard let s = output.state else {
-				initialized = false
-				if let n = output.notification {
-					next.send(value: (nil, n))
-				}
-				return
-			}
-			next.send(value: (s, output.notification))
-		}
 	}
 	
 }

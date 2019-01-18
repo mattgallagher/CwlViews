@@ -17,6 +17,10 @@
 //  OF THIS SOFTWARE.
 //
 
+public struct ModelState {
+	
+}
+
 /// Instead of offering a single "notification" output signal, like a plain `Adapter`, the `FilteredAdapter` is optimized around the idea of multiple filtered views of the output, with subtle questions like "whether to notify immediately upon connecting" handled by the filtered view, rather than a behavior baked into the adapter.
 /// A single shared `State` is shared between the `reduce` and filter stages of the pipeline using a manual synchronization context to ensure this remains threadsafe. The `withMutableState` function offers synchronous, threadsafe access to the same storage for serialization and other concerns that might require immediate access.
 /// However, there are also some omissions. Unlike `Adapter`, this *requires* an initial `State`. There is also no built-in support for `Codable`, since this `FilteredAdapter` would typically be used on data where serialization and persistence are manually handled.

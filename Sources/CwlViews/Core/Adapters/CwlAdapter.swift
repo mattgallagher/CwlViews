@@ -22,12 +22,13 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 	public typealias InputValue = State.Message
 	private enum Keys: CodingKey { case `var` }
 	
+	private let executionContext = State.executionContext
 	public let multiInput: SignalMultiInput<State.Message>
 	public var input: SignalInput<State.Message> { return multiInput }
 	
 	public let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
-		return combinedSignal.compactMap { content in content.notification }
+		return combinedSignal.mapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification }).compact()
 	}
 	
 	private init(content: State.Output?) {
@@ -36,7 +37,7 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 		let initializer = { (message: State.Message) throws -> State.Output? in
 			try State.initialize(message: message, feedback: i)
 		}
-		combinedSignal = sig.reduce(initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
+		combinedSignal = sig.reduce(context: executionContext, initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
 			try content.state.reduce(message: message, feedback: i)
 		}
 	}

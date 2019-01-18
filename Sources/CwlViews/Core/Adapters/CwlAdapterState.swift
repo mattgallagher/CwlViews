@@ -13,12 +13,18 @@ public protocol AdapterState {
 	
 	typealias Output = (state: Self, notification: Notification?)
 	
+	static var executionContext: Exec { get }
+	
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
 	func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> Output
 	func resume() -> Notification?
 	
 	init(persistentValue: PersistentValue)
 	var persistentValue: PersistentValue { get }
+}
+
+public extension AdapterState {
+	static var executionContext: Exec { return .direct }
 }
 
 public extension AdapterState where PersistentValue == NonPersistentAdapterState {

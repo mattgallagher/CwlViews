@@ -7,11 +7,11 @@
 //
 
 /// An "Either" type for use in scenarios where "Equatable" and "Codable" are required but there's only ever a single "Master" instance so equality is implied. This is common in Navigation Controller stacks and Split Views.
-public enum MasterDetail<Master: StateContainer, Detail: StateContainer>: StateContainer {
+public enum MasterDetail<Master: CodableContainer, Detail: CodableContainer>: CodableContainer {
 	case master(Master)
 	case detail(Detail)
 	
-	public var childValues: [StateContainer] {
+	public var childCodableContainers: [CodableContainer] {
 		switch self {
 		case .master(let tvm): return [tvm]
 		case .detail(let dvm): return [dvm]

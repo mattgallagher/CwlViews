@@ -863,7 +863,7 @@ public struct TableScrollPosition {
 }
 
 public func updateFirstRow<RowData>(_ storage: Var<IndexPath?>) -> SignalInput<[TableRow<RowData>]> {
-	return Input().map { $0.first?.indexPath }.bind(to: storage.updatingInput)
+	return Input().map { $0.first?.indexPath }.bind(to: storage.updatingInput())
 }
 
 extension SignalInterface where OutputValue == IndexPath? {

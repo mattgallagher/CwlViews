@@ -9,22 +9,27 @@
 public struct ToggleValue: AdapterState {
 	public typealias Message = Void
 	public typealias Notification = Bool
-	public typealias PersistentValue = Bool
 	
-	public let persistentValue: Bool
-	public init(persistentValue: Bool) {
-		self.persistentValue = persistentValue
+	public let value: Bool
+	public init(value: Bool) {
+		self.value = value
 	}
 	
 	public func reduce(message: Void, feedback: SignalMultiInput<Message>) -> Output {
-		return Output(state: ToggleValue(persistentValue: !persistentValue), notification: !persistentValue)
+		return Output(state: ToggleValue(value: !value), notification: !value)
 	}
 	
-	public func resume() -> Notification? { return persistentValue }
+	public func resume() -> Notification? { return value }
 	
 	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
 		return nil
 	}
 }
 
-public typealias ToggleVar<Value> = Adapter<ToggleValue>
+public typealias ToggleVar = Adapter<ToggleValue>
+
+public extension Adapter where State == ToggleValue {
+	init(_ value: Bool) {
+		self.init(initial: ToggleValue(value: value))
+	}
+}

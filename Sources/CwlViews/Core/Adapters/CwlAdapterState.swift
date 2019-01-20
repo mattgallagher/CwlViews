@@ -8,32 +8,41 @@
 
 public protocol AdapterState {
 	associatedtype Message
+	associatedtype DefaultMessage = Message
 	associatedtype Notification
-	associatedtype PersistentValue: Codable = NonPersistentAdapterState
+//	associatedtype PersistentValue: Codable = NonPersistentAdapterState
 	
 	typealias Output = (state: Self, notification: Notification?)
 	
 	static var executionContext: Exec { get }
+	static func message(from: DefaultMessage) -> Message
 	
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
 	func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> Output
 	func resume() -> Notification?
 	
-	init(persistentValue: PersistentValue)
-	var persistentValue: PersistentValue { get }
+//	init(persistentValue: PersistentValue)
+//	var persistentValue: PersistentValue { get }
 }
 
 public extension AdapterState {
 	static var executionContext: Exec { return .direct }
+	func resume() -> Notification? { return nil }
 }
 
-public extension AdapterState where PersistentValue == NonPersistentAdapterState {
-	init(persistentValue: PersistentValue) {
-		fatalError("init(persistentValue:) must not be called on AdapterState when PersistentValue == NonPersistentAdapterState")
-	}
-	var persistentValue: PersistentValue {
-		fatalError("getter:persistentValue must not be called on AdapterState when PersistentValue == NonPersistentAdapterState")
+public extension AdapterState where DefaultMessage == Message {
+	static func message(from: DefaultMessage) -> Message {
+		return from
 	}
 }
 
-public struct NonPersistentAdapterState: Codable {}
+//public extension AdapterState where PersistentValue == NonPersistentAdapterState {
+//	init(persistentValue: PersistentValue) {
+//		fatalError("init(persistentValue:) must not be called on AdapterState when PersistentValue == NonPersistentAdapterState")
+//	}
+//	var persistentValue: PersistentValue {
+//		fatalError("getter:persistentValue must not be called on AdapterState when PersistentValue == NonPersistentAdapterState")
+//	}
+//}
+//
+//public struct NonPersistentAdapterState: Codable {}

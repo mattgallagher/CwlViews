@@ -23,48 +23,53 @@ import Foundation
 public struct StackAdapterState<PathElement: Codable>: AdapterState {
 	public typealias Message = StackMutation<PathElement>
 	public typealias Notification = StackMutation<PathElement>
-	public typealias PersistentValue = [PathElement]
 	
-	public let persistentValue: [PathElement]
-	public init(persistentValue: [PathElement]) {
-		self.persistentValue = persistentValue
+	public let value: [PathElement]
+	public init(value: [PathElement]) {
+		self.value = value
 	}
 	
 	public func reduce(message: Message, feedback: SignalMultiInput<Message>) -> Output {
 		switch message {
 		case .push(let e):
-			let next = StackAdapterState<PathElement>(persistentValue: persistentValue.appending(e))
+			let next = StackAdapterState<PathElement>(value: value.appending(e))
 			return Output(state: next, notification: message)
 		case .pop:
-			let next = StackAdapterState<PathElement>(persistentValue: Array(persistentValue.dropLast()))
+			let next = StackAdapterState<PathElement>(value: Array(value.dropLast()))
 			return Output(state: next, notification: message)
 		case .popToCount(let i):
 			guard i >= 1 else { return Output(state: self, notification: nil) }
-			let next = StackAdapterState<PathElement>(persistentValue: Array(persistentValue.prefix(i)))
+			let next = StackAdapterState<PathElement>(value: Array(value.prefix(i)))
 			return Output(state: next, notification: message)
 		case .reload(let newStack):
-			let next = StackAdapterState<PathElement>(persistentValue: newStack)
+			let next = StackAdapterState<PathElement>(value: newStack)
 			return Output(state: next, notification: message)
 		}
 	}
 	
 	public func resume() -> Notification? {
-		return Message.reload(persistentValue)
+		return Message.reload(value)
 	}
 	
 	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
-		return StackAdapterState<PathElement>(persistentValue: []).reduce(message: message, feedback: feedback)
+		return StackAdapterState<PathElement>(value: []).reduce(message: message, feedback: feedback)
 	}
 }
 
 public typealias StackAdapter<PathElement: Codable> = Adapter<StackAdapterState<PathElement>>
 
+public extension Adapter {
+	init<PathElement: Codable>( _ value: [PathElement]) where StackAdapterState<PathElement> == State {
+		self.init(initial: StackAdapterState<PathElement>(value: value))
+	}
+}
+
 extension Adapter {
-	public func pushInput<PathElement>() -> SignalInput<PathElement> where State.Message == StackMutation<PathElement> {
-		return Signal<PathElement>.channel().map { State.Message.push($0) }.bind(to: input)
+	public func pushInput<PathElement>() -> SignalInput<PathElement> where State.DefaultMessage == StackMutation<PathElement> {
+		return Signal<PathElement>.channel().map { State.DefaultMessage.push($0) }.bind(to: input)
 	}
 	
-	public func poppedToCount<PathElement>() -> SignalInput<Int> where State.Message == StackMutation<PathElement> {
-		return Signal<Int>.channel().map { State.Message.popToCount($0) }.bind(to: input)
+	public func poppedToCount<PathElement>() -> SignalInput<Int> where State.DefaultMessage == StackMutation<PathElement> {
+		return Signal<Int>.channel().map { State.DefaultMessage.popToCount($0) }.bind(to: input)
 	}
 }

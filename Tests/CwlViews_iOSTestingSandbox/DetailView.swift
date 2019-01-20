@@ -19,7 +19,7 @@
 
 import CwlViews
 
-struct DetailViewState: StateContainer {
+struct DetailViewState: CodableContainer {
 	let row: String
 	let showChild: ToggleVar
 	
@@ -28,7 +28,7 @@ struct DetailViewState: StateContainer {
 		self.showChild = ToggleVar(false)
 	}
 	
-	var childValues: [StateContainer] { return [showChild] }
+	var childCodableValues: [CodableContainer] { return [showChild] }
 }
 
 func detailViewController(_ detailState: DetailViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {

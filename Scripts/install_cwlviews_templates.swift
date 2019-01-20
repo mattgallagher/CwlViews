@@ -794,12 +794,12 @@ func iOSMainContent() -> String {
 func iOSNavViewContent() -> String {
 	return """
 		typealias NavPathElement = MasterOrDetail<TableViewState, DetailViewState>
-		struct NavViewState: StateContainer {
+		struct NavViewState: CodableContainer {
 			let navStack: StackAdapter<NavPathElement>
 			init () {
 				navStack = StackAdapter([.master(TableViewState())])
 			}
-			var childValues: [StateContainer] { return [navStack] }
+			var childCodableValues: [CodableContainer] { return [navStack] }
 		}
 
 		func navViewController(_ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
@@ -830,7 +830,7 @@ func iOSNavViewContent() -> String {
 
 func iOSTableViewContent() -> String {
 	return """
-		struct TableViewState: StateContainer {
+		struct TableViewState: CodableContainer {
 			let isEditing: Var<Bool>
 			let firstRow: Var<IndexPath>
 			let selection: TempVar<TableRow<String>>
@@ -840,7 +840,7 @@ func iOSTableViewContent() -> String {
 				firstRow = Var(IndexPath(row: 0, section: 0))
 				selection = TempVar()
 			}
-			var childValues: [StateContainer] { return [isEditing, firstRow] }
+			var childCodableValues: [CodableContainer] { return [isEditing, firstRow] }
 		}
 
 		func tableViewController(_ tableState: TableViewState, _ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
@@ -910,7 +910,7 @@ func iOSTableViewContent() -> String {
 
 func iOSDetailViewContent() -> String {
 	return """
-		struct DetailViewState: StateContainer {
+		struct DetailViewState: CodableContainer {
 			let row: String
 		}
 

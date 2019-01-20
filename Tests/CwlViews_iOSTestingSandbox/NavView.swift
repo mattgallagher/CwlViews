@@ -20,12 +20,12 @@
 import CwlViews
 
 typealias NavPathElement = MasterDetail<TableViewState, DetailViewState>
-struct NavViewState: StateContainer {
+struct NavViewState: CodableContainer {
 	let navStack: StackAdapter<NavPathElement>
 	init () {
 		navStack = StackAdapter([.master(TableViewState())])
 	}
-	var childValues: [StateContainer] { return [navStack] }
+	var childCodableValues: [CodableContainer] { return [navStack] }
 }
 
 func navViewController(_ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
@@ -38,7 +38,7 @@ func navViewController(_ navState: NavViewState, _ doc: DocumentAdapter) -> View
 				return detailViewController(detailState, doc)
 			}
 		},
-		.poppedToCount --> navState.navStack.poppedToCount,
+		.poppedToCount --> navState.navStack.poppedToCount(),
 		.navigationBar -- NavigationBar(
 			.barTintColor -- .barTint,
 			.titleTextAttributes -- [.foregroundColor: UIColor.white],

@@ -17,14 +17,23 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface, SignalInterface {
+public struct Adapter<State: AdapterState>: CodableContainer, SignalInputInterface, SignalInterface {
 	public typealias OutputValue = State.Notification
-	public typealias InputValue = State.Message
+	public typealias InputValue = State.DefaultMessage
 	private enum Keys: CodingKey { case `var` }
 	
 	private let executionContext = State.executionContext
 	public let multiInput: SignalMultiInput<State.Message>
-	public var input: SignalInput<State.Message> { return multiInput }
+	public var input: SignalInput<State.DefaultMessage> {
+		if let i = multiInput as? SignalInput<State.DefaultMessage>  {
+			return i
+		} else {
+			return Input<State.DefaultMessage>().map(State.message).bind(to: multiInput)
+		}
+	}
+	public var message: SignalInput<State.Message> {
+		return multiInput
+	}
 	
 	public let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
@@ -42,63 +51,62 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 		}
 	}
 	
-	public init(from decoder: Decoder) throws {
-		if State.PersistentValue.self == NonPersistentAdapterState.self {
-			self.init()
-			return
-		}
-		
-		// Decoding must:
-		// * Use keyed container
-		// * Call `decode`, not `decodeIfPresent`
-		// * Catch errors from the `decode` (using try? and optional unwrapping is insufficient)
-		// Unless I've missed something, this specific pattern appears to be necessary to correctly decode potentially optional `RB.PersistentState` without *knowing* whether it is defined as an optional – but also handle a situation where it might not be present at all.
-		let c = try decoder.container(keyedBy: Keys.self)
-		let p = try c.decode(State.PersistentValue.self, forKey: .var)
-		self.init(content: State.Output(state: State(persistentValue: p), notification: nil))
-	}
-	
 	public init(initial: State? = nil) {
 		self.init(content: initial.map { State.Output(state: $0, notification: nil) })
 	}
 	
-	public func encode(to encoder: Encoder) throws {
-		if State.PersistentValue.self != NonPersistentAdapterState.self, let s = stateSignal.peek() {
-			var c = encoder.container(keyedBy: Keys.self)
-			try c.encode(s.persistentValue, forKey: .var)
-		}
-	}
-	
 	public func cancel() {
-		if State.self is StateContainer.Type, let value = stateSignal.peek(), var sc = value as? StateContainer {
+		if State.self is CodableContainer.Type, let value = stateSignal.peek(), var sc = value as? CodableContainer {
 			sc.cancel()
 		}
 		input.cancel()
 	}
 	
-	public var childValues: [StateContainer] {
-		if State.self is StateContainer.Type, let value = stateSignal.peek(), let sc = value as? StateContainer {
-			return sc.childValues
+}
+
+extension Adapter {
+	public init(from decoder: Decoder) throws {
+		self.init()
+	}
+	public func encode(to encoder: Encoder) throws {
+	}
+	public var codableValueChanged: Signal<Void> {
+		return Signal<Void>.preclosed()
+	}
+	
+	public var childCodableContainers: [CodableContainer] {
+		return []
+	}
+}
+
+extension Adapter where State: Codable {
+	public init(from decoder: Decoder) throws {
+		let c = try decoder.container(keyedBy: Keys.self)
+		let p = try c.decode(State.self, forKey: .var)
+		self.init(content: State.Output(state: p, notification: nil))
+	}
+	public func encode(to encoder: Encoder) throws {
+		if let s = stateSignal.peek() {
+			var c = encoder.container(keyedBy: Keys.self)
+			try c.encode(s, forKey: .var)
+		}
+	}
+	public var childCodableContainers: [CodableContainer] {
+		if State.self is CodableContainer.Type, let value = stateSignal.peek(), let sc = value as? CodableContainer {
+			return sc.childCodableContainers
 		}
 		return []
 	}
-	
-	public var persistentValueChanged: Signal<Void> {
-		// No persistent value
-		if State.PersistentValue.self == Void.self {
-			return Signal<Void>.preclosed()
-		}
-		
+	public var codableValueChanged: Signal<Void> {
 		// Persistent value without child persistent value. Emit post-activation changes
-		if !(State.self is StateContainer.Type) {
+		if !(State.self is CodableContainer.Type) {
 			return stateSignal.map { _ in () }.dropActivation()
 		}
 		
 		// Persistent value with child persistent values. FlatMap over all child changes. NOTE: since the child will not emit its initial value, we must start with one.
 		return combinedSignal.flatMapLatest { (content: State.Output) -> Signal<Void> in
-			guard let state = content.state as? StateContainer else { return .preclosed(()) }
-			return state.persistentValueChanged.startWith(())
+			guard let state = content.state as? CodableContainer else { return .preclosed(()) }
+			return state.codableValueChanged.startWith(())
 		}.dropActivation()
 	}
-	
 }

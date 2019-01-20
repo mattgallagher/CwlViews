@@ -20,7 +20,7 @@
 import CwlViews
 import Darwin
 
-struct TableViewState: StateContainer {
+struct TableViewState: CodableContainer {
 	let isEditing: Var<Bool>
 	let firstRow: Var<IndexPath>
 	let selection: TempVar<TableRow<String>>
@@ -30,7 +30,7 @@ struct TableViewState: StateContainer {
 		firstRow = Var(IndexPath(row: 0, section: 0))
 		selection = TempVar()
 	}
-	var childValues: [StateContainer] { return [isEditing, firstRow] }
+	var childCodableValues: [CodableContainer] { return [isEditing, firstRow] }
 }
 
 func tableViewController(_ tableState: TableViewState, _ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
@@ -39,7 +39,7 @@ func tableViewController(_ tableState: TableViewState, _ navState: NavViewState,
 			tableState.selection
 				.compactMap { $0.data }
 				.map { .detail(DetailViewState(row: $0)) }
-				.cancellableBind(to: navState.navStack.pushInput)
+				.cancellableBind(to: navState.navStack.pushInput())
 		],
 		.navigationItem -- navItem(tableState: tableState, doc: doc),
 		.view -- TableView<String>(
@@ -62,7 +62,7 @@ func tableViewController(_ tableState: TableViewState, _ navState: NavViewState,
 				.bind(to: doc),
 			.userDidScrollToRow --> Input()
 				.map { $0.indexPath }
-				.bind(to: tableState.firstRow.updatingInput),
+				.bind(to: tableState.firstRow.updatingInput()),
 			.scrollToRow <-- tableState.firstRow
 				.map { .set(.none($0)) },
 			.separatorInset -- UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)

@@ -1,5 +1,5 @@
 //
-//  CwlStateContainer.swift
+//  CwlCodableContainer.swift
 //  CwlViews
 //
 //  Created by Matt Gallagher on 2018/01/09.
@@ -18,26 +18,26 @@
 //
 
 
-public protocol StateContainer: Lifetime, Codable {
-	var persistentValueChanged: Signal<Void> { get }
-	var childValues: [StateContainer] { get }
+public protocol CodableContainer: Lifetime, Codable {
+	var codableValueChanged: Signal<Void> { get }
+	var childCodableContainers: [CodableContainer] { get }
 }
 
-extension StateContainer {
-	public var childValues: [StateContainer] { return [] }
-	public var persistentValueChanged: Signal<Void> {
-		return Signal<Void>.merge(sequence: childValues.map {
-			return $0.persistentValueChanged
+extension CodableContainer {
+	public var childCodableContainers: [CodableContainer] { return [] }
+	public var codableValueChanged: Signal<Void> {
+		return Signal<Void>.merge(sequence: childCodableContainers.map {
+			return $0.codableValueChanged
 		})
 	}
 	public mutating func cancel() {
-		for var v in childValues {
+		for var v in childCodableContainers {
 			v.cancel()
 		}
 	}
 }
 
-extension Array: Lifetime where Element: StateContainer {
+extension Array: Lifetime where Element: CodableContainer {
 	public mutating func cancel() {
 		for var v in self {
 			v.cancel()
@@ -45,20 +45,20 @@ extension Array: Lifetime where Element: StateContainer {
 	}
 }
 
-extension Optional: Lifetime where Wrapped: StateContainer {
+extension Optional: Lifetime where Wrapped: CodableContainer {
 	public mutating func cancel() {
 		self?.cancel()
 	}
 }
 
-extension Array: StateContainer where Element: StateContainer {
-	public var childValues: [StateContainer] {
-		return flatMap { $0.childValues }
+extension Array: CodableContainer where Element: CodableContainer {
+	public var childCodableContainers: [CodableContainer] {
+		return flatMap { $0.childCodableContainers }
 	}
 }
 
-extension Optional: StateContainer where Wrapped: StateContainer {
-	public var childValues: [StateContainer] {
-		return self?.childValues ?? []
+extension Optional: CodableContainer where Wrapped: CodableContainer {
+	public var childCodableContainers: [CodableContainer] {
+		return self?.childCodableContainers ?? []
 	}
 }

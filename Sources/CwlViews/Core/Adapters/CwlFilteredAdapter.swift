@@ -17,7 +17,7 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct ModelState {
+public struct ModelState<Wrapped> {
 	
 }
 

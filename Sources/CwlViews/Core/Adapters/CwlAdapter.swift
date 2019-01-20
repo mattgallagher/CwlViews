@@ -28,7 +28,7 @@ public struct Adapter<State: AdapterState>: StateContainer, SignalInputInterface
 	
 	public let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
-		return combinedSignal.mapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification }).compact()
+		return combinedSignal.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
 	}
 	
 	private init(content: State.Output?) {

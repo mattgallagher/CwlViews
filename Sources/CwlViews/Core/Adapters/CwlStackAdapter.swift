@@ -60,7 +60,7 @@ public typealias StackAdapter<PathElement: Codable> = Adapter<StackAdapterState<
 
 public extension Adapter {
 	init<PathElement: Codable>( _ value: [PathElement]) where StackAdapterState<PathElement> == State {
-		self.init(initial: StackAdapterState<PathElement>(value: value))
+		self.init(adapterState: StackAdapterState<PathElement>(value: value))
 	}
 }
 

@@ -37,22 +37,26 @@ public struct Adapter<State: AdapterState>: CodableContainer, SignalInputInterfa
 	
 	public let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
-		return combinedSignal.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
+		return combinedSignal
+			.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
 	}
 	
-	private init(content: State.Output?) {
+	public init(adapterState: State? = nil) {
 		let (i, sig) = Signal<State.Message>.multiChannel().tuple
 		multiInput = i
-		let initializer = { (message: State.Message) throws -> State.Output? in
-			try State.initialize(message: message, feedback: i)
+		
+		if let state = adapterState {
+			combinedSignal = sig.reduce(initialState: (state, nil), context: executionContext) { (content: State.Output, message: State.Message) throws -> State.Output in
+				try content.state.reduce(message: message, feedback: i)
+			}
+		} else {
+			let initializer = { (message: State.Message) throws -> State.Output? in
+				try State.initialize(message: message, feedback: i)
+			}
+			combinedSignal = sig.reduce(context: executionContext, initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
+				try content.state.reduce(message: message, feedback: i)
+			}
 		}
-		combinedSignal = sig.reduce(context: executionContext, initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
-			try content.state.reduce(message: message, feedback: i)
-		}
-	}
-	
-	public init(initial: State? = nil) {
-		self.init(content: initial.map { State.Output(state: $0, notification: nil) })
 	}
 	
 	public func cancel() {
@@ -83,7 +87,7 @@ extension Adapter where State: Codable {
 	public init(from decoder: Decoder) throws {
 		let c = try decoder.container(keyedBy: Keys.self)
 		let p = try c.decode(State.self, forKey: .var)
-		self.init(content: State.Output(state: p, notification: nil))
+		self.init(adapterState: p)
 	}
 	public func encode(to encoder: Encoder) throws {
 		if let s = stateSignal.peek() {

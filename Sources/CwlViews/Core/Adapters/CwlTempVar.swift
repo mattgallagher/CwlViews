@@ -29,3 +29,9 @@ public struct TempValue<Value>: AdapterState {
 }
 
 public typealias TempVar<Value> = Adapter<TempValue<Value>>
+
+public extension Adapter {
+	init<Value>(_ value: Value) where TempValue<Value> == State {
+		self.init(adapterState: TempValue<Value>(temporaryValue: value))
+	}
+}

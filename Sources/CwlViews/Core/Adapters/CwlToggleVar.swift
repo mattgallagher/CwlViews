@@ -30,6 +30,6 @@ public typealias ToggleVar = Adapter<ToggleValue>
 
 public extension Adapter where State == ToggleValue {
 	init(_ value: Bool) {
-		self.init(initial: ToggleValue(value: value))
+		self.init(adapterState: ToggleValue(value: value))
 	}
 }

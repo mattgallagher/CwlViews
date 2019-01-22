@@ -49,7 +49,7 @@ public typealias Var<Value: Codable> = Adapter<VarState<Value>>
 
 public extension Adapter {
 	init<Value>(_ value: Value) where VarState<Value> == State {
-		self.init(initial: VarState<Value>(value: value))
+		self.init(adapterState: VarState<Value>(value: value))
 	}
 }
 

@@ -30,7 +30,7 @@ struct TableViewState: CodableContainer {
 		firstRow = Var(IndexPath(row: 0, section: 0))
 		selection = TempVar()
 	}
-	var childCodableValues: [CodableContainer] { return [isEditing, firstRow] }
+	var childCodableContainers: [CodableContainer] { return [isEditing, firstRow] }
 }
 
 func tableViewController(_ tableState: TableViewState, _ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {

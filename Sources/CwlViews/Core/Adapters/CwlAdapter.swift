@@ -17,12 +17,12 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct Adapter<State: AdapterState>: CodableContainer, SignalInputInterface, SignalInterface {
+public struct Adapter<State: AdapterState>: SignalInputInterface, SignalInterface {
 	public typealias OutputValue = State.Notification
 	public typealias InputValue = State.DefaultMessage
 	private enum Keys: CodingKey { case `var` }
 	
-	private let executionContext = State.executionContext
+	private let executionContext: Exec
 	public let multiInput: SignalMultiInput<State.Message>
 	public var input: SignalInput<State.DefaultMessage> {
 		if let i = multiInput as? SignalInput<State.DefaultMessage>  {
@@ -35,7 +35,7 @@ public struct Adapter<State: AdapterState>: CodableContainer, SignalInputInterfa
 		return multiInput
 	}
 	
-	public let combinedSignal: SignalMulti<State.Output>
+	let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
 		return combinedSignal
 			.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
@@ -46,6 +46,7 @@ public struct Adapter<State: AdapterState>: CodableContainer, SignalInputInterfa
 		multiInput = i
 		
 		if let state = adapterState {
+			executionContext = state.initializedContext
 			combinedSignal = sig.reduce(initialState: (state, nil), context: executionContext) { (content: State.Output, message: State.Message) throws -> State.Output in
 				try content.state.reduce(message: message, feedback: i)
 			}
@@ -53,64 +54,49 @@ public struct Adapter<State: AdapterState>: CodableContainer, SignalInputInterfa
 			let initializer = { (message: State.Message) throws -> State.Output? in
 				try State.initialize(message: message, feedback: i)
 			}
+			executionContext = State.uninitializedContext
 			combinedSignal = sig.reduce(context: executionContext, initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
 				try content.state.reduce(message: message, feedback: i)
 			}
 		}
 	}
+}
+
+/// If `withMutableState` is called re-entrantly (i.e. already inside the `ModelState`'s mutex) then the underlying `combinedSignal` will not emit synchronously and the `withMutableState` function will throw this error.
+public struct AdapterFailedToEmit: Error {}
+
+extension Adapter: CodableContainer {
+	public init(from decoder: Decoder) throws {
+		let c = try decoder.singleValueContainer()
+		let p = try c.decode(State.self)
+		self.init(adapterState: p)
+	}
+	
+	public func encode(to encoder: Encoder) throws {
+		if let s = combinedSignal.peek()?.state {
+			var c = encoder.singleValueContainer()
+			try c.encode(s)
+		}
+	}
+	
+	public var childCodableContainers: [CodableContainer] {
+		return (combinedSignal.peek()?.state as? CodableContainer)?.childCodableContainers ?? []
+	}
+	
+	public var codableValueChanged: Signal<Void> {
+		if State.self is CodableContainer.Type {
+			return combinedSignal.flatMapLatest { (content: State.Output) -> Signal<Void> in
+				let cc = content.state as! CodableContainer
+				return cc.codableValueChanged.startWith(())
+			}.dropActivation()
+		}
+		return combinedSignal.map { _ in () }.dropActivation()
+	}
 	
 	public func cancel() {
-		if State.self is CodableContainer.Type, let value = stateSignal.peek(), var sc = value as? CodableContainer {
+		if State.self is CodableContainer.Type, let value = combinedSignal.peek()?.state, var sc = value as? CodableContainer {
 			sc.cancel()
 		}
 		input.cancel()
-	}
-	
-}
-
-extension Adapter {
-	public init(from decoder: Decoder) throws {
-		self.init()
-	}
-	public func encode(to encoder: Encoder) throws {
-	}
-	public var codableValueChanged: Signal<Void> {
-		return Signal<Void>.preclosed()
-	}
-	
-	public var childCodableContainers: [CodableContainer] {
-		return []
-	}
-}
-
-extension Adapter where State: Codable {
-	public init(from decoder: Decoder) throws {
-		let c = try decoder.container(keyedBy: Keys.self)
-		let p = try c.decode(State.self, forKey: .var)
-		self.init(adapterState: p)
-	}
-	public func encode(to encoder: Encoder) throws {
-		if let s = stateSignal.peek() {
-			var c = encoder.container(keyedBy: Keys.self)
-			try c.encode(s, forKey: .var)
-		}
-	}
-	public var childCodableContainers: [CodableContainer] {
-		if State.self is CodableContainer.Type, let value = stateSignal.peek(), let sc = value as? CodableContainer {
-			return sc.childCodableContainers
-		}
-		return []
-	}
-	public var codableValueChanged: Signal<Void> {
-		// Persistent value without child persistent value. Emit post-activation changes
-		if !(State.self is CodableContainer.Type) {
-			return stateSignal.map { _ in () }.dropActivation()
-		}
-		
-		// Persistent value with child persistent values. FlatMap over all child changes. NOTE: since the child will not emit its initial value, we must start with one.
-		return combinedSignal.flatMapLatest { (content: State.Output) -> Signal<Void> in
-			guard let state = content.state as? CodableContainer else { return .preclosed(()) }
-			return state.codableValueChanged.startWith(())
-		}.dropActivation()
 	}
 }

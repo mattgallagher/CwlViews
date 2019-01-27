@@ -6,28 +6,40 @@
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 
-public protocol AdapterState {
+public protocol AdapterState: Codable {
 	associatedtype Message
 	associatedtype DefaultMessage = Message
 	associatedtype Notification
-//	associatedtype PersistentValue: Codable = NonPersistentAdapterState
 	
 	typealias Output = (state: Self, notification: Notification?)
 	
-	static var executionContext: Exec { get }
+	static var uninitializedContext: Exec { get }
+
 	static func message(from: DefaultMessage) -> Message
-	
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
+
+	var initializedContext: Exec { get }
+
 	func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> Output
 	func resume() -> Notification?
-	
-//	init(persistentValue: PersistentValue)
-//	var persistentValue: PersistentValue { get }
 }
 
 public extension AdapterState {
-	static var executionContext: Exec { return .direct }
-	func resume() -> Notification? { return nil }
+	static var uninitializedContext: Exec {
+		return .direct
+	}
+	
+	var initializedContext: Exec {
+		return Self.uninitializedContext
+	}
+	
+	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output? {
+		return nil
+	}
+	
+	func resume() -> Notification? {
+		return nil
+	}
 }
 
 public extension AdapterState where DefaultMessage == Message {
@@ -36,13 +48,32 @@ public extension AdapterState where DefaultMessage == Message {
 	}
 }
 
-//public extension AdapterState where PersistentValue == NonPersistentAdapterState {
-//	init(persistentValue: PersistentValue) {
-//		fatalError("init(persistentValue:) must not be called on AdapterState when PersistentValue == NonPersistentAdapterState")
-//	}
-//	var persistentValue: PersistentValue {
-//		fatalError("getter:persistentValue must not be called on AdapterState when PersistentValue == NonPersistentAdapterState")
-//	}
-//}
-//
-//public struct NonPersistentAdapterState: Codable {}
+public protocol NonPersistentAdapterState: AdapterState {}
+
+public extension NonPersistentAdapterState {
+	public init(from decoder: Decoder) throws {
+		fatalError("A non-persistent adapter cannot be decoded.")
+	}
+	
+	public func encode(to encoder: Encoder) throws {
+	}
+}
+
+public protocol SingleValueAdapterState: AdapterState {
+	associatedtype PersistentValue: Codable
+	init(value: PersistentValue)
+	var value: PersistentValue { get }
+}
+
+public extension SingleValueAdapterState {
+	public init(from decoder: Decoder) throws {
+		let c = try decoder.singleValueContainer()
+		let p = try c.decode(PersistentValue.self)
+		self.init(value: p)
+	}
+	
+	public func encode(to encoder: Encoder) throws {
+		var c = encoder.singleValueContainer()
+		try c.encode(value)
+	}
+}

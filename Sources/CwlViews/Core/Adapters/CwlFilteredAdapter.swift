@@ -17,12 +17,61 @@
 //  OF THIS SOFTWARE.
 //
 
-//public struct ModelState<Wrapped, M, N>: AdapterState {
-//	public typealias Message = M
-//	public typealias Notification = N
-//	public init(async: Bool, initial: Wrapped, reduce: (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) -> Notification) {
-//	}
-//}
+public final class ModelState<Wrapped, M, N>: NonPersistentAdapterState {
+	public typealias Message = M
+	public typealias Notification = N
+	public let initializedContext: Exec 
+	
+	let reducer: (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) throws -> Notification
+	let resumer: (_ model: Wrapped) -> Notification?
+	var wrapped: Wrapped
+	
+	public init(async: Bool = false, initial: Wrapped, resumer: @escaping (_ model: Wrapped) -> Notification? = { _ in nil }, reducer: @escaping (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) throws -> Notification) {
+		self.initializedContext = async ? Exec.asyncQueue() : Exec.syncQueue()
+		self.reducer = reducer
+		self.resumer = resumer
+		self.wrapped = initial
+	}
+
+	public func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> (state: ModelState<Wrapped, Message, Notification>, notification: N?) {
+		let n = try reducer(&wrapped, message, feedback)
+		return (self, n)
+	}
+	
+	public func resume() -> Notification? {
+		return resumer(wrapped)
+	}
+}
+
+extension Adapter {
+	/// Allows out-of-stream access to the `wrapped` value (for synchronous actions like save).
+	/// The `perform` function is run within the `ModelState`'s queue.
+	///
+	/// - Parameter perform: sync access to the `wrapped` value of a `ModelState` inside this `Adapter`. 
+	/// - Returns: any value returned from `perform`
+	/// - Throws:
+	///   * `SignalEnd` if the underlying is closed
+	///   * `AdapterFailedToEmit` if the underlying signal was queued due to re-entrancy.
+	public func sync<Value, Wrapped, M, N>(_ perform: (inout Wrapped) throws -> Value) throws -> Value where ModelState<Wrapped, M, N> == State {
+		var result: Result<Value, Error>?
+		withoutActuallyEscaping(perform) { p in
+			let output = combinedSignal.subscribe { r in
+				switch r {
+				case .failure(let e): result = Result<Value, Error>.failure(e)
+				case .success(let v):
+					var value = v.state.wrapped
+					result = Result<Value, Error> { try p(&value) }
+				}
+			}
+			output.cancel()
+		}
+		guard let r = result else {
+			throw AdapterFailedToEmit()
+		}
+		return try r.get()
+	}
+
+}
 
 /// Instead of offering a single "notification" output signal, like a plain `Adapter`, the `FilteredAdapter` is optimized around the idea of multiple filtered views of the output, with subtle questions like "whether to notify immediately upon connecting" handled by the filtered view, rather than a behavior baked into the adapter.
 /// A single shared `State` is shared between the `reduce` and filter stages of the pipeline using a manual synchronization context to ensure this remains threadsafe. The `withMutableState` function offers synchronous, threadsafe access to the same storage for serialization and other concerns that might require immediate access.

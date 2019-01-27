@@ -25,7 +25,7 @@ struct NavViewState: CodableContainer {
 	init () {
 		navStack = StackAdapter([.master(TableViewState())])
 	}
-	var childCodableValues: [CodableContainer] { return [navStack] }
+	var childCodableContainers: [CodableContainer] { return [navStack] }
 }
 
 func navViewController(_ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {

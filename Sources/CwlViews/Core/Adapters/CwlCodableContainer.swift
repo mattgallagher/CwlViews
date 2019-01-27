@@ -24,11 +24,15 @@ public protocol CodableContainer: Lifetime, Codable {
 }
 
 extension CodableContainer {
-	public var childCodableContainers: [CodableContainer] { return [] }
 	public var codableValueChanged: Signal<Void> {
-		return Signal<Void>.merge(sequence: childCodableContainers.map {
-			return $0.codableValueChanged
-		})
+		let sequence = childCodableContainers.map { return $0.codableValueChanged }
+		if sequence.isEmpty {
+			return Signal<Void>.preclosed()
+		} else if sequence.count == 1 {
+			return sequence.first!
+		} else {
+			return Signal<Void>.merge(sequence: sequence)
+		}
 	}
 	public mutating func cancel() {
 		for var v in childCodableContainers {

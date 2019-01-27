@@ -6,7 +6,9 @@
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 
-public struct VarState<Value: Codable>: Codable, AdapterState {
+public typealias Var<Value: Codable> = Adapter<VarState<Value>>
+
+public struct VarState<Value: Codable>: SingleValueAdapterState {
 	public enum Message {
 		case set(Value)
 		case update(Value)
@@ -45,7 +47,25 @@ public struct VarState<Value: Codable>: Codable, AdapterState {
 	}
 }
 
-public typealias Var<Value: Codable> = Adapter<VarState<Value>>
+extension VarState: Codable where Value: Codable {}
+
+extension VarState: Lifetime where Value: Lifetime {
+	public mutating func cancel() {
+		var v = value
+		v.cancel()
+		self = VarState(value: v)
+	}
+}
+
+extension VarState: CodableContainer where Value: CodableContainer {
+	public var childCodableContainers: [CodableContainer] {
+		return value.childCodableContainers
+	}
+	
+	public var codableValueChanged: Signal<Void> {
+		return value.codableValueChanged
+	}
+}
 
 public extension Adapter {
 	init<Value>(_ value: Value) where VarState<Value> == State {
@@ -62,3 +82,4 @@ extension Adapter {
 		return Input().map { .notify($0) }.bind(to: message)
 	}
 }
+

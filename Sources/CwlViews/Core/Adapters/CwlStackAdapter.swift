@@ -19,8 +19,10 @@
 
 import Foundation
 
+public typealias StackAdapter<PathElement: Codable> = Adapter<StackAdapterState<PathElement>>
+
 /// This "Adapter" is a `ModelSignalValue` that manages a stack of navigation items as might be used by a UINavigationController. The adapter converts `push`, `popToCount` and `reload` messages into updates to the array of `PathElement`. The adapter includes convenient input signals, animated output signals and includes automatic implementation of coding and notification protocols.
-public struct StackAdapterState<PathElement: Codable>: AdapterState {
+public struct StackAdapterState<PathElement: Codable>: SingleValueAdapterState {
 	public typealias Message = StackMutation<PathElement>
 	public typealias Notification = StackMutation<PathElement>
 	
@@ -56,7 +58,30 @@ public struct StackAdapterState<PathElement: Codable>: AdapterState {
 	}
 }
 
-public typealias StackAdapter<PathElement: Codable> = Adapter<StackAdapterState<PathElement>>
+extension StackAdapterState: Codable where PathElement: Codable {}
+
+extension StackAdapterState: Lifetime where PathElement: Lifetime {
+	public mutating func cancel() {
+		for var l in value {
+			l.cancel()
+		}
+		self = StackAdapterState(value: value.map { element in
+			var e = element
+			e.cancel()
+			return e
+		})
+	}
+}
+
+extension StackAdapterState: CodableContainer where PathElement: CodableContainer {
+	public var childCodableContainers: [CodableContainer] {
+		return value.childCodableContainers
+	}
+	
+	public var codableValueChanged: Signal<Void> {
+		return value.codableValueChanged
+	}
+}
 
 public extension Adapter {
 	init<PathElement: Codable>( _ value: [PathElement]) where StackAdapterState<PathElement> == State {

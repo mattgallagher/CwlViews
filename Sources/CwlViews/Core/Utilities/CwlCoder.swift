@@ -26,12 +26,14 @@ extension NSCoder {
 	///   - interface: exposes the signal
 	///   - forKey: key used for encoding (is `String.viewStateKey` by default)
 	public func encodeLatest<Interface>(from interface: Interface, forKey: String = .viewStateKey) where Interface: SignalInterface, Interface.OutputValue: Codable {
-		if let data = interface.peekData() {
+		if let data = interface.peek().flatMap({ try? JSONEncoder().encode($0) }) {
 			_ = self.encode(data, forKey: forKey)
 		}
 	}
 
 	/// Decodes the JSON data in self, associated with the provided key, and sends into the signal input.
+	///
+	/// NOTE: this function does not send errors.
 	///
 	/// - Parameters:
 	///   - inputInterface: exposes the signal input
@@ -39,41 +41,6 @@ extension NSCoder {
 	public func decodeSend<InputInterface>(to inputInterface: InputInterface, forKey: String = .viewStateKey) where InputInterface: SignalInputInterface, InputInterface.InputValue: Codable {
 		if let data = self.decodeObject(forKey: forKey) as? Data, let value = try? JSONDecoder().decode(InputInterface.InputValue.self, from: data) {
 			inputInterface.input.send(value: value)
-		}
-	}
-}
-
-extension SignalInterface where OutputValue == Data {
-	public func decode<Target: Decodable>(as decodableType: Target.Type) -> Signal<Target> {
-		return transformValues { v, n in _ = n.send(result: Result<Target, Error> { try JSONDecoder().decode(decodableType, from: v) }.mapFailure(SignalEnd.other)) }
-	}
-}
-
-extension SignalInterface where OutputValue: Encodable {
-	public func peekData() -> Data? {
-		return peek().flatMap { try? JSONEncoder().encode($0) }
-	}
-
-	public func data() -> Signal<Data> {
-		return transformValues { v, n in _ = n.send(result: Result<Data, Error> { try JSONEncoder().encode(v) }.mapFailure(SignalEnd.other)) }
-	}
-
-	/// This function subscribes to the signal and logs emitted values as JSON data to the console
-	///
-	/// - Parameter prefix: pre-pended to each JSON value
-	/// - Returns: an endpoint which will keep this logger alive
-	public func logJson(prefix: String = "", outputFormatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> SignalOutput<OutputValue> {
-		return subscribe { result in
-			switch result {
-			case .success(let v):
-				let enc = JSONEncoder()
-				enc.outputFormatting = outputFormatting
-				if let data = try? enc.encode(v), let string = String(data: data, encoding: .utf8) {
-					print("\(prefix)\(string)")
-				}
-			case .failure(let e):
-				print("\(prefix)\(e)")
-			}
 		}
 	}
 }

@@ -23,7 +23,7 @@ private let doc = DocumentAdapter(document: Document())
 private let viewState = Var(NavViewState())
 
 #if DEBUG
-	let docLog = doc.stateSignal.logJson(prefix: "Document changed: ")
+//	let docLog = doc.stateSignal.logJson(prefix: "Document changed: ")
 	let viewLog = viewState.logJson(prefix: "View-state changed: ")
 #endif
 
@@ -34,7 +34,7 @@ func application(_ viewState: Var<NavViewState>, _ doc: DocumentAdapter) -> Appl
 				navViewController(navState, doc)
 			}
 		),
-//		.didEnterBackground --> Input().transformValues { v, n in n.send(.save) }.bind(to: doc),
+		.didEnterBackground --> Input().transformValues { v, n in n.send(.save) }.bind(to: doc),
 		.willEncodeRestorableState -- { $0.encodeLatest(from: viewState) },
 		.didDecodeRestorableState -- { $0.decodeSend(to: viewState) }
 	)

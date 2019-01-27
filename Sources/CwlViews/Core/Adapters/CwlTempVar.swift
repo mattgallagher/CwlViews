@@ -6,7 +6,7 @@
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 
-public struct TempValue<Value>: AdapterState {
+public struct TempValue<Value>: NonPersistentAdapterState {
 	public typealias Message = Value
 	public typealias Notification = Value
 	

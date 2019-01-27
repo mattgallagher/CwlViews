@@ -6,7 +6,7 @@
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 
-public struct ToggleValue: AdapterState {
+public struct ToggleValue: SingleValueAdapterState {
 	public typealias Message = Void
 	public typealias Notification = Bool
 	

@@ -28,7 +28,7 @@ struct DetailViewState: CodableContainer {
 		self.showChild = ToggleVar(false)
 	}
 	
-	var childCodableValues: [CodableContainer] { return [showChild] }
+	var childCodableContainers: [CodableContainer] { return [showChild] }
 }
 
 func detailViewController(_ detailState: DetailViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {

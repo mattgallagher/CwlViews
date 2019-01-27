@@ -31,12 +31,12 @@ struct DocumentAdapter: SignalInputInterface {
 	}
 	
 	func rowsSignal() -> Signal<ArrayMutation<String>> {
-		return adapter.filteredSignal { (document: Document, notification: Document.Notification?, next: SignalNext<ArrayMutation<String>>) in
+		return adapter.filteredSignal { (document: Document, notification: Document.Notification?) in
 			switch notification ?? .reload {
-			case .addedRowIndex(let i): next.send(value: .inserted(document.rows[i], at: i))
-			case .removedRowIndex(let i): next.send(value: .deleted(at: i))
-			case .reload: next.send(value: .reload(document.rows))
-			case .none: break
+			case .addedRowIndex(let i): return .value(.inserted(document.rows[i], at: i))
+			case .removedRowIndex(let i): return .value(.deleted(at: i))
+			case .reload: return .value(.reload(document.rows))
+			case .none: return .none
 			}
 		}
 	}

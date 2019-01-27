@@ -34,7 +34,7 @@ func application(_ viewState: Var<NavViewState>, _ doc: DocumentAdapter) -> Appl
 				navViewController(navState, doc)
 			}
 		),
-		.didEnterBackground --> Input().transformValues { v, n in n.send(.save) }.bind(to: doc),
+		.didEnterBackground --> Input().map { .save }.bind(to: doc),
 		.willEncodeRestorableState -- { $0.encodeLatest(from: viewState) },
 		.didDecodeRestorableState -- { $0.decodeSend(to: viewState) }
 	)

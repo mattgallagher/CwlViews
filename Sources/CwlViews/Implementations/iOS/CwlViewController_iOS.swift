@@ -541,11 +541,11 @@ public struct ModalPresentation {
 
 extension SignalInterface {
 	public func modalPresentation<T>(_ construct: @escaping (T) -> ViewControllerConvertible) -> Signal<ModalPresentation> where OutputValue == Optional<T> {
-		return transform { (result, next) in
+		return transform { result in
 			switch result {
-			case .success(.some(let t)): next.send(value: ModalPresentation(construct(t)))
-			case .success: next.send(value: ModalPresentation(nil))
-			case .failure(let e): next.send(error: e)
+			case .success(.some(let t)): return .value(ModalPresentation(construct(t)))
+			case .success: return .value(ModalPresentation(nil))
+			case .failure(let e): return .end(e)
 			}
 		}
 	}

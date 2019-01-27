@@ -118,11 +118,10 @@ public struct SetMutation<Element> {
 
 extension SignalInterface {
 	public func sortedArrayMutation<Element>(equate: @escaping (Element, Element) -> Bool, compare: @escaping (Element, Element) -> Bool) -> Signal<ArrayMutation<Element>> where SetMutation<Element> == OutputValue {
-		return transform(initialState: Array<Element>()) { (array: inout Array<Element>, result: Signal<SetMutation<Element>>.Result, next: SignalNext<ArrayMutation<Element>>) in
+		return transform(initialState: Array<Element>()) { (array: inout Array<Element>, result: Signal<SetMutation<Element>>.Result) in
 			switch result {
-			case .success(let mutation):
-				mutation.apply(to: &array, equate: equate, compare: compare).forEach { next.send(value: $0) }
-			case .failure(let e): next.send(end: e)
+			case .success(let m): return .values(sequence: m.apply(to: &array, equate: equate, compare: compare))
+			case .failure(let e): return .end(e)
 			}
 		}
 	}

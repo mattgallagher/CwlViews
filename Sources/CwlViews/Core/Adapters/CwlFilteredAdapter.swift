@@ -88,7 +88,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	public let pair: SignalChannel<SignalMultiInput<Message>, SignalMulti<PossibleNotification>>
 	public var input: SignalInput<Message> { return pair.input }
 	
-	private let context: DispatchQueueContext
+	private let context: Exec
 	private let state: MutableBox<State>
 	
 	/// Construction where the `reduce` function includes a `loopback` parameter
@@ -99,7 +99,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	///   - reduce: the reducing function which combines the internal `State` and `Message` on each iteration, emitting a `Notification?` (or throwing in the case of unrecoverable error or close state). A `loopback` parameter is provided which allows the reducing function to schedule asynchronous tasks that may call back into the adapter at a later time.
 	public init(initialState: State, sync: Bool = true, reduce: @escaping (_ state: inout State, _ message: Message, _ loopback: SignalMultiInput<Message>) throws -> Notification?) {
 		state = MutableBox<State>(initialState)
-		context = DispatchQueueContext(sync: sync)
+		context = sync ? Exec.syncQueue() : Exec.asyncQueue()
 		let channel = Signal<Message>.multiChannel()
 		let loopback = channel.input
 		pair = channel.reduce(initialState: .never, context: .custom(context)) { [state, loopback] (cache: PossibleNotification, message: Message) throws -> PossibleNotification in
@@ -156,7 +156,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	/// - initialValue: a context value passed into the processor on each invocation
 	/// - processor: the function that produces and emits the slice of `State`. The `State` is provided as an `UnsafePointer`, since Swift doesn't have another way to indicate read-only pass-by-reference. The `Notification?` parameter will be `nil` on initial invocation but will never be `nil` again after that point – this distinction allows construction of a specialized slice on initial connection. Output from the function is via the `SignalNext<Processed>` parameter, allowing zero, one or more value outputs or a close, if desired.
 	/// - Returns: the signal output from the `processor`
-	public func filteredSignal<Value, Processed>(initialValue: Value, _ processor: @escaping (inout Value, State, Notification?) throws -> Signal<Processed>.TransformedResult) -> Signal<Processed> {
+	public func filteredSignal<Value, Processed>(initialValue: Value, _ processor: @escaping (inout Value, State, Notification?) throws -> Signal<Processed>.Next) -> Signal<Processed> {
 		return pair.signal.transform(initialState: initialValue) { [state] (value: inout Value, incoming: Signal<PossibleNotification>.Result) in
 			do {
 				switch incoming {
@@ -175,7 +175,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	///
 	/// - processor: the function that produces and emits the slice of `State`. The `State` is provided as an `UnsafePointer`, since Swift doesn't have another way to indicate read-only pass-by-reference. The `Notification?` parameter will be `nil` on initial invocation but will never be `nil` again after that point – this distinction allows construction of a specialized slice on initial connection. Output from the function is via the `SignalNext<Processed>` parameter, allowing zero, one or more value outputs or a close, if desired.
 	/// - Returns: the signal output from the `processor`
-	public func filteredSignal<Processed>(_ processor: @escaping (State, Notification?) throws -> Signal<Processed>.TransformedResult) -> Signal<Processed> {
+	public func filteredSignal<Processed>(_ processor: @escaping (State, Notification?) throws -> Signal<Processed>.Next) -> Signal<Processed> {
 		return filteredSignal(initialValue: ()) { (value: inout (), state: State, notification: Notification?) throws in
 			return try processor(state, notification)
 		}
@@ -183,7 +183,7 @@ public struct FilteredAdapter<Message, State, Notification>: Lifetime, SignalInp
 	
 	/// Allows out-of-stream access to the `State` (for synchronous actions like save). Since this function acquires the context where the signal closures run, do *not* call this from one of the `filterSignal` or `notificationSignal` processing closures as it will deadlock attempting re-entrant access to the context.
 	public func withMutableState<Value>(_ perform: (inout State) throws -> Value) rethrows -> Value {
-		return try context.queue.sync {
+		return try context.invokeSync {
 			try perform(&state.value)
 		}
 	}

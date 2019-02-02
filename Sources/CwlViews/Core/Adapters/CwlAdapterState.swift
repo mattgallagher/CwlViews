@@ -13,29 +13,24 @@ public protocol AdapterState: Codable {
 	
 	typealias Output = (state: Self, notification: Notification?)
 	
-	static var uninitializedContext: Exec { get }
-	static var scheduleAsync: Bool { get }
+	static var defaultContext: (Exec, Bool) { get }
 
 	static func message(from: DefaultMessage) -> Message
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
 
-	var initializedContext: Exec { get }
+	var instanceContext: (Exec, Bool) { get }
 
 	func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> Output
 	func resume() -> Notification?
 }
 
 public extension AdapterState {
-	static var uninitializedContext: Exec {
-		return .direct
+	static var defaultContext: (Exec, Bool) {
+		return (.direct, false)
 	}
 	
-	static var scheduleAsync: Bool {
-		return false
-	}
-	
-	var initializedContext: Exec {
-		return Self.uninitializedContext
+	var instanceContext: (Exec, Bool) {
+		return Self.defaultContext
 	}
 	
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output? {

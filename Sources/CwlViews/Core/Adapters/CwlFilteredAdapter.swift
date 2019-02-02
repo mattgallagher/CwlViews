@@ -17,25 +17,33 @@
 //  OF THIS SOFTWARE.
 //
 
-public final class ModelState<Wrapped, M, N>: NonPersistentAdapterState {
+public struct ModelState<Wrapped, M, N>: NonPersistentAdapterState {
 	public typealias Message = M
 	public typealias Notification = N
-	public let initializedContext: Exec 
+	public let instanceContext: (Exec, Bool) 
 	
 	let reducer: (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) throws -> Notification
 	let resumer: (_ model: Wrapped) -> Notification?
-	var wrapped: Wrapped
+	let wrapped: Wrapped
+	
+	init(previous: ModelState<Wrapped, M, N>, nextWrapped: Wrapped) {
+		self.instanceContext = previous.instanceContext
+		self.reducer = previous.reducer
+		self.resumer = previous.resumer
+		self.wrapped = nextWrapped
+	}
 	
 	public init(async: Bool = false, initial: Wrapped, resumer: @escaping (_ model: Wrapped) -> Notification? = { _ in nil }, reducer: @escaping (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) throws -> Notification) {
-		self.initializedContext = async ? Exec.asyncQueue() : Exec.syncQueue()
+		self.instanceContext = (Exec.syncQueue(), async)
 		self.reducer = reducer
 		self.resumer = resumer
 		self.wrapped = initial
 	}
 
 	public func reduce(message: Message, feedback: SignalMultiInput<Message>) throws -> (state: ModelState<Wrapped, Message, Notification>, notification: N?) {
-		let n = try reducer(&wrapped, message, feedback)
-		return (self, n)
+		var nextWrapped = wrapped
+		let n = try reducer(&nextWrapped, message, feedback)
+		return (ModelState<Wrapped, M, N>(previous: self, nextWrapped: nextWrapped), n)
 	}
 	
 	public func resume() -> Notification? {

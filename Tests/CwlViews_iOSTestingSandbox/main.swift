@@ -24,7 +24,7 @@ private let viewState = Var(NavViewState())
 
 #if DEBUG
 //	let docLog = doc.stateSignal.logJson(prefix: "Document changed: ")
-	let viewLog = viewState.logJson(prefix: "View-state changed: ")
+	let viewLog = viewState.encoded().logJson(prefix: "View-state changed: ")
 #endif
 
 func application(_ viewState: Var<NavViewState>, _ doc: DocumentAdapter) -> Application {

@@ -17,36 +17,28 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct Adapter<State: AdapterState>: SignalInputInterface, SignalInterface {
+public struct Adapter<State: AdapterState>: SignalInterface {
 	public typealias OutputValue = State.Notification
 	public typealias InputValue = State.DefaultMessage
 	private enum Keys: CodingKey { case `var` }
 	
 	private let executionContext: Exec
-	public let multiInput: SignalMultiInput<State.Message>
-	public var input: SignalInput<State.DefaultMessage> {
-		if let i = multiInput as? SignalInput<State.DefaultMessage>  {
-			return i
-		} else {
-			return Input<State.DefaultMessage>().map(State.message).bind(to: multiInput)
-		}
-	}
-	public var message: SignalInput<State.Message> {
-		return multiInput
-	}
-	
 	let combinedSignal: SignalMulti<State.Output>
+	public let multiInput: SignalMultiInput<State.Message>
+	
 	public var signal: Signal<State.Notification> {
 		return combinedSignal
 			.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
 	}
 	
 	public init(adapterState: State? = nil) {
-		let (i, sig) = Signal<State.Message>.multiChannel().tuple
+		let (i, s) = Signal<State.Message>.multiChannel().tuple
 		multiInput = i
 		
 		if let state = adapterState {
-			executionContext = state.initializedContext
+			let (ec, async) = state.instanceContext
+			executionContext = ec
+			let sig = async ? s.scheduleAsync(relativeTo: executionContext) : s
 			combinedSignal = sig.reduce(initialState: (state, nil), context: executionContext) { (content: State.Output, message: State.Message) throws -> State.Output in
 				try content.state.reduce(message: message, feedback: i)
 			}
@@ -54,49 +46,12 @@ public struct Adapter<State: AdapterState>: SignalInputInterface, SignalInterfac
 			let initializer = { (message: State.Message) throws -> State.Output? in
 				try State.initialize(message: message, feedback: i)
 			}
-			executionContext = State.uninitializedContext
+			let (ec, async) = State.defaultContext
+			executionContext = ec
+			let sig = async ? s.scheduleAsync(relativeTo: executionContext) : s
 			combinedSignal = sig.reduce(context: executionContext, initializer: initializer) { (content: State.Output, message: State.Message) throws -> State.Output in
 				try content.state.reduce(message: message, feedback: i)
 			}
 		}
-	}
-}
-
-/// If `withMutableState` is called re-entrantly (i.e. already inside the `ModelState`'s mutex) then the underlying `combinedSignal` will not emit synchronously and the `withMutableState` function will throw this error.
-public struct AdapterFailedToEmit: Error {}
-
-extension Adapter: CodableContainer {
-	public init(from decoder: Decoder) throws {
-		let c = try decoder.singleValueContainer()
-		let p = try c.decode(State.self)
-		self.init(adapterState: p)
-	}
-	
-	public func encode(to encoder: Encoder) throws {
-		if let s = combinedSignal.peek()?.state {
-			var c = encoder.singleValueContainer()
-			try c.encode(s)
-		}
-	}
-	
-	public var childCodableContainers: [CodableContainer] {
-		return (combinedSignal.peek()?.state as? CodableContainer)?.childCodableContainers ?? []
-	}
-	
-	public var codableValueChanged: Signal<Void> {
-		if State.self is CodableContainer.Type {
-			return combinedSignal.flatMapLatest { (content: State.Output) -> Signal<Void> in
-				let cc = content.state as! CodableContainer
-				return cc.codableValueChanged.startWith(())
-			}.dropActivation()
-		}
-		return combinedSignal.map { _ in () }.dropActivation()
-	}
-	
-	public func cancel() {
-		if State.self is CodableContainer.Type, let value = combinedSignal.peek()?.state, var sc = value as? CodableContainer {
-			sc.cancel()
-		}
-		input.cancel()
 	}
 }

@@ -14,6 +14,7 @@ public protocol AdapterState: Codable {
 	typealias Output = (state: Self, notification: Notification?)
 	
 	static var uninitializedContext: Exec { get }
+	static var scheduleAsync: Bool { get }
 
 	static func message(from: DefaultMessage) -> Message
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
@@ -27,6 +28,10 @@ public protocol AdapterState: Codable {
 public extension AdapterState {
 	static var uninitializedContext: Exec {
 		return .direct
+	}
+	
+	static var scheduleAsync: Bool {
+		return false
 	}
 	
 	var initializedContext: Exec {

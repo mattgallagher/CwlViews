@@ -36,8 +36,6 @@ extension Adapter: SignalInputInterface {
 	}
 }
 
-public struct AdapterFailedToEmit: Error {}
-
 extension Adapter: CodableContainer {
 	public init(from decoder: Decoder) throws {
 		let c = try decoder.singleValueContainer()

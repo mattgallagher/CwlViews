@@ -22,11 +22,16 @@ import CwlViews
 typealias DocumentAdapter = Adapter<ModelState<Document, Document.Change, Document.Notification>>
 extension Adapter where State == ModelState<Document, Document.Change, Document.Notification> {
 	init(document: Document) {
-		self.init(adapterState: ModelState(async: false, initial: document, resumer: { model -> Notification? in nil }, reducer: { model, message, feedback -> Notification? }))
+		self.init(adapterState: ModelState(
+			async: true,
+			initial: document,
+			resumer: { model -> Document.Notification? in .reload },
+			reducer: { model, message, feedback -> Document.Notification? in try? model.apply(message) }
+		))
 	}
 	
 	func rowsSignal() -> Signal<ArrayMutation<String>> {
-		return slice { document, notification -> Signal<ArrayMutation<String>>.Next in
+		return slice(resume: .reload) { document, notification -> Signal<ArrayMutation<String>>.Next in
 			switch notification {
 			case .addedRowIndex(let i): return .value(.inserted(document.rows[i], at: i))
 			case .removedRowIndex(let i): return .value(.deleted(at: i))
@@ -36,26 +41,3 @@ extension Adapter where State == ModelState<Document, Document.Change, Document.
 		}
 	}
 }
-
-//struct DocumentAdapter: SignalInputInterface {
-//	typealias InputValue = Document.Change
-//	
-//	let adapter: FilteredAdapter<Document.Change, Document, Document.Notification>
-//	var input: SignalInput<Document.Change> { return adapter.pair.input }
-//	var stateSignal: Signal<Document> { return adapter.stateSignal }
-//	
-//	init(document: Document) {
-//		self.adapter = FilteredAdapter(initialState: document) { (document: inout Document, change: Document.Change) in try? document.apply(change) }
-//	}
-//	
-//	func rowsSignal() -> Signal<ArrayMutation<String>> {
-//		return adapter.filteredSignal { (document: Document, notification: Document.Notification?) in
-//			switch notification ?? .reload {
-//			case .addedRowIndex(let i): return .value(.inserted(document.rows[i], at: i))
-//			case .removedRowIndex(let i): return .value(.deleted(at: i))
-//			case .reload: return .value(.reload(document.rows))
-//			case .none: return .none
-//			}
-//		}
-//	}
-//}

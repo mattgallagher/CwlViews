@@ -33,7 +33,7 @@ public struct ModelState<Wrapped, M, N>: NonPersistentAdapterState {
 		self.wrapped = nextWrapped
 	}
 	
-	public init(async: Bool = false, initial: Wrapped, resumer: @escaping (_ model: Wrapped) -> Notification? = { _ in nil }, reducer: @escaping (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) throws -> Notification) {
+	public init(async: Bool = false, initial: Wrapped, resumer: @escaping (_ model: Wrapped) -> Notification? = { _ in nil }, reducer: @escaping (_ model: inout Wrapped, _ message: Message, _ feedback: SignalMultiInput<Message>) throws -> Notification?) {
 		self.instanceContext = (Exec.syncQueue(), async)
 		self.reducer = reducer
 		self.resumer = resumer
@@ -51,10 +51,25 @@ public struct ModelState<Wrapped, M, N>: NonPersistentAdapterState {
 	}
 }
 
-extension Adapter {
-	func slice<Wrapped, Processed, M, N>(resume: N?, _ processor: @escaping (Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
-		let s = combinedSignal.compactMapActivation(select: .last, context: executionContext, activation: { tuple in resume.map { (tuple.state, $0) } }, remainder: { $0 })
-		return combinedSignal.transform(context: executionContext) { result in
+public extension Adapter {
+	func sync<Wrapped, R, M, N>(_ processor: (Wrapped) throws -> R) throws -> R where ModelState<Wrapped, M, N> == State {
+		return try executionContext.invokeSync {
+			if let state = combinedSignal.peek()?.state {
+				return try processor(state.wrapped)
+			} else {
+				throw AdapterFailedToEmit()
+			}
+		}
+	}
+	
+	func slice<Wrapped, Processed, M, N>(resume: N? = nil, _ processor: @escaping (Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
+		let s: Signal<State.Output>
+		if let r = resume {
+			s = combinedSignal.compactMapLatestActivation(context: executionContext) { ($0.state, r) }
+		} else {
+			s = combinedSignal
+		}
+		return s.transform(context: executionContext) { result in
 			switch result {
 			case .failure(let e): return .end(e)
 			case .success(_, nil): return .none
@@ -68,8 +83,14 @@ extension Adapter {
 		}
 	}
 	
-	func slice<Value, Wrapped, Processed, M, N>(initial: Value, _ processor: @escaping (inout Value, Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
-		return combinedSignal.transform(initialState: initial, context: executionContext) { value, result in
+	func slice<Value, Wrapped, Processed, M, N>(initial: Value, resume: N? = nil, _ processor: @escaping (inout Value, Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
+		let s: Signal<State.Output>
+		if let r = resume {
+			s = combinedSignal.compactMapLatestActivation(context: executionContext) { ($0.state, r) }
+		} else {
+			s = combinedSignal
+		}
+		return s.transform(initialState: initial, context: executionContext) { value, result in
 			switch result {
 			case .failure(let e): return .end(e)
 			case .success(_, nil): return .none

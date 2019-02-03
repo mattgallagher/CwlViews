@@ -9,29 +9,33 @@
 public extension Adapter {
 	
 	func encoded(formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Signal<Data> {
-		return codableValueChanged.startWith(()).transform { _ in Signal<Data>.Next.single(Result<Data, Error> { () throws -> Data in
-			let enc = JSONEncoder()
-			enc.outputFormatting = formatting
-			return try enc.encode(self)
-		}.mapFailure(SignalEnd.other) ) }
+		return codableValueChanged.startWith(()).transform { _ in
+			.single(Result {
+				let enc = JSONEncoder()
+				enc.outputFormatting = formatting
+				return try enc.encode(self)
+			}.mapFailure(SignalEnd.other))
+		}
 	}
 	
-	var message: SignalInput<State.Message> { return multiInput }
-}
-
-extension Signal where OutputValue == Data {
-
-	public func logJson(prefix: String = "") -> SignalOutput<Data> {
-		return subscribeValues { data in
+	func logJson(prefix: String = "") -> SignalOutput<Data> {
+		return encoded().subscribeValues { data in
 			if let string = String(data: data, encoding: .utf8) {
 				print("\(prefix)\(string)")
 			}
 		}
 	}
-
-}
-
-extension Signal where OutputValue == String {
+	
+	func filter<Value, Wrapped, Processed, M, N>(intialValue: Value, _ processor: @escaping (inout Value, Wrapped, N) -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
+		return combinedSignal.transform(initialState: intialValue, context: executionContext) { value, result in
+			switch result {
+			case .failure(let e): return .end(e)
+			case .success(_, nil): return .none
+			case .success(let wrapped, let notification?):
+				return try processor(&value, wrapped, notification)
+			}
+		}
+	}
 }
 
 extension Adapter: SignalInputInterface {

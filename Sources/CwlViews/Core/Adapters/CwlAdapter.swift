@@ -22,13 +22,14 @@ public struct Adapter<State: AdapterState>: SignalInterface {
 	public typealias InputValue = State.DefaultMessage
 	private enum Keys: CodingKey { case `var` }
 	
-	private let executionContext: Exec
-	let combinedSignal: SignalMulti<State.Output>
+	let executionContext: Exec
+
 	public let multiInput: SignalMultiInput<State.Message>
+	public var message: SignalInput<State.Message> { return multiInput }
 	
+	let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {
-		return combinedSignal
-			.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
+		return combinedSignal.compactMapActivation(select: .first, context: executionContext, activation: { $0.state.resume() }, remainder: { $0.notification })
 	}
 	
 	public init(adapterState: State? = nil) {

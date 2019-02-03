@@ -65,6 +65,12 @@ public protocol SingleValueAdapterState: AdapterState {
 	var value: PersistentValue { get }
 }
 
+extension Adapter where State: SingleValueAdapterState {
+	public var state: Signal<State> {
+		return combinedSignal.compactMap { content in content.state }
+	}
+}
+
 public extension SingleValueAdapterState {
 	public init(from decoder: Decoder) throws {
 		let c = try decoder.singleValueContainer()

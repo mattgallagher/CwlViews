@@ -19,20 +19,15 @@
 
 import CwlViews
 
-struct DocumentAdapter: SignalInputInterface {
-	typealias InputValue = Document.Change
-	
-	let adapter: FilteredAdapter<Document.Change, Document, Document.Notification>
-	var input: SignalInput<Document.Change> { return adapter.pair.input }
-	var stateSignal: Signal<Document> { return adapter.stateSignal }
-	
+typealias DocumentAdapter = Adapter<ModelState<Document, Document.Change, Document.Notification>>
+extension Adapter where State == ModelState<Document, Document.Change, Document.Notification> {
 	init(document: Document) {
-		self.adapter = FilteredAdapter(initialState: document) { (document: inout Document, change: Document.Change) in try? document.apply(change) }
+		self.init(adapterState: ModelState(async: false, initial: document, resumer: { model -> Notification? in nil }, reducer: { model, message, feedback -> Notification? }))
 	}
 	
 	func rowsSignal() -> Signal<ArrayMutation<String>> {
-		return adapter.filteredSignal { (document: Document, notification: Document.Notification?) in
-			switch notification ?? .reload {
+		return slice { document, notification -> Signal<ArrayMutation<String>>.Next in
+			switch notification {
 			case .addedRowIndex(let i): return .value(.inserted(document.rows[i], at: i))
 			case .removedRowIndex(let i): return .value(.deleted(at: i))
 			case .reload: return .value(.reload(document.rows))
@@ -41,3 +36,26 @@ struct DocumentAdapter: SignalInputInterface {
 		}
 	}
 }
+
+//struct DocumentAdapter: SignalInputInterface {
+//	typealias InputValue = Document.Change
+//	
+//	let adapter: FilteredAdapter<Document.Change, Document, Document.Notification>
+//	var input: SignalInput<Document.Change> { return adapter.pair.input }
+//	var stateSignal: Signal<Document> { return adapter.stateSignal }
+//	
+//	init(document: Document) {
+//		self.adapter = FilteredAdapter(initialState: document) { (document: inout Document, change: Document.Change) in try? document.apply(change) }
+//	}
+//	
+//	func rowsSignal() -> Signal<ArrayMutation<String>> {
+//		return adapter.filteredSignal { (document: Document, notification: Document.Notification?) in
+//			switch notification ?? .reload {
+//			case .addedRowIndex(let i): return .value(.inserted(document.rows[i], at: i))
+//			case .removedRowIndex(let i): return .value(.deleted(at: i))
+//			case .reload: return .value(.reload(document.rows))
+//			case .none: return .none
+//			}
+//		}
+//	}
+//}

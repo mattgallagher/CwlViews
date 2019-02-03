@@ -7,7 +7,6 @@
 //
 
 public extension Adapter {
-	
 	func encoded(formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Signal<Data> {
 		return codableValueChanged.startWith(()).transform { _ in
 			.single(Result {
@@ -25,21 +24,9 @@ public extension Adapter {
 			}
 		}
 	}
-	
-	func filter<Value, Wrapped, Processed, M, N>(intialValue: Value, _ processor: @escaping (inout Value, Wrapped, N) -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
-		return combinedSignal.transform(initialState: intialValue, context: executionContext) { value, result in
-			switch result {
-			case .failure(let e): return .end(e)
-			case .success(_, nil): return .none
-			case .success(let wrapped, let notification?):
-				return try processor(&value, wrapped, notification)
-			}
-		}
-	}
 }
 
 extension Adapter: SignalInputInterface {
-
 	public var input: SignalInput<State.DefaultMessage> {
 		if let i = multiInput as? SignalInput<State.DefaultMessage>  {
 			return i
@@ -47,19 +34,8 @@ extension Adapter: SignalInputInterface {
 			return Input<State.DefaultMessage>().map(State.message).bind(to: multiInput)
 		}
 	}
-	
 }
 
-extension Adapter where State: SingleValueAdapterState {
-
-	/// Access to `state` values emitted from `combinedSignal`.
-	public var state: Signal<State> {
-		return combinedSignal.compactMap { content in content.state }
-	}
-	
-}
-
-/// If `withMutableState` is called re-entrantly (i.e. already inside the `ModelState`'s mutex) then the underlying `combinedSignal` will not emit synchronously and the `withMutableState` function will throw this error.
 public struct AdapterFailedToEmit: Error {}
 
 extension Adapter: CodableContainer {

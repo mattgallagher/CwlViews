@@ -162,7 +162,7 @@
 		C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */; };
 		C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD51FF5B6DA0058E427 /* main.swift */; };
 		C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */; };
-		C9EC312C1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */; };
+		C9EC312C1E854A5400D7B47E /* CwlModelState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EC312A1E854A5400D7B47E /* CwlModelState.swift */; };
 		C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143961FF5BB8A002BBB13 /* NavView.swift */; };
 		C9F143991FF5BB98002BBB13 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143981FF5BB98002BBB13 /* TableView.swift */; };
 		C9F3979B1FD0CA3E00BEE049 /* CwlStackAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */; };
@@ -436,7 +436,7 @@
 		C9EB225B1DC9BB80009E0885 /* CwlGestureRecognizer_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGestureRecognizer_macOS.swift; sourceTree = "<group>"; };
 		C9EB56921EAC49F8000EC5F4 /* CwlTableSection_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableSection_iOS.swift; sourceTree = "<group>"; };
 		C9EB56941EAC4A49000EC5F4 /* CwlTreeMutation_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTreeMutation_macOS.swift; sourceTree = "<group>"; };
-		C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlFilteredAdapter.swift; sourceTree = "<group>"; };
+		C9EC312A1E854A5400D7B47E /* CwlModelState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlModelState.swift; sourceTree = "<group>"; };
 		C9F143961FF5BB8A002BBB13 /* NavView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavView.swift; sourceTree = "<group>"; };
 		C9F143981FF5BB98002BBB13 /* TableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		C9F35BB61E7ABA8900D948D2 /* CwlNavigationController_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationController_iOS.swift; sourceTree = "<group>"; };
@@ -728,8 +728,8 @@
 				C9B676F021EDE14400A7D5C9 /* CwlAdapter+Signals.swift */,
 				C9033CC121EB5C220077245D /* CwlAdapterState.swift */,
 				C937E76C20046BE000E63965 /* CwlCodableContainer.swift */,
-				C9EC312A1E854A5400D7B47E /* CwlFilteredAdapter.swift */,
 				C985C9DA21DDC70E00E8FF8B /* CwlMasterDetail.swift */,
+				C9EC312A1E854A5400D7B47E /* CwlModelState.swift */,
 				C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */,
 				C985C9D621DDC69800E8FF8B /* CwlTempVar.swift */,
 				C985C9D821DDC6B600E8FF8B /* CwlToggleVar.swift */,
@@ -1455,7 +1455,7 @@
 				C985C9B621DC83A200E8FF8B /* CwlAlertAction_iOS.swift in Sources */,
 				C9FDAD301F3AB30900154DA8 /* CwlAdapter.swift in Sources */,
 				C95FABC921D5182F007CCE78 /* CwlView_macOS.swift in Sources */,
-				C9EC312C1E854A5400D7B47E /* CwlFilteredAdapter.swift in Sources */,
+				C9EC312C1E854A5400D7B47E /* CwlModelState.swift in Sources */,
 				C985C9C721DCF79A00E8FF8B /* CwlTextView_iOS.swift in Sources */,
 				C97B16E121DB30D400F72DB9 /* CwlPanGestureRecognizer_iOS.swift in Sources */,
 				C926D0601FF058D4002BF020 /* CwlSetMutation.swift in Sources */,

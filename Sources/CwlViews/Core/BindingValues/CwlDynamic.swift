@@ -30,7 +30,7 @@ public enum Dynamic<Value> {
 			return InitialSubsequent<Value>(initial: v)
 		case .dynamic(let signal):
 			let sc = signal.capture()
-			return InitialSubsequent<Value>(initial: sc.currentValue, subsequent: sc)
+			return InitialSubsequent<Value>(initial: sc.values.last, subsequent: sc)
 		}
 	}
 	

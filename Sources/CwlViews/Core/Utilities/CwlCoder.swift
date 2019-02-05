@@ -26,7 +26,7 @@ extension NSCoder {
 	///   - interface: exposes the signal
 	///   - forKey: key used for encoding (is `String.viewStateKey` by default)
 	public func encodeLatest<Interface>(from interface: Interface, forKey: String = .viewStateKey) where Interface: SignalInterface, Interface.OutputValue: Codable {
-		if let data = interface.peek().flatMap({ try? JSONEncoder().encode($0) }) {
+		if let data = try? JSONEncoder().encode(interface.peek()) {
 			_ = self.encode(data, forKey: forKey)
 		}
 	}

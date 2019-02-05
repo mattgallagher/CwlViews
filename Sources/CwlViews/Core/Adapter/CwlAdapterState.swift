@@ -5,8 +5,19 @@
 //  Created by Matt Gallagher on 13/1/19.
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
+//  Permission to use, copy, modify, and/or distribute this software for any purpose with or without
+//  fee is hereby granted, provided that the above copyright notice and this permission notice
+//  appear in all copies.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+//  SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+//  AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+//  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+//  NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+//  OF THIS SOFTWARE.
+//
 
-public protocol AdapterState: Codable {
+public protocol AdapterState {
 	associatedtype Message
 	associatedtype DefaultMessage = Message
 	associatedtype Notification
@@ -48,18 +59,26 @@ public extension AdapterState where DefaultMessage == Message {
 	}
 }
 
-public protocol NonPersistentAdapterState: AdapterState {}
+public protocol NonPersistentAdapterState: AdapterState, Codable {
+	init()
+}
 
 public extension NonPersistentAdapterState {
 	public init(from decoder: Decoder) throws {
-		fatalError("A non-persistent adapter cannot be decoded.")
+		self.init()
 	}
 	
 	public func encode(to encoder: Encoder) throws {
 	}
 }
 
-public protocol SingleValueAdapterState: AdapterState {
+public extension Adapter {
+	init<Value>() where TempValue<Value> == State {
+		self.init(adapterState: TempValue<Value>())
+	}
+}
+
+public protocol SingleValueAdapterState: AdapterState, Codable {
 	associatedtype PersistentValue: Codable
 	init(value: PersistentValue)
 	var value: PersistentValue { get }
@@ -81,5 +100,19 @@ public extension SingleValueAdapterState {
 	public func encode(to encoder: Encoder) throws {
 		var c = encoder.singleValueContainer()
 		try c.encode(value)
+	}
+}
+
+extension Adapter where State: SingleValueAdapterState {
+	public func logJson(prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime {
+		return codableValueChanged
+			.startWith(())
+			.subscribe { _ in
+				let enc = JSONEncoder()
+				enc.outputFormatting = formatting
+				if let data = try? enc.encode(self), let string = String(data: data, encoding: .utf8) {
+					print("\(prefix)\(string)")
+				}
+		}
 	}
 }

@@ -17,7 +17,7 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct ModelState<Wrapped, M, N>: NonPersistentAdapterState {
+public struct ModelState<Wrapped, M, N>: AdapterState {
 	public typealias Message = M
 	public typealias Notification = N
 	public let instanceContext: (Exec, Bool) 
@@ -53,13 +53,9 @@ public struct ModelState<Wrapped, M, N>: NonPersistentAdapterState {
 
 public extension Adapter {
 	func sync<Wrapped, R, M, N>(_ processor: (Wrapped) throws -> R) throws -> R where ModelState<Wrapped, M, N> == State {
-		return try executionContext.invokeSync {
-			if let state = combinedSignal.peek()?.state {
-				return try processor(state.wrapped)
-			} else {
-				throw AdapterFailedToEmit()
-			}
-		}
+		// Don't `peek` inside the `invokeSync` since that would require re-entering the `executionContext`.
+		let wrapped = try combinedSignal.peek().state.wrapped
+		return try executionContext.invokeSync { return try processor(wrapped) }
 	}
 	
 	func slice<Wrapped, Processed, M, N>(resume: N? = nil, _ processor: @escaping (Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
@@ -100,6 +96,16 @@ public extension Adapter {
 				} catch {
 					return .error(error)
 				}
+			}
+		}
+	}
+
+	public func logJson<Wrapped, M, N>(prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime where State == ModelState<Wrapped, M, N>, Wrapped: Encodable {
+		return combinedSignal.subscribeValues(context: executionContext) { (state, _) in
+			let enc = JSONEncoder()
+			enc.outputFormatting = formatting
+			if let data = try? enc.encode(state.wrapped), let string = String(data: data, encoding: .utf8) {
+				print("\(prefix)\(string)")
 			}
 		}
 	}

@@ -17,7 +17,6 @@
 //  OF THIS SOFTWARE.
 //
 
-
 public protocol CodableContainer: Lifetime, Codable {
 	var codableValueChanged: Signal<Void> { get }
 	var childCodableContainers: [CodableContainer] { get }

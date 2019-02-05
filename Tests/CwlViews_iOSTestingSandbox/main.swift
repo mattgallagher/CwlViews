@@ -27,8 +27,8 @@ private let viewState = Var(NavViewState())
 	let viewLog = viewState.logJson(prefix: "View-state changed: ")
 #endif
 
-func application(_ viewState: Var<NavViewState>, _ doc: DocumentAdapter) -> Application {
-	return Application(
+applicationMain {
+	Application(
 		.window -- Window(
 			.rootViewController <-- viewState.map { navState in
 				navViewController(navState, doc)
@@ -39,5 +39,3 @@ func application(_ viewState: Var<NavViewState>, _ doc: DocumentAdapter) -> Appl
 		.didDecodeRestorableState -- { $0.decodeSend(to: viewState) }
 	)
 }
-
-applicationMain { application(viewState, doc) }

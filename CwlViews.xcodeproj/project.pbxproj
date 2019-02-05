@@ -683,7 +683,7 @@
 		C94854101DC58FF5009CC145 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				C985C9D021DDC53900E8FF8B /* Adapters */,
+				C985C9D021DDC53900E8FF8B /* Adapter */,
 				C985C9C921DDC47C00E8FF8B /* Binder */,
 				C985C9CA21DDC4A300E8FF8B /* BindingValues */,
 				C985C9D121DDC56200E8FF8B /* Mutation */,
@@ -721,7 +721,7 @@
 			path = BindingValues;
 			sourceTree = "<group>";
 		};
-		C985C9D021DDC53900E8FF8B /* Adapters */ = {
+		C985C9D021DDC53900E8FF8B /* Adapter */ = {
 			isa = PBXGroup;
 			children = (
 				C9FDAD2E1F3AB30900154DA8 /* CwlAdapter.swift */,
@@ -735,7 +735,7 @@
 				C985C9D821DDC6B600E8FF8B /* CwlToggleVar.swift */,
 				C985C9D421DDC67100E8FF8B /* CwlVar.swift */,
 			);
-			path = Adapters;
+			path = Adapter;
 			sourceTree = "<group>";
 		};
 		C985C9D121DDC56200E8FF8B /* Mutation */ = {

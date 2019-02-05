@@ -1,5 +1,5 @@
 //
-//  CwlConstant.swift
+//  CwlTempVar.swift
 //  CwlViews
 //
 //  Created by Matt Gallagher on 3/1/19.
@@ -17,15 +17,30 @@
 //  OF THIS SOFTWARE.
 //
 
-/// A simple wrapper around a value used to identify "static" bindings (bindings which are applied only at construction time)
-public struct Constant<Value> {
-	public typealias ValueType = Value
-	public let value: Value
-	public init(_ value: Value) {
-		self.value = value
+public struct TempValue<Value>: NonPersistentAdapterState {
+	public typealias Message = Value
+	public typealias Notification = Value
+	
+	let temporaryValue: Value?
+	public init() {
+		temporaryValue = nil
 	}
-	public static func constant(_ value: Value) -> Constant<Value> {
-		return Constant<Value>(value)
+	
+	private init(temporaryValue: Value) {
+		self.temporaryValue = temporaryValue
+	}
+	
+	public func reduce(message: Value, feedback: SignalMultiInput<Message>) -> Output {
+		return Output(state: TempValue(temporaryValue: message), notification: message)
+	}
+	
+	public func resume() -> Notification? {
+		return temporaryValue
+	}
+	
+	public static func initialize(message: Message, feedback: SignalMultiInput<Message>) -> Output? {
+		return Output(state: TempValue(temporaryValue: message), notification: message)
 	}
 }
 
+public typealias TempVar<Value> = Adapter<TempValue<Value>>

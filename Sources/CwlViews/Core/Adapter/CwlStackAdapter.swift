@@ -90,11 +90,11 @@ public extension Adapter {
 }
 
 extension Adapter {
-	public func pushInput<PathElement>() -> SignalInput<PathElement> where State.DefaultMessage == StackMutation<PathElement> {
-		return Signal<PathElement>.channel().map { State.DefaultMessage.push($0) }.bind(to: input)
+	public func pushInput<PathElement>() -> SignalInput<PathElement> where State.Message == StackMutation<PathElement> {
+		return Signal<PathElement>.channel().map { State.Message.push($0) }.bind(to: input)
 	}
 	
-	public func poppedToCount<PathElement>() -> SignalInput<Int> where State.DefaultMessage == StackMutation<PathElement> {
-		return Signal<Int>.channel().map { State.DefaultMessage.popToCount($0) }.bind(to: input)
+	public func poppedToCount<PathElement>() -> SignalInput<Int> where State.Message == StackMutation<PathElement> {
+		return Signal<Int>.channel().map { State.Message.popToCount($0) }.bind(to: input)
 	}
 }

@@ -54,13 +54,12 @@ public extension ScrollView {
 		case isScrollEnabled(Dynamic<Bool>)
 		case maximumZoomScale(Dynamic<CGFloat>)
 		case minimumZoomScale(Dynamic<CGFloat>)
+		case refreshControl(Dynamic<UIRefreshControl?>)
 		case scrollIndicatorInsets(Dynamic<UIEdgeInsets>)
 		case scrollsToTop(Dynamic<Bool>)
 		case showsHorizontalScrollIndicator(Dynamic<Bool>)
 		case showsVerticalScrollIndicator(Dynamic<Bool>)
 		case zoomScale(Dynamic<CGFloat>)
-		
-		@available(iOS 10.0, *) case refreshControl(Dynamic<UIRefreshControl?>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case flashScrollIndicators(Signal<Void>)
@@ -167,16 +166,13 @@ public extension ScrollView.Preparer {
 		case .isScrollEnabled(let x): return x.apply(instance) { i, v in i.isScrollEnabled = v }
 		case .maximumZoomScale(let x): return x.apply(instance) { i, v in i.maximumZoomScale = v }
 		case .minimumZoomScale(let x): return x.apply(instance) { i, v in i.minimumZoomScale = v }
+		case .refreshControl(let x): return x.apply(instance) { i, v in i.refreshControl = v }
 		case .scrollIndicatorInsets(let x): return x.apply(instance) { i, v in i.scrollIndicatorInsets = v }
 		case .scrollsToTop(let x): return x.apply(instance) { i, v in i.scrollsToTop = v }
 		case .showsHorizontalScrollIndicator(let x): return x.apply(instance) { i, v in i.showsHorizontalScrollIndicator = v }
 		case .showsVerticalScrollIndicator(let x): return x.apply(instance) { i, v in i.showsVerticalScrollIndicator = v }
 		case .zoomScale(let x): return x.apply(instance) { i, v in i.zoomScale = v }
 		
-		case .refreshControl(let x):
-			guard #available(iOS 10.0, *) else { return nil }
-			return x.apply(instance) { i, v in i.refreshControl = v }
-			
 		// 2. Signal bindings are performed on the object after construction.
 		case .flashScrollIndicators(let x): return x.apply(instance) { i, v in i.flashScrollIndicators() }
 		case .scrollRectToVisible(let x): return x.apply(instance) { i, v in i.scrollRectToVisible(v.rect, animated: v.animated) }

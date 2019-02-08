@@ -79,6 +79,8 @@ public extension TableView {
 		case deselectAll(Signal<Void>)
 		case deselectColumn(Signal<NSUserInterfaceItemIdentifier>)
 		case deselectRow(Signal<Int>)
+		case hideRowActions(Signal<Void>)
+		case hideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
 		case highlightColumn(Signal<NSUserInterfaceItemIdentifier?>)
 		case moveColumn(Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>)
 		case scrollColumnToVisible(Signal<NSUserInterfaceItemIdentifier>)
@@ -88,10 +90,7 @@ public extension TableView {
 		case selectRows(Signal<(indexes: IndexSet, byExtendingSelection: Bool)>)
 		case sizeLastColumnToFit(Signal<Void>)
 		case sizeToFit(Signal<Void>)
-		
-		@available(macOS 10.11, *) case hideRowActions(Signal<Void>)
-		@available(macOS 10.11, *) case hideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
-		@available(macOS 10.11, *) case unhideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
+		case unhideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
 
 		// 3. Action bindings are triggered by the object after construction.
 		case columnMoved(SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>)
@@ -113,6 +112,7 @@ public extension TableView {
 		case isGroupRow((_ row: Int, _ rowData: RowData?) -> Bool)
 		case nextTypeSelectMatch((_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int)
 		case pasteboardWriter((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> NSPasteboardWriting)
+		case rowActionsForRow((_ row: Int, _ data: RowData?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction])
 		case rowView((_ row: Int, _ rowData: RowData?) -> TableRowViewConvertible?)
 		case selectionIndexesForProposedSelection((_ tableView: NSTableView, IndexSet) -> IndexSet)
 		case selectionShouldChange((_ tableView: NSTableView) -> Bool)
@@ -124,8 +124,6 @@ public extension TableView {
 		case typeSelectString((TableCell<RowData>) -> String?)
 		case updateDraggingItems((_ tableView: NSTableView, _ forDrag: NSDraggingInfo) -> Void)
 		case validateDrop((_ tableView: NSTableView, _ info: NSDraggingInfo, _ proposedRow: Int, _ proposedDropOperation: NSTableView.DropOperation) -> NSDragOperation)
-
-		@available(macOS 10.11, *) case rowActionsForRow((_ row: Int, _ data: RowData?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction])
 	}
 }
 
@@ -172,6 +170,7 @@ public extension TableView.Preparer {
 		case .mouseDownInHeaderOfTableColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:mouseDownInHeaderOf:)))
 		case .nextTypeSelectMatch(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:nextTypeSelectMatchFromRow:toRow:for:)))
 		case .pasteboardWriter(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:pasteboardWriterForRow:)))
+		case .rowActionsForRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:rowActionsForRow:edge:)))
 		case .rowView(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:rowViewForRow:)))
 		case .selectionIndexesForProposedSelection(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:selectionIndexesForProposedSelection:)))
 		case .selectionShouldChange(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.selectionShouldChange(in:)))
@@ -184,10 +183,6 @@ public extension TableView.Preparer {
 		case .typeSelectString(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:typeSelectStringFor:row:)))
 		case .updateDraggingItems(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:updateDraggingItemsForDrag:)))
 		case .validateDrop(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:validateDrop:proposedRow:proposedDropOperation:)))
-
-		case .rowActionsForRow(let x):
-			guard #available(macOS 10.11, *) else { return }
-			delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:rowActionsForRow:edge:)))
 		default: break
 		}
 	}
@@ -239,6 +234,8 @@ public extension TableView.Preparer {
 				}
 			}
 		case .deselectRow(let x): return x.apply(instance) { i, v in i.deselectRow(v) }
+		case .hideRowActions(let x): return x.apply(instance) { i, v in i.rowActionsVisible = false }
+		case .hideRows(let x): return x.apply(instance) { i, v in i.hideRows(at: v.indexes, withAnimation: v.withAnimation) }
 		case .highlightColumn(let x):
 			return x.apply(instance) { i, v in
 				i.highlightedTableColumn = v.flatMap { (identifier: NSUserInterfaceItemIdentifier) -> NSTableColumn? in
@@ -268,16 +265,7 @@ public extension TableView.Preparer {
 		case .selectRows(let x): return x.apply(instance) { i, v in i.selectRowIndexes(v.indexes, byExtendingSelection: v.byExtendingSelection) }
 		case .sizeLastColumnToFit(let x): return x.apply(instance) { i, v in i.sizeLastColumnToFit() }
 		case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
-		
-		case .hideRowActions(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.rowActionsVisible = false }
-		case .hideRows(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.hideRows(at: v.indexes, withAnimation: v.withAnimation) }
-		case .unhideRows(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.unhideRows(at: v.indexes, withAnimation: v.withAnimation) }
+		case .unhideRows(let x): return x.apply(instance) { i, v in i.unhideRows(at: v.indexes, withAnimation: v.withAnimation) }
 
 		// 3. Action bindings are triggered by the object after construction.
 		case .columnMoved(let x):
@@ -615,7 +603,6 @@ extension TableView.Preparer {
 			return handler(ofType: ((NSTableView, NSDraggingSession, NSPoint, NSDragOperation) -> Void).self)!(tableView, session, screenPoint, operation)
 		}
 
-		@available(macOS 10.11, *)
 		open func tableView(_ tableView: NSTableView, rowActionsForRow row: Int, edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction] {
 			return handler(ofType: ((NSTableView, Int, NSTableView.RowActionEdge) -> [NSTableViewRowAction]).self)!(tableView, row, edge)
 		}
@@ -668,6 +655,8 @@ public extension BindingName where Binding: TableViewBinding {
 	static var deselectAll: TableViewName<Signal<Void>> { return .name(B.deselectAll) }
 	static var deselectColumn: TableViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.deselectColumn) }
 	static var deselectRow: TableViewName<Signal<Int>> { return .name(B.deselectRow) }
+	static var hideRowActions: TableViewName<Signal<Void>> { return .name(B.hideRowActions) }
+	static var hideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.hideRows) }
 	static var highlightColumn: TableViewName<Signal<NSUserInterfaceItemIdentifier?>> { return .name(B.highlightColumn) }
 	static var moveColumn: TableViewName<Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>> { return .name(B.moveColumn) }
 	static var scrollColumnToVisible: TableViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.scrollColumnToVisible) }
@@ -677,10 +666,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var selectRows: TableViewName<Signal<(indexes: IndexSet, byExtendingSelection: Bool)>> { return .name(B.selectRows) }
 	static var sizeLastColumnToFit: TableViewName<Signal<Void>> { return .name(B.sizeLastColumnToFit) }
 	static var sizeToFit: TableViewName<Signal<Void>> { return .name(B.sizeToFit) }
-	
-	@available(macOS 10.11, *) static var hideRowActions: TableViewName<Signal<Void>> { return .name(B.hideRowActions) }
-	@available(macOS 10.11, *) static var hideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.hideRows) }
-	@available(macOS 10.11, *) static var unhideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.unhideRows) }
+	static var unhideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.unhideRows) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	static var columnMoved: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }
@@ -702,6 +688,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var isGroupRow: TableViewName<(_ row: Int, _ rowData: Binding.RowDataType?) -> Bool> { return .name(B.isGroupRow) }
 	static var nextTypeSelectMatch: TableViewName<(_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int> { return .name(B.nextTypeSelectMatch) }
 	static var pasteboardWriter: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> NSPasteboardWriting> { return .name(B.pasteboardWriter) }
+	static var rowActionsForRow: TableViewName<(_ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(B.rowActionsForRow) }
 	static var rowView: TableViewName<(_ row: Int, _ rowData: Binding.RowDataType?) -> TableRowViewConvertible?> { return .name(B.rowView) }
 	static var selectionIndexesForProposedSelection: TableViewName<(_ tableView: NSTableView, IndexSet) -> IndexSet> { return .name(B.selectionIndexesForProposedSelection) }
 	static var selectionShouldChange: TableViewName<(_ tableView: NSTableView) -> Bool> { return .name(B.selectionShouldChange) }
@@ -713,8 +700,6 @@ public extension BindingName where Binding: TableViewBinding {
 	static var typeSelectString: TableViewName<(TableCell<Binding.RowDataType>) -> String?> { return .name(B.typeSelectString) }
 	static var updateDraggingItems: TableViewName<(_ tableView: NSTableView, _ forDrag: NSDraggingInfo) -> Void> { return .name(B.updateDraggingItems) }
 	static var validateDrop: TableViewName<(_ tableView: NSTableView, _ info: NSDraggingInfo, _ proposedRow: Int, _ proposedDropOperation: NSTableView.DropOperation) -> NSDragOperation> { return .name(B.validateDrop) }
-	
-	@available(macOS 10.11, *) static var rowActionsForRow: TableViewName<(_ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(B.rowActionsForRow) }
 
 	// Composite binding names
 	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {

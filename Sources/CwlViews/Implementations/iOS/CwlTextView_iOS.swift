@@ -66,9 +66,8 @@ public extension TextView {
 		case shouldBeginEditing((UITextView) -> Bool)
 		case shouldChangeText((UITextView, NSRange, String) -> Bool)
 		case shouldEndEditing((UITextView) -> Bool)
-		
-		@available(iOS 10.0, *) case shouldInteractWithAttachment((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)
-		@available(iOS 10.0, *) case shouldInteractWithURL((UITextView, URL, NSRange, UITextItemInteraction) -> Bool)
+		case shouldInteractWithAttachment((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)
+		case shouldInteractWithURL((UITextView, URL, NSRange, UITextItemInteraction) -> Bool)
 	}
 }
 
@@ -115,12 +114,8 @@ public extension TextView.Preparer {
 		case .shouldChangeText(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
 		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
 		
-		case .shouldInteractWithAttachment(let x):
-			guard #available(iOS 10.0, *) else { return }
-			delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
-		case .shouldInteractWithURL(let x):
-			guard #available(iOS 10.0, *) else { return }
-			delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithAttachment(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithURL(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
 		default: break
 		}
 	}
@@ -195,20 +190,20 @@ extension TextView.Preparer {
 			return handler(ofType: ((UITextView, NSRange, String) -> Bool).self)!(textView, range, text)
 		}
 		
+		open func textView(_ textView: UITextView, shouldInteractWith textAttachment: NSTextAttachment, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+			return handler(ofType: ((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool).self)!(textView, textAttachment, characterRange, interaction)
+		}
+		
+		open func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+			return handler(ofType: ((UITextView, URL, NSRange, UITextItemInteraction) -> Bool).self)!(textView, url, characterRange, interaction)
+		}
+		
 		open func textViewDidChange(_ textView: UITextView) {
 			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
 		}
 		
 		open func textViewDidChangeSelection(_ textView: UITextView) {
 			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
-		}
-		
-		@available(iOS 10.0, *) open func textView(_ textView: UITextView, shouldInteractWith textAttachment: NSTextAttachment, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-			return handler(ofType: ((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool).self)!(textView, textAttachment, characterRange, interaction)
-		}
-		
-		@available(iOS 10.0, *) open func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-			return handler(ofType: ((UITextView, URL, NSRange, UITextItemInteraction) -> Bool).self)!(textView, url, characterRange, interaction)
 		}
 	}
 }
@@ -260,9 +255,8 @@ public extension BindingName where Binding: TextViewBinding {
 	static var shouldBeginEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldBeginEditing) }
 	static var shouldChangeText: TextViewName<(UITextView, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
 	static var shouldEndEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldEndEditing) }
-	
-	@available(iOS 10.0, *) static var shouldInteractWithAttachment: TextViewName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithAttachment) }
-	@available(iOS 10.0, *) static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithURL) }
+	static var shouldInteractWithAttachment: TextViewName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithAttachment) }
+	static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithURL) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

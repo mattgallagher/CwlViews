@@ -24,6 +24,7 @@
 /* Begin PBXBuildFile section */
 		C9033CC221EB5C220077245D /* CwlAdapterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9033CC121EB5C220077245D /* CwlAdapterState.swift */; };
 		C9086A182196502A006DBD43 /* CwlBackingLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */; };
+		C90A04B1220989FB002ABE89 /* CwlImageDrawn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */; };
 		C9111CBC1E361D670029DD2F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A45E1E3476E50088F2AD /* main.swift */; };
 		C9111CBD1E3623470029DD2F /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A4651E34CD900088F2AD /* MainMenu.swift */; };
 		C91307411F66384200174902 /* CwlCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C913073F1F66384200174902 /* CwlCoder.swift */; };
@@ -162,6 +163,8 @@
 		C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */; };
 		C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD51FF5B6DA0058E427 /* main.swift */; };
 		C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */; };
+		C9E4CEF6220C390B00D7165D /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E4CEF4220C38E200D7165D /* SplitViewController.swift */; };
+		C9E4CEF9220C39D900D7165D /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E4CEF7220C395000D7165D /* TabBarController.swift */; };
 		C9EC312C1E854A5400D7B47E /* CwlModelState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EC312A1E854A5400D7B47E /* CwlModelState.swift */; };
 		C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143961FF5BB8A002BBB13 /* NavView.swift */; };
 		C9F143991FF5BB98002BBB13 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143981FF5BB98002BBB13 /* TableView.swift */; };
@@ -291,6 +294,7 @@
 
 /* Begin PBXFileReference section */
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
+		C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageDrawn.swift; sourceTree = "<group>"; };
 		C90AAA4F1EBCA12400E2C0EE /* CwlAlertController_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertController_iOS.swift; sourceTree = "<group>"; };
 		C90AAA511EBCA83000E2C0EE /* CwlAlertAction_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertAction_iOS.swift; sourceTree = "<group>"; };
 		C913073F1F66384200174902 /* CwlCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlCoder.swift; sourceTree = "<group>"; };
@@ -433,6 +437,8 @@
 		C9DF3DD51FF5B6DA0058E427 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		C9E181211EA89B6F00DD0107 /* CwlOutlineView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlOutlineView_macOS.swift; sourceTree = "<group>"; };
+		C9E4CEF4220C38E200D7165D /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
+		C9E4CEF7220C395000D7165D /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
 		C9EB225B1DC9BB80009E0885 /* CwlGestureRecognizer_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGestureRecognizer_macOS.swift; sourceTree = "<group>"; };
 		C9EB56921EAC49F8000EC5F4 /* CwlTableSection_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableSection_iOS.swift; sourceTree = "<group>"; };
 		C9EB56941EAC4A49000EC5F4 /* CwlTreeMutation_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTreeMutation_macOS.swift; sourceTree = "<group>"; };
@@ -754,6 +760,7 @@
 			isa = PBXGroup;
 			children = (
 				C913073F1F66384200174902 /* CwlCoder.swift */,
+				C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */,
 				C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */,
 			);
 			path = Utilities;
@@ -929,6 +936,15 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
+		C9E4CEEF220C38B800D7165D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C9E4CEF4220C38E200D7165D /* SplitViewController.swift */,
+				C9E4CEF7220C395000D7165D /* TabBarController.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		C9F9A31821DEF0C000026DC1 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -963,6 +979,7 @@
 			isa = PBXGroup;
 			children = (
 				C9F9A34F21DF70F100026DC1 /* main.swift */,
+				C9E4CEEF220C38B800D7165D /* Views */,
 				C9F9A34621DF6FBE00026DC1 /* Assets.xcassets */,
 				C9F9A34821DF6FBE00026DC1 /* LaunchScreen.storyboard */,
 				C9F9A34B21DF6FBE00026DC1 /* Info.plist */,
@@ -1523,6 +1540,7 @@
 				C95FABC621D4A1C6007CCE78 /* CwlLayer.swift in Sources */,
 				C97B16ED21DC429C00F72DB9 /* CwlTextInputTraits_iOS.swift in Sources */,
 				C97A5B5521D59656001D98DD /* CwlWebView.swift in Sources */,
+				C90A04B1220989FB002ABE89 /* CwlImageDrawn.swift in Sources */,
 				C97B16D121D8E13800F72DB9 /* CwlPressGestureRecognizer_macOS.swift in Sources */,
 				C91307411F66384200174902 /* CwlCoder.swift in Sources */,
 				C97B16C021D745DC00F72DB9 /* CwlTableCellView_macOS.swift in Sources */,
@@ -1581,6 +1599,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9E4CEF9220C39D900D7165D /* TabBarController.swift in Sources */,
+				C9E4CEF6220C390B00D7165D /* SplitViewController.swift in Sources */,
 				C9F9A35021DF70F100026DC1 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

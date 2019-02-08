@@ -207,7 +207,6 @@ extension ScopedValues where Scope == UIControl.State {
 	public static func selected(_ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: .selected)
 	}
-	@available(iOS 9.0, *)
 	public static func focused(_ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: .focused)
 	}

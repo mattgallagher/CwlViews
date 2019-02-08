@@ -17,16 +17,6 @@
 //  OF THIS SOFTWARE.
 //
 
-extension Adapter: SignalInputInterface {
-	public var input: SignalInput<State.DefaultMessage> {
-		if let i = multiInput as? SignalInput<State.DefaultMessage>  {
-			return i
-		} else {
-			return Input<State.DefaultMessage>().map(State.message).bind(to: multiInput)
-		}
-	}
-}
-
 extension Adapter: Lifetime {
 	public func cancel() {
 		if State.self is CodableContainer.Type, let value = (try? combinedSignal.peek())?.state, var sc = value as? CodableContainer {

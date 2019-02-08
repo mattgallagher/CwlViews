@@ -17,15 +17,15 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct Adapter<State: AdapterState>: SignalInterface {
+public struct Adapter<State: AdapterState>: SignalInterface, SignalInputInterface {
 	public typealias OutputValue = State.Notification
-	public typealias InputValue = State.DefaultMessage
+	public typealias InputValue = State.Message
 	private enum Keys: CodingKey { case `var` }
 	
 	let executionContext: Exec
 
 	public let multiInput: SignalMultiInput<State.Message>
-	public var message: SignalInput<State.Message> { return multiInput }
+	public var input: SignalInput<State.Message> { return multiInput }
 	
 	let combinedSignal: SignalMulti<State.Output>
 	public var signal: Signal<State.Notification> {

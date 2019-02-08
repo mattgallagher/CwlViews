@@ -47,8 +47,7 @@ public extension TabBar {
 		case selectionIndicatorImage(Dynamic<UIImage?>)
 		case shadowImage(Dynamic<UIImage?>)
 		case tintColor(Dynamic<UIColor>)
-
-		@available(iOS 10.0, *) case unselectedItemTintColor(Dynamic<UIColor>)
+		case unselectedItemTintColor(Dynamic<UIColor>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case customizingItems(Signal<SetOrAnimate<[ItemIdentifier]?>>)
@@ -136,9 +135,7 @@ public extension TabBar.Preparer {
 		case .shadowImage(let x): return x.apply(instance) { i, v in i.shadowImage = v }
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
 
-		case .unselectedItemTintColor(let x):
-			guard #available(iOS 10.0, *) else { return nil }
-			return x.apply(instance) { i, v in i.unselectedItemTintColor = v }
+		case .unselectedItemTintColor(let x): return x.apply(instance) { i, v in i.unselectedItemTintColor = v }
 
 		// 2. Signal bindings are performed on the object after construction.
 		case .customizingItems(let x): return x.apply(instance, storage) { i, s, v in
@@ -249,8 +246,7 @@ public extension BindingName where Binding: TabBarBinding {
 	static var selectionIndicatorImage: TabBarName<Dynamic<UIImage?>> { return .name(B.selectionIndicatorImage) }
 	static var shadowImage: TabBarName<Dynamic<UIImage?>> { return .name(B.shadowImage) }
 	static var tintColor: TabBarName<Dynamic<UIColor>> { return .name(B.tintColor) }
-	
-	@available(iOS 10.0, *) static var unselectedItemTintColor: TabBarName<Dynamic<UIColor>> { return .name(B.unselectedItemTintColor) }
+	static var unselectedItemTintColor: TabBarName<Dynamic<UIColor>> { return .name(B.unselectedItemTintColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var customizingItems: TabBarName<Signal<SetOrAnimate<[Binding.ItemIdentifierType]?>>> { return .name(B.customizingItems) }

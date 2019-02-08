@@ -70,13 +70,12 @@ public extension TextField {
 		case didBeginEditing((_ textField: UITextField) -> Void)
 		case didChange((_ textField: UITextField) -> Void)
 		case didEndEditing((_ textField: UITextField) -> Void)
+		case didEndEditingWithReason((_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void)
 		case shouldBeginEditing((_ textField: UITextField) -> Bool)
 		case shouldChangeCharacters((_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool)
 		case shouldClear((_ textField: UITextField) -> Bool)
 		case shouldEndEditing((_ textField: UITextField) -> Bool)
 		case shouldReturn((_ textField: UITextField) -> Bool)
-
-		@available(iOS 10.0, *) case didEndEditingWithReason((_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void)
 	}
 }
 	
@@ -106,9 +105,7 @@ public extension TextField.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didEndEditingWithReason(let x):
-			guard #available(iOS 10.0, *) else { return }
-			delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
+		case .didEndEditingWithReason(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
 		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
 		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
 		case .shouldChangeCharacters(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
@@ -196,7 +193,7 @@ extension TextField.Preparer {
 			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
 		}
 		
-		@available(iOS 10.0, *) open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
+		open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
 			handler(ofType: ((UITextField, UITextField.DidEndEditingReason) -> Void).self)!(textField, reason)
 		}
 	}
@@ -253,13 +250,12 @@ public extension BindingName where Binding: TextFieldBinding {
 	static var didBeginEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didBeginEditing) }
 	static var didChange: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didChange) }
 	static var didEndEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didEndEditing) }
+	static var didEndEditingWithReason: TextFieldName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void> { return .name(B.didEndEditingWithReason) }
 	static var shouldBeginEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldBeginEditing) }
 	static var shouldChangeCharacters: TextFieldName<(_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool> { return .name(B.shouldChangeCharacters) }
 	static var shouldClear: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldClear) }
 	static var shouldEndEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldEndEditing) }
 	static var shouldReturn: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldReturn) }
-	
-	@available(iOS 10.0, *) static var didEndEditingWithReason: TextFieldName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void> { return .name(B.didEndEditingWithReason) }
 	
 	// Composite binding names
 	static var textChanged: TextFieldName<SignalInput<String>> {

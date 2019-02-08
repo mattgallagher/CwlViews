@@ -19,14 +19,12 @@
 
 public protocol AdapterState {
 	associatedtype Message
-	associatedtype DefaultMessage = Message
 	associatedtype Notification
 	
 	typealias Output = (state: Self, notification: Notification?)
 	
 	static var defaultContext: (Exec, Bool) { get }
 
-	static func message(from: DefaultMessage) -> Message
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output?
 
 	var instanceContext: (Exec, Bool) { get }
@@ -50,12 +48,6 @@ public extension AdapterState {
 	
 	func resume() -> Notification? {
 		return nil
-	}
-}
-
-public extension AdapterState where DefaultMessage == Message {
-	static func message(from: DefaultMessage) -> Message {
-		return from
 	}
 }
 

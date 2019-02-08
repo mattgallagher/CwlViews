@@ -85,11 +85,27 @@ public extension Adapter {
 }
 
 extension Adapter {
-	public func updatingInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
-		return Input().map { .update($0) }.bind(to: message)
+	public func setterInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+		return Input().map { VarState<Value>.Message.set($0) }.bind(to: self)
 	}
-
+	
+	public func updatingInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+		return Input().map { VarState<Value>.Message.update($0) }.bind(to: self)
+	}
+	
 	public func notifyingInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
-		return Input().map { .notify($0) }.bind(to: message)
+		return Input<Value>().map { VarState<Value>.Message.notify($0) }.bind(to: self)
+	}
+}
+
+extension SignalInterface {
+	public func bind<InputInterface>(to interface: InputInterface) where InputInterface: SignalInputInterface, InputInterface.InputValue == VarState<OutputValue>.Message {
+		return map { VarState<OutputValue>.Message.set($0) }.bind(to: interface)
+	}
+}
+
+extension SignalChannel {
+	public func bind<Target>(to interface: Target) -> InputInterface where Target: SignalInputInterface, Target.InputValue == VarState<Interface.OutputValue>.Message {
+		return final { $0.map { VarState<Interface.OutputValue>.Message.set($0) }.bind(to: interface) }.input
 	}
 }

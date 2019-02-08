@@ -40,8 +40,7 @@ public extension GestureRecognizer {
 		case cancelsTouchesInView(Dynamic<Bool>)
 		case delaysTouchesBegan(Dynamic<Bool>)
 		case delaysTouchesEnded(Dynamic<Bool>)
-
-		@available(iOS 9.2, *) case requiresExclusiveTouchType(Dynamic<Bool>)
+		case requiresExclusiveTouchType(Dynamic<Bool>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -107,9 +106,7 @@ public extension GestureRecognizer.Preparer {
 		case .delaysTouchesBegan(let x): return x.apply(instance) { i, v in i.delaysTouchesBegan = v }
 		case .delaysTouchesEnded(let x): return x.apply(instance) { i, v in i.delaysTouchesEnded = v }
 		
-		case .requiresExclusiveTouchType(let x):
-			guard #available(iOS 9.2, *) else { return nil }
-			return x.apply(instance) { i, v in i.requiresExclusiveTouchType = v }
+		case .requiresExclusiveTouchType(let x): return x.apply(instance) { i, v in i.requiresExclusiveTouchType = v }
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -182,8 +179,7 @@ public extension BindingName where Binding: GestureRecognizerBinding {
 	static var cancelsTouchesInView: GestureRecognizerName<Dynamic<Bool>> { return .name(B.cancelsTouchesInView) }
 	static var delaysTouchesBegan: GestureRecognizerName<Dynamic<Bool>> { return .name(B.delaysTouchesBegan) }
 	static var delaysTouchesEnded: GestureRecognizerName<Dynamic<Bool>> { return .name(B.delaysTouchesEnded) }
-	
-	@available(iOS 9.2, *) static var requiresExclusiveTouchType: GestureRecognizerName<Dynamic<Bool>> { return .name(B.requiresExclusiveTouchType) }
+	static var requiresExclusiveTouchType: GestureRecognizerName<Dynamic<Bool>> { return .name(B.requiresExclusiveTouchType) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

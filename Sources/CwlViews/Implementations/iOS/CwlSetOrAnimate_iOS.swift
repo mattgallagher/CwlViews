@@ -32,6 +32,15 @@ public struct SetOrAnimate<Value> {
 	}
 }
 
+extension SetOrAnimate: ExpressibleByArrayLiteral where Value: ExpressibleByArrayLiteral, Value: RangeReplaceableCollection, Value.ArrayLiteralElement == Value.Element {
+	public typealias ArrayLiteralElement = Value.ArrayLiteralElement
+	public init(arrayLiteral elements: Value.ArrayLiteralElement...) {
+		var value: Value = []
+		value.append(contentsOf: elements)
+		self = .set(value)
+	}
+}
+
 extension SignalInterface {
 	/// A signal transformation which wraps the output in `SetOrAnimate` with the first value as in `set` but subsequent values as in `animate`
 	public func animate(_ choice: AnimationChoice = .subsequent) -> Signal<SetOrAnimate<OutputValue>> {

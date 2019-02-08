@@ -47,12 +47,11 @@ public extension View {
 		case isHidden(Dynamic<Bool>)
 		case layerContentsRedrawPolicy(Dynamic<NSView.LayerContentsRedrawPolicy>)
 		case layout(Dynamic<Layout?>)
+		case pressureConfiguration(Dynamic<NSPressureConfiguration>)
 		case registeredDragTypes(Dynamic<[NSPasteboard.PasteboardType]>)
 		case tooltip(Dynamic<String>)
 		case verticalContentCompressionResistancePriority(Dynamic<NSLayoutConstraint.Priority>)
 		case verticalContentHuggingPriority(Dynamic<NSLayoutConstraint.Priority>)
-
-		@available(macOS 10.11, *) case pressureConfiguration(Dynamic<NSPressureConfiguration>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case needsDisplay(Signal<Bool>)
@@ -132,6 +131,7 @@ public extension View.Preparer {
 		case .isHidden(let x): return x.apply(instance) { i, v in i.isHidden = v }
 		case .layerContentsRedrawPolicy(let x): return x.apply(instance) { i, v in i.layerContentsRedrawPolicy = v }
 		case .layout(let x): return x.apply(instance) { i, v in i.applyLayout(v) }
+		case .pressureConfiguration(let x): return x.apply(instance) { i, v in i.pressureConfiguration = v }
 		case .registeredDragTypes(let x):
 			return x.apply(instance) { i, v in
 				if v.isEmpty {
@@ -143,10 +143,6 @@ public extension View.Preparer {
 		case .tooltip(let x): return x.apply(instance) { i, v in i.toolTip = v }
 		case .verticalContentCompressionResistancePriority(let x): return x.apply(instance) { i, v in i.setContentCompressionResistancePriority(v, for: NSLayoutConstraint.Orientation.vertical) }
 		case .verticalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.vertical) }
-			
-		case .pressureConfiguration(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.pressureConfiguration = v }
 			
 		// 2. Signal bindings are performed on the object after construction.
 		case .needsDisplay(let x): return x.apply(instance) { i, v in i.needsDisplay = v }
@@ -203,12 +199,11 @@ public extension BindingName where Binding: ViewBinding {
 	static var isHidden: ViewName<Dynamic<Bool>> { return .name(B.isHidden) }
 	static var layerContentsRedrawPolicy: ViewName<Dynamic<NSView.LayerContentsRedrawPolicy>> { return .name(B.layerContentsRedrawPolicy) }
 	static var layout: ViewName<Dynamic<Layout?>> { return .name(B.layout) }
+	static var pressureConfiguration: ViewName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
 	static var registeredDragTypes: ViewName<Dynamic<[NSPasteboard.PasteboardType]>> { return .name(B.registeredDragTypes) }
 	static var tooltip: ViewName<Dynamic<String>> { return .name(B.tooltip) }
 	static var verticalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentCompressionResistancePriority) }
 	static var verticalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentHuggingPriority) }
-	
-	@available(macOS 10.11, *) static var pressureConfiguration: ViewName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var needsDisplay: ViewName<Signal<Bool>> { return .name(B.needsDisplay) }

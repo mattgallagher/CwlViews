@@ -40,10 +40,12 @@ public extension Button {
 		case alternateTitle(Dynamic<String>)
 		case attributedAlternateTitle(Dynamic<NSAttributedString>)
 		case attributedTitle(Dynamic<NSAttributedString>)
+		case bezelColor(Dynamic<NSColor?>)
 		case bezelStyle(Dynamic<NSButton.BezelStyle>)
 		case buttonType(Dynamic<NSButton.ButtonType>)
 		case highlight(Dynamic<Bool>)
 		case image(Dynamic<NSImage?>)
+		case imageHugsTitle(Dynamic<Bool>)
 		case imagePosition(Dynamic<NSControl.ImagePosition>)
 		case imageScaling(Dynamic<NSImageScaling>)
 		case isBordered(Dynamic<Bool>)
@@ -58,8 +60,6 @@ public extension Button {
 		case sound(Dynamic<NSSound?>)
 		case state(Dynamic<NSControl.StateValue>)
 		case title(Dynamic<String>)
-		@available(macOS 10.12.2, *) case bezelColor(Dynamic<NSColor?>)
-		@available(macOS 10.12, *) case imageHugsTitle(Dynamic<Bool>)
 
 		//	2. Signal bindings are performed on the object after construction.
 		case setNextState(Signal<Void>)
@@ -100,35 +100,26 @@ public extension Button.Preparer {
 		case .alternateTitle(let x): return x.apply(instance) { i, v in i.alternateTitle = v }
 		case .attributedAlternateTitle(let x): return x.apply(instance) { i, v in i.attributedAlternateTitle = v }
 		case .attributedTitle(let x): return x.apply(instance) { i, v in i.attributedTitle = v }
+		case .bezelColor(let x): return x.apply(instance) { i, v in i.bezelColor = v }
 		case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
 		case .buttonType(let x): return x.apply(instance) { i, v in i.setButtonType(v) }
 		case .highlight(let x): return x.apply(instance) { i, v in i.highlight(v) }
 		case .image(let x): return x.apply(instance) { i, v in i.image = v }
+		case .imageHugsTitle(let x): return x.apply(instance) { i, v in i.imageHugsTitle = v }
 		case .imagePosition(let x): return x.apply(instance) { i, v in i.imagePosition = v }
 		case .imageScaling(let x): return x.apply(instance) { i, v in i.imageScaling = v }
 		case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
-		case .isSpringLoaded(let x):
-			guard #available(macOS 10.10.3, *) else { return nil }
-			return x.apply(instance) { i, v in i.isSpringLoaded = v }
+		case .isSpringLoaded(let x): return x.apply(instance) { i, v in i.isSpringLoaded = v }
 		case .isTransparent(let x): return x.apply(instance) { i, v in i.isTransparent = v }
 		case .keyEquivalent(let x): return x.apply(instance) { i, v in i.keyEquivalent = v }
 		case .keyEquivalentModifierMask(let x): return x.apply(instance) { i, v in i.keyEquivalentModifierMask = v }
-		case .maxAcceleratorLevel(let x):
-			guard #available(macOS 10.10.3, *) else { return nil }
-			return x.apply(instance) { i, v in i.maxAcceleratorLevel = v }
+		case .maxAcceleratorLevel(let x): return x.apply(instance) { i, v in i.maxAcceleratorLevel = v }
 		case .performKeyEquivalent(let x): return x.apply(instance) { i, v in i.performKeyEquivalent(with: v) }
 		case .periodicDelay(let x): return x.apply(instance) { i, v in i.setPeriodicDelay(v.delay, interval: v.interval) }
 		case .showsBorderOnlyWhileMouseInside(let x): return x.apply(instance) { i, v in i.showsBorderOnlyWhileMouseInside = v }
 		case .sound(let x): return x.apply(instance) { i, v in i.sound = v }
 		case .state(let x): return x.apply(instance) { i, v in i.state = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
-
-		case .bezelColor(let x):
-			guard #available(macOS 10.12.2, *) else { return nil }
-			return x.apply(instance) { i, v in i.bezelColor = v }
-		case .imageHugsTitle(let x):
-			guard #available(macOS 10.12, *) else { return nil }
-			return x.apply(instance) { i, v in i.imageHugsTitle = v }
 
 		//	2. Signal bindings are performed on the object after construction.
 		case .setNextState(let x): return x.apply(instance) { i, v in i.setNextState() }
@@ -166,10 +157,12 @@ public extension BindingName where Binding: ButtonBinding {
 	static var alternateTitle: ButtonName<Dynamic<String>> { return .name(B.alternateTitle) }
 	static var attributedAlternateTitle: ButtonName<Dynamic<NSAttributedString>> { return .name(B.attributedAlternateTitle) }
 	static var attributedTitle: ButtonName<Dynamic<NSAttributedString>> { return .name(B.attributedTitle) }
+	static var bezelColor: ButtonName<Dynamic<NSColor?>> { return .name(B.bezelColor) }
 	static var bezelStyle: ButtonName<Dynamic<NSButton.BezelStyle>> { return .name(B.bezelStyle) }
 	static var buttonType: ButtonName<Dynamic<NSButton.ButtonType>> { return .name(B.buttonType) }
 	static var highlight: ButtonName<Dynamic<Bool>> { return .name(B.highlight) }
 	static var image: ButtonName<Dynamic<NSImage?>> { return .name(B.image) }
+	static var imageHugsTitle: ButtonName<Dynamic<Bool>> { return .name(B.imageHugsTitle) }
 	static var imagePosition: ButtonName<Dynamic<NSControl.ImagePosition>> { return .name(B.imagePosition) }
 	static var imageScaling: ButtonName<Dynamic<NSImageScaling>> { return .name(B.imageScaling) }
 	static var isBordered: ButtonName<Dynamic<Bool>> { return .name(B.isBordered) }
@@ -184,8 +177,6 @@ public extension BindingName where Binding: ButtonBinding {
 	static var sound: ButtonName<Dynamic<NSSound?>> { return .name(B.sound) }
 	static var state: ButtonName<Dynamic<NSControl.StateValue>> { return .name(B.state) }
 	static var title: ButtonName<Dynamic<String>> { return .name(B.title) }
-	@available(macOS 10.12.2, *) static var bezelColor: ButtonName<Dynamic<NSColor?>> { return .name(B.bezelColor) }
-	@available(macOS 10.12, *) static var imageHugsTitle: ButtonName<Dynamic<Bool>> { return .name(B.imageHugsTitle) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	static var setNextState: ButtonName<Signal<Void>> { return .name(B.setNextState) }

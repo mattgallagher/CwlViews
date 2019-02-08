@@ -47,6 +47,8 @@ public extension TextField {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
+		case allowsCharacterPickerTouchBarItem(Dynamic<Bool>)
+		case allowsDefaultTighteningForTruncation(Dynamic<Bool>)
 		case allowsEditingTextAttributes(Dynamic<Bool>)
 		case allowsUndo(Dynamic<Bool>)
 		case backgroundColor(Dynamic<NSColor?>)
@@ -54,20 +56,17 @@ public extension TextField {
 		case bezelStyle(Dynamic<NSTextField.BezelStyle>)
 		case drawsBackground(Dynamic<Bool>)
 		case importsGraphics(Dynamic<Bool>)
+		case isAutomaticTextCompletionEnabled(Dynamic<Bool>)
 		case isBordered(Dynamic<Bool>)
 		case isEditable(Dynamic<Bool>)
 		case isSelectable(Dynamic<Bool>)
+		case maximumNumberOfLines(Dynamic<Int>)
 		case placeholderAttributedString(Dynamic<NSAttributedString?>)
 		case placeholderString(Dynamic<String?>)
 		case preferredMaxLayoutWidth(Dynamic<CGFloat>)
 		case sendsActionOnEndEditing(Dynamic<Bool>)
 		case textColor(Dynamic<NSColor?>)
 		case usesSingleLineMode(Dynamic<Bool>)
-
-		@available(macOS 10.12.2, *) case allowsCharacterPickerTouchBarItem(Dynamic<Bool>)
-		@available(macOS 10.11, *) case allowsDefaultTighteningForTruncation(Dynamic<Bool>)
-		@available(macOS 10.12.2, *) case isAutomaticTextCompletionEnabled(Dynamic<Bool>)
-		@available(macOS 10.11, *) case maximumNumberOfLines(Dynamic<Int>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case selectText(Signal<Void>)
@@ -129,6 +128,8 @@ public extension TextField.Preparer {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
+		case .allowsCharacterPickerTouchBarItem(let x): return x.apply(instance) { i, v in i.allowsCharacterPickerTouchBarItem = v }
+		case .allowsDefaultTighteningForTruncation(let x): return x.apply(instance) { i, v in i.allowsDefaultTighteningForTruncation = v }
 		case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
 		case .allowsUndo(let x): return x.apply(instance) { i, v in i.cell?.allowsUndo = v }
 		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
@@ -136,28 +137,17 @@ public extension TextField.Preparer {
 		case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
 		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
 		case .importsGraphics(let x): return x.apply(instance) { i, v in i.importsGraphics = v }
+		case .isAutomaticTextCompletionEnabled(let x): return x.apply(instance) { i, v in i.isAutomaticTextCompletionEnabled = v }
 		case .isBordered(let x): return x.apply(instance) { i, v in i.isBordered = v }
 		case .isEditable(let x): return x.apply(instance) { i, v in i.isEditable = v }
 		case .isSelectable(let x): return x.apply(instance) { i, v in i.isSelectable = v }
+		case .maximumNumberOfLines(let x): return x.apply(instance) { i, v in i.maximumNumberOfLines = v }
 		case .placeholderAttributedString(let x): return x.apply(instance) { i, v in i.placeholderAttributedString = v }
 		case .placeholderString(let x): return x.apply(instance) { i, v in i.placeholderString = v }
 		case .preferredMaxLayoutWidth(let x): return x.apply(instance) { i, v in i.preferredMaxLayoutWidth = v }
 		case .sendsActionOnEndEditing(let x): return x.apply(instance) { i, v in i.cell?.sendsActionOnEndEditing = v }
 		case .textColor(let x): return x.apply(instance) { i, v in i.textColor = v }
 		case .usesSingleLineMode(let x): return x.apply(instance) { i, v in i.usesSingleLineMode = v }
-
-		case .allowsCharacterPickerTouchBarItem(let x):
-			guard #available(macOS 10.12.2, *) else { return nil }
-			return x.apply(instance) { i, v in i.allowsCharacterPickerTouchBarItem = v }
-		case .allowsDefaultTighteningForTruncation(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.allowsDefaultTighteningForTruncation = v }
-		case .isAutomaticTextCompletionEnabled(let x):
-			guard #available(macOS 10.12.2, *) else { return nil }
-			return x.apply(instance) { i, v in i.isAutomaticTextCompletionEnabled = v }
-		case .maximumNumberOfLines(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.maximumNumberOfLines = v }
 
 		// 2. Signal bindings are performed on the object after construction.
 		case .selectText(let x): return x.apply(instance) { i, v in i.selectText(nil) }
@@ -227,6 +217,8 @@ public extension BindingName where Binding: TextFieldBinding {
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
+	static var allowsCharacterPickerTouchBarItem: TextFieldName<Dynamic<Bool>> { return .name(B.allowsCharacterPickerTouchBarItem) }
+	static var allowsDefaultTighteningForTruncation: TextFieldName<Dynamic<Bool>> { return .name(B.allowsDefaultTighteningForTruncation) }
 	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
 	static var allowsUndo: TextFieldName<Dynamic<Bool>> { return .name(B.allowsUndo) }
 	static var backgroundColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.backgroundColor) }
@@ -234,20 +226,17 @@ public extension BindingName where Binding: TextFieldBinding {
 	static var bezelStyle: TextFieldName<Dynamic<NSTextField.BezelStyle>> { return .name(B.bezelStyle) }
 	static var drawsBackground: TextFieldName<Dynamic<Bool>> { return .name(B.drawsBackground) }
 	static var importsGraphics: TextFieldName<Dynamic<Bool>> { return .name(B.importsGraphics) }
+	static var isAutomaticTextCompletionEnabled: TextFieldName<Dynamic<Bool>> { return .name(B.isAutomaticTextCompletionEnabled) }
 	static var isBordered: TextFieldName<Dynamic<Bool>> { return .name(B.isBordered) }
 	static var isEditable: TextFieldName<Dynamic<Bool>> { return .name(B.isEditable) }
 	static var isSelectable: TextFieldName<Dynamic<Bool>> { return .name(B.isSelectable) }
+	static var maximumNumberOfLines: TextFieldName<Dynamic<Int>> { return .name(B.maximumNumberOfLines) }
 	static var placeholderAttributedString: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.placeholderAttributedString) }
 	static var placeholderString: TextFieldName<Dynamic<String?>> { return .name(B.placeholderString) }
 	static var preferredMaxLayoutWidth: TextFieldName<Dynamic<CGFloat>> { return .name(B.preferredMaxLayoutWidth) }
 	static var sendsActionOnEndEditing: TextFieldName<Dynamic<Bool>> { return .name(B.sendsActionOnEndEditing) }
 	static var textColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.textColor) }
 	static var usesSingleLineMode: TextFieldName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
-	
-	@available(macOS 10.12.2, *) static var allowsCharacterPickerTouchBarItem: TextFieldName<Dynamic<Bool>> { return .name(B.allowsCharacterPickerTouchBarItem) }
-	@available(macOS 10.11, *) static var allowsDefaultTighteningForTruncation: TextFieldName<Dynamic<Bool>> { return .name(B.allowsDefaultTighteningForTruncation) }
-	@available(macOS 10.12.2, *) static var isAutomaticTextCompletionEnabled: TextFieldName<Dynamic<Bool>> { return .name(B.isAutomaticTextCompletionEnabled) }
-	@available(macOS 10.11, *) static var maximumNumberOfLines: TextFieldName<Dynamic<Int>> { return .name(B.maximumNumberOfLines) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var selectText: TextFieldName<Signal<Void>> { return .name(B.selectText) }

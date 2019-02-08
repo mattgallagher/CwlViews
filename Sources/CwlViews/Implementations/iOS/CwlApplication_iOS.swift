@@ -132,9 +132,7 @@ public extension Application.Preparer {
 		case .didUpdate(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didUpdate:)))
 		case .handleEventsForBackgroundURLSession(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:)))
 		case .handleWatchKitExtensionRequest(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:)))
-		case .open(let x):
-			guard #available(iOS 9.0, *) else { return }
-			delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:open:options:)))
+		case .open(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:open:options:)))
 		case .performAction(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:)))
 		case .performFetch(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:)))
 		case .protectedDataWillBecomeUnavailable(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:)))
@@ -326,22 +324,12 @@ extension Application.Preparer {
 			handler(ofType: SignalInput<Callback<String, ()>>.self)!.send(value: Callback(session, input))
 		}
 		
-		@available(iOS, introduced: 8.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		open func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
-			handler(ofType: SignalInput<UIUserNotificationSettings>.self)!.send(value: notificationSettings)
-		}
-		
 		open func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 			handler(ofType: SignalInput<Result<Data, Error>>.self)!.send(value: Result.success(deviceToken))
 		}
 		
 		open func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
 			handler(ofType: SignalInput<Result<Data, Error>>.self)!.send(value: Result.failure(error))
-		}
-		
-		@available(iOS, introduced: 4.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		open func application(_ application: UIApplication, didReceive: UILocalNotification) {
-			handler(ofType: SignalInput<UILocalNotification>.self)!.send(value: didReceive)
 		}
 		
 		open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
@@ -356,21 +344,9 @@ extension Application.Preparer {
 			handler(ofType: SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>.self)!.send(value: Callback(userInfo, input))
 		}
 		
-		@available(iOS, introduced: 4.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for localNotification: UILocalNotification, completionHandler: @escaping () -> Void) {
-			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handler(ofType: SignalInput<Callback<(String?, UILocalNotification), ()>>.self)!.send(value: Callback((identifier, localNotification), input))
-		}
-		
 		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
 			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
 			handler(ofType: SignalInput<Callback<(String?, [AnyHashable: Any]), ()>>.self)!.send(value: Callback((identifier, userInfo), input))
-		}
-		
-		@available(iOS, introduced: 4.0, deprecated: 10.0, message: "Use UserNotifications Framework's UNNotificationSettings")
-		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for localNotification: UILocalNotification, withResponseInfo responseInfo: [AnyHashable : Any], completionHandler: @escaping () -> Void) {
-			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handler(ofType: SignalInput<Callback<(String?, UILocalNotification, [AnyHashable : Any]), ()>>.self)!.send(value: Callback((identifier, localNotification, responseInfo), input))
 		}
 		
 		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], withResponseInfo responseInfo: [AnyHashable : Any], completionHandler: @escaping () -> Void) {

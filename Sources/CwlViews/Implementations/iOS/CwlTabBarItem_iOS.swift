@@ -36,12 +36,11 @@ public extension TabBarItem {
 		case systemItem(Constant<UITabBarItem.SystemItem?>)
 
 		//	1. Value bindings may be applied at construction and may subsequently change.
+		case badgeColor(Dynamic<UIColor?>)
+		case badgeTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>)
 		case badgeValue(Dynamic<String?>)
 		case selectedImage(Dynamic<UIImage?>)
 		case titlePositionAdjustment(Dynamic<UIOffset>)
-		
-		@available(iOS 10.0, *) case badgeColor(Dynamic<UIColor?>)
-		@available(iOS 10.0, *) case badgeTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key : Any]?>>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		
@@ -113,11 +112,8 @@ public extension TabBarItem.Preparer {
 		case .selectedImage: return selectedImage.resume()?.apply(instance) { i, v in i.selectedImage = v }
 		case .titlePositionAdjustment(let x): return x.apply(instance) { i, v in i.titlePositionAdjustment = v }
 		
-		case .badgeColor(let x):
-			guard #available(iOS 10.0, *) else { return nil }
-			return x.apply(instance) { i, v in i.badgeColor = v }
+		case .badgeColor(let x): return x.apply(instance) { i, v in i.badgeColor = v }
 		case .badgeTextAttributes(let x):
-			guard #available(iOS 10.0, *) else { return nil }
 			return x.apply(
 				instance: instance,
 				removeOld: { i, scope, v in i.setBadgeTextAttributes(nil, for: scope) },

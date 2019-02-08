@@ -385,7 +385,6 @@ extension ScopedValues where Scope == LeftRightControlState {
 	public static func selected(right: UIControl.State = .selected, _ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: LeftRightControlState(left: .selected, right: right))
 	}
-	@available(iOS 9.0, *)
 	public static func focused(right: UIControl.State = .focused, _ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: LeftRightControlState(left: .focused, right: right))
 	}

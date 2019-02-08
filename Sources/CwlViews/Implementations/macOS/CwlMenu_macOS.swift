@@ -43,7 +43,7 @@ public extension Menu {
 		case minimumWidth(Dynamic<CGFloat>)
 		case showsStateColumn(Dynamic<Bool>)
 		case title(Dynamic<String>)
-		@available(macOS 10.11, *) case userInterfaceLayoutDirection(Dynamic<NSUserInterfaceLayoutDirection>)
+		case userInterfaceLayoutDirection(Dynamic<NSUserInterfaceLayoutDirection>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case cancelTracking(Signal<Void>)
@@ -141,10 +141,7 @@ public extension Menu.Preparer {
 		case .minimumWidth(let x): return x.apply(instance) { i, v in i.minimumWidth = v }
 		case .showsStateColumn(let x): return x.apply(instance) { i, v in i.showsStateColumn = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
-			
-		case .userInterfaceLayoutDirection(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
+		case .userInterfaceLayoutDirection(let x): return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .cancelTracking(let x): return x.apply(instance) { i, v in i.cancelTracking() }
@@ -235,14 +232,14 @@ public extension BindingName where Binding: MenuBinding {
 	static var systemName: MenuName<Constant<SystemMenu>> { return .name(B.systemName) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var items: MenuName<Dynamic<[MenuItemConvertible]>> { return .name(B.items) }
-	static var title: MenuName<Dynamic<String>> { return .name(B.title) }
-	static var autoenablesItems: MenuName<Dynamic<Bool>> { return .name(B.autoenablesItems) }
-	static var minimumWidth: MenuName<Dynamic<CGFloat>> { return .name(B.minimumWidth) }
-	static var font: MenuName<Dynamic<NSFont>> { return .name(B.font) }
 	static var allowsContextMenuPlugIns: MenuName<Dynamic<Bool>> { return .name(B.allowsContextMenuPlugIns) }
+	static var autoenablesItems: MenuName<Dynamic<Bool>> { return .name(B.autoenablesItems) }
+	static var font: MenuName<Dynamic<NSFont>> { return .name(B.font) }
+	static var items: MenuName<Dynamic<[MenuItemConvertible]>> { return .name(B.items) }
+	static var minimumWidth: MenuName<Dynamic<CGFloat>> { return .name(B.minimumWidth) }
 	static var showsStateColumn: MenuName<Dynamic<Bool>> { return .name(B.showsStateColumn) }
-	@available(macOS 10.11, *) static var userInterfaceLayoutDirection: MenuName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
+	static var title: MenuName<Dynamic<String>> { return .name(B.title) }
+	static var userInterfaceLayoutDirection: MenuName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var popUpContextMenu: MenuName<Signal<(with: NSEvent, for: NSView)>> { return .name(B.popUpContextMenu) }

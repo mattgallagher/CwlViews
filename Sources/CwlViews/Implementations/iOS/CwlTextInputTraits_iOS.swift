@@ -38,12 +38,11 @@ public struct TextInputTraits {
 		case keyboardAppearance(Dynamic<UIKeyboardAppearance>)
 		case keyboardType(Dynamic<UIKeyboardType>)
 		case returnKeyType(Dynamic<UIReturnKeyType>)
+		case smartDashesType(Dynamic<UITextSmartDashesType>)
+		case smartInsertDeleteType(Dynamic<UITextSmartInsertDeleteType>)
+		case smartQuotesType(Dynamic<UITextSmartQuotesType>)
 		case spellCheckingType(Dynamic<UITextSpellCheckingType>)
-		
-		@available(iOS 11.0, *) case smartDashesType(Dynamic<UITextSmartDashesType>)
-		@available(iOS 11.0, *) case smartInsertDeleteType(Dynamic<UITextSmartInsertDeleteType>)
-		@available(iOS 11.0, *) case smartQuotesType(Dynamic<UITextSmartQuotesType>)
-		@available(iOS 10.0, *) case textContentType(Dynamic<UITextContentType>)
+		case textContentType(Dynamic<UITextContentType>)
 	}
 	
 	// No, you're not seeing things, this is one method, copy and pasted three times with a different instance parameter type.
@@ -53,24 +52,16 @@ public struct TextInputTraits {
 			switch trait {
 			case .autocapitalizationType(let x): return x.apply(instance) { i, v in i.autocapitalizationType = v }
 			case .autocorrectionType(let x): return x.apply(instance) { i, v in i.autocorrectionType = v }
-			case .spellCheckingType(let x): return x.apply(instance) { i, v in i.spellCheckingType = v }
 			case .enablesReturnKeyAutomatically(let x): return x.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
+			case .isSecureTextEntry(let x): return x.apply(instance) { i, v in i.isSecureTextEntry = v }
 			case .keyboardAppearance(let x): return x.apply(instance) { i, v in i.keyboardAppearance = v }
 			case .keyboardType(let x): return x.apply(instance) { i, v in i.keyboardType = v }
 			case .returnKeyType(let x): return x.apply(instance) { i, v in i.returnKeyType = v }
-			case .isSecureTextEntry(let x): return x.apply(instance) { i, v in i.isSecureTextEntry = v }
-			case .textContentType(let x):
-				guard #available(iOS 10.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.textContentType = v }
-			case .smartDashesType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartDashesType = v }
-			case .smartQuotesType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartQuotesType = v }
-			case .smartInsertDeleteType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
+			case .smartDashesType(let x): return x.apply(instance) { i, v in i.smartDashesType = v }
+			case .smartInsertDeleteType(let x): return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
+			case .smartQuotesType(let x): return x.apply(instance) { i, v in i.smartQuotesType = v }
+			case .spellCheckingType(let x): return x.apply(instance) { i, v in i.spellCheckingType = v }
+			case .textContentType(let x): return x.apply(instance) { i, v in i.textContentType = v }
 			}
 		})
 	}
@@ -82,24 +73,16 @@ public struct TextInputTraits {
 			switch trait {
 			case .autocapitalizationType(let x): return x.apply(instance) { i, v in i.autocapitalizationType = v }
 			case .autocorrectionType(let x): return x.apply(instance) { i, v in i.autocorrectionType = v }
-			case .spellCheckingType(let x): return x.apply(instance) { i, v in i.spellCheckingType = v }
 			case .enablesReturnKeyAutomatically(let x): return x.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
+			case .isSecureTextEntry(let x): return x.apply(instance) { i, v in i.isSecureTextEntry = v }
 			case .keyboardAppearance(let x): return x.apply(instance) { i, v in i.keyboardAppearance = v }
 			case .keyboardType(let x): return x.apply(instance) { i, v in i.keyboardType = v }
 			case .returnKeyType(let x): return x.apply(instance) { i, v in i.returnKeyType = v }
-			case .isSecureTextEntry(let x): return x.apply(instance) { i, v in i.isSecureTextEntry = v }
-			case .textContentType(let x):
-				guard #available(iOS 10.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.textContentType = v }
-			case .smartDashesType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartDashesType = v }
-			case .smartQuotesType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartQuotesType = v }
-			case .smartInsertDeleteType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
+			case .smartDashesType(let x): return x.apply(instance) { i, v in i.smartDashesType = v }
+			case .smartInsertDeleteType(let x): return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
+			case .smartQuotesType(let x): return x.apply(instance) { i, v in i.smartQuotesType = v }
+			case .spellCheckingType(let x): return x.apply(instance) { i, v in i.spellCheckingType = v }
+			case .textContentType(let x): return x.apply(instance) { i, v in i.textContentType = v }
 			}
 		})
 	}
@@ -111,24 +94,16 @@ public struct TextInputTraits {
 			switch trait {
 			case .autocapitalizationType(let x): return x.apply(instance) { i, v in i.autocapitalizationType = v }
 			case .autocorrectionType(let x): return x.apply(instance) { i, v in i.autocorrectionType = v }
-			case .spellCheckingType(let x): return x.apply(instance) { i, v in i.spellCheckingType = v }
 			case .enablesReturnKeyAutomatically(let x): return x.apply(instance) { i, v in i.enablesReturnKeyAutomatically = v }
+			case .isSecureTextEntry(let x): return x.apply(instance) { i, v in i.isSecureTextEntry = v }
 			case .keyboardAppearance(let x): return x.apply(instance) { i, v in i.keyboardAppearance = v }
 			case .keyboardType(let x): return x.apply(instance) { i, v in i.keyboardType = v }
 			case .returnKeyType(let x): return x.apply(instance) { i, v in i.returnKeyType = v }
-			case .isSecureTextEntry(let x): return x.apply(instance) { i, v in i.isSecureTextEntry = v }
-			case .textContentType(let x):
-				guard #available(iOS 10.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.textContentType = v }
-			case .smartDashesType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartDashesType = v }
-			case .smartQuotesType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartQuotesType = v }
-			case .smartInsertDeleteType(let x):
-				guard #available(iOS 11.0, *) else { return nil }
-				return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
+			case .smartDashesType(let x): return x.apply(instance) { i, v in i.smartDashesType = v }
+			case .smartInsertDeleteType(let x): return x.apply(instance) { i, v in i.smartInsertDeleteType = v }
+			case .smartQuotesType(let x): return x.apply(instance) { i, v in i.smartQuotesType = v }
+			case .spellCheckingType(let x): return x.apply(instance) { i, v in i.spellCheckingType = v }
+			case .textContentType(let x): return x.apply(instance) { i, v in i.textContentType = v }
 			}
 		})
 	}
@@ -152,12 +127,11 @@ public extension BindingName where Source == Binding, Binding == TextInputTraits
 	static var keyboardAppearance: BindingName<Dynamic<UIKeyboardAppearance>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.keyboardAppearance) }
 	static var keyboardType: BindingName<Dynamic<UIKeyboardType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.keyboardType) }
 	static var returnKeyType: BindingName<Dynamic<UIReturnKeyType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.returnKeyType) }
+	static var smartDashesType: BindingName<Dynamic<UITextSmartDashesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartDashesType) }
+	static var smartInsertDeleteType: BindingName<Dynamic<UITextSmartInsertDeleteType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartInsertDeleteType) }
+	static var smartQuotesType: BindingName<Dynamic<UITextSmartQuotesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartQuotesType) }
 	static var spellCheckingType: BindingName<Dynamic<UITextSpellCheckingType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.spellCheckingType) }
-	
-	@available(iOS 11.0, *) static var smartDashesType: BindingName<Dynamic<UITextSmartDashesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartDashesType) }
-	@available(iOS 11.0, *) static var smartInsertDeleteType: BindingName<Dynamic<UITextSmartInsertDeleteType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartInsertDeleteType) }
-	@available(iOS 11.0, *) static var smartQuotesType: BindingName<Dynamic<UITextSmartQuotesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartQuotesType) }
-	@available(iOS 10.0, *) static var textContentType: BindingName<Dynamic<UITextContentType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.textContentType) }
+	static var textContentType: BindingName<Dynamic<UITextContentType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.textContentType) }
 }
 
 #endif

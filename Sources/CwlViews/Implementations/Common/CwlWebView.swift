@@ -39,10 +39,10 @@ public extension WebView {
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case allowsBackForwardNavigationGestures(Dynamic<Bool>)
-
-		@available(macOS 10.11, *) case allowsLinkPreview(Dynamic<Bool>)
+		case allowsLinkPreview(Dynamic<Bool>)
+		case customUserAgent(Dynamic<String?>)
+		
 		@available(macOS 10.13, *) @available(iOS, unavailable) case allowsMagnification(Dynamic<Bool>)
-		@available(macOS 10.11, *) case customUserAgent(Dynamic<String?>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case magnification(Dynamic<(factor: CGFloat, centeredAt: CGPoint)>)
 		
 		//	2. Signal bindings are performed on the object after construction.
@@ -51,15 +51,15 @@ public extension WebView {
 		case goForward(Signal<Callback<Void, WKNavigation?>>)
 		case goTo(Signal<Callback<WKBackForwardListItem, WKNavigation?>>)
 		case load(Signal<Callback<URLRequest, WKNavigation?>>)
+		case loadData(Signal<Callback<(data: Data, mimeType: String, baseURL: URL, characterEncodingName: String), WKNavigation?>>)
+		case loadFile(Signal<Callback<(url: URL, allowingReadAccessTo: URL), WKNavigation?>>)
 		case loadHTMLString(Signal<Callback<(string: String, baseURL: URL?), WKNavigation?>>)
 		case reload(Signal<Callback<Void, WKNavigation?>>)
 		case reloadFromOrigin(Signal<Callback<Void, WKNavigation?>>)
 		case stopLoading(Signal<Void>)
-
-		@available(macOS 10.11, *) case loadData(Signal<Callback<(data: Data, mimeType: String, baseURL: URL, characterEncodingName: String), WKNavigation?>>)
-		@available(macOS 10.11, *) case loadFile(Signal<Callback<(url: URL, allowingReadAccessTo: URL), WKNavigation?>>)
 		
 		//	3. Action bindings are triggered by the object after construction.
+		case didClose(SignalInput<Void>)
 		case didCommit(SignalInput<WKNavigation>)
 		case didStartProvisionalNavigation(SignalInput<WKNavigation>)
 		case didReceiveServerRedirectForProvisionalNavigation(SignalInput<WKNavigation>)
@@ -74,7 +74,6 @@ public extension WebView {
 		case runJavaScriptConfirmPanel(SignalInput<Callback<(message: String, frame: WKFrameInfo), Bool>>)
 		case runJavaScriptTextInputPanel(SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>)
 		
-		@available(macOS 10.11, iOS 9.0, *) case didClose(SignalInput<Void>)
 		@available(macOS 10.12, *) @available(iOS, unavailable) case runOpenPanel(SignalInput<(parameters: WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>)
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
@@ -133,9 +132,7 @@ public extension WebView.Preparer {
 		case .didFail(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didFail:withError:)))
 		case .didFailProvisionalNavigation(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didFailProvisionalNavigation:withError:)))
 		case .didFinish(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didFinish:)))
-		case .contentProcessDidTerminate(let x):
-			guard #available(macOS 10.11, *) else { return }
-			delegate().addHandler(x, #selector(WKNavigationDelegate.webViewWebContentProcessDidTerminate(_:)))
+		case .contentProcessDidTerminate(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webViewWebContentProcessDidTerminate(_:)))
 		case .decideActionPolicy(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView,WKNavigationAction, @escaping (WKNavigationActionPolicy) -> Void) -> Void)?))
 		case .decideResponsePolicy(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView, WKNavigationResponse, @escaping (WKNavigationResponsePolicy) -> Void) -> Void)?))
 		case .didReceiveAuthenticationChallenge(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didReceive:completionHandler:)))
@@ -143,27 +140,21 @@ public extension WebView.Preparer {
 		case .runJavaScriptConfirmPanel(let x): delegate().addHandler(x, #selector(WKUIDelegate.webView(_:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:)))
 		case .runJavaScriptTextInputPanel(let x): delegate().addHandler(x, #selector(WKUIDelegate.webView(_:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:)))
 		case .createWebView(let x): delegate().addHandler(x, #selector(WKUIDelegate.webView(_:createWebViewWith:for:windowFeatures:)))
-		case .didClose(let x):
-			guard #available(macOS 10.11, iOS 9.0, *) else { return }
-			delegate().addHandler(x, #selector(WKUIDelegate.webViewDidClose(_:)))
+		case .didClose(let x): delegate().addHandler(x, #selector(WKUIDelegate.webViewDidClose(_:)))
 		case .runOpenPanel(let x):
 			#if os(macOS)
-				guard #available(macOS 10.12, *) else { return }
 				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:runOpenPanelWith:initiatedByFrame:completionHandler:)))
 			#endif
 		case .shouldPreviewElement(let x):
 			#if os(iOS)
-				guard #available(iOS 10.0, *) else { return }
 				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:shouldPreviewElement:)))
 			#endif
 		case .previewingViewController(let x):
 			#if os(iOS)
-				guard #available(iOS 10.0, *) else { return }
 				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:previewingViewControllerForElement:defaultActions:)))
 			#endif
 		case .commitPreviewingViewController(let x):
 			#if os(iOS)
-				guard #available(iOS 10.0, *) else { return }
 				delegate().addHandler(x, #selector(WKUIDelegate.webView(_:commitPreviewingViewController:)))
 			#endif
 		default: break
@@ -199,7 +190,6 @@ public extension WebView.Preparer {
 		
 		case .allowsLinkPreview(let x):
 			return x.apply(instance) { i, v in
-				guard #available(macOS 10.11, *) else { return }
 				i.allowsLinkPreview = v
 			}
 		case .allowsMagnification(let x):
@@ -210,7 +200,6 @@ public extension WebView.Preparer {
 			#endif
 		case .customUserAgent(let x):
 			return x.apply(instance) { i, v in
-				guard #available(macOS 10.11, *) else { return }
 				i.customUserAgent = v
 			}
 		case .magnification(let x):
@@ -231,12 +220,8 @@ public extension WebView.Preparer {
 		case .reloadFromOrigin(let x): return x.apply(instance) { i, v in v.callback.send(value: i.reloadFromOrigin()) }
 		case .stopLoading(let x): return x.apply(instance) { i, v in i.stopLoading() }
 
-		case .loadData(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in v.callback.send(value: i.load(v.value.data, mimeType: v.value.mimeType, characterEncodingName: v.value.characterEncodingName, baseURL: v.value.baseURL)) }
-		case .loadFile(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in v.callback.send(value: i.loadFileURL(v.value.url, allowingReadAccessTo: v.value.allowingReadAccessTo)) }
+		case .loadData(let x): return x.apply(instance) { i, v in v.callback.send(value: i.load(v.value.data, mimeType: v.value.mimeType, characterEncodingName: v.value.characterEncodingName, baseURL: v.value.baseURL)) }
+		case .loadFile(let x): return x.apply(instance) { i, v in v.callback.send(value: i.loadFileURL(v.value.url, allowingReadAccessTo: v.value.allowingReadAccessTo)) }
 			
 		//	3. Action bindings are triggered by the object after construction.
 		case .contentProcessDidTerminate: return nil
@@ -332,7 +317,7 @@ extension WebView.Preparer {
 		}
 
 		#if os(iOS)
-			@available(iOS 10.0, *) open func webView(_ webView: WKWebView, shouldPreviewElement elementInfo: WKPreviewElementInfo) -> Bool {
+			open func webView(_ webView: WKWebView, shouldPreviewElement elementInfo: WKPreviewElementInfo) -> Bool {
 				return handler(ofType: ((WKWebView, WKPreviewElementInfo) -> Bool).self)!(webView, elementInfo)
 			}
 			
@@ -340,11 +325,11 @@ extension WebView.Preparer {
 				handler(ofType: ((WKWebView, UIViewController) -> Void).self)!(webView, previewingViewController)
 			}
 			
-			@available(iOS 10.0, *) open func webView(_ webView: WKWebView, previewingViewControllerForElement elementInfo: WKPreviewElementInfo, defaultActions previewActions: [WKPreviewActionItem]) -> UIViewController? {
+			open func webView(_ webView: WKWebView, previewingViewControllerForElement elementInfo: WKPreviewElementInfo, defaultActions previewActions: [WKPreviewActionItem]) -> UIViewController? {
 				return handler(ofType: ((WKWebView, WKPreviewElementInfo, [WKPreviewActionItem]) -> UIViewController?).self)!(webView, elementInfo, previewActions)
 			}
 		#else
-			@available(macOS 10.12, *) open func webView(_ webView: WKWebView, runOpenPanelWith parameters: WebView.WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
+			open func webView(_ webView: WKWebView, runOpenPanelWith parameters: WebView.WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
 				handler(ofType: SignalInput<(parameters: WebView.WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>.self)!.send(value: (parameters: parameters, frame: frame, completion: Input().subscribeWhile(context: .main) { r in completionHandler(r.value ?? nil); return false }))
 			}
 		#endif
@@ -372,9 +357,9 @@ public extension BindingName where Binding: WebViewBinding {
 	//	1. Value bindings may be applied at construction and may subsequently change.
 	static var allowsBackForwardNavigationGestures: WebViewName<Dynamic<Bool>> { return .name(B.allowsBackForwardNavigationGestures) }
 	
-	@available(macOS 10.11, *) static var allowsLinkPreview: WebViewName<Dynamic<Bool>> { return .name(B.allowsLinkPreview) }
+	static var allowsLinkPreview: WebViewName<Dynamic<Bool>> { return .name(B.allowsLinkPreview) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var allowsMagnification: WebViewName<Dynamic<Bool>> { return .name(B.allowsMagnification) }
-	@available(macOS 10.11, *) static var customUserAgent: WebViewName<Dynamic<String?>> { return .name(B.customUserAgent) }
+	static var customUserAgent: WebViewName<Dynamic<String?>> { return .name(B.customUserAgent) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var magnification: WebViewName<Dynamic<(factor: CGFloat, centeredAt: CGPoint)>> { return .name(B.magnification) }
 	
 	//	2. Signal bindings are performed on the object after construction.
@@ -388,8 +373,8 @@ public extension BindingName where Binding: WebViewBinding {
 	static var reloadFromOrigin: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(B.reloadFromOrigin) }
 	static var stopLoading: WebViewName<Signal<Void>> { return .name(B.stopLoading) }
 	
-	@available(macOS 10.11, *) static var loadData: WebViewName<Signal<Callback<(data: Data, mimeType: String, baseURL: URL, characterEncodingName: String), WKNavigation?>>> { return .name(B.loadData) }
-	@available(macOS 10.11, *) static var loadFile: WebViewName<Signal<Callback<(url: URL, allowingReadAccessTo: URL), WKNavigation?>>> { return .name(B.loadFile) }
+	static var loadData: WebViewName<Signal<Callback<(data: Data, mimeType: String, baseURL: URL, characterEncodingName: String), WKNavigation?>>> { return .name(B.loadData) }
+	static var loadFile: WebViewName<Signal<Callback<(url: URL, allowingReadAccessTo: URL), WKNavigation?>>> { return .name(B.loadFile) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	static var didCommit: WebViewName<SignalInput<WKNavigation>> { return .name(B.didCommit) }
@@ -406,7 +391,7 @@ public extension BindingName where Binding: WebViewBinding {
 	static var runJavaScriptConfirmPanel: WebViewName<SignalInput<Callback<(message: String, frame: WKFrameInfo), Bool>>> { return .name(B.runJavaScriptConfirmPanel) }
 	static var runJavaScriptTextInputPanel: WebViewName<SignalInput<Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>>> { return .name(B.runJavaScriptTextInputPanel) }
 	
-	@available(macOS 10.11, iOS 9.0, *) static var didClose: WebViewName<SignalInput<Void>> { return .name(B.didClose) }
+	static var didClose: WebViewName<SignalInput<Void>> { return .name(B.didClose) }
 	@available(macOS 10.12, *) @available(iOS, unavailable) static var runOpenPanel: WebViewName<SignalInput<(parameters: WebView.WKOpenPanelParameters, frame: WKFrameInfo, completion: SignalInput<[URL]?>)>> { return .name(B.runOpenPanel) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.

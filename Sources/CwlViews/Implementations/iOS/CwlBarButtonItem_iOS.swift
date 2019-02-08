@@ -276,7 +276,6 @@ extension ScopedValues where Scope == StateAndMetrics {
 	public static func selected(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: StateAndMetrics(state: .selected, metrics: metrics))
 	}
-	@available(iOS 9.0, *)
 	public static func focused(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: StateAndMetrics(state: .focused, metrics: metrics))
 	}
@@ -301,7 +300,6 @@ extension ScopedValues where Scope == StateStyleAndMetrics {
 	public static func selected(style: UIBarButtonItem.Style = .plain, metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: StateStyleAndMetrics(state: .selected, metrics: metrics))
 	}
-	@available(iOS 9.0, *)
 	public static func focused(style: UIBarButtonItem.Style = .plain, metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
 		return .value(value, for: StateStyleAndMetrics(state: .focused, metrics: metrics))
 	}

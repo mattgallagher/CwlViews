@@ -108,12 +108,11 @@ public extension Application {
 		case shouldOpenUntitledFile(() -> Bool)
 		case shouldTerminate(() -> ApplicationTerminateReply)
 		case shouldTerminateAfterLastWindowClosed(() -> Bool)
+		case userDidAcceptCloudKitShare((CKShare.Metadata) -> Void)
 		case willContinueUserActivity((_ type: String) -> Bool)
 		case willEncodeRestorableState((NSCoder) -> Void)
 		case willPresentError((Error) -> Error)
 		case willTerminate(() -> Void)
-
-		@available(macOS 10.12, *) case userDidAcceptCloudKitShare((CKShare.Metadata) -> Void)
 	}
 }
 
@@ -166,14 +165,11 @@ public extension Application.Preparer {
 		case .shouldOpenUntitledFile(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldOpenUntitledFile(_:)))
 		case .shouldTerminate(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldTerminate(_:)))
 		case .shouldTerminateAfterLastWindowClosed(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldTerminateAfterLastWindowClosed(_:)))
+		case .userDidAcceptCloudKitShare(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:userDidAcceptCloudKitShareWith:)))
 		case .willContinueUserActivity(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:willContinueUserActivityWithType:)))
 		case .willEncodeRestorableState(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:willEncodeRestorableState:)))
 		case .willPresentError(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:willPresentError:)))
 		case .willTerminate(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationWillTerminate(_:)))
-
-		case .userDidAcceptCloudKitShare(let x):
-			guard #available(macOS 10.12, *) else { return }
-			delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:userDidAcceptCloudKitShareWith:)))
 		default: break
 		}
 	}
@@ -384,7 +380,6 @@ extension Application.Preparer {
 			handler(ofType: SignalInput<Error>.self)!.send(value: error)
 		}
 		
-		@available(macOS 10.12, *)
 		open func application(_ application: NSApplication, userDidAcceptCloudKitShareWith metadata: CKShare.Metadata) {
 			handler(ofType: ((CKShare.Metadata) -> Void).self)!(metadata)
 		}
@@ -468,12 +463,11 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var shouldOpenUntitledFile: ApplicationName<() -> Bool> { return .name(B.shouldOpenUntitledFile) }
 	static var shouldTerminate: ApplicationName<() -> ApplicationTerminateReply> { return .name(B.shouldTerminate) }
 	static var shouldTerminateAfterLastWindowClosed: ApplicationName<() -> Bool> { return .name(B.shouldTerminateAfterLastWindowClosed) }
+	static var userDidAcceptCloudKitShare: ApplicationName<(CKShare.Metadata) -> Void> { return .name(B.userDidAcceptCloudKitShare) }
 	static var willContinueUserActivity: ApplicationName<(_ type: String) -> Bool> { return .name(B.willContinueUserActivity) }
 	static var willEncodeRestorableState: ApplicationName<(NSCoder) -> Void> { return .name(B.willEncodeRestorableState) }
 	static var willPresentError: ApplicationName<(Error) -> Error> { return .name(B.willPresentError) }
 	static var willTerminate: ApplicationName<() -> Void> { return .name(B.willTerminate) }
-	
-	@available(macOS 10.12, *) static var userDidAcceptCloudKitShare: ApplicationName<(CKShare.Metadata) -> Void> { return .name(B.userDidAcceptCloudKitShare) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

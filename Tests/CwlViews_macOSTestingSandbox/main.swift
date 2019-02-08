@@ -78,16 +78,15 @@ struct Document {
 	}
 }
 
-class DocumentAdapter: SignalInterface {
-	let document: FilteredAdapter<Document.Action, Document, Document.Action.Result>
-	
-	var signal: Signal<Document.Action.Result> { return document.filteredSignal { (state: Document, output: Document.Action.Result?, next: SignalNext<Document.Action.Result>) -> Void in _ = output.map { next.send(value: $0) } } }
-	
-	init(loadOperation: Document.Action) {
-		document = FilteredAdapter(initialState: Document()) { (document: inout Document, operation: Document.Action) throws -> Document.Action.Result? in
-			// Update the `document`, returning an `ArrayMutation` of the specific rows that changed.
-			return try document.applyAction(operation)
-		}
+typealias DocumentAdapter = Adapter<ModelState<Document, Document.Action, Document.Action.Result>>
+extension Adapter where State == ModelState<Document, Document.Action, Document.Action.Result> {
+	init(document: Document) {
+		self.init(adapterState: ModelState(
+			async: true,
+			initial: document,
+			resumer: { model -> State.Notification? in nil },
+			reducer: { model, message, feedback throws -> State.Notification? in try model.applyAction(message) }
+		))
 	}
 }
 
@@ -108,13 +107,13 @@ class ViewModel {
 		(self.selectionInput, self.selectionOutput) = (si, so)
 		
 		// When a remove instruction is received, apply it to each the selected rows
-		(self.removeInput, self.removeEndpoint) = Signal<Void>.create { s -> SignalOutput<Document.Action> in
-			so.sample(s).transform { (r: Result<IndexSet, SignalEnd>, n: SignalNext<Document.Action>) in
+		(self.removeInput, self.removeEndpoint) = Signal<Void>.create { (s: Signal<Void>) -> SignalOutput<Document.Action> in
+			return so.sample(s).transform { (r: Signal<IndexSet>.Result) -> Signal<Document.Action>.Next in
 				switch r {
-				case .success(let v): v.forEach { n.send(value: .deleteRow($0)) }
-				case .failure(let e): n.send(error: e)
+				case .success(let v): return Signal<Document.Action>.Next.values(sequence: v.map { .deleteRow($0) })
+				case .failure(let e): return Signal<Document.Action>.Next.end(e)
 				}
-			}.subscribeValues { v in doc.document.input.send(value: v) }
+			}.subscribeValues { (v: Document.Action) -> Void in doc.send(value: v) }
 		}
 	}
 	
@@ -135,7 +134,7 @@ class ViewModel {
 	}
 	
 	func addRow() {
-		doc.document.input.send(value: .createRow)
+		doc.input.send(value: .createRow)
 	}
 	
 	func removeSelectedRows() {
@@ -147,11 +146,11 @@ class ViewModel {
 	}
 	
 	func attemptToRemoveNonExistentRow() {
-		doc.document.input.send(value: .deleteRow(-1))
+		doc.input.send(value: .deleteRow(-1))
 	}
 	
 	func fatalError() {
-		doc.document.input.send(value: .fatalError)
+		doc.input.send(value: .fatalError)
 	}
 }
 
@@ -328,7 +327,7 @@ func thirdWindow() -> Window {
 	)
 }
 
-let doc = DocumentAdapter(loadOperation: .setContents(Document()))
+let doc = DocumentAdapter(document: Document())
 let (fatalErrorInput, fatalErrorSignal) = Signal<Bool>.create()
 
 let x = Foundation.NSString()

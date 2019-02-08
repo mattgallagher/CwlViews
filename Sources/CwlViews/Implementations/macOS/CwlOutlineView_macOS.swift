@@ -74,12 +74,11 @@ public extension OutlineView {
 		case rowHeight(Dynamic<CGFloat>)
 		case rowSizeStyle(Dynamic<NSTableView.RowSizeStyle>)
 		case selectionHighlightStyle(Dynamic<NSTableView.SelectionHighlightStyle>)
+		case stronglyReferencesItems(Dynamic<Bool>)
 		case treeData(Dynamic<TableRowMutation<TreeMutation<NodeData>>>)
 		case userInterfaceLayoutDirection(Dynamic<NSUserInterfaceLayoutDirection>)
 		case usesAlternatingRowBackgroundColors(Dynamic<Bool>)
 		case verticalMotionCanBeginDrag(Dynamic<Bool>)
-
-		@available(macOS 10.12, *) case stronglyReferencesItems(Dynamic<Bool>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case collapseTreePath(Signal<(treePath: TreePath<NodeData>?, collapseChildren: Bool)>)
@@ -87,6 +86,8 @@ public extension OutlineView {
 		case deselectColumn(Signal<NSUserInterfaceItemIdentifier>)
 		case deselectTreePath(Signal<TreePath<NodeData>>)
 		case expandTreePath(Signal<(treePath: TreePath<NodeData>?, expandChildren: Bool)>)
+		case hideRowActions(Signal<Void>)
+		case hideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
 		case highlightColumn(Signal<NSUserInterfaceItemIdentifier?>)
 		case moveColumn(Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>)
 		case scrollColumnToVisible(Signal<NSUserInterfaceItemIdentifier>)
@@ -97,10 +98,7 @@ public extension OutlineView {
 		case setDropTreePath(Signal<(treePath: TreePath<NodeData>?, dropChildIndex: Int)>)
 		case sizeLastColumnToFit(Signal<Void>)
 		case sizeToFit(Signal<Void>)
-
-		@available(macOS 10.11, *) case hideRowActions(Signal<Void>)
-		@available(macOS 10.11, *) case hideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
-		@available(macOS 10.11, *) case unhideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
+		case unhideRows(Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>)
 		
 		// 3. Action bindings are triggered by the object after construction.
 		case columnMoved(SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>)
@@ -263,9 +261,7 @@ public extension OutlineView.Preparer {
 		case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance) { i, v in i.usesAlternatingRowBackgroundColors = v }
 		case .verticalMotionCanBeginDrag(let x): return x.apply(instance) { i, v in i.verticalMotionCanBeginDrag = v }
 
-		case .stronglyReferencesItems(let x):
-			guard #available(macOS 10.12, *) else { return nil }
-			return x.apply(instance) { i, v in i.stronglyReferencesItems = v }
+		case .stronglyReferencesItems(let x): return x.apply(instance) { i, v in i.stronglyReferencesItems = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .collapseTreePath(let x):
@@ -297,7 +293,8 @@ public extension OutlineView.Preparer {
 					i.expandItem(nil, expandChildren: v.expandChildren)
 				}
 			}
-
+		case .hideRowActions(let x): return x.apply(instance) { i, v in i.rowActionsVisible = false }
+		case .hideRows(let x): return x.apply(instance) { i, v in i.hideRows(at: v.indexes, withAnimation: v.withAnimation) }
 		case .highlightColumn(let x):
 			return x.apply(instance) { i, v in
 				i.highlightedTableColumn = v.flatMap { (identifier: NSUserInterfaceItemIdentifier) -> NSTableColumn? in
@@ -344,16 +341,7 @@ public extension OutlineView.Preparer {
 			}
 		case .sizeLastColumnToFit(let x): return x.apply(instance) { i, v in i.sizeLastColumnToFit() }
 		case .sizeToFit(let x): return x.apply(instance) { i, v in i.sizeToFit() }
-		
-		case .hideRowActions(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.rowActionsVisible = false }
-		case .hideRows(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.hideRows(at: v.indexes, withAnimation: v.withAnimation) }
-		case .unhideRows(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.unhideRows(at: v.indexes, withAnimation: v.withAnimation) }
+		case .unhideRows(let x): return x.apply(instance) { i, v in i.unhideRows(at: v.indexes, withAnimation: v.withAnimation) }
 
 		// 3. Action bindings are triggered by the object after construction.
 		case .columnMoved(let x):
@@ -898,12 +886,11 @@ public extension BindingName where Binding: OutlineViewBinding {
 	static var rowHeight: OutlineViewName<Dynamic<CGFloat>> { return .name(B.rowHeight) }
 	static var rowSizeStyle: OutlineViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(B.rowSizeStyle) }
 	static var selectionHighlightStyle: OutlineViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
+	static var stronglyReferencesItems: OutlineViewName<Dynamic<Bool>> { return .name(B.stronglyReferencesItems) }
 	static var treeData: OutlineViewName<Dynamic<TableRowMutation<TreeMutation<Binding.NodeDataType>>>> { return .name(B.treeData) }
 	static var userInterfaceLayoutDirection: OutlineViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
 	static var usesAlternatingRowBackgroundColors: OutlineViewName<Dynamic<Bool>> { return .name(B.usesAlternatingRowBackgroundColors) }
 	static var verticalMotionCanBeginDrag: OutlineViewName<Dynamic<Bool>> { return .name(B.verticalMotionCanBeginDrag) }
-	
-	@available(macOS 10.12, *) static var stronglyReferencesItems: OutlineViewName<Dynamic<Bool>> { return .name(B.stronglyReferencesItems) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var collapseTreePath: OutlineViewName<Signal<(treePath: TreePath<Binding.NodeDataType>?, collapseChildren: Bool)>> { return .name(B.collapseTreePath) }
@@ -911,6 +898,8 @@ public extension BindingName where Binding: OutlineViewBinding {
 	static var deselectColumn: OutlineViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.deselectColumn) }
 	static var deselectTreePath: OutlineViewName<Signal<TreePath<Binding.NodeDataType>>> { return .name(B.deselectTreePath) }
 	static var expandTreePath: OutlineViewName<Signal<(treePath: TreePath<Binding.NodeDataType>?, expandChildren: Bool)>> { return .name(B.expandTreePath) }
+	static var hideRowActions: OutlineViewName<Signal<Void>> { return .name(B.hideRowActions) }
+	static var hideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.hideRows) }
 	static var highlightColumn: OutlineViewName<Signal<NSUserInterfaceItemIdentifier?>> { return .name(B.highlightColumn) }
 	static var moveColumn: OutlineViewName<Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>> { return .name(B.moveColumn) }
 	static var scrollColumnToVisible: OutlineViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.scrollColumnToVisible) }
@@ -921,10 +910,7 @@ public extension BindingName where Binding: OutlineViewBinding {
 	static var setDropTreePath: OutlineViewName<Signal<(treePath: TreePath<Binding.NodeDataType>?, dropChildIndex: Int)>> { return .name(B.setDropTreePath) }
 	static var sizeLastColumnToFit: OutlineViewName<Signal<Void>> { return .name(B.sizeLastColumnToFit) }
 	static var sizeToFit: OutlineViewName<Signal<Void>> { return .name(B.sizeToFit) }
-	
-	@available(macOS 10.11, *) static var hideRowActions: OutlineViewName<Signal<Void>> { return .name(B.hideRowActions) }
-	@available(macOS 10.11, *) static var hideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.hideRows) }
-	@available(macOS 10.11, *) static var unhideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.unhideRows) }
+	static var unhideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.unhideRows) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	static var columnMoved: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }

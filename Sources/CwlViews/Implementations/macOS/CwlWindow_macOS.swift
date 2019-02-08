@@ -73,6 +73,8 @@ public extension Window {
 		case key(Dynamic<Bool>)
 		case level(Dynamic<NSWindow.Level>)
 		case main(Dynamic<Bool>)
+		case maxFullScreenContentSize(Dynamic<NSSize>)
+		case minFullScreenContentSize(Dynamic<NSSize>)
 		case miniwindowImage(Dynamic<NSImage?>)
 		case miniwindowTitle(Dynamic<String>)
 		case order(Dynamic<WindowOrder>)
@@ -87,9 +89,6 @@ public extension Window {
 		case styleMask(Dynamic<NSWindow.StyleMask>)
 		case title(Dynamic<String>)
 		case toolbar(Dynamic<ToolbarConvertible>)
-
-		@available(macOS 10.11, *) case minFullScreenContentSize(Dynamic<NSSize>)
-		@available(macOS 10.11, *) case maxFullScreenContentSize(Dynamic<NSSize>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case close(Signal<WindowCloseBehavior>)
@@ -296,8 +295,10 @@ public extension Window.Preparer {
 		case .key: return nil
 		case .level(let x): return x.apply(instance) { i, v in i.level = v }
 		case .main: return nil
+		case .minFullScreenContentSize(let x): return x.apply(instance) { i, v in i.minFullScreenContentSize = v }
 		case .miniwindowImage(let x): return x.apply(instance) { i, v in i.miniwindowImage = v }
 		case .miniwindowTitle(let x): return x.apply(instance) { i, v in i.miniwindowTitle = v }
+		case .maxFullScreenContentSize(let x): return x.apply(instance) { i, v in i.maxFullScreenContentSize = v }
 		case .order: return nil
 		case .preferredBackingLocation(let x): return x.apply(instance) { i, v in i.preferredBackingLocation = v }
 		case .preservesContentDuringLiveResize(let x): return x.apply(instance) { i, v in i.preservesContentDuringLiveResize = v }
@@ -322,13 +323,6 @@ public extension Window.Preparer {
 		case .styleMask: return styleMask.apply(instance) { i, v in i.styleMask = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
-
-		case .minFullScreenContentSize(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.minFullScreenContentSize = v }
-		case .maxFullScreenContentSize(let x):
-			guard #available(macOS 10.11, *) else { return nil }
-			return x.apply(instance) { i, v in i.maxFullScreenContentSize = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .close(let x):
@@ -559,6 +553,8 @@ public extension BindingName where Binding: WindowBinding {
 	static var key: WindowName<Dynamic<Bool>> { return .name(B.key) }
 	static var level: WindowName<Dynamic<NSWindow.Level>> { return .name(B.level) }
 	static var main: WindowName<Dynamic<Bool>> { return .name(B.main) }
+	static var maxFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.maxFullScreenContentSize) }
+	static var minFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.minFullScreenContentSize) }
 	static var miniwindowImage: WindowName<Dynamic<NSImage?>> { return .name(B.miniwindowImage) }
 	static var miniwindowTitle: WindowName<Dynamic<String>> { return .name(B.miniwindowTitle) }
 	static var order: WindowName<Dynamic<WindowOrder>> { return .name(B.order) }
@@ -573,9 +569,6 @@ public extension BindingName where Binding: WindowBinding {
 	static var styleMask: WindowName<Dynamic<NSWindow.StyleMask>> { return .name(B.styleMask) }
 	static var title: WindowName<Dynamic<String>> { return .name(B.title) }
 	static var toolbar: WindowName<Dynamic<ToolbarConvertible>> { return .name(B.toolbar) }
-	
-	@available(macOS 10.11, *) static var minFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.minFullScreenContentSize) }
-	@available(macOS 10.11, *) static var maxFullScreenContentSize: WindowName<Dynamic<NSSize>> { return .name(B.maxFullScreenContentSize) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	static var close: WindowName<Signal<WindowCloseBehavior>> { return .name(B.close) }

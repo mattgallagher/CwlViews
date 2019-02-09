@@ -85,15 +85,15 @@ public extension Adapter {
 }
 
 extension Adapter {
-	public func setterInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+	public func set<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input().map { VarState<Value>.Message.set($0) }.bind(to: self)
 	}
 	
-	public func updatingInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+	public func update<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input().map { VarState<Value>.Message.update($0) }.bind(to: self)
 	}
 	
-	public func notifyingInput<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+	public func notify<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input<Value>().map { VarState<Value>.Message.notify($0) }.bind(to: self)
 	}
 }

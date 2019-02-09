@@ -298,7 +298,10 @@ public extension TableView.Preparer {
 				// Finally, perform the scroll
 				i.scrollToRow(at: indexPath, at: v.value.position, animated: v.isAnimated)
 			}
-		case .selectRow(let x): return x.apply(instance) { i, v in i.selectRow(at: v.value?.indexPath, animated: v.isAnimated, scrollPosition: v.value?.position ?? .none) }
+		case .selectRow(let x):
+			return x.apply(instance) { i, v in
+				i.selectRow(at: v.value?.indexPath, animated: v.isAnimated, scrollPosition: v.value?.position ?? .none)
+			}
 			
 		//	3. Action bindings are triggered by the object after construction.
 		case .accessoryButtonTapped: return nil
@@ -461,11 +464,11 @@ extension TableView.Preparer {
 			case .delete:
 				i.deleteSections(v.arrayMutation.indexSet.offset(by: sections.localOffset), with: v.animation)
 			case .move(let destination):
-				i.beginUpdates()
-				for (count, index) in v.arrayMutation.indexSet.offset(by: sections.localOffset).enumerated() {
-					i.moveSection(index, toSection: destination + count)
-				}
-				i.endUpdates()
+				i.performBatchUpdates({
+					for (count, index) in v.arrayMutation.indexSet.offset(by: sections.localOffset).enumerated() {
+						i.moveSection(index, toSection: destination + count)
+					}
+				})
 			case .insert:
 				i.insertSections(v.arrayMutation.indexSet.offset(by: sections.localOffset), with: v.animation)
 			case .scroll:
@@ -863,7 +866,7 @@ public struct TableScrollPosition {
 }
 
 public func updateFirstRow<RowData>(_ storage: Var<IndexPath?>) -> SignalInput<[TableRow<RowData>]> {
-	return Input().map { $0.first?.indexPath }.bind(to: storage.updatingInput())
+	return Input().map { $0.first?.indexPath }.bind(to: storage.update())
 }
 
 extension SignalInterface where OutputValue == IndexPath? {

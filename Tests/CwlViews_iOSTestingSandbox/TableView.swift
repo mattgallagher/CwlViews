@@ -39,7 +39,7 @@ func tableViewController(_ tableState: TableViewState, _ navState: NavViewState,
 			tableState.selection
 				.compactMap { $0.data }
 				.map { .detail(DetailViewState(row: $0)) }
-				.cancellableBind(to: navState.navStack.pushInput())
+				.cancellableBind(to: navState.navStack.push())
 		],
 		.navigationItem -- navItem(tableState: tableState, doc: doc),
 		.view -- TableView<String>(
@@ -62,7 +62,7 @@ func tableViewController(_ tableState: TableViewState, _ navState: NavViewState,
 				.bind(to: doc),
 			.userDidScrollToRow --> Input()
 				.map { $0.indexPath }
-				.bind(to: tableState.firstRow.updatingInput()),
+				.bind(to: tableState.firstRow.update()),
 			.scrollToRow <-- tableState.firstRow
 				.map { .set(.none($0)) },
 			.separatorInset -- UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)

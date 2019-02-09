@@ -436,7 +436,7 @@ extension TableView.Preparer {
 						cellInput = getSignalInput(for: cellView, valueType: RowData.self)
 					} else if let cc = col.element.cellConstructor {
 						let dataTuple = Signal<RowData>.create()
-						let constructed = cc(identifier, dataTuple.signal).nsTableCellView()
+						let constructed = cc(identifier, dataTuple.signal.multicast()).nsTableCellView()
 						if constructed.identifier == nil {
 							constructed.identifier = identifier
 						}

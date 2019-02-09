@@ -194,7 +194,7 @@ extension SplitViewController.Preparer {
 			return true
 		}
 		
-		open func collapsedController(_ controller: UISplitViewController) {
+		open func collapsedController(_ controller: UINavigationController) {
 			if let svc = secondaryViewController, svc === controller {
 				dismissedSecondary?.send(value: ())
 			}

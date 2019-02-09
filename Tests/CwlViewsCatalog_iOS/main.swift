@@ -19,23 +19,14 @@
 
 import CwlViews
 
-struct Services {}
-struct Document {}
-extension Adapter where State == ModelState<Document, Void, Void> {
-	init(document: Document) {
-		self.init(adapterState: ModelState(initial: document, resumer: { _ in nil }, reducer: { _, _, _ in nil }))
-	}
-}
-typealias DocumentAdapter = Adapter<ModelState<Document, Void, Void>>
-
-private let services = Services()
-private let doc = DocumentAdapter(document: Document())
-private let viewVar = Var<SplitViewState>(SplitViewState())
+private let viewVar = Var(SplitViewState())
 
 applicationMain {
 	Application(
 		.window -- Window(
-			.rootViewController <-- viewVar.map { viewState in splitViewController(viewState, doc, services) }
-		)
+			.rootViewController <-- viewVar.map { viewState in splitViewController(viewState) }
+		),
+		.willEncodeRestorableState -- viewVar.storeToArchive(),
+		.didDecodeRestorableState -- viewVar.loadFromArchive()
 	)
 }

@@ -160,7 +160,7 @@ extension NavigationController.Preparer {
 		open var preferredInterfaceOrientation: UIInterfaceOrientation = .portrait
 		open var expectedStackCount: Int = 0
 		public let popSignal: SignalInput<Int>?
-		weak var collapsedController: UISplitViewController?
+		weak var collapsedController: UINavigationController?
 		
 		open override var isInUse: Bool {
 			return true
@@ -185,7 +185,7 @@ extension NavigationController.Preparer {
 			}
 			
 			// Track when a collapsed split view is added
-			if navigationController.viewControllers.count == expectedStackCount + 1, let collapsed = navigationController.viewControllers.last as? UISplitViewController {
+			if navigationController.viewControllers.count == expectedStackCount + 1, let collapsed = navigationController.viewControllers.last as? UINavigationController {
 				collapsedController = collapsed
 			}
 			

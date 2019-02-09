@@ -90,7 +90,7 @@ public extension Adapter {
 }
 
 extension Adapter {
-	public func pushInput<PathElement>() -> SignalInput<PathElement> where State.Message == StackMutation<PathElement> {
+	public func push<PathElement>() -> SignalInput<PathElement> where State.Message == StackMutation<PathElement> {
 		return Signal<PathElement>.channel().map { State.Message.push($0) }.bind(to: input)
 	}
 	

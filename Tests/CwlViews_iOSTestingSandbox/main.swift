@@ -35,7 +35,7 @@ applicationMain {
 			}
 		),
 		.didEnterBackground --> Input().map { .save }.bind(to: doc),
-		.willEncodeRestorableState -- { $0.encodeLatest(from: viewState) },
-		.didDecodeRestorableState -- { $0.decodeSend(to: viewState) }
+		.willEncodeRestorableState -- viewState.storeToArchive(),
+		.didDecodeRestorableState -- viewState.loadFromArchive()
 	)
 }

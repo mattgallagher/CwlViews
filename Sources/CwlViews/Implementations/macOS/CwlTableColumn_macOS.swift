@@ -80,7 +80,7 @@ public extension TableColumn {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
-		var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
+		var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: SignalMulti<RowData>) -> TableCellViewConvertible)?
 		var cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
 		var dataMissingCell: (() -> TableCellViewConvertible?)?
 	}
@@ -143,13 +143,13 @@ public extension TableColumn.Preparer {
 extension TableColumn.Preparer {
 	open class Storage: EmbeddedObjectStorage {
 		public let tableColumn: NSTableColumn
-		public let cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?
+		public let cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: SignalMulti<RowData>) -> TableCellViewConvertible)?
 		public let cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
 		public let dataMissingCell: (() -> TableCellViewConvertible?)?
 
 		open var sortFunction: ((_ isRow: RowData, _ orderedBefore: RowData) -> Bool)?
 
-		public init(tableColumn: NSTableColumn, cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)?, cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?, dataMissingCell: (() -> TableCellViewConvertible?)?) {
+		public init(tableColumn: NSTableColumn, cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: SignalMulti<RowData>) -> TableCellViewConvertible)?, cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?, dataMissingCell: (() -> TableCellViewConvertible?)?) {
 			self.tableColumn = tableColumn
 			self.cellConstructor = cellConstructor
 			self.cellIdentifier = cellIdentifier

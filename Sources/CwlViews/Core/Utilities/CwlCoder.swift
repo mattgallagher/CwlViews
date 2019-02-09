@@ -19,7 +19,19 @@
 
 import Foundation
 
-extension NSCoder {
+extension Adapter {
+	public func storeToArchive<Value>() -> (NSKeyedArchiver) -> Void where State == VarState<Value> {
+		return { archiver in archiver.encodeLatest(from: self) }
+	}
+}
+
+extension Adapter {
+	public func loadFromArchive<Value>() -> (NSKeyedUnarchiver) -> Void where State == VarState<Value> {
+		return { unarchiver in unarchiver.decodeSend(to: self.set()) }
+	}
+}
+
+extension NSKeyedArchiver {
 	/// Gets the latest value from the signal and encodes the value as JSON data into self using the provided key
 	///
 	/// - Parameters:
@@ -30,7 +42,9 @@ extension NSCoder {
 			_ = self.encode(data, forKey: forKey)
 		}
 	}
+}
 
+extension NSKeyedUnarchiver {
 	/// Decodes the JSON data in self, associated with the provided key, and sends into the signal input.
 	///
 	/// NOTE: this function does not send errors.

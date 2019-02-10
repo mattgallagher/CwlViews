@@ -8,49 +8,65 @@
 
 import CwlViews
 
+enum Tabs: Int, Codable {
+	case left
+	case right
+}
+
 func tabBarController(_ viewState: SplitViewState) -> ViewControllerConvertible {
-	enum Tabs { case left, right }
 	return NavigationController(
-		.stack -- [TabBarController<Tabs>(
-			.items -- [.left, .right],
-			.tabConstructor -- { identifier in
-				switch identifier {
-				case .left:
-					return NavigationController(
-						.tabBarItem -- TabBarItem(
-							.title -- .listTab,
-							.image -- .drawn(width: 30, height: 30) { $0.fillEllipse(in: $1) }
-						),
-						.stack -- [
-							tableViewController(viewState)
-						]
-					)
-				case .right:
-					return ViewController(
-						.tabBarItem -- TabBarItem(
-							.title -- .aboutTab,
-							.image -- .drawn(width: 30, height: 30) { $0.fill($1) }
-						),
-						.view -- aboutTabScrollContainer()
-					)
+		.stack -- [
+			TabBarController<Tabs>(
+				.navigationItem -- NavigationItem(.title <-- viewState.selectedTab.map { $0.title }),
+				.items -- [.left, .right],
+				.didSelect --> viewState.selectedTab,
+				.tabConstructor -- { identifier in
+					switch identifier {
+					case .left:
+						return NavigationController(
+							.isNavigationBarHidden -- true,
+							.tabBarItem -- TabBarItem(
+								.title -- .listTab,
+								.image -- .drawn(width: 30, height: 30) { $0.fillEllipse(in: $1) }
+							),
+							.stack -- [
+								catalogTable(viewState)
+							]
+						)
+					case .right:
+						return ViewController(
+							.tabBarItem -- TabBarItem(
+								.title -- .aboutTab,
+								.image -- .drawn(width: 30, height: 30) { $0.fill($1) }
+							),
+							.view -- aboutTabScrollContainer()
+						)
+					}
+				},
+				.animationControllerForTransition -- { source, destination -> UIViewControllerAnimatedTransitioning? in
+					guard let navControllerView = source.navigationController?.view else { return nil }
+					UIView.transition(from: navControllerView, to: navControllerView, duration: 0.3, options: [.transitionCrossDissolve, .showHideTransitionViews])
+					return nil
 				}
-			}
-		)]
+			)
+		]
 	)
 }
 
 private func aboutTabScrollContainer() -> ViewConvertible {
 	return View(
 		.backgroundColor -- .white,
-		.layout -- .single(
+		.layout -- .fill(
 			ScrollView(
 				.alwaysBounceVertical -- true,
 				.contentInsetAdjustmentBehavior -- .never,
-				.layout -- .single(
+				.layout -- .vertical(
 					marginEdges: .none,
-					length: .equalTo(ratio: 1, priority: .userMid),
-					breadth: .equalTo(ratio: 1),
-					aboutTabContent()
+					.view(
+						length: .equalTo(ratio: 1, priority: .userMid),
+						breadth: .equalTo(ratio: 1),
+						aboutTabContent()
+					)
 				)
 			)
 		)
@@ -80,6 +96,15 @@ private func aboutTabContent() -> ViewConvertible {
 			.space(.fillRemaining)
 		)
 	)
+}
+
+private extension Tabs {
+	var title: String {
+		switch self {
+		case .left: return .listTab
+		case .right: return .aboutTab
+		}
+	}
 }
 
 private extension String {

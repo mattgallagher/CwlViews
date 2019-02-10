@@ -21,6 +21,10 @@ import CwlViews
 
 private let viewVar = Var(SplitViewState())
 
+#if DEBUG
+	let viewLog = viewVar.logJson(prefix: "View-state changed: ")
+#endif
+
 applicationMain {
 	Application(
 		.window -- Window(

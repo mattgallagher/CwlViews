@@ -73,7 +73,7 @@ public extension BindingName {
 	static func --<A>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Constant<A> == Value {
 		return name.binding(with: Value.constant(value))
 	}
-
+	
 	/// Build a value binding (property changes on the instance) from a name and a constant value
 	///
 	/// - Parameters:

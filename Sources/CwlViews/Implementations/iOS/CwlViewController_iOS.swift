@@ -36,6 +36,7 @@ public extension ViewController {
 		case navigationItem(Constant<NavigationItem>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
+		case additionalSafeAreaInsets(Dynamic<UIEdgeInsets>)
 		case definesPresentationContext(Dynamic<Bool>)
 		case edgesForExtendedLayout(Dynamic<UIRectEdge>)
 		case extendedLayoutIncludesOpaqueBars(Dynamic<Bool>)
@@ -131,6 +132,7 @@ public extension ViewController.Preparer {
 			return nil
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
+		case .additionalSafeAreaInsets(let x): return x.apply(instance) { i, v in i.additionalSafeAreaInsets = v }
 		case .definesPresentationContext(let x): return x.apply(instance) { i, v in i.definesPresentationContext = v }
 		case .edgesForExtendedLayout(let x): return x.apply(instance) { i, v in i.edgesForExtendedLayout = v }
 		case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance) { i, v in i.extendedLayoutIncludesOpaqueBars = v }
@@ -465,6 +467,7 @@ public extension BindingName where Binding: ViewControllerBinding {
 	static var navigationItem: ViewControllerName<Constant<NavigationItem>> { return .name(B.navigationItem) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var additionalSafeAreaInsets: ViewControllerName<Dynamic<UIEdgeInsets>> { return .name(B.additionalSafeAreaInsets) }
 	static var definesPresentationContext: ViewControllerName<Dynamic<Bool>> { return .name(B.definesPresentationContext) }
 	static var edgesForExtendedLayout: ViewControllerName<Dynamic<UIRectEdge>> { return .name(B.edgesForExtendedLayout) }
 	static var extendedLayoutIncludesOpaqueBars: ViewControllerName<Dynamic<Bool>> { return .name(B.extendedLayoutIncludesOpaqueBars) }

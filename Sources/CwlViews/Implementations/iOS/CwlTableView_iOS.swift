@@ -59,6 +59,7 @@ public extension TableView {
 		case separatorColor(Dynamic<UIColor?>)
 		case separatorEffect(Dynamic<UIVisualEffect?>)
 		case separatorInset(Dynamic<UIEdgeInsets>)
+		case separatorInsetReference(Dynamic<UITableView.SeparatorInsetReference>)
 		case separatorStyle(Dynamic<UITableViewCell.SeparatorStyle>)
 		case tableData(Dynamic<TableData<RowData>>)
 		case tableFooterView(Dynamic<ViewConvertible?>)
@@ -253,6 +254,7 @@ public extension TableView.Preparer {
 		case .separatorColor(let x): return x.apply(instance) { i, v in i.separatorColor = v }
 		case .separatorEffect(let x): return x.apply(instance) { i, v in i.separatorEffect = v }
 		case .separatorInset(let x): return x.apply(instance) { i, v in i.separatorInset = v }
+		case .separatorInsetReference(let x): return x.apply(instance) { i, v in i.separatorInsetReference = v }
 		case .separatorStyle(let x): return x.apply(instance) { i, v in i.separatorStyle = v }
 		case .tableFooterView(let x): return x.apply(instance) { i, v	in i.tableFooterView = v?.uiView() }
 		case .tableHeaderView(let x): return x.apply(instance) { i, v in i.tableHeaderView = v?.uiView() }
@@ -744,6 +746,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var separatorColor: TableViewName<Dynamic<UIColor?>> { return .name(B.separatorColor) }
 	static var separatorEffect: TableViewName<Dynamic<UIVisualEffect?>> { return .name(B.separatorEffect) }
 	static var separatorInset: TableViewName<Dynamic<UIEdgeInsets>> { return .name(B.separatorInset) }
+	static var separatorInsetReference: TableViewName<Dynamic<UITableView.SeparatorInsetReference>> { return .name(B.separatorInsetReference) }
 	static var separatorStyle: TableViewName<Dynamic<UITableViewCell.SeparatorStyle>> { return .name(B.separatorStyle) }
 	static var tableData: TableViewName<Dynamic<TableData<Binding.RowDataType>>> { return .name(B.tableData) }
 	static var tableFooterView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableFooterView) }
@@ -871,7 +874,7 @@ public func updateFirstRow<RowData>(_ storage: Var<IndexPath?>) -> SignalInput<[
 
 extension SignalInterface where OutputValue == IndexPath? {
 	public func restoreFirstRow() -> Signal<SetOrAnimate<TableScrollPosition>> {
-		return compactMap { $0.map { .top($0) } }.animate(.none)
+		return compactMap { $0.map { .top($0) } }.animate(.never)
 	}
 }
 

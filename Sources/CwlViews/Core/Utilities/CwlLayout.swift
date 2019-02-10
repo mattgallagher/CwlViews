@@ -47,8 +47,8 @@
 /// - all: animate to the new layout
 /// - subsequent: animate to the new layout only if there was a previous layout
 public enum AnimationChoice {
-	case none
-	case all
+	case never
+	case always
 	case subsequent
 }
 
@@ -150,8 +150,23 @@ public struct Layout {
 	}
 	
 	/// A convenience constructor for a vertical layout
-	public static func single(align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ view: ViewConvertible) -> Layout {
-		return Layout(axis: .vertical, align: align, marginEdges: marginEdges, animate: animate, entities: [Entity.view(length: length, breadth: breadth, relative: relative, view)])
+	public static func fill(axis: Layout.Axis = .vertical, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, _ view: ViewConvertible) -> Layout {
+		switch axis {
+		case .horizontal: return .horizontal(align: align, marginEdges: marginEdges, animate: animate, .view(view))
+		case .vertical: return .vertical(align: align, marginEdges: marginEdges, animate: animate, .view(view))
+		}
+	}
+	
+	/// A convenience constructor for a vertical layout
+	public static func center(axis: Layout.Axis = .vertical, horizontalAlignment: Alignment = .center, verticalAlignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Layout {
+		switch axis {
+		case .vertical:
+			let v = Entity.sublayout(axis: .vertical, align: verticalAlignment, length: length, breadth: breadth, relative: relative, entities)
+			return Layout(axis: .horizontal, align: horizontalAlignment, marginEdges: marginEdges, animate: animate, entities: [v])
+		case .horizontal:
+			let h = Entity.sublayout(axis: .horizontal, align: horizontalAlignment, length: length, breadth: breadth, relative: relative, entities)
+			return Layout(axis: .vertical, align: verticalAlignment, marginEdges: marginEdges, animate: animate, entities: [h])
+		}
 	}
 	
 	// Used for removing all views from their superviews
@@ -210,6 +225,11 @@ public struct Layout {
 			#else
 				return Entity(.sizedView(view.uiView(), size))
 			#endif
+		}
+
+		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: [Entity]) -> Entity {
+			let size = Size(length: length, breadth: breadth, relative: relative)
+			return Entity(.layout(Layout(axis: axis, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
 		public static func horizontal(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Entity {

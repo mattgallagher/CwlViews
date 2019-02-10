@@ -136,7 +136,7 @@ public extension BindingName where Binding: NavigationItemBinding {
 		return Binding.compositeName(
 			value: { dynamicArray in 
 				switch dynamicArray {
-				case .constant(let b) where animate == .all: return .constant(.animate(b))
+				case .constant(let b) where animate == .always: return .constant(.animate(b))
 				case .constant(let b): return .constant(.set(b))
 				case .dynamic(let b): return .dynamic(b.animate(animate))
 				}
@@ -149,7 +149,7 @@ public extension BindingName where Binding: NavigationItemBinding {
 		return Binding.compositeName(
 			value: { dynamicArray in 
 				switch dynamicArray {
-				case .constant(let b) where animate == .all: return .constant(.animate(b))
+				case .constant(let b) where animate == .always: return .constant(.animate(b))
 				case .constant(let b): return .constant(.set(b))
 				case .dynamic(let b): return .dynamic(b.animate(animate))
 				}

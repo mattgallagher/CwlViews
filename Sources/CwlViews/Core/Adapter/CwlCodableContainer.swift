@@ -23,6 +23,10 @@ public protocol CodableContainer: Lifetime, Codable {
 }
 
 extension CodableContainer {
+	public var childCodableContainers: [CodableContainer] {
+		return Mirror(reflecting: self).children.compactMap { $0.value as? CodableContainer }
+	}
+	
 	public var codableValueChanged: Signal<Void> {
 		let sequence = childCodableContainers.map { return $0.codableValueChanged }
 		if sequence.isEmpty {
@@ -33,6 +37,7 @@ extension CodableContainer {
 			return Signal<Void>.merge(sequence: sequence)
 		}
 	}
+	
 	public mutating func cancel() {
 		for var v in childCodableContainers {
 			v.cancel()

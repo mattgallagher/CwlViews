@@ -70,8 +70,8 @@ public extension AlertAction {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension AlertAction.Preparer {
-	func constructInstance(subclass: Instance.Type, parameters: Void) -> Instance {
-		return subclass.init(title: title, style: style, handler: handler.map { h in
+	func constructInstance(type: Instance.Type, parameters: Void) -> Instance {
+		return type.init(title: title, style: style, handler: handler.map { h in
 			{ _ in h.send(value: ()) }
 		})
 	}

@@ -79,8 +79,8 @@ public extension Button {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension Button.Preparer {
-	func constructInstance(subclass: Instance.Type, parameters: Void) -> Instance {
-		return subclass.init(type: type)
+	func constructInstance(type: Instance.Type, parameters: Void) -> Instance {
+		return type.init(type: self.type)
 	}
 	
 	mutating func prepareBinding(_ binding: Binding) {

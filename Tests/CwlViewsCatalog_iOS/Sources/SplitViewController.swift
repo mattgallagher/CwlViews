@@ -9,15 +9,15 @@
 import CwlViews
 
 struct SplitViewState: CodableContainer {
+	let rowSelection: Var<CatalogViewState?>
+	let selectedTab: Var<Tabs>
 	let splitButtonVar: TempVar<BarButtonItemConvertible?>
-	let detailSelection: Var<Catalog?>
 	
 	init() {
 		splitButtonVar = TempVar()
-		detailSelection = Var(nil)
+		rowSelection = Var(nil)
+		selectedTab = Var(.left)
 	}
-	
-	var childCodableContainers: [CodableContainer] { return [] }
 }
 
 func splitViewController(_ viewState: SplitViewState) -> ViewControllerConvertible {
@@ -26,37 +26,28 @@ func splitViewController(_ viewState: SplitViewState) -> ViewControllerConvertib
 		.displayModeButton --> viewState.splitButtonVar,
 		.primaryViewController -- tabBarController(viewState),
 		.secondaryViewController -- NavigationController(
-			.stack <-- viewState.detailSelection.map { selection in
-				let view: ViewConvertible
+			.stack <-- viewState.rowSelection.map { [split = viewState.splitButtonVar] selection in
+				let navigationItem = NavigationItem(
+					.leftBarButtonItems() <-- split.optionalToArray(),
+					.title -- selection?.name.rawValue ?? ""
+				)
 				switch selection {
-				case nil: view = View(.backgroundColor -- .white)
-				case .alert?: view = buttonView()
-				case .barButton?: view = buttonView()
-				case .button?: view = buttonView()
-				case .control?: view = buttonView()
-				case .gestureRecognizer?: view = buttonView()
-				case .imageView?: view = buttonView()
-				case .navigationBar?: view = buttonView()
-				case .pageViewController?: view = buttonView()
-				case .searchBar?: view = buttonView()
-				case .slider?: view = buttonView()
-				case .switch?: view = buttonView()
-				case .textField?: view = buttonView()
+				case nil: return ViewController(.view -- View(.backgroundColor -- .white))
+				case .alert(let state)?: return alertView(state, navigationItem)
+				case .barButton(let state)?: return alertView(state, navigationItem)
+				case .button(let state)?: return alertView(state, navigationItem)
+				case .control(let state)?: return alertView(state, navigationItem)
+				case .gestureRecognizer(let state)?: return alertView(state, navigationItem)
+				case .imageView(let state)?: return alertView(state, navigationItem)
+				case .navigationBar(let state)?: return alertView(state, navigationItem)
+				case .pageViewController(let state)?: return alertView(state, navigationItem)
+				case .searchBar(let state)?: return alertView(state, navigationItem)
+				case .slider(let state)?: return alertView(state, navigationItem)
+				case .switch(let state)?: return alertView(state, navigationItem)
+				case .textField(let state)?: return alertView(state, navigationItem)
 				}
-				
-				return [ViewController(
-					.navigationItem -- NavigationItem(
-						.leftBarButtonItems() <-- viewState.splitButtonVar.optionalToArray(),
-						.title -- selection?.rawValue ?? ""
-					),
-					.view -- view
-				)]
-			}
+			}.map { .reload([$0]) }
 		),
-		.shouldShowSecondary <-- viewState.detailSelection.map { $0 != nil }
+		.shouldShowSecondary <-- viewState.rowSelection.map { $0 != nil }
 	)
-}
-
-func buttonView() -> ViewConvertible {
-	return View(.backgroundColor -- .white)
 }

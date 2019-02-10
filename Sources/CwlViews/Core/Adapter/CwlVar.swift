@@ -84,28 +84,40 @@ public extension Adapter {
 	}
 }
 
-extension Adapter {
-	public func set<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+public extension Adapter {
+	func set<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input().map { VarState<Value>.Message.set($0) }.bind(to: self)
 	}
 	
-	public func update<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+	func update<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input().map { VarState<Value>.Message.update($0) }.bind(to: self)
 	}
 	
-	public func notify<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
+	func notify<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input<Value>().map { VarState<Value>.Message.notify($0) }.bind(to: self)
 	}
 }
 
-extension SignalInterface {
-	public func bind<InputInterface>(to interface: InputInterface) where InputInterface: SignalInputInterface, InputInterface.InputValue == VarState<OutputValue>.Message {
+public extension SignalInterface {
+	func bind<InputInterface>(to interface: InputInterface) where InputInterface: SignalInputInterface, InputInterface.InputValue == VarState<OutputValue>.Message {
 		return map { VarState<OutputValue>.Message.set($0) }.bind(to: interface)
 	}
 }
 
-extension SignalChannel {
-	public func bind<Target>(to interface: Target) -> InputInterface where Target: SignalInputInterface, Target.InputValue == VarState<Interface.OutputValue>.Message {
+public extension SignalChannel {
+	func bind<Target>(to interface: Target) -> InputInterface where Target: SignalInputInterface, Target.InputValue == VarState<Interface.OutputValue>.Message {
 		return final { $0.map { VarState<Interface.OutputValue>.Message.set($0) }.bind(to: interface) }.input
+	}
+}
+
+public extension BindingName {
+	/// Build an action binding (callbacks triggered by the instance) from a name and a signal input.
+	///
+	/// - Parameters:
+	///   - name: the binding name
+	///   - value: the binding argument
+	/// - Returns: the binding
+	static func --><A>(name: BindingName<Value, Source, Binding>, value: Adapter<VarState<A>>) -> Binding where SignalInput<A> == Value {
+		return name.binding(with: value.set())
 	}
 }

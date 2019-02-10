@@ -42,7 +42,8 @@
 		C934D7C721F4624700BA719E /* CwlTestableBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C934D7C521F4624700BA719E /* CwlTestableBinder.swift */; };
 		C937E76E20046BE000E63965 /* CwlCodableContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C937E76C20046BE000E63965 /* CwlCodableContainer.swift */; };
 		C93A2C0F1F567B2A005C3E7B /* CwlTableRowMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */; };
-		C93E06D5220E76D30028DCB2 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93E06D4220E76D30028DCB2 /* TableViewController.swift */; };
+		C93C7E33220F0534000484E4 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93C7E32220F0534000484E4 /* AlertView.swift */; };
+		C93E06D5220E76D30028DCB2 /* CatalogTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93E06D4220E76D30028DCB2 /* CatalogTable.swift */; };
 		C93FBC132160FF2300DFCF0E /* CwlSignal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; };
 		C93FBC682161059D00DFCF0E /* CwlSignal.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C93FBC6B216105DB00DFCF0E /* CwlUtils.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -319,7 +320,8 @@
 		C935AC071E81762F006C1165 /* CwlStackView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlStackView.swift; sourceTree = "<group>"; };
 		C937E76C20046BE000E63965 /* CwlCodableContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlCodableContainer.swift; sourceTree = "<group>"; };
 		C93A2C0D1F567B2A005C3E7B /* CwlTableRowMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTableRowMutation.swift; sourceTree = "<group>"; };
-		C93E06D4220E76D30028DCB2 /* TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
+		C93C7E32220F0534000484E4 /* AlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
+		C93E06D4220E76D30028DCB2 /* CatalogTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTable.swift; sourceTree = "<group>"; };
 		C93FBC002160FCFF00DFCF0E /* CwlSignal.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CwlSignal.xcodeproj; path = CwlSignal/CwlSignal.xcodeproj; sourceTree = "<group>"; };
 		C93FBC642161055700DFCF0E /* CwlUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CwlUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C940A3B31E87751B001F1310 /* CwlScrollView_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollView_iOS.swift; sourceTree = "<group>"; };
@@ -943,7 +945,8 @@
 			children = (
 				C9E4CEF4220C38E200D7165D /* SplitViewController.swift */,
 				C9E4CEF7220C395000D7165D /* TabBarController.swift */,
-				C93E06D4220E76D30028DCB2 /* TableViewController.swift */,
+				C93E06D4220E76D30028DCB2 /* CatalogTable.swift */,
+				C93C7E32220F0534000484E4 /* AlertView.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -1602,10 +1605,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C93C7E33220F0534000484E4 /* AlertView.swift in Sources */,
 				C9E4CEF9220C39D900D7165D /* TabBarController.swift in Sources */,
 				C9E4CEF6220C390B00D7165D /* SplitViewController.swift in Sources */,
 				C9F9A35021DF70F100026DC1 /* main.swift in Sources */,
-				C93E06D5220E76D30028DCB2 /* TableViewController.swift in Sources */,
+				C93E06D5220E76D30028DCB2 /* CatalogTable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

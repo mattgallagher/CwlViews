@@ -71,8 +71,8 @@ public extension AlertController {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension AlertController.Preparer {
-	func constructInstance(subclass: Instance.Type, parameters: Void) -> Instance {
-		return subclass.init(title: title.initial, message: message.initial ?? nil, preferredStyle: preferredStyle)
+	func constructInstance(type: Instance.Type, parameters: Void) -> Instance {
+		return type.init(title: title.initial, message: message.initial ?? nil, preferredStyle: preferredStyle)
 	}
 	
 	mutating func prepareBinding(_ binding: Binding) {
@@ -132,6 +132,21 @@ public extension BindingName where Binding: AlertControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: AlertControllerName<$2> { return .name(B.$1) }
+
+	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var actions: AlertControllerName<Constant<[AlertActionConvertible]>> { return .name(B.actions) }
+	static var preferredStyle: AlertControllerName<Constant<UIAlertController.Style>> { return .name(B.preferredStyle) }
+	static var textFields: AlertControllerName<Constant<[TextField]>> { return .name(B.textFields) }
+	
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var message: AlertControllerName<Dynamic<String?>> { return .name(B.message) }
+	static var preferredActionIndex: AlertControllerName<Dynamic<Int?>> { return .name(B.preferredActionIndex) }
+	
+	// 2. Signal bindings are performed on the object after construction.
+	
+	//	3. Action bindings are triggered by the object after construction.
+	
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

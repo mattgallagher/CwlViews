@@ -163,13 +163,21 @@ extension Signal {
 	}
 }
 
-extension SignalInput {
+extension SignalInputInterface {
+	/// A convenience version of `send` that wraps a value in `Result.success` before sending
+	///
+	/// - Parameter value: will be wrapped and sent
+	/// - Returns: the return value from the underlying `send(result:)` function
+	public func send(result: Signal<InputValue>.Result) {
+		input.send(result: result)
+	}
+	
 	/// A convenience version of `send` that wraps a value in `Result.success` before sending
 	///
 	/// - Parameter value: will be wrapped and sent
 	/// - Returns: the return value from the underlying `send(result:)` function
 	public func send(value: InputValue) {
-		send(result: .success(value))
+		input.send(result: .success(value))
 	}
 	
 	/// A convenience version of `send` that wraps a value in `Result.success` before sending
@@ -177,8 +185,9 @@ extension SignalInput {
 	/// - Parameter value: will be wrapped and sent
 	/// - Returns: the return value from the underlying `send(result:)` function
 	public func send(_ values: InputValue...) {
+		let i = self.input
 		for v in values {
-			send(result: .success(v))
+			i.send(result: .success(v))
 		}
 	}
 	
@@ -187,8 +196,9 @@ extension SignalInput {
 	/// - Parameter value: will be wrapped and sent
 	/// - Returns: the return value from the underlying `send(result:)` function
 	public func send<S: Sequence>(sequence: S) where S.Iterator.Element == InputValue {
+		let i = self.input
 		for v in sequence {
-			send(result: .success(v))
+			i.send(result: .success(v))
 		}
 	}
 	
@@ -197,7 +207,7 @@ extension SignalInput {
 	/// - Parameter error: will be wrapped and sent
 	/// - Returns: the return value from the underlying `send(result:)` function
 	public func send(error: Error) {
-		send(result: .failure(.other(error)))
+		input.send(result: .failure(.other(error)))
 	}
 	
 	/// A convenience version of `send` that wraps an error in `Result.failure` before sending
@@ -205,14 +215,14 @@ extension SignalInput {
 	/// - Parameter error: will be wrapped and sent
 	/// - Returns: the return value from the underlying `send(result:)` function
 	public func send(end: SignalEnd) {
-		send(result: .failure(end))
+		input.send(result: .failure(end))
 	}
 	
 	/// Sends a `Result.failure(SignalEnd.complete)`
 	///
 	/// - Returns: the return value from the underlying `send(result:)` function
 	public func complete() {
-		send(result: .failure(.complete))
+		input.send(result: .failure(.complete))
 	}
 
 	@available(*, deprecated, message: "Renamed `complete`")
@@ -302,6 +312,37 @@ extension SignalInterface {
 		let pair = Signal<OutputValue>.create()
 		try! signal.capture().bind(to: pair.input, resend: true)
 		return pair.signal
+	}
+	
+	/// Appends a handler function that transforms the value emitted from this `Signal` into a new `Signal`.
+	///
+	/// - Parameters:
+	///   - context: the `Exec` context used to invoke the `handler`
+	///   - processor: the function invoked for each received `Result`
+	/// - Returns: the created `Signal`
+	public func transformValues<U>(context: Exec = .direct, _ processor: @escaping (OutputValue) -> Signal<U>.Next) -> Signal<U> {
+		return transform(context: context) { r in
+			switch r {
+			case .success(let v): return processor(v)
+			case .failure(let e): return .single(.failure(e))
+			}
+		}
+	}
+	
+	/// Appends a handler function that transforms the value emitted from this `Signal` into a new `Signal`.
+	///
+	/// - Parameters:
+	///   - initialState: the initial value for a state value associated with the handler. This value is retained and if the signal graph is deactivated, the state value is reset to this value.
+	///   - context: the `Exec` context used to invoke the `handler`
+	///   - processor: the function invoked for each received `Result`
+	/// - Returns: the transformed output `Signal`
+	public func transformValues<S, U>(initialState: S, context: Exec = .direct, _ processor: @escaping (inout S, OutputValue) -> Signal<U>.Next) -> Signal<U> {
+		return transform(initialState: initialState, context: context) { s, r in
+			switch r {
+			case .success(let v): return processor(&s, v)
+			case .failure(let e): return .single(.failure(e))
+			}
+		}
 	}
 
 	/// Maps values from self or second to EitherValue2 and merges into a single stream.

@@ -347,7 +347,7 @@ public extension SearchBarBinding {
 	}
 }
 public extension SearchBar.Binding {
-	public typealias Preparer = SearchBar.Preparer
+	typealias Preparer = SearchBar.Preparer
 	static func searchBarBinding(_ binding: SearchBar.Binding) -> SearchBar.Binding {
 		return binding
 	}

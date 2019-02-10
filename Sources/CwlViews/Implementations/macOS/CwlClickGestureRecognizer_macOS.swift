@@ -138,7 +138,7 @@ public extension ClickGestureRecognizerBinding {
 	}
 }
 public extension ClickGestureRecognizer.Binding {
-	public typealias Preparer = ClickGestureRecognizer.Preparer
+	typealias Preparer = ClickGestureRecognizer.Preparer
 	static func clickGestureRecognizerBinding(_ binding: ClickGestureRecognizer.Binding) -> ClickGestureRecognizer.Binding {
 		return binding
 	}

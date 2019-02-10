@@ -138,7 +138,7 @@ public extension SwipeGestureRecognizerBinding {
 	}
 }
 public extension SwipeGestureRecognizer.Binding {
-	public typealias Preparer = SwipeGestureRecognizer.Preparer
+	typealias Preparer = SwipeGestureRecognizer.Preparer
 	static func swipeGestureRecognizerBinding(_ binding: SwipeGestureRecognizer.Binding) -> SwipeGestureRecognizer.Binding {
 		return binding
 	}

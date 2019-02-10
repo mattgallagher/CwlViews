@@ -282,7 +282,7 @@ public extension MenuBinding {
 	}
 }
 public extension Menu.Binding {
-	public typealias Preparer = Menu.Preparer
+	typealias Preparer = Menu.Preparer
 	static func menuBinding(_ binding: Menu.Binding) -> Menu.Binding {
 		return binding
 	}

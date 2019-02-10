@@ -277,7 +277,7 @@ public extension TextFieldBinding {
 	}
 }
 public extension TextField.Binding {
-	public typealias Preparer = TextField.Preparer
+	typealias Preparer = TextField.Preparer
 	static func textFieldBinding(_ binding: TextField.Binding) -> TextField.Binding {
 		return binding
 	}

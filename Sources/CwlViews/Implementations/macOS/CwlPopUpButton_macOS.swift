@@ -167,7 +167,7 @@ public extension PopUpButtonBinding {
 	}
 }
 public extension PopUpButton.Binding {
-	public typealias Preparer = PopUpButton.Preparer
+	typealias Preparer = PopUpButton.Preparer
 	static func popUpButtonBinding(_ binding: PopUpButton.Binding) -> PopUpButton.Binding {
 		return binding
 	}

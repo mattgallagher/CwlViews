@@ -280,7 +280,7 @@ public extension NavigationControllerBinding {
 	}
 }
 public extension NavigationController.Binding {
-	public typealias Preparer = NavigationController.Preparer
+	typealias Preparer = NavigationController.Preparer
 	static func navigationControllerBinding(_ binding: NavigationController.Binding) -> NavigationController.Binding {
 		return binding
 	}

@@ -289,7 +289,7 @@ public extension PageViewControllerBinding {
 	}
 }
 public extension PageViewController.Binding {
-	public typealias Preparer = PageViewController.Preparer
+	typealias Preparer = PageViewController.Preparer
 	static func pageViewControllerBinding(_ binding: PageViewController<PageDataType>.Binding) -> PageViewController.Binding {
 		return binding
 	}

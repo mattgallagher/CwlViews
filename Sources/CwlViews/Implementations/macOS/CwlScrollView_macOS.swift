@@ -263,7 +263,7 @@ public extension ScrollViewBinding {
 	}
 }
 public extension ScrollView.Binding {
-	public typealias Preparer = ScrollView.Preparer
+	typealias Preparer = ScrollView.Preparer
 	static func scrollViewBinding(_ binding: ScrollView.Binding) -> ScrollView.Binding {
 		return binding
 	}

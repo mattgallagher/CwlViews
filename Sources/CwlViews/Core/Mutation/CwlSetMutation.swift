@@ -96,9 +96,9 @@ public struct SetMutation<Element> {
 			// It would be nice if this was better than n squared complexity and aggregated the updates, rather than issueing updates for individual rows.
 			var result = Array<ArrayMutation<Element>>()
 			for v in values {
-				let oldIndex = array.index { u in equate(v, u) }!
+				let oldIndex = array.firstIndex { u in equate(v, u) }!
 				array.remove(at: oldIndex)
-				let newIndex = array.index { u in compare(v, u) } ?? array.count
+				let newIndex = array.firstIndex { u in compare(v, u) } ?? array.count
 				array.insert(v, at: newIndex)
 				if newIndex == oldIndex {
 					result.append(.updated(v, at: oldIndex))

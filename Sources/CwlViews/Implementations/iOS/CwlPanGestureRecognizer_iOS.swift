@@ -141,7 +141,7 @@ public extension PanGestureRecognizerBinding {
 	}
 }
 public extension PanGestureRecognizer.Binding {
-	public typealias Preparer = PanGestureRecognizer.Preparer
+	typealias Preparer = PanGestureRecognizer.Preparer
 	static func panGestureRecognizerBinding(_ binding: PanGestureRecognizer.Binding) -> PanGestureRecognizer.Binding {
 		return binding
 	}

@@ -323,7 +323,7 @@ public extension SplitViewControllerBinding {
 	}
 }
 public extension SplitViewController.Binding {
-	public typealias Preparer = SplitViewController.Preparer
+	typealias Preparer = SplitViewController.Preparer
 	static func splitViewControllerBinding(_ binding: SplitViewController.Binding) -> SplitViewController.Binding {
 		return binding
 	}

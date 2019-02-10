@@ -183,7 +183,7 @@ public extension LabelBinding {
 	}
 }
 public extension Label.Binding {
-	public typealias Preparer = Label.Preparer
+	typealias Preparer = Label.Preparer
 	static func windowBinding(_ binding: Label.Binding) -> Label.Binding {
 		return binding
 	}

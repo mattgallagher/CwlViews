@@ -135,7 +135,7 @@ public extension RotationGestureRecognizerBinding {
 	}
 }
 public extension RotationGestureRecognizer.Binding {
-	public typealias Preparer = RotationGestureRecognizer.Preparer
+	typealias Preparer = RotationGestureRecognizer.Preparer
 	static func rotationGestureRecognizerBinding(_ binding: RotationGestureRecognizer.Binding) -> RotationGestureRecognizer.Binding {
 		return binding
 	}

@@ -235,7 +235,7 @@ public extension ViewBinding {
 	}
 }
 public extension View.Binding {
-	public typealias Preparer = View.Preparer
+	typealias Preparer = View.Preparer
 	static func viewBinding(_ binding: View.Binding) -> View.Binding {
 		return binding
 	}

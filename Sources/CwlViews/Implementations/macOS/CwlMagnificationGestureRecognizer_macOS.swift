@@ -135,7 +135,7 @@ public extension MagnificationGestureRecognizerBinding {
 	}
 }
 public extension MagnificationGestureRecognizer.Binding {
-	public typealias Preparer = MagnificationGestureRecognizer.Preparer
+	typealias Preparer = MagnificationGestureRecognizer.Preparer
 	static func magnificationGestureRecognizerBinding(_ binding: MagnificationGestureRecognizer.Binding) -> MagnificationGestureRecognizer.Binding {
 		return binding
 	}

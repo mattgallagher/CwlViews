@@ -178,7 +178,7 @@ public extension LayerBinding {
 	}
 }
 public extension Layer.Binding {
-	public typealias Preparer = Layer.Preparer
+	typealias Preparer = Layer.Preparer
 	static func layerBinding(_ binding: Layer.Binding) -> Layer.Binding {
 		return binding
 	}

@@ -141,7 +141,7 @@ public extension PressGestureRecognizerBinding {
 	}
 }
 public extension PressGestureRecognizer.Binding {
-	public typealias Preparer = PressGestureRecognizer.Preparer
+	typealias Preparer = PressGestureRecognizer.Preparer
 	static func pressGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> PressGestureRecognizer.Binding {
 		return binding
 	}

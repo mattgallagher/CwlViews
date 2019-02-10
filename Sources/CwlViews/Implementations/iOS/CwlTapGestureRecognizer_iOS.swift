@@ -138,7 +138,7 @@ public extension TapGestureRecognizerBinding {
 	}
 }
 public extension TapGestureRecognizer.Binding {
-	public typealias Preparer = TapGestureRecognizer.Preparer
+	typealias Preparer = TapGestureRecognizer.Preparer
 	static func tapGestureRecognizerBinding(_ binding: TapGestureRecognizer.Binding) -> TapGestureRecognizer.Binding {
 		return binding
 	}

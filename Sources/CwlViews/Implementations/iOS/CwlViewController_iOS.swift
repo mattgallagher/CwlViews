@@ -523,7 +523,7 @@ public extension ViewControllerBinding {
 	}
 }
 public extension ViewController.Binding {
-	public typealias Preparer = ViewController.Preparer
+	typealias Preparer = ViewController.Preparer
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> ViewController.Binding {
 		return binding
 	}

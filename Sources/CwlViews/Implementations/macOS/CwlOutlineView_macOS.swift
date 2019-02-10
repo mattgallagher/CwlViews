@@ -984,7 +984,7 @@ public extension OutlineViewBinding {
 	}
 }
 public extension OutlineView.Binding {
-	public typealias Preparer = OutlineView.Preparer
+	typealias Preparer = OutlineView.Preparer
 	static func outlineViewBinding(_ binding: OutlineView<NodeDataType>.Binding) -> OutlineView<NodeDataType>.Binding {
 		return binding
 	}

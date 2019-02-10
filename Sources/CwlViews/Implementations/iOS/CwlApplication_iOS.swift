@@ -481,7 +481,7 @@ public extension ApplicationBinding {
 	}
 }
 public extension Application.Binding {
-	public typealias Preparer = Application.Preparer
+	typealias Preparer = Application.Preparer
 	static func applicationBinding(_ binding: Application.Binding) -> Application.Binding {
 		return binding
 	}

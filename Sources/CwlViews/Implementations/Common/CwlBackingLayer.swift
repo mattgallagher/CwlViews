@@ -328,7 +328,7 @@ public extension BackingLayerBinding {
 	}
 }
 public extension BackingLayer.Binding {
-	public typealias Preparer = BackingLayer.Preparer
+	typealias Preparer = BackingLayer.Preparer
 	static func backingLayerBinding(_ binding: BackingLayer.Binding) -> BackingLayer.Binding {
 		return binding
 	}

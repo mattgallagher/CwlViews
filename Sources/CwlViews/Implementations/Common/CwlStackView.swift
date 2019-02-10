@@ -70,9 +70,9 @@ public extension StackView {
 	}
 	
 	#if os(macOS)
-		public typealias EdgeInsets = NSEdgeInsets
+		typealias EdgeInsets = NSEdgeInsets
 	#else
-		public typealias EdgeInsets = UIEdgeInsets
+		typealias EdgeInsets = UIEdgeInsets
 	#endif
 }
 
@@ -254,7 +254,7 @@ public extension StackViewBinding {
 	}
 }
 public extension StackView.Binding {
-	public typealias Preparer = StackView.Preparer
+	typealias Preparer = StackView.Preparer
 	static func stackViewBinding(_ binding: StackView.Binding) -> StackView.Binding {
 		return binding
 	}

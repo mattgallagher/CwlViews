@@ -154,6 +154,7 @@ public struct Layout {
 		switch axis {
 		case .horizontal: return .horizontal(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relative: relative, view))
 		case .vertical: return .vertical(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relative: relative, view))
+		@unknown default: fatalError()
 		}
 	}
 	
@@ -166,6 +167,7 @@ public struct Layout {
 		case .horizontal:
 			let h = Entity.sublayout(axis: .horizontal, align: horizontalAlignment, length: length, breadth: breadth, relative: relative, entities)
 			return Layout(axis: .vertical, align: verticalAlignment, marginEdges: marginEdges, animate: animate, entities: [h])
+		@unknown default: fatalError()
 		}
 	}
 	
@@ -351,6 +353,7 @@ public struct Layout {
 			case .equal: constraint = first.constraint(equalTo: second, multiplier: ratio, constant: constant)
 			case .lessThanOrEqual: constraint = first.constraint(lessThanOrEqualTo: second, multiplier: ratio, constant: constant)
 			case .greaterThanOrEqual: constraint = first.constraint(greaterThanOrEqualTo: second, multiplier: ratio, constant: constant)
+			@unknown default: fatalError()
 			}
 			constraint.priority = priority
 			constraints.append(constraint)
@@ -363,6 +366,7 @@ public struct Layout {
 			case (.equal, _): constraint = first.constraint(equalTo: second, constant: reverse ? -constant: constant)
 			case (.lessThanOrEqual, false), (.greaterThanOrEqual, true): constraint = first.constraint(lessThanOrEqualTo: second, constant: reverse ? -constant: constant)
 			case (.greaterThanOrEqual, false), (.lessThanOrEqual, true): constraint = first.constraint(greaterThanOrEqualTo: second, constant: reverse ? -constant: constant)
+			@unknown default: fatalError()
 			}
 			constraint.priority = priority
 			constraints.append(constraint)
@@ -526,6 +530,7 @@ public struct Layout {
 			}
 			
 			state.containerBounds.top = bounds.bottom
+		@unknown default:	fatalError()
 		}
 	}
 	
@@ -610,6 +615,7 @@ public struct Layout {
 				(state.dimension ?? Dimension()).unscaledConstraintBetween(first: previous.trailing, second: state.containerBounds.trailing, constraints: &state.storage.constraints, reverse: true)
 			case .vertical:
 				(state.dimension ?? Dimension()).unscaledConstraintBetween(first: previous.bottom, second: state.containerBounds.bottom, constraints: &state.storage.constraints, reverse: true)
+			@unknown default: fatalError()
 			}
 		}
 	}
@@ -619,30 +625,30 @@ public struct Layout {
 // As of Xcode 8, the "Debug View Hierarchy" option does not show layout guides, making debugging of constraints involving layout guides tricky. To aid debugging in these cases, set the following condition to `true && DEBUG` and CwlLayout will create views instead of layout guides.
 // Otherwise, you can set this to `false && DEBUG`.
 #if true && DEBUG
-extension Layout {
-	fileprivate typealias Box = Layout.View
-}
-extension Layout.View {
-	fileprivate func addLayoutBox(_ layoutBox: Layout.Box) {
-		layoutBox.translatesAutoresizingMaskIntoConstraints = false
-		self.addSubview(layoutBox)
+	extension Layout {
+		fileprivate typealias Box = Layout.View
 	}
-	fileprivate func removeLayoutBox(_ layoutBox: Layout.Box) {
-		layoutBox.removeFromSuperview()
+	extension Layout.View {
+		fileprivate func addLayoutBox(_ layoutBox: Layout.Box) {
+			layoutBox.translatesAutoresizingMaskIntoConstraints = false
+			self.addSubview(layoutBox)
+		}
+		fileprivate func removeLayoutBox(_ layoutBox: Layout.Box) {
+			layoutBox.removeFromSuperview()
+		}
 	}
-}
 #else
-extension Layout {
-	fileprivate typealias Box = Layout.Guide
-}
-extension Layout.View {
-	fileprivate func addLayoutBox(_ layoutBox: Layout.Box) {
-		self.addLayoutGuide(layoutBox)
+	extension Layout {
+		fileprivate typealias Box = Layout.Guide
 	}
-	fileprivate func removeLayoutBox(_ layoutBox: Layout.Box) {
-		self.removeLayoutGuide(layoutBox)
+	extension Layout.View {
+		fileprivate func addLayoutBox(_ layoutBox: Layout.Box) {
+			self.addLayoutGuide(layoutBox)
+		}
+		fileprivate func removeLayoutBox(_ layoutBox: Layout.Box) {
+			self.removeLayoutGuide(layoutBox)
+		}
 	}
-}
 #endif
 
 // NOTE:
@@ -704,7 +710,7 @@ fileprivate func applyLayoutToView(view: Layout.View, params: (layout: Layout, b
 	}
 	
 	// Check if this will be animated
-	let shouldAnimate = layout.animate != .none && (previous != nil || layout.animate != .subsequent)
+	let shouldAnimate = layout.animate != .never && (previous != nil || layout.animate != .subsequent)
 	
 	// Exclude views in the new layout from the removed set. If we're animating, we'll need animated and added sets too.
 	var animatedViews = Set<Layout.View>()

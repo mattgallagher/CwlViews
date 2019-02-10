@@ -144,7 +144,7 @@ public extension LongPressGestureRecognizerBinding {
 	}
 }
 public extension LongPressGestureRecognizer.Binding {
-	public typealias Preparer = LongPressGestureRecognizer.Preparer
+	typealias Preparer = LongPressGestureRecognizer.Preparer
 	static func longPressGestureRecognizerBinding(_ binding: LongPressGestureRecognizer.Binding) -> LongPressGestureRecognizer.Binding {
 		return binding
 	}

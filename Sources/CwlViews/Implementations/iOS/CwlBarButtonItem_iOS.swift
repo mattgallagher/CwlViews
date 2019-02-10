@@ -236,7 +236,7 @@ public extension BarButtonItemBinding {
 	}
 }
 public extension BarButtonItem.Binding {
-	public typealias Preparer = BarButtonItem.Preparer
+	typealias Preparer = BarButtonItem.Preparer
 	static func barButtonItemBinding(_ binding: BarButtonItem.Binding) -> BarButtonItem.Binding {
 		return binding
 	}

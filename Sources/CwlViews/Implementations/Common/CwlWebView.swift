@@ -434,7 +434,7 @@ public extension WebViewBinding {
 	}
 }
 public extension WebView.Binding {
-	public typealias Preparer = WebView.Preparer
+	typealias Preparer = WebView.Preparer
 	static func webViewBinding(_ binding: WebView.Binding) -> WebView.Binding {
 		return binding
 	}

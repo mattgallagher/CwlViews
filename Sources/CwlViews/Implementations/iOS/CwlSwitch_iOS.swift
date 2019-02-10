@@ -151,7 +151,7 @@ public extension SwitchBinding {
 	}
 }
 public extension Switch.Binding {
-	public typealias Preparer = Switch.Preparer
+	typealias Preparer = Switch.Preparer
 	static func switchBinding(_ binding: Switch.Binding) -> Switch.Binding {
 		return binding
 	}

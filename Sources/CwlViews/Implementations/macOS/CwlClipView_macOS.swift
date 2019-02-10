@@ -150,7 +150,7 @@ public extension ClipViewBinding {
 	}
 }
 public extension ClipView.Binding {
-	public typealias Preparer = ClipView.Preparer
+	typealias Preparer = ClipView.Preparer
 	static func clipViewBinding(_ binding: ClipView.Binding) -> ClipView.Binding {
 		return binding
 	}

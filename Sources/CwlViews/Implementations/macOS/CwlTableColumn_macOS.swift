@@ -210,7 +210,7 @@ public extension TableColumnBinding {
 	}
 }
 public extension TableColumn.Binding {
-	public typealias Preparer = TableColumn.Preparer
+	typealias Preparer = TableColumn.Preparer
 	static func tableColumnBinding(_ binding: TableColumn.Binding) -> TableColumn.Binding {
 		return binding
 	}

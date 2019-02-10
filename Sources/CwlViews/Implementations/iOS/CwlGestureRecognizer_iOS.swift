@@ -212,7 +212,7 @@ extension UIGestureRecognizer: GestureRecognizerConvertible, DefaultConstructabl
 	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return self }
 }
 public extension GestureRecognizer {
-	public func uiGestureRecognizer() -> GestureRecognizer.Instance { return instance() }
+	func uiGestureRecognizer() -> GestureRecognizer.Instance { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols
@@ -225,7 +225,7 @@ public extension GestureRecognizerBinding {
 	}
 }
 public extension GestureRecognizer.Binding {
-	public typealias Preparer = GestureRecognizer.Preparer
+	typealias Preparer = GestureRecognizer.Preparer
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> GestureRecognizer.Binding {
 		return binding
 	}

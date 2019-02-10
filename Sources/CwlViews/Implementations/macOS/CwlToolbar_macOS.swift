@@ -222,7 +222,7 @@ extension ToolbarBinding {
 	}
 }
 public extension Toolbar.Binding {
-	public typealias Preparer = Toolbar.Preparer
+	typealias Preparer = Toolbar.Preparer
 	static func toolbarBinding(_ binding: Toolbar.Binding) -> Toolbar.Binding {
 		return binding
 	}

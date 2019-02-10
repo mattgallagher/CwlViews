@@ -31,14 +31,14 @@ public protocol Binder: class {
 }
 
 public extension Binder {
- 	public typealias Instance = Preparer.Instance
-	public typealias Parameters = Preparer.Parameters
-	public typealias Output = Preparer.Output
+ 	typealias Instance = Preparer.Instance
+	typealias Parameters = Preparer.Parameters
+	typealias Output = Preparer.Output
 	
 	/// Invokes `consume` on the underlying state. If the state is not `pending`, this will trigger a fatal error. State will be set to `consumed`.
 	///
 	/// - Returns: the array of `Binding` from the state parameters.
-	public func consume() -> (type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+	func consume() -> (type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		guard case .pending(let type, let parameters, let bindings) = state else {
 			fatalError("Attempted to consume bindings from already constructed or consumed binder.")
 		}

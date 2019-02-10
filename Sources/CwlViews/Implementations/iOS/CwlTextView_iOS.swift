@@ -283,7 +283,7 @@ public extension TextViewBinding {
 	}
 }
 public extension TextView.Binding {
-	public typealias Preparer = TextView.Preparer
+	typealias Preparer = TextView.Preparer
 	static func textViewBinding(_ binding: TextView.Binding) -> TextView.Binding {
 		return binding
 	}

@@ -118,7 +118,7 @@ public extension TableHeaderViewBinding {
 	}
 }
 public extension TableHeaderView.Binding {
-	public typealias Preparer = TableHeaderView.Preparer
+	typealias Preparer = TableHeaderView.Preparer
 	static func tableHeaderViewBinding(_ binding: TableHeaderView.Binding) -> TableHeaderView.Binding {
 		return binding
 	}

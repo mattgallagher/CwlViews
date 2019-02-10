@@ -52,7 +52,7 @@ public protocol BinderBaseBinding: Binding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self
 }
 public extension BinderBase.Binding {
-	public typealias Preparer = BinderBase
+	typealias Preparer = BinderBase
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> BinderBase.Binding { return binding }
 }
 

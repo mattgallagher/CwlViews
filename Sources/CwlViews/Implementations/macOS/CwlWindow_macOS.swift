@@ -651,7 +651,7 @@ public extension WindowBinding {
 	}
 }
 public extension Window.Binding {
-	public typealias Preparer = Window.Preparer
+	typealias Preparer = Window.Preparer
 	static func windowBinding(_ binding: Window.Binding) -> Window.Binding {
 		return binding
 	}

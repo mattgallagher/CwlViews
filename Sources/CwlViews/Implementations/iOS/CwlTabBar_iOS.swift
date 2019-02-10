@@ -288,7 +288,7 @@ public extension TabBarBinding {
 	}
 }
 public extension TabBar.Binding {
-	public typealias Preparer = TabBar.Preparer
+	typealias Preparer = TabBar.Preparer
 	static func tabBarBinding(_ binding: TabBar<ItemIdentifierType>.Binding) -> TabBar.Binding {
 		return binding
 	}

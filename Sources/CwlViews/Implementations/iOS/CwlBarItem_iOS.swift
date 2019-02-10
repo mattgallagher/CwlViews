@@ -158,7 +158,7 @@ public extension BarItemBinding {
 	}
 }
 public extension BarItem.Binding {
-	public typealias Preparer = BarItem.Preparer
+	typealias Preparer = BarItem.Preparer
 	static func barItemBinding(_ binding: BarItem.Binding) -> BarItem.Binding {
 		return binding
 	}

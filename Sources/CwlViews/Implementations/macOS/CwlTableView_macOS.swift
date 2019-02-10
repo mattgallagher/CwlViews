@@ -732,7 +732,7 @@ public extension TableViewBinding {
 	}
 }
 public extension TableView.Binding {
-	public typealias Preparer = TableView.Preparer
+	typealias Preparer = TableView.Preparer
 	static func tableViewBinding(_ binding: TableView<RowDataType>.Binding) -> TableView<RowDataType>.Binding {
 		return binding
 	}

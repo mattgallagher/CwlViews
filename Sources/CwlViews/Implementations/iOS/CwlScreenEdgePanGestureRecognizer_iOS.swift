@@ -135,7 +135,7 @@ public extension ScreenEdgePanGestureRecognizerBinding {
 	}
 }
 public extension ScreenEdgePanGestureRecognizer.Binding {
-	public typealias Preparer = ScreenEdgePanGestureRecognizer.Preparer
+	typealias Preparer = ScreenEdgePanGestureRecognizer.Preparer
 	static func screenEdgePanGestureRecognizerBinding(_ binding: ScreenEdgePanGestureRecognizer.Binding) -> ScreenEdgePanGestureRecognizer.Binding {
 		return binding
 	}

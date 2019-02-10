@@ -100,7 +100,7 @@ public extension Adapter {
 		}
 	}
 
-	public func logJson<Wrapped, M, N>(prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime where State == ModelState<Wrapped, M, N>, Wrapped: Encodable {
+	func logJson<Wrapped, M, N>(prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime where State == ModelState<Wrapped, M, N>, Wrapped: Encodable {
 		return combinedSignal.subscribeValues(context: executionContext) { (state, _) in
 			let enc = JSONEncoder()
 			enc.outputFormatting = formatting

@@ -135,7 +135,7 @@ public extension PinchGestureRecognizerBinding {
 	}
 }
 public extension PinchGestureRecognizer.Binding {
-	public typealias Preparer = PinchGestureRecognizer.Preparer
+	typealias Preparer = PinchGestureRecognizer.Preparer
 	static func pinchGestureRecognizerBinding(_ binding: PinchGestureRecognizer.Binding) -> PinchGestureRecognizer.Binding {
 		return binding
 	}

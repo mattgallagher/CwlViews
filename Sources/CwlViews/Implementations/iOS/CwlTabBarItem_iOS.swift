@@ -166,7 +166,7 @@ public extension TabBarItemBinding {
 	}
 }
 public extension TabBarItem.Binding {
-	public typealias Preparer = TabBarItem.Preparer
+	typealias Preparer = TabBarItem.Preparer
 	static func tabBarItemBinding(_ binding: TabBarItem.Binding) -> TabBarItem.Binding {
 		return binding
 	}

@@ -229,7 +229,7 @@ public extension ButtonBinding {
 	}
 }
 public extension Button.Binding {
-	public typealias Preparer = Button.Preparer
+	typealias Preparer = Button.Preparer
 	static func buttonBinding(_ binding: Button.Binding) -> Button.Binding {
 		return binding
 	}

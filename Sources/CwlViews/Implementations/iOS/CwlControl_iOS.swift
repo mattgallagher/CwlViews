@@ -180,7 +180,7 @@ public extension ControlBinding {
 	}
 }
 public extension Control.Binding {
-	public typealias Preparer = Control.Preparer
+	typealias Preparer = Control.Preparer
 	static func controlBinding(_ binding: Control.Binding) -> Control.Binding {
 		return binding
 	}

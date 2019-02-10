@@ -145,7 +145,7 @@ public extension GradientLayerBinding {
 	}
 }
 public extension GradientLayer.Binding {
-	public typealias Preparer = GradientLayer.Preparer
+	typealias Preparer = GradientLayer.Preparer
 	static func gradientLayerBinding(_ binding: GradientLayer.Binding) -> GradientLayer.Binding {
 		return binding
 	}

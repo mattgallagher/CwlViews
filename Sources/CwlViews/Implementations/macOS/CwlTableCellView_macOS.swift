@@ -138,7 +138,7 @@ public extension TableCellViewBinding {
 	}
 }
 public extension TableCellView.Binding {
-	public typealias Preparer = TableCellView.Preparer
+	typealias Preparer = TableCellView.Preparer
 	static func tableCellViewBinding(_ binding: TableCellView.Binding) -> TableCellView.Binding {
 		return binding
 	}

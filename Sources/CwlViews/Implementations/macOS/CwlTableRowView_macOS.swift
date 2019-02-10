@@ -159,7 +159,7 @@ public extension TableRowViewBinding {
 	}
 }
 public extension TableRowView.Binding {
-	public typealias Preparer = TableRowView.Preparer
+	typealias Preparer = TableRowView.Preparer
 	static func tableRowViewBinding(_ binding: TableRowView.Binding) -> TableRowView.Binding {
 		return binding
 	}

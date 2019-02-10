@@ -191,7 +191,7 @@ public extension MenuItemBinding {
 	}
 }
 public extension MenuItem.Binding {
-	public typealias Preparer = MenuItem.Preparer
+	typealias Preparer = MenuItem.Preparer
 	static func menuItemBinding(_ binding: MenuItem.Binding) -> MenuItem.Binding {
 		return binding
 	}

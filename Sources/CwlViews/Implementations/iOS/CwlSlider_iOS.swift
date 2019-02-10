@@ -173,7 +173,7 @@ public extension SliderBinding {
 	}
 }
 public extension Slider.Binding {
-	public typealias Preparer = Slider.Preparer
+	typealias Preparer = Slider.Preparer
 	static func sliderBinding(_ binding: Slider.Binding) -> Slider.Binding {
 		return binding
 	}

@@ -229,7 +229,7 @@ public extension NavigationBarBinding {
 	}
 }
 public extension NavigationBar.Binding {
-	public typealias Preparer = NavigationBar.Preparer
+	typealias Preparer = NavigationBar.Preparer
 	static func scrollViewBinding(_ binding: NavigationBar.Binding) -> NavigationBar.Binding {
 		return binding
 	}

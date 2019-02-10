@@ -180,7 +180,7 @@ public extension NavigationItemBinding {
 	}
 }
 public extension NavigationItem.Binding {
-	public typealias Preparer = NavigationItem.Preparer
+	typealias Preparer = NavigationItem.Preparer
 	static func navigationItemBinding(_ binding: NavigationItem.Binding) -> NavigationItem.Binding {
 		return binding
 	}

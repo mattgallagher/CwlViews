@@ -34,7 +34,7 @@ public protocol HasDelegate: class {
 }
 
 public extension BinderDelegateEmbedder {
-	public init() {
+	init() {
 		self.init(delegateClass: Delegate.self)
 	}
 	

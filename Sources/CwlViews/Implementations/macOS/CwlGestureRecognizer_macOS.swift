@@ -205,7 +205,7 @@ public extension GestureRecognizerBinding {
 	}
 }
 public extension GestureRecognizer.Binding {
-	public typealias Preparer = GestureRecognizer.Preparer
+	typealias Preparer = GestureRecognizer.Preparer
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> GestureRecognizer.Binding {
 		return binding
 	}

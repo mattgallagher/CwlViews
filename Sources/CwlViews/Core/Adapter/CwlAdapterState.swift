@@ -56,11 +56,11 @@ public protocol NonPersistentAdapterState: AdapterState, Codable {
 }
 
 public extension NonPersistentAdapterState {
-	public init(from decoder: Decoder) throws {
+	init(from decoder: Decoder) throws {
 		self.init()
 	}
 	
-	public func encode(to encoder: Encoder) throws {
+	func encode(to encoder: Encoder) throws {
 	}
 }
 
@@ -83,13 +83,13 @@ extension Adapter where State: SingleValueAdapterState {
 }
 
 public extension SingleValueAdapterState {
-	public init(from decoder: Decoder) throws {
+	init(from decoder: Decoder) throws {
 		let c = try decoder.singleValueContainer()
 		let p = try c.decode(PersistentValue.self)
 		self.init(value: p)
 	}
 	
-	public func encode(to encoder: Encoder) throws {
+	func encode(to encoder: Encoder) throws {
 		var c = encoder.singleValueContainer()
 		try c.encode(value)
 	}

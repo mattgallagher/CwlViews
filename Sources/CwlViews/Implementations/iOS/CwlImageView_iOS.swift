@@ -179,7 +179,7 @@ public extension ImageViewBinding {
 	}
 }
 public extension ImageView.Binding {
-	public typealias Preparer = ImageView.Preparer
+	typealias Preparer = ImageView.Preparer
 	static func imageViewBinding(_ binding: ImageView.Binding) -> ImageView.Binding {
 		return binding
 	}

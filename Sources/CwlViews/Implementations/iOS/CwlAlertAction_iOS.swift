@@ -163,7 +163,7 @@ public extension AlertActionBinding {
 	}
 }
 public extension AlertAction.Binding {
-	public typealias Preparer = AlertAction.Preparer
+	typealias Preparer = AlertAction.Preparer
 	static func alertActionBinding(_ binding: AlertAction.Binding) -> AlertAction.Binding {
 		return binding
 	}

@@ -230,7 +230,7 @@ public extension TableViewCellBinding {
 	}
 }
 public extension TableViewCell.Binding {
-	public typealias Preparer = TableViewCell.Preparer
+	typealias Preparer = TableViewCell.Preparer
 	static func tableViewCellBinding(_ binding: TableViewCell.Binding) -> TableViewCell.Binding {
 		return binding
 	}

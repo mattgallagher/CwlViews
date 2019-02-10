@@ -133,7 +133,7 @@ public extension TabBarController.Preparer {
 		// 2. Signal bindings are performed on the object after construction.
 		case .selectItem(let x):
 			return x.apply(instance, storage) { i, s, v in
-				if let vc = s.viewController(for: v), let index = i.viewControllers?.index(of: vc) {
+				if let vc = s.viewController(for: v), let index = i.viewControllers?.firstIndex(of: vc) {
 					i.selectedIndex = index
 				}
 			}
@@ -297,7 +297,7 @@ public extension TabBarControllerBinding {
 	}
 }
 public extension TabBarController.Binding {
-	public typealias Preparer = TabBarController.Preparer
+	typealias Preparer = TabBarController.Preparer
 	static func tabBarControllerBinding(_ binding: TabBarController<ItemIdentifierType>.Binding) -> TabBarController<ItemIdentifierType>.Binding {
 		return binding
 	}

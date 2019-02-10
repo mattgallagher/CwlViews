@@ -13,7 +13,7 @@ enum Tabs: Int, Codable {
 	case right
 }
 
-func tabBarController(_ viewState: SplitViewState) -> ViewControllerConvertible {
+func tabbedView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 	return NavigationController(
 		.stack -- [
 			TabBarController<Tabs>(
@@ -50,51 +50,6 @@ func tabBarController(_ viewState: SplitViewState) -> ViewControllerConvertible 
 				}
 			)
 		]
-	)
-}
-
-private func aboutTabScrollContainer() -> ViewConvertible {
-	return View(
-		.backgroundColor -- .white,
-		.layout -- .fill(
-			ScrollView(
-				.alwaysBounceVertical -- true,
-				.contentInsetAdjustmentBehavior -- .never,
-				.layout -- .vertical(
-					marginEdges: .none,
-					.view(
-						length: .equalTo(ratio: 1, priority: .userMid),
-						breadth: .equalTo(ratio: 1),
-						aboutTabContent()
-					)
-				)
-			)
-		)
-	)
-}
-
-private func aboutTabContent() -> ViewConvertible {
-	return View(
-		.layoutMargins -- UIEdgeInsets(top: 20, left: 30, bottom: 20, right: 30),
-		.layout -- .vertical(
-			align: .leading,
-			marginEdges: .allLayout,
-			.view(
-				Label(
-					.text -- .aboutTitle,
-					.font -- .preferredFont(forTextStyle: .title1)
-				)
-			),
-			.space(24),
-			.view(
-				Label(
-					.numberOfLines -- 0,
-					.text -- .bodyText,
-					.font -- .preferredFont(forTextStyle: .body)
-				)
-			),
-			.space(.fillRemaining)
-		)
 	)
 }
 

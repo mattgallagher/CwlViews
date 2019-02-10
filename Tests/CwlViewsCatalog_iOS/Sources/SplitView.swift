@@ -20,11 +20,11 @@ struct SplitViewState: CodableContainer {
 	}
 }
 
-func splitViewController(_ viewState: SplitViewState) -> ViewControllerConvertible {
+func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 	return SplitViewController(
 		.preferredDisplayMode -- .allVisible,
 		.displayModeButton --> viewState.splitButtonVar,
-		.primaryViewController -- tabBarController(viewState),
+		.primaryViewController -- tabbedView(viewState),
 		.secondaryViewController -- NavigationController(
 			.stack <-- viewState.rowSelection.map { [split = viewState.splitButtonVar] selection in
 				let navigationItem = NavigationItem(
@@ -34,17 +34,17 @@ func splitViewController(_ viewState: SplitViewState) -> ViewControllerConvertib
 				switch selection {
 				case nil: return ViewController(.view -- View(.backgroundColor -- .white))
 				case .alert(let state)?: return alertView(state, navigationItem)
-				case .barButton(let state)?: return alertView(state, navigationItem)
-				case .button(let state)?: return alertView(state, navigationItem)
-				case .control(let state)?: return alertView(state, navigationItem)
-				case .gestureRecognizer(let state)?: return alertView(state, navigationItem)
-				case .imageView(let state)?: return alertView(state, navigationItem)
-				case .navigationBar(let state)?: return alertView(state, navigationItem)
-				case .pageViewController(let state)?: return alertView(state, navigationItem)
-				case .searchBar(let state)?: return alertView(state, navigationItem)
-				case .slider(let state)?: return alertView(state, navigationItem)
-				case .switch(let state)?: return alertView(state, navigationItem)
-				case .textField(let state)?: return alertView(state, navigationItem)
+				case .barButton(let state)?: return barButtonView(state, navigationItem)
+				case .button(let state)?: return buttonView(state, navigationItem)
+				case .control(let state)?: return controlView(state, navigationItem)
+				case .gestureRecognizer(let state)?: return gestureRecognizerView(state, navigationItem)
+				case .imageView(let state)?: return imageView(state, navigationItem)
+				case .navigationBar(let state)?: return navigationBarView(state, navigationItem)
+				case .pageViewController(let state)?: return pageView(state, navigationItem)
+				case .searchBar(let state)?: return searchBarView(state, navigationItem)
+				case .slider(let state)?: return sliderView(state, navigationItem)
+				case .switch(let state)?: return switchView(state, navigationItem)
+				case .textField(let state)?: return textFieldView(state, navigationItem)
 				}
 			}.map { .reload([$0]) }
 		),

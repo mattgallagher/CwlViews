@@ -150,10 +150,10 @@ public struct Layout {
 	}
 	
 	/// A convenience constructor for a vertical layout
-	public static func fill(axis: Layout.Axis = .vertical, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, _ view: ViewConvertible) -> Layout {
+	public static func fill(axis: Layout.Axis = .vertical, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ view: ViewConvertible) -> Layout {
 		switch axis {
-		case .horizontal: return .horizontal(align: align, marginEdges: marginEdges, animate: animate, .view(view))
-		case .vertical: return .vertical(align: align, marginEdges: marginEdges, animate: animate, .view(view))
+		case .horizontal: return .horizontal(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relative: relative, view))
+		case .vertical: return .vertical(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relative: relative, view))
 		}
 	}
 	

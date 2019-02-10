@@ -28,7 +28,7 @@ private let viewVar = Var(SplitViewState())
 applicationMain {
 	Application(
 		.window -- Window(
-			.rootViewController <-- viewVar.map { viewState in splitViewController(viewState) }
+			.rootViewController <-- viewVar.map { viewState in splitView(viewState) }
 		),
 		.willEncodeRestorableState -- viewVar.storeToArchive(),
 		.didDecodeRestorableState -- viewVar.loadFromArchive()

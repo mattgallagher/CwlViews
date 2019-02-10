@@ -33,7 +33,7 @@ public extension BarButtonItem {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case barButtonSystemItem(Constant<UIBarButtonItem.SystemItem>)
+		case systemItem(Constant<UIBarButtonItem.SystemItem>)
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case backButtonBackgroundImage(Dynamic<ScopedValues<StateAndMetrics, UIImage?>>)
@@ -102,7 +102,7 @@ public extension BarButtonItem.Preparer {
 		case .inheritedBinding(.title(let x)): title = x.initialSubsequent()
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .barButtonSystemItem(let x): systemItem = x.value
+		case .systemItem(let x): systemItem = x.value
 		case .customView(let x): customView = x.initialSubsequent()
 		case .itemStyle(let x): itemStyle = x.initialSubsequent()
 		default: break
@@ -117,7 +117,7 @@ public extension BarButtonItem.Preparer {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case .barButtonSystemItem: return nil
+		case .systemItem: return nil
 			
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case .backButtonBackgroundImage(let x):
@@ -185,7 +185,7 @@ public extension BindingName where Binding: BarButtonItemBinding {
 	// With:    static var $1: BarButtonItemName<$2> { return .name(B.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var barButtonSystemItem: BarButtonItemName<Constant<UIBarButtonItem.SystemItem>> { return .name(B.barButtonSystemItem) }
+	static var systemItem: BarButtonItemName<Constant<UIBarButtonItem.SystemItem>> { return .name(B.systemItem) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
 	static var backButtonBackgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> { return .name(B.backButtonBackgroundImage) }

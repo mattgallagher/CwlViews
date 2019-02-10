@@ -24,14 +24,19 @@ func alertView(_ alertState: AlertViewState, _ navigationItem: NavigationItem) -
 			.backgroundColor -- .white,
 			.layout -- .center(
 				.view(Label(.text <-- alertState.lastSelectedValue)),
+				.space(),
 				.view(Button(
 					.title -- .normal(.trigger),
 					.titleColor -- .normal(.orange),
-					.action(.primaryActionTriggered) --> Input().map { _ in () }.bind(to: alertState.showAlert)
+					.action(.primaryActionTriggered) --> Input()
+						.map { _ in () }
+						.bind(to: alertState.showAlert)
 				))
 			)
 		),
-		.present <-- alertState.showAlert.filter { $0 }.map { _ in ModalPresentation(alert(alertState)) }
+		.present <-- alertState.showAlert
+			.filter { $0 }
+			.map { _ in ModalPresentation(alert(alertState)) }
 	)
 }
 

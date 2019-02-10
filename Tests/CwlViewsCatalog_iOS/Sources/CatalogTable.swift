@@ -23,21 +23,20 @@ enum CatalogName: String, Codable, CaseIterable, CodingKey {
 	case textField = "TextField"
 }
 
-enum CatalogViewState {
+enum CatalogViewState: CodableContainer {
 	case alert(AlertViewState)
-	case barButton(AlertViewState)
-	case button(AlertViewState)
-	case control(AlertViewState)
-	case gestureRecognizer(AlertViewState)
-	case imageView(AlertViewState)
-	case navigationBar(AlertViewState)
-	case pageViewController(AlertViewState)
-	case searchBar(AlertViewState)
-	case slider(AlertViewState)
-	case `switch`(AlertViewState)
-	case textField(AlertViewState)
+	case barButton(BarButtonViewState)
+	case button(ButtonViewState)
+	case control(ControlViewState)
+	case gestureRecognizer(GestureRecognizerViewState)
+	case imageView(ImageViewState)
+	case navigationBar(NavigationBarViewState)
+	case pageViewController(PageViewState)
+	case searchBar(SearchBarViewState)
+	case slider(SliderViewState)
+	case `switch`(SwitchViewState)
+	case textField(TextFieldViewState)
 }
-
 
 func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
 	return ViewController(
@@ -61,22 +60,22 @@ extension CatalogName {
 	var viewState: CatalogViewState {
 		switch self {
 		case .alert: return .alert(AlertViewState())
-		case .barButton: return .barButton(AlertViewState())
-		case .button: return .button(AlertViewState())
-		case .control: return .control(AlertViewState())
-		case .gestureRecognizer: return .gestureRecognizer(AlertViewState())
-		case .imageView: return .imageView(AlertViewState())
-		case .navigationBar: return .navigationBar(AlertViewState())
-		case .pageViewController: return .pageViewController(AlertViewState())
-		case .searchBar: return .searchBar(AlertViewState())
-		case .slider: return .slider(AlertViewState())
-		case .switch: return .switch(AlertViewState())
-		case .textField: return .textField(AlertViewState())
+		case .barButton: return .barButton(BarButtonViewState())
+		case .button: return .button(ButtonViewState())
+		case .control: return .control(ControlViewState())
+		case .gestureRecognizer: return .gestureRecognizer(GestureRecognizerViewState())
+		case .imageView: return .imageView(ImageViewState())
+		case .navigationBar: return .navigationBar(NavigationBarViewState())
+		case .pageViewController: return .pageViewController(PageViewState())
+		case .searchBar: return .searchBar(SearchBarViewState())
+		case .slider: return .slider(SliderViewState())
+		case .switch: return .switch(SwitchViewState())
+		case .textField: return .textField(TextFieldViewState())
 		}
 	}
 }
 
-extension CatalogViewState: CodableContainer {
+extension CatalogViewState {
 	var name: CatalogName {
 		switch self {
 		case .alert: return .alert
@@ -99,17 +98,17 @@ extension CatalogViewState: CodableContainer {
 		let name = try c.decode(CatalogName.self)
 		switch name {
 		case .alert: self = .alert(try c.decode(AlertViewState.self))
-		case .barButton: self = .barButton(try c.decode(AlertViewState.self))
-		case .button: self = .button(try c.decode(AlertViewState.self))
-		case .control: self = .control(try c.decode(AlertViewState.self))
-		case .gestureRecognizer: self = .gestureRecognizer(try c.decode(AlertViewState.self))
-		case .imageView: self = .imageView(try c.decode(AlertViewState.self))
-		case .navigationBar: self = .navigationBar(try c.decode(AlertViewState.self))
-		case .pageViewController: self = .pageViewController(try c.decode(AlertViewState.self))
-		case .searchBar: self = .searchBar(try c.decode(AlertViewState.self))
-		case .slider: self = .slider(try c.decode(AlertViewState.self))
-		case .switch: self = .switch(try c.decode(AlertViewState.self))
-		case .textField: self = .textField(try c.decode(AlertViewState.self))
+		case .barButton: self = .barButton(try c.decode(BarButtonViewState.self))
+		case .button: self = .button(try c.decode(ButtonViewState.self))
+		case .control: self = .control(try c.decode(ControlViewState.self))
+		case .gestureRecognizer: self = .gestureRecognizer(try c.decode(GestureRecognizerViewState.self))
+		case .imageView: self = .imageView(try c.decode(ImageViewState.self))
+		case .navigationBar: self = .navigationBar(try c.decode(NavigationBarViewState.self))
+		case .pageViewController: self = .pageViewController(try c.decode(PageViewState.self))
+		case .searchBar: self = .searchBar(try c.decode(SearchBarViewState.self))
+		case .slider: self = .slider(try c.decode(SliderViewState.self))
+		case .switch: self = .switch(try c.decode(SwitchViewState.self))
+		case .textField: self = .textField(try c.decode(TextFieldViewState.self))
 		}
 	}
 	

@@ -72,29 +72,29 @@ public struct MarginEdges: OptionSet {
 }
 
 #if os(macOS)
-	extension NSView {
+	public extension NSView {
 		/// Adds the views contained by `layout` in the arrangment described by the layout to `self`.
 		///
 		/// - Parameter layout: a set of views and layout descriptions
-		public func applyLayout(_ layout: Layout?) {
+		func applyLayout(_ layout: Layout?) {
 			applyLayoutToView(view: self, params: layout.map { (layout: $0, bounds: Layout.Bounds(view: self, marginEdges: .none)) })
 		}
 	}
 #else
-	extension UIView {
+	public extension UIView {
 		/// Adds the views contained by `layout` in the arrangment described by the layout to `self`.
 		///
 		/// - Parameter layout: a set of views and layout descriptions
-		public func applyLayout(_ layout: Layout?) {
+		func applyLayout(_ layout: Layout?) {
 			applyLayoutToView(view: self, params: layout.map { (layout: $0, bounds: Layout.Bounds(view: self, marginEdges: $0.marginEdges)) })
 		}
 	}
 	
-	extension UIScrollView {
+	public extension UIScrollView {
 		/// Adds the views contained by `layout` in the arrangment described by the layout to `self`.
 		///
 		/// - Parameter layout: a set of views and layout descriptions
-		public func applyContentLayout(_ layout: Layout?) {
+		func applyContentLayout(_ layout: Layout?) {
 			applyLayoutToView(view: self, params: layout.map { (layout: $0, bounds: Layout.Bounds(scrollView: self)) })
 		}
 	}
@@ -116,22 +116,22 @@ public struct Layout {
 	#endif
 	
 	/// Layout is either horizontal or vertical (although any element within the layout may be a layout in the perpendicular direction)
-	public let axis: Axis
+	let axis: Axis
 	
 	/// Within the horizontal row or vertical column, layout entities may fill, center or align-leading or align-trailing
-	public let align: Alignment
+	let align: Alignment
 	
 	/// The layout may extend to the view bounds or may be limited by the safeAreaMargins or layoutMargins. The safeArea insets supercede the layoutMargins (prior to iOS 11, safeArea is interpreted as UIViewController top/bottom layout guides when laying out within a UIViewController, otherwise it is treated as a synonym for the layoutMargins). This value has no effect on macOS.	
-	public let marginEdges: MarginEdges
+	let marginEdges: MarginEdges
 	
 	/// When applied to the top level `Layout` passed to 'applyLayout`, then replacing an existing layout on a view, if this variable is true, after applying the new layout, `layoutIfNeeded` will be called inside a `UIView.beginAnimations`/`UIView.endAnimations` block. Has no effect when set on a child `Layout`.
-	public let animate: AnimationChoice
+	let animate: AnimationChoice
 	
 	/// This is the list of views, spaces and sublayouts that will be layed out.
-	public var entities: [Entity]
+	var entities: [Entity]
 	
 	/// The default constructor assigns all values. In general, it's easier to use the `.horizontal` or `.vertical` constructor where possible.
-	public init(axis: Axis, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, entities: [Entity]) {
+	init(axis: Axis, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, entities: [Entity]) {
 		self.axis = axis
 		self.align = align
 		self.entities = entities
@@ -141,12 +141,44 @@ public struct Layout {
 	
 	/// A convenience constructor for a horizontal layout
 	public static func horizontal(align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, _ entities: Entity...) -> Layout {
+		return .horizontal(align: align, marginEdges: marginEdges, animate: animate, entities: entities)
+	}
+	public static func horizontal(align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, entities: [Entity]) -> Layout {
 		return Layout(axis: .horizontal, align: align, marginEdges: marginEdges, animate: animate, entities: entities)
 	}
 	
 	/// A convenience constructor for a vertical layout
 	public static func vertical(align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, _ entities: Entity...) -> Layout {
+		return .vertical(align: align, marginEdges: marginEdges, animate: animate, entities: entities)
+	}
+	public static func vertical(align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, entities: [Entity]) -> Layout {
 		return Layout(axis: .vertical, align: align, marginEdges: marginEdges, animate: animate, entities: entities)
+	}
+	
+	/// A convenience constructor for a nested pair of layouts that combine to form a single centered arrangment
+	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Layout {
+		return .center(axis: axis, alignment: alignment, marginEdges: marginEdges, animate: animate, length: length, breadth: breadth, relative: relative, entities: entities)
+	}
+	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, entities: [Entity]) -> Layout {
+		switch axis {
+		case .vertical:
+			let v = Entity.sublayout(axis: .vertical, align: alignment, length: length, breadth: breadth, relative: relative, entities: entities)
+			let matched = Entity.matchedPair(
+				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
+				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
+				separator: v
+			)
+			return Layout(axis: .vertical, align: .center, marginEdges: marginEdges, animate: animate, entities: [matched])
+		case .horizontal:
+			let h = Entity.sublayout(axis: .horizontal, align: alignment, length: length, breadth: breadth, relative: relative, entities: entities)
+			let matched = Entity.matchedPair(
+				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
+				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
+				separator: h
+			)
+			return Layout(axis: .horizontal, align: .center, marginEdges: marginEdges, animate: animate, entities: [matched])
+		@unknown default: fatalError()
+		}
 	}
 	
 	/// A convenience constructor for a vertical layout
@@ -158,21 +190,8 @@ public struct Layout {
 		}
 	}
 	
-	/// A convenience constructor for a vertical layout
-	public static func center(axis: Layout.Axis = .vertical, horizontalAlignment: Alignment = .center, verticalAlignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Layout {
-		switch axis {
-		case .vertical:
-			let v = Entity.sublayout(axis: .vertical, align: verticalAlignment, length: length, breadth: breadth, relative: relative, entities)
-			return Layout(axis: .horizontal, align: horizontalAlignment, marginEdges: marginEdges, animate: animate, entities: [v])
-		case .horizontal:
-			let h = Entity.sublayout(axis: .horizontal, align: horizontalAlignment, length: length, breadth: breadth, relative: relative, entities)
-			return Layout(axis: .vertical, align: verticalAlignment, marginEdges: marginEdges, animate: animate, entities: [h])
-		@unknown default: fatalError()
-		}
-	}
-	
 	// Used for removing all views from their superviews
-	fileprivate func forEachView(_ visit: (View) -> Void) {
+	func forEachView(_ visit: (View) -> Void) {
 		entities.forEach { $0.forEachView(visit) }
 	}
 
@@ -184,18 +203,18 @@ public struct Layout {
 	/// - layout: a nested layout which may be parallel or perpedicular to its container and whose size may be specified (like view)
 	/// - matched: a sequence of alternating "same size" and independent entities (you can use `.space(0)` if you don't want independent entities).
 	public struct Entity {
-		public enum Content {
+		enum Content {
 			case space(Dimension)
 			case sizedView(Layout.View, Size?)
 			indirect case layout(Layout, size: Size?)
 			indirect case matched(Matched)
 		}
-		public let content: Content
-		public init(_ content: Content) {
+		let content: Content
+		init(_ content: Content) {
 			self.content = content
 		}
 		
-		fileprivate func forEachView(_ visit: (Layout.View) -> Void) {
+		func forEachView(_ visit: (Layout.View) -> Void) {
 			switch content {
 			case .sizedView(let v, _):
 				#if os(macOS)
@@ -229,7 +248,12 @@ public struct Layout {
 			#endif
 		}
 
-		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: [Entity]) -> Entity {
+		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Entity {
+			let size = Size(length: length, breadth: breadth, relative: relative)
+			return Entity(.layout(Layout(axis: axis, align: align, marginEdges: .none, entities: entities), size: size))
+		}
+		
+		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, entities: [Entity]) -> Entity {
 			let size = Size(length: length, breadth: breadth, relative: relative)
 			return Entity(.layout(Layout(axis: axis, align: align, marginEdges: .none, entities: entities), size: size))
 		}
@@ -239,7 +263,17 @@ public struct Layout {
 			return Entity(.layout(Layout(axis: .horizontal, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
+		public static func horizontal(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: [Entity]) -> Entity {
+			let size = Size(length: length, breadth: breadth, relative: relative)
+			return Entity(.layout(Layout(axis: .horizontal, align: align, marginEdges: .none, entities: entities), size: size))
+		}
+		
 		public static func vertical(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Entity {
+			let size = Size(length: length, breadth: breadth, relative: relative)
+			return Entity(.layout(Layout(axis: .vertical, align: align, marginEdges: .none, entities: entities), size: size))
+		}
+		
+		public static func vertical(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, entities: [Entity]) -> Entity {
 			let size = Size(length: length, breadth: breadth, relative: relative)
 			return Entity(.layout(Layout(axis: .vertical, align: align, marginEdges: .none, entities: entities), size: size))
 		}
@@ -254,7 +288,11 @@ public struct Layout {
 			)))
 		}
 		
-		public static func matched(_ first: Entity, _ subsequent: [Matched.Element]) -> Entity {
+		public static func matched(_ first: Entity, _ subsequent: Matched.Element...) -> Entity {
+			return Entity(.matched(.init(first: first, subsequent: subsequent)))
+		}
+
+		public static func matched(_ first: Entity, subsequent: [Matched.Element]) -> Entity {
 			return Entity(.matched(.init(first: first, subsequent: subsequent)))
 		}
 	}
@@ -347,7 +385,7 @@ public struct Layout {
 			return equalTo(ratio: 1, priority: .userMid)
 		}
 		
-		fileprivate func scaledConstraintBetween(first: NSLayoutDimension, second: NSLayoutDimension, constraints: inout [NSLayoutConstraint]) {
+		func scaledConstraintBetween(first: NSLayoutDimension, second: NSLayoutDimension, constraints: inout [NSLayoutConstraint]) {
 			let constraint: NSLayoutConstraint
 			switch relationship {
 			case .equal: constraint = first.constraint(equalTo: second, multiplier: ratio, constant: constant)
@@ -355,12 +393,12 @@ public struct Layout {
 			case .greaterThanOrEqual: constraint = first.constraint(greaterThanOrEqualTo: second, multiplier: ratio, constant: constant)
 			@unknown default: fatalError()
 			}
-			constraint.priority = priority
+			constraint.priority = adjustedPriority(priority, count: constraints.count)
 			constraints.append(constraint)
 			constraint.isActive = true
 		}
 		
-		fileprivate func unscaledConstraintBetween<AnchorType>(first: NSLayoutAnchor<AnchorType>, second: NSLayoutAnchor<AnchorType>, constraints: inout [NSLayoutConstraint], reverse: Bool = false) {
+		func unscaledConstraintBetween<AnchorType>(first: NSLayoutAnchor<AnchorType>, second: NSLayoutAnchor<AnchorType>, constraints: inout [NSLayoutConstraint], reverse: Bool = false) {
 			let constraint: NSLayoutConstraint
 			switch (relationship, reverse) {
 			case (.equal, _): constraint = first.constraint(equalTo: second, constant: reverse ? -constant: constant)
@@ -368,7 +406,7 @@ public struct Layout {
 			case (.greaterThanOrEqual, false), (.lessThanOrEqual, true): constraint = first.constraint(greaterThanOrEqualTo: second, constant: reverse ? -constant: constant)
 			@unknown default: fatalError()
 			}
-			constraint.priority = priority
+			constraint.priority = adjustedPriority(priority, count: constraints.count)
 			constraints.append(constraint)
 			constraint.isActive = true
 		}
@@ -385,7 +423,7 @@ public struct Layout {
 		var centerX: NSLayoutXAxisAnchor
 		var centerY: NSLayoutYAxisAnchor
 		
-		fileprivate init(box: Layout.Box) {
+		init(box: Layout.Box) {
 			leading = box.leadingAnchor
 			top = box.topAnchor
 			trailing = box.trailingAnchor
@@ -397,7 +435,7 @@ public struct Layout {
 		}
 		
 		#if os(iOS)
-			fileprivate init(scrollView: UIScrollView) {
+			init(scrollView: UIScrollView) {
 				leading = scrollView.contentLayoutGuide.leadingAnchor
 				top = scrollView.contentLayoutGuide.topAnchor
 				trailing = scrollView.contentLayoutGuide.trailingAnchor
@@ -408,7 +446,7 @@ public struct Layout {
 				centerY = scrollView.contentLayoutGuide.centerYAnchor
 			}
 			
-			fileprivate init(view: Layout.View, marginEdges: MarginEdges) {
+			init(view: Layout.View, marginEdges: MarginEdges) {
 				leading = marginEdges.contains(.leadingSafeArea) ? view.safeAreaLayoutGuide.leadingAnchor : (marginEdges.contains(.leadingLayout) ? view.layoutMarginsGuide.leadingAnchor : view.leadingAnchor)
 				top = marginEdges.contains(.topSafeArea) ? view.safeAreaLayoutGuide.topAnchor : (marginEdges.contains(.topLayout) ? view.layoutMarginsGuide.topAnchor : view.topAnchor)
 				trailing = marginEdges.contains(.trailingSafeArea) ? view.safeAreaLayoutGuide.trailingAnchor : (marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.trailingAnchor : view.trailingAnchor)
@@ -419,7 +457,7 @@ public struct Layout {
 				centerY = (marginEdges.contains(.leadingSafeArea) && marginEdges.contains(.trailingSafeArea)) ? view.safeAreaLayoutGuide.centerYAnchor : (marginEdges.contains(.leadingLayout) && marginEdges.contains(.trailingLayout) ? view.layoutMarginsGuide.centerYAnchor : view.centerYAnchor)
 			}
 		#else
-			fileprivate init(view: Layout.View, marginEdges: MarginEdges) {
+			init(view: Layout.View, marginEdges: MarginEdges) {
 				leading = view.leadingAnchor
 				top = view.topAnchor
 				trailing = view.trailingAnchor
@@ -432,7 +470,7 @@ public struct Layout {
 		#endif
 	}
 
-	fileprivate struct State {
+	private struct State {
 		let view: View
 		let storage: Storage
 		
@@ -457,7 +495,7 @@ public struct Layout {
 		}
 	}
 
-	fileprivate func twoPointConstraint<First, Second>(firstSource: NSLayoutAnchor<First>, firstTarget: NSLayoutAnchor<First>, secondSource: NSLayoutAnchor<Second>, secondTarget: NSLayoutAnchor<Second>, secondRelationLessThan: Bool? = nil, constraints: inout [NSLayoutConstraint]) {
+	private func twoPointConstraint<First, Second>(firstSource: NSLayoutAnchor<First>, firstTarget: NSLayoutAnchor<First>, secondSource: NSLayoutAnchor<Second>, secondTarget: NSLayoutAnchor<Second>, secondRelationLessThan: Bool? = nil, constraints: inout [NSLayoutConstraint]) {
 		let first = firstSource.constraint(equalTo: firstTarget)
 		first.priority = .required
 		first.isActive = true
@@ -472,18 +510,18 @@ public struct Layout {
 			secondHigh = secondSource.constraint(greaterThanOrEqualTo: secondTarget)
 		}
 		if let high = secondHigh {
-			secondLow.priority = .userLow
-			high.priority = .userHigh
+			secondLow.priority = adjustedPriority(.userLow, count: constraints.count)
+			high.priority = adjustedPriority(.userHigh, count: constraints.count + 1)
 			high.isActive = true
 			constraints.append(high)
 		} else {
-			secondLow.priority = .userHigh
+			secondLow.priority = adjustedPriority(.userHigh, count: constraints.count)
 		}
 		secondLow.isActive = true
 		constraints.append(secondLow)
 	}
 	
-	fileprivate func constrain(bounds: Bounds, leading: Dimension, length: Dimension?, breadth: Dimension?, relative: Bool, state: inout State) {
+	private func constrain(bounds: Bounds, leading: Dimension, length: Dimension?, breadth: Dimension?, relative: Bool, state: inout State) {
 		switch axis {
 		case .horizontal:
 			leading.unscaledConstraintBetween(first: bounds.leading, second: state.containerBounds.leading, constraints: &state.storage.constraints)
@@ -535,7 +573,7 @@ public struct Layout {
 	}
 	
 	@discardableResult
-	fileprivate func layout(entity: Entity, state: inout State, needDimensionAnchor: Bool = false) -> NSLayoutDimension? {
+	private func layout(entity: Entity, state: inout State, needDimensionAnchor: Bool = false) -> NSLayoutDimension? {
 		switch entity.content {
 		case .space(let dimension):
 			if let d = state.dimension, (d.ratio != 0 || d.constant != 0) {
@@ -550,9 +588,7 @@ public struct Layout {
 				state.view.addLayoutBox(box)
 				state.storage.boxes.append(box)
 				constrain(bounds: Bounds(box: box), leading: Dimension(), length: dimension, breadth: nil, relative: false, state: &state)
-				if !needDimensionAnchor {
-					state.previousEntityBounds = Bounds(box: box)
-				}
+				state.previousEntityBounds = Bounds(box: box)
 				return axis == .horizontal ? box.widthAnchor : box.heightAnchor
 			}
 			state.dimension = dimension
@@ -625,27 +661,27 @@ public struct Layout {
 // As of Xcode 8, the "Debug View Hierarchy" option does not show layout guides, making debugging of constraints involving layout guides tricky. To aid debugging in these cases, set the following condition to `true && DEBUG` and CwlLayout will create views instead of layout guides.
 // Otherwise, you can set this to `false && DEBUG`.
 #if true && DEBUG
-	extension Layout {
-		fileprivate typealias Box = Layout.View
+	private extension Layout {
+		typealias Box = Layout.View
 	}
-	extension Layout.View {
-		fileprivate func addLayoutBox(_ layoutBox: Layout.Box) {
+	private extension Layout.View {
+		func addLayoutBox(_ layoutBox: Layout.Box) {
 			layoutBox.translatesAutoresizingMaskIntoConstraints = false
 			self.addSubview(layoutBox)
 		}
-		fileprivate func removeLayoutBox(_ layoutBox: Layout.Box) {
+		func removeLayoutBox(_ layoutBox: Layout.Box) {
 			layoutBox.removeFromSuperview()
 		}
 	}
 #else
-	extension Layout {
-		fileprivate typealias Box = Layout.Guide
+	private extension Layout {
+		typealias Box = Layout.Guide
 	}
-	extension Layout.View {
-		fileprivate func addLayoutBox(_ layoutBox: Layout.Box) {
+	private extension Layout.View {
+		func addLayoutBox(_ layoutBox: Layout.Box) {
 			self.addLayoutGuide(layoutBox)
 		}
-		fileprivate func removeLayoutBox(_ layoutBox: Layout.Box) {
+		func removeLayoutBox(_ layoutBox: Layout.Box) {
 			self.removeLayoutGuide(layoutBox)
 		}
 	}
@@ -663,27 +699,27 @@ public struct Layout {
 // allows you to easily set layout priorities above, between or below the
 // intrinisic priorities without always resorting to `.required`.
 //
-extension Layout.Dimension.Priority {
+public extension Layout.Dimension.Priority {
 	#if os(macOS)
-		public static let userLow = NSLayoutConstraint.Priority(rawValue: 156.25)
-		public static let userMid = NSLayoutConstraint.Priority(rawValue: 437.5)
-		public static let userHigh = NSLayoutConstraint.Priority(rawValue: 843.75)
+		static let userLow = NSLayoutConstraint.Priority(rawValue: 156.25)
+		static let userMid = NSLayoutConstraint.Priority(rawValue: 437.5)
+		static let userHigh = NSLayoutConstraint.Priority(rawValue: 843.75)
 	#else
-		public static let userLow = UILayoutPriority(rawValue: 156.25)
-		public static let userMid = UILayoutPriority(rawValue: 437.5)
-		public static let userHigh = UILayoutPriority(rawValue: 843.75)
+		static let userLow = UILayoutPriority(rawValue: 156.25)
+		static let userMid = UILayoutPriority(rawValue: 437.5)
+		static let userHigh = UILayoutPriority(rawValue: 843.75)
 	#endif
 }
 
-fileprivate var associatedLayoutKey = NSObject()
-fileprivate func setLayout(_ newValue: Layout.Storage?, for object: Layout.View) {
+private var associatedLayoutKey = NSObject()
+private func setLayout(_ newValue: Layout.Storage?, for object: Layout.View) {
 	objc_setAssociatedObject(object, &associatedLayoutKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 }
-fileprivate func getLayout(for view: Layout.View) -> Layout.Storage? {
+private func getLayout(for view: Layout.View) -> Layout.Storage? {
 	return objc_getAssociatedObject(view, &associatedLayoutKey) as? Layout.Storage
 }
 
-fileprivate extension Layout.View {
+private extension Layout.View {
 	func remove(constraintsAndBoxes previousLayout: Layout.Storage?, subviews: Set<Layout.View>) {
 		guard let previous = previousLayout else { return }
 		for constraint in previous.constraints {
@@ -696,7 +732,13 @@ fileprivate extension Layout.View {
 	}
 }
 
-fileprivate func applyLayoutToView(view: Layout.View, params: (layout: Layout, bounds: Layout.Bounds)?) {
+// Applying a rolloing set of priorities reduces the chance of ambiguity. Later constraints will always take precedence.
+// NOTE: this does not eliminate ambiguity due to conflicting `.required` contraints or views with equal hugging or compression resistance.
+private func adjustedPriority(_ priority: Layout.Dimension.Priority, count: Int) -> Layout.Dimension.Priority {
+	return min(.required, priority + Float(count) + (1 / 128))
+}
+
+private func applyLayoutToView(view: Layout.View, params: (layout: Layout, bounds: Layout.Bounds)?) {
 	var removedViews = Set<Layout.View>()
 	
 	// Check for a previous layout and get the old views

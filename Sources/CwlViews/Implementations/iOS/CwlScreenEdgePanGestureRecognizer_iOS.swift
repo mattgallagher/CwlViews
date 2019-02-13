@@ -35,7 +35,7 @@ public extension ScreenEdgePanGestureRecognizer {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case screenEdge(Dynamic<UIRectEdge>)
+		case edges(Dynamic<UIRectEdge>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
@@ -70,7 +70,7 @@ public extension ScreenEdgePanGestureRecognizer.Preparer {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		case .screenEdge(let x): return x.apply(instance) { i, v in i.edges = v }
+		case .edges(let x): return x.apply(instance) { i, v in i.edges = v }
 			
 		// 2. Signal bindings are performed on the object after construction.
 			
@@ -102,7 +102,7 @@ public extension BindingName where Binding: ScreenEdgePanGestureRecognizerBindin
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var screenEdge: ScreenEdgePanGestureRecognizerName<Dynamic<UIRectEdge>> { return .name(B.screenEdge) }
+	static var edges: ScreenEdgePanGestureRecognizerName<Dynamic<UIRectEdge>> { return .name(B.edges) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

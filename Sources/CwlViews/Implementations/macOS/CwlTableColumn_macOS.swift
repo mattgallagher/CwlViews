@@ -88,11 +88,11 @@ public extension TableColumn {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension TableColumn.Preparer {
-	public func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
 		return type.init(identifier: parameters)
 	}
 	
-	public func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Storage {
+	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Storage {
 		return storage
 	}
 	

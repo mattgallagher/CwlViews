@@ -162,7 +162,7 @@ public extension Menu.Preparer {
 			return Signal.notifications(name: NSMenu.didEndTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .didSendAction(let x):
 			return Signal.notifications(name: NSMenu.didSendActionNotification, object: instance).compactMap { n -> Int? in
-				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.index(where: { i in i == menuItem }) {
+				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.firstIndex(where: { i in i == menuItem }) {
 					return index
 				}
 				return nil
@@ -171,7 +171,7 @@ public extension Menu.Preparer {
 		case .willOpen: return nil
 		case .willSendAction(let x):
 			return Signal.notifications(name: NSMenu.willSendActionNotification, object: instance).compactMap { n -> Int? in
-				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.index(of: menuItem) {
+				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.firstIndex(of: menuItem) {
 					return index
 				}
 				return nil

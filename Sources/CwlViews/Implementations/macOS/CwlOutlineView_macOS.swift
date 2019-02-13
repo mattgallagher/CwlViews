@@ -970,7 +970,7 @@ public extension OutlineViewConvertible {
 	func nsControl() -> Control.Instance { return nsOutlineView() }
 }
 public extension OutlineView {
-	public func nsOutlineView() -> NSOutlineView { return instance() }
+	func nsOutlineView() -> NSOutlineView { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols

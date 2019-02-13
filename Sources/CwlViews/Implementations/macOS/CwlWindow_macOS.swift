@@ -190,7 +190,7 @@ public extension Window {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension Window.Preparer {
-	public func constructInstance(type: NSWindow.Type, parameters: Void) -> NSWindow {
+	func constructInstance(type: NSWindow.Type, parameters: Void) -> NSWindow {
 		let width = contentWidth.initial ?? WindowSize(constant: Window.Preparer.defaultWindowSize.width)
 		let height = contentHeight.initial ?? WindowSize(constant: Window.Preparer.defaultWindowSize.height)
 		let screen = self.screen.initial ?? NSScreen.screens.first
@@ -638,7 +638,7 @@ extension NSWindow: WindowConvertible, DefaultConstructable, HasDelegate {
 	public func nsWindow() -> Window.Instance { return self }
 }
 public extension Window {
-	public func nsWindow() -> Window.Instance { return instance() }
+	func nsWindow() -> Window.Instance { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols

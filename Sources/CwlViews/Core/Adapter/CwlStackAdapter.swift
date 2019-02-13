@@ -94,7 +94,7 @@ extension Adapter {
 		return Signal<PathElement>.channel().map { State.Message.push($0) }.bind(to: input)
 	}
 	
-	public func poppedToCount<PathElement>() -> SignalInput<Int> where State.Message == StackMutation<PathElement> {
+	public func popToCount<PathElement>() -> SignalInput<Int> where State.Message == StackMutation<PathElement> {
 		return Signal<Int>.channel().map { State.Message.popToCount($0) }.bind(to: input)
 	}
 }

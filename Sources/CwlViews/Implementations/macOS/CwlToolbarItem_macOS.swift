@@ -189,7 +189,7 @@ extension NSToolbarItem: ToolbarItemConvertible, TargetActionSender {
 	public func nsToolbarItem() -> ToolbarItem.Instance { return self }
 }
 public extension ToolbarItem {
-	public func nsToolbarItem() -> ToolbarItem.Instance { return instance() }
+	func nsToolbarItem() -> ToolbarItem.Instance { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols

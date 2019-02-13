@@ -192,7 +192,7 @@ extension NSGestureRecognizer: GestureRecognizerConvertible, TargetActionSender,
 	public func nsGestureRecognizer() -> GestureRecognizer.Instance { return self }
 }
 public extension GestureRecognizer {
-	public func nsGestureRecognizer() -> GestureRecognizer.Instance { return instance() }
+	func nsGestureRecognizer() -> GestureRecognizer.Instance { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols

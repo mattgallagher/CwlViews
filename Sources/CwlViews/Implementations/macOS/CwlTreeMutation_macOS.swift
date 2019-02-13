@@ -68,8 +68,8 @@ public struct TreePath<NodeData>: Hashable {
 	public init(indexes: [NodeIndex]) {
 		self.indexes = indexes
 	}
-	public var hashValue: Int {
-		return indexes.reduce(0) { (state, value) in state ^ value.index.hashValue }
+	public func hash(into hasher: inout Hasher) {
+		indexes.forEach { value in hasher.combine(value.index) }
 	}
 	public static func ==(lhs: TreePath<NodeData>, rhs: TreePath<NodeData>) -> Bool {
 		if lhs.indexes.count != rhs.indexes.count {

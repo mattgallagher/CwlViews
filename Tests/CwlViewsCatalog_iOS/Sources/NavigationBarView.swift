@@ -1,5 +1,5 @@
 //
-//  NavigationBarView.swift
+//  NavigationView.swift
 //  CwlViews
 //
 //  Created by Matt Gallagher on 10/2/19.
@@ -9,18 +9,51 @@
 import CwlViews
 
 struct NavigationBarViewState: CodableContainer {
+	let stack: StackAdapter<Int>
 	init() {
+		stack = StackAdapter([0])
 	}
 }
 
-func navigationBarView(_ navigationBarViewState: NavigationBarViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
+func navigationView(_ navigationViewState: NavigationBarViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
 	return ViewController(
 		.navigationItem -- navigationItem,
 		.view -- View(
 			.backgroundColor -- .white,
-			.layout -- .center(
-				.view(Label(.text -- CatalogName.navigationBar.rawValue))
+			.layout -- .horizontal(
+				align: .center,
+				.view(
+					NavigationBar(
+						.items <-- navigationViewState.stack.stackMap { value -> NavigationItemConvertible in
+							NavigationItem(
+								.title -- .localizedStringWithFormat(.item, value),
+								.leftBarButtonItems -- value != 0 ? [
+									BarButtonItem(
+										.title -- .button1,
+										.action --> Input()
+											.map { _ in StackMutation<Int>.pop }
+											.bind(to: navigationViewState.stack)
+									)
+								] : [],
+								.rightBarButtonItems -- [
+									BarButtonItem(
+										.title -- .button2,
+										.action --> Input()
+											.map { _ in StackMutation<Int>.push(value + 1) }
+											.bind(to: navigationViewState.stack)
+									)
+								]
+							)
+						}
+					)
+				)
 			)
 		)
 	)
+}
+
+private extension String {
+	static let button1 = NSLocalizedString("Pop", comment: "")
+	static let button2 = NSLocalizedString("Push", comment: "")
+	static let item = NSLocalizedString("Item %ld", comment: "")
 }

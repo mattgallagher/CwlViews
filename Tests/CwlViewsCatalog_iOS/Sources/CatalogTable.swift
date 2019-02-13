@@ -8,7 +8,7 @@
 
 import CwlViews
 
-enum CatalogName: String, Codable, CaseIterable, CodingKey {
+enum CatalogName: String, Codable, CaseIterable {
 	case alert = "Alert"
 	case barButton = "BarButton"
 	case button = "Button"
@@ -51,8 +51,7 @@ func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
 			},
 			.didSelectRow --> Input().keyPath(\.data?.viewState).bind(to: viewState.rowSelection),
 			.selectRow <-- viewState.rowSelection.compactMap { $0 == nil ? .animate(nil) : nil }
-		),
-		.didAppear --> Input().map { _ in nil }.bind(to: viewState.rowSelection)
+		)
 	)
 }
 

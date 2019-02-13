@@ -33,6 +33,7 @@ public extension SplitViewController {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case backgroundView(Constant<View>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case maximumPrimaryColumnWidth(Dynamic<CGFloat>)
@@ -124,6 +125,9 @@ public extension SplitViewController.Preparer {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 
 		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .backgroundView(let v):
+			v.value.apply(to: instance.view)
+			return nil
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .maximumPrimaryColumnWidth(let x): return x.apply(instance) { i, v in i.maximumPrimaryColumnWidth = v }
@@ -269,6 +273,7 @@ public extension BindingName where Binding: SplitViewControllerBinding {
 	// With:    static var $1: SplitViewControllerName<$2> { return .name(B.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var backgroundView: SplitViewControllerName<Constant<View>> { return .name(B.backgroundView) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	static var maximumPrimaryColumnWidth: SplitViewControllerName<Dynamic<CGFloat>> { return .name(B.maximumPrimaryColumnWidth) }

@@ -718,7 +718,7 @@ public extension TableViewConvertible {
 	func nsControl() -> Control.Instance { return nsTableView() }
 }
 public extension TableView {
-	public func nsTableView() -> NSTableView { return instance() }
+	func nsTableView() -> NSTableView { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols

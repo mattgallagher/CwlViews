@@ -22,6 +22,7 @@ struct SplitViewState: CodableContainer {
 
 func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 	return SplitViewController(
+		.backgroundView -- View(.backgroundColor -- .orange),
 		.preferredDisplayMode -- .allVisible,
 		.displayModeButton --> viewState.splitButtonVar,
 		.primaryViewController -- tabbedView(viewState),
@@ -39,7 +40,7 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 				case .control(let state)?: return controlView(state, navigationItem)
 				case .gestureRecognizer(let state)?: return gestureRecognizerView(state, navigationItem)
 				case .imageView(let state)?: return imageView(state, navigationItem)
-				case .navigationBar(let state)?: return navigationBarView(state, navigationItem)
+				case .navigationBar(let state)?: return navigationView(state, navigationItem)
 				case .pageViewController(let state)?: return pageView(state, navigationItem)
 				case .searchBar(let state)?: return searchBarView(state, navigationItem)
 				case .slider(let state)?: return sliderView(state, navigationItem)
@@ -48,6 +49,7 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 				}
 			}.map { .reload([$0]) }
 		),
-		.shouldShowSecondary <-- viewState.rowSelection.map { $0 != nil }
+		.shouldShowSecondary <-- viewState.rowSelection.map { $0 != nil },
+		.dismissedSecondary --> Input().map { _ in nil }.bind(to: viewState.rowSelection)
 	)
 }

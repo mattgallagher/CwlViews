@@ -40,10 +40,11 @@ func layoutWithAnimation(_ buttonViewState: ButtonViewState) -> Signal<Layout> {
 	return buttonViewState.showChild.map { show -> Layout in
 		.vertical(
 			align: .center,
+			marginEdges: .allLayout,
 			.space(24),
 			.view(button),
 			.space(),
-			.view(length: show ? .fillRemaining : 8, breadth: .equalTo(ratio: 0.8), childView),
+			.view(length: show ? .fillRemaining : 8, breadth: .equalTo(ratio: 1.0), childView),
 			.space(show ? 24 : .fillRemaining)
 		)
 	}

@@ -209,7 +209,7 @@ extension NSToolbar: ToolbarConvertible, DefaultConstructable, HasDelegate {
 	public func nsToolbar() -> Toolbar.Instance { return self }
 }
 public extension Toolbar {
-	public func nsToolbar() -> Toolbar.Instance { return instance() }
+	func nsToolbar() -> Toolbar.Instance { return instance() }
 }
 
 // MARK: - Binder Part 8: Downcast protocols

@@ -41,7 +41,7 @@ public extension NavigationBar {
 		case barStyle(Dynamic<UIBarStyle>)
 		case barTintColor(Dynamic<UIColor?>)
 		case isTranslucent(Dynamic<Bool>)
-		case items(Dynamic<SetOrAnimate<[NavigationItemConvertible]>>)
+		case items(Dynamic<StackMutation<NavigationItemConvertible>>)
 		case shadowImage(Dynamic<UIImage?>)
 		case tintColor(Dynamic<UIColor?>)
 		case titleTextAttributes(Dynamic<[NSAttributedString.Key: Any]>)
@@ -113,7 +113,19 @@ public extension NavigationBar.Preparer {
 		case .barStyle(let x): return x.apply(instance) { i, v in i.barStyle = v }
 		case .barTintColor(let x): return x.apply(instance) { i, v in i.barTintColor = v }
 		case .isTranslucent(let x): return x.apply(instance) { i, v in i.isTranslucent = v }
-		case .items(let x): return x.apply(instance) { i, v in i.setItems(v.value.map { $0.uiNavigationItem() }, animated: v.isAnimated) }
+		case .items(let x):
+			return x.apply(instance, storage) { i, s, v in
+				switch v {
+				case .push(let e):
+					i.pushItem(e.uiNavigationItem(), animated: true)
+				case .pop:
+					i.popItem(animated: true)
+				case .popToCount(let c):
+					i.setItems(i.items?.dropLast((i.items?.count ?? 0) - c) ?? [], animated: true)
+				case .reload(let newStack):
+					i.setItems(newStack.map { $0.uiNavigationItem() }, animated: false)
+				}
+			}
 		case .shadowImage(let x): return x.apply(instance) { i, v in i.shadowImage = v }
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
 		case .titleTextAttributes(let x): return x.apply(instance) { i, v in i.titleTextAttributes = v }
@@ -187,7 +199,7 @@ public extension BindingName where Binding: NavigationBarBinding {
 	static var barStyle: NavigationBarName<Dynamic<UIBarStyle>> { return .name(B.barStyle) }
 	static var barTintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(B.barTintColor) }
 	static var isTranslucent: NavigationBarName<Dynamic<Bool>> { return .name(B.isTranslucent) }
-	static var items: NavigationBarName<Dynamic<SetOrAnimate<[NavigationItemConvertible]>>> { return .name(B.items) }
+	static var items: NavigationBarName<Dynamic<StackMutation<NavigationItemConvertible>>> { return .name(B.items) }
 	static var shadowImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.shadowImage) }
 	static var tintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(B.tintColor) }
 	static var titleTextAttributes: NavigationBarName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.titleTextAttributes) }

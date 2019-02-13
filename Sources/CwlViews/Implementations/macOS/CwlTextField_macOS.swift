@@ -35,7 +35,7 @@ public class TextField: Binder, TextFieldConvertible {
 	}
 
 	public convenience init(type: Instance.Type = Instance.self, labelStyled bindings: Binding...) {
-		self.init(type: type, bindings: TextField.defaultLabelBindings + bindings)
+		self.init(type: type, parameters: (), bindings: TextField.defaultLabelBindings + bindings)
 	}
 }
 

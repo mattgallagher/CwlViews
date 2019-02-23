@@ -61,7 +61,7 @@ public extension TableView {
 		case separatorInset(Dynamic<UIEdgeInsets>)
 		case separatorInsetReference(Dynamic<UITableView.SeparatorInsetReference>)
 		case separatorStyle(Dynamic<UITableViewCell.SeparatorStyle>)
-		case tableData(Dynamic<TableData<RowData>>)
+		case tableData(Dynamic<TableSectionMutation<RowData>>)
 		case tableFooterView(Dynamic<ViewConvertible?>)
 		case tableHeaderView(Dynamic<ViewConvertible?>)
 		
@@ -368,7 +368,7 @@ public extension TableView.Preparer {
 		case .shouldUpdateFocus: return nil
 		case .tableData(let x):
 			return x.apply(instance, storage) { i, s, v in
-				s.applyTableRowMutation(v, to: i)
+				s.applyRangeMutation(v, to: i)
 			}
 		case .targetIndexPathForMoveFromRow: return nil
 		case .titleForDeleteConfirmationButtonForRow: return nil
@@ -387,7 +387,7 @@ extension TableView.Preparer {
 	open class Storage: ScrollView.Preparer.Storage, UITableViewDelegate, UITableViewDataSource {
 		open override var isInUse: Bool { return true }
 		
-		open var sections = TableRowState<TableSectionState<RowData>>()
+		open var sections = TableSectionState<TableRowState<RowData>>()
 		open var indexTitles: [String]? = nil
 		open var scrollJunction: (SignalCapture<SetOrAnimate<(IndexPath, UITableView.ScrollPosition)>>, SignalInput<SetOrAnimate<(IndexPath, UITableView.ScrollPosition)>>)? = nil
 		open var cellIdentifier: (TableRow<RowData>) -> String?
@@ -415,13 +415,13 @@ extension TableView.Preparer {
 			let cellInput: SignalInput<RowData>?
 			if let i = identifier, let reusedView = tableView.dequeueReusableCell(withIdentifier: i) {
 				cellView = reusedView
-				cellInput = getSignalInput(for: reusedView, valueType: RowData.self)
+				cellInput = cellSignalInput(for: reusedView, valueType: RowData.self)
 			} else if let cc = cellConstructor {
 				let dataTuple = Signal<RowData>.channel().multicast()
 				let constructed = cc(identifier, dataTuple.signal).uiTableViewCell(reuseIdentifier: identifier)
 				cellView = constructed
 				cellInput = dataTuple.input
-				setSignalInput(for: constructed, to: dataTuple.input)
+				setCellSignalInput(for: constructed, to: dataTuple.input)
 			} else {
 				return dataMissingCell(indexPath).uiTableViewCell(reuseIdentifier: nil)
 			}
@@ -459,7 +459,7 @@ extension TableView.Preparer {
 			}
 		}
 		
-		open func applyTableRowMutation(_ v: TableRowMutation<TableSectionMutation<RowData>>, to i: UITableView) {
+		open func applyRangeMutation(_ v: RangeMutation<RowData, TableSectionMetadata>, to i: UITableView) {
 			v.apply(to: &sections)
 			
 			switch v.arrayMutation.kind {
@@ -494,7 +494,7 @@ extension TableView.Preparer {
 							guard let section = sections.rows.at(sectionIndex - sections.localOffset) else { continue }
 							for indexPath in mappedIndices {
 								guard let cell = i.cellForRow(at: indexPath), let value = section.rows.at(indexPath.row - section.rowState.localOffset) else { continue }
-								getSignalInput(for: cell, valueType: RowData.self)?.send(value: value)
+								cellSignalInput(for: cell, valueType: RowData.self)?.send(value: value)
 							}
 							notifyVisibleRowsChanged(in: i)
 						case .reload:
@@ -748,7 +748,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var separatorInset: TableViewName<Dynamic<UIEdgeInsets>> { return .name(B.separatorInset) }
 	static var separatorInsetReference: TableViewName<Dynamic<UITableView.SeparatorInsetReference>> { return .name(B.separatorInsetReference) }
 	static var separatorStyle: TableViewName<Dynamic<UITableViewCell.SeparatorStyle>> { return .name(B.separatorStyle) }
-	static var tableData: TableViewName<Dynamic<TableData<Binding.RowDataType>>> { return .name(B.tableData) }
+	static var tableData: TableViewName<Dynamic<TableSectionMutation<Binding.RowDataType>>> { return .name(B.tableData) }
 	static var tableFooterView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableFooterView) }
 	static var tableHeaderView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableHeaderView) }
 	
@@ -841,8 +841,6 @@ public extension TableView.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
-public typealias TableData<RowData> = TableRowMutation<TableSectionMutation<RowData>>
-
 public struct TableScrollPosition {
 	public let indexPath: IndexPath
 	public let position: UITableView.ScrollPosition

@@ -319,7 +319,7 @@ public extension TableView.Preparer {
 		case .nextTypeSelectMatch: return nil
 		case .pasteboardWriter: return nil
 		case .rowActionsForRow: return nil
-		case .rows(let x): return x.apply(instance, storage) { i, s, v in s.applyTableRowMutation(v, in: i) }
+		case .rows(let x): return x.apply(instance, storage) { i, s, v in s.applyRangeMutation(v, in: i) }
 		case .rowView: return nil
 		case .selectionIndexesForProposedSelection: return nil
 		case .selectionShouldChange: return nil
@@ -369,7 +369,7 @@ extension TableView.Preparer {
 		open override var isInUse: Bool { return true }
 
 		open var actionTarget: SignalDoubleActionTarget? = nil
-		open var rowState: TableRowState<RowData> = TableRowState<RowData>()
+		open var rowState: RangeMutationState<RowData> = RangeMutationState<RowData>()
 		open var visibleRows: IndexSet = []
 		open var visibleRowsSignalInput: SignalInput<CountableRange<Int>>? = nil
 		open var groupRowCellConstructor: ((Int) -> TableCellViewConvertible)?
@@ -433,7 +433,7 @@ extension TableView.Preparer {
 					let cellInput: SignalInput<RowData>?
 					if let reusedView = tableView.makeView(withIdentifier: identifier, owner: tableView), let downcast = reusedView as? NSTableCellView {
 						cellView = downcast
-						cellInput = getSignalInput(for: cellView, valueType: RowData.self)
+						cellInput = cellSignalInput(for: cellView, valueType: RowData.self)
 					} else if let cc = col.element.cellConstructor {
 						let dataTuple = Signal<RowData>.create()
 						let constructed = cc(identifier, dataTuple.signal.multicast()).nsTableCellView()
@@ -442,7 +442,7 @@ extension TableView.Preparer {
 						}
 						cellView = constructed
 						cellInput = dataTuple.input
-						setSignalInput(for: cellView, to: dataTuple.input)
+						setCellSignalInput(for: cellView, to: dataTuple.input)
 					} else {
 						return col.element.dataMissingCell?()?.nsTableCellView()
 					}
@@ -474,7 +474,7 @@ extension TableView.Preparer {
 			}
 		}
 
-		open func applyTableRowMutation(_ rowMutation: TableRowMutation<RowData>, in tableView: NSTableView) {
+		open func applyRangeMutation(_ rowMutation: TableRowMutation<RowData>, in tableView: NSTableView) {
 			rowMutation.apply(to: &rowState)
 			switch rowMutation.arrayMutation.kind {
 			case .delete:
@@ -493,7 +493,7 @@ extension TableView.Preparer {
 				for rowIndex in rowMutation.arrayMutation.indexSet {
 					for columnIndex in 0..<tableView.numberOfColumns {
 						guard let cell = tableView.view(atColumn: columnIndex, row: rowIndex, makeIfNecessary: false), let value = rowState.rows.at(rowIndex - rowState.localOffset) else { continue }
-						getSignalInput(for: cell, valueType: RowData.self)?.send(value: value)
+						cellSignalInput(for: cell, valueType: RowData.self)?.send(value: value)
 					}
 				}
 			case .reload:

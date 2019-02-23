@@ -19,95 +19,86 @@
 
 #if os(iOS)
 
-extension Sequence {
-	public func sectionMutation(header: String? = nil, footer: String? = nil) -> TableSectionMutation<Element> {
-		return rowMutation().sectionMutation(header: header, footer: footer)
-	}
-	public func tableData(header: String? = nil, footer: String? = nil) -> TableData<Element> {
-		return rowMutation().sectionMutation(header: header, footer: footer).tableData()
-	}
-}
-
 extension ArrayMutation {
-	public func sectionMutation(header: String? = nil, footer: String? = nil) -> TableSectionMutation<Value> {
-		return rowMutation().sectionMutation(header: header, footer: footer)
+	public func rowMutation(header: String? = nil, footer: String? = nil) -> TableRowMutation<Element> {
+		return rangeMutation(metadata: TableSectionMetadata(header: header, footer: footer))
 	}
 	
-	public func tableData(header: String? = nil, footer: String? = nil) -> TableData<Value> {
-		return rowMutation().sectionMutation(header: header, footer: footer).tableData()
+	public func tableData(header: String? = nil, footer: String? = nil) -> TableSectionMutation<Element> {
+		return rangeMutation().tableData(header: header, footer: footer)
 	}
 }
 
-extension TableRowMutation {
-	public func sectionMutation(header: String? = nil, footer: String? = nil) -> TableSectionMutation<Value> {
-		return TableSectionMutation(header: header, footer: footer, rowMutation: self)
+extension RangeMutation {
+	public func rowMutation(header: String? = nil, footer: String? = nil) -> TableRowMutation<Element> {
+		return TableRowMutation(metadata: TableSectionMetadata(header: header, footer: footer), rangeMutation: self)
 	}
 	
-	public func tableData(header: String? = nil, footer: String? = nil) -> TableData<Value> {
+	public func tableData(header: String? = nil, footer: String? = nil) -> TableSectionMutation<Element> {
 		return sectionMutation(header: header, footer: footer).tableData()
 	}
 }
 
 extension TableSectionMutation {
-	public func tableData() -> TableRowMutation<TableSectionMutation<Value>> {
-		return TableRowMutation(array: [self])
+	public func tableData() -> RangeMutation<TableSectionMutation<Element>> {
+		return RangeMutation(array: [self])
 	}
 }
 
-extension TableRowMutation {
-	public static func tableData<RowData>(sections: [TableSectionMutation<RowData>]) -> TableData<RowData> where TableSectionMutation<RowData> == Value {
-		return TableRowMutation(array: sections)
+extension RangeMutation {
+	public static func tableData<RowData>(sections: [TableSectionMutation<RowData>]) -> TableData<RowData> where TableSectionMutation<RowData> == Element {
+		return RangeMutation(array: sections)
 	}
 	
-	public static func tableDataFromSections<RowData>(_ sections: TableSectionMutation<RowData>...) -> TableData<RowData> where TableSectionMutation<RowData> == Value {
-		return TableRowMutation(array: sections)
+	public static func tableDataFromSections<RowData>(_ sections: TableSectionMutation<RowData>...) -> TableData<RowData> where TableSectionMutation<RowData> == Element {
+		return RangeMutation(array: sections)
 	}
 }
 
 extension SignalInterface {
-	public func arrayMutationToSectionMutation<Value>(header: String? = nil, footer: String? = nil) -> Signal<TableSectionMutation<Value>> where ArrayMutation<Value> == OutputValue {
-		return map(initialState: 0) { (globalCount: inout Int, arrayMutation: ArrayMutation<Value>) -> TableSectionMutation<Value> in
+	public func arrayMutationToSectionMutation<Element>(header: String? = nil, footer: String? = nil) -> Signal<TableSectionMutation<Element>> where ArrayMutation<Element> == OutputElement {
+		return map(initialState: 0) { (globalCount: inout Int, arrayMutation: ArrayMutation<Element>) -> TableSectionMutation<Element> in
 			arrayMutation.delta(&globalCount)
-			return TableSectionMutation(header: header, footer: footer, rowMutation: TableRowMutation(arrayMutation: arrayMutation, localOffset: 0, globalCount: globalCount))
+			return TableSectionMutation(header: header, footer: footer, rangeMutation: RangeMutation(arrayMutation: arrayMutation, localOffset: 0, globalCount: globalCount))
 		}
 	}
 	
-	public func tableData<Value>() -> Signal<TableData<Value>> where ArrayMutation<Value> == OutputValue {
-		return Signal.sections(Signal.section(rowSignal: signal.map(initialState: 0) { (globalCount: inout Int, arrayMutation: ArrayMutation<Value>) -> TableRowMutation<Value> in
+	public func tableData<Element>() -> Signal<TableData<Element>> where ArrayMutation<Element> == OutputElement {
+		return Signal.sections(Signal.section(rowSignal: signal.map(initialState: 0) { (globalCount: inout Int, arrayMutation: ArrayMutation<Element>) -> RangeMutation<Element> in
 			arrayMutation.delta(&globalCount)
-			return TableRowMutation(arrayMutation: arrayMutation, localOffset: 0, globalCount: globalCount)
+			return RangeMutation(arrayMutation: arrayMutation, localOffset: 0, globalCount: globalCount)
 		})
 		)
 	}
 	
-	public static func sections<RowData>(signals: [Signal<TableSectionMutation<RowData>>]) -> Signal<TableRowMutation<TableSectionMutation<RowData>>> where TableRowMutation<TableSectionMutation<RowData>> == OutputValue {
-		var result: [Signal<TableRowMutation<TableSectionMutation<RowData>>>] = []
+	public static func sections<RowData>(signals: [Signal<TableSectionMutation<RowData>>]) -> Signal<RangeMutation<TableSectionMutation<RowData>>> where RangeMutation<TableSectionMutation<RowData>> == OutputElement {
+		var result: [Signal<RangeMutation<TableSectionMutation<RowData>>>] = []
 		let count = signals.count
 		for (index, sectionSignal) in signals.enumerated() {
 			result += sectionSignal.map { section in
 				let mutation = ArrayMutation<TableSectionMutation<RowData>>(updatedIndex: index, value: section)
-				return TableRowMutation(arrayMutation: mutation, localOffset: 0, globalCount: count, animation: noTableViewAnimation)
+				return RangeMutation(arrayMutation: mutation, localOffset: 0, globalCount: count)
 			}
 		}
-		let sections = TableRowMutation<TableSectionMutation<RowData>>(arrayMutation: ArrayMutation(insertedRange: 0..<signals.count, values: Array<TableSectionMutation<RowData>>(repeating: TableSectionMutation<RowData>(), count: signals.count)), localOffset: 0, globalCount: signals.count)
-		let (mergedInput, mergedSignal) = Signal<TableRowMutation<TableSectionMutation<RowData>>>.createMergedInput()
+		let sections = RangeMutation<TableSectionMutation<RowData>>(arrayMutation: ArrayMutation(insertedRange: 0..<signals.count, values: Array<TableSectionMutation<RowData>>(repeating: TableSectionMutation<RowData>(), count: signals.count)), localOffset: 0, globalCount: signals.count)
+		let (mergedInput, mergedSignal) = Signal<RangeMutation<TableSectionMutation<RowData>>>.createMergedInput()
 		for s in result {
 			mergedInput.add(s)
 		}
 		return mergedSignal.startWith(sequence: [sections])
 	}
 	
-	public static func sections<RowData>(_ signals: Signal<TableSectionMutation<RowData>>...) -> Signal<TableRowMutation<TableSectionMutation<RowData>>> where TableRowMutation<TableSectionMutation<RowData>> == OutputValue {
+	public static func sections<RowData>(_ signals: Signal<TableSectionMutation<RowData>>...) -> Signal<RangeMutation<TableSectionMutation<RowData>>> where RangeMutation<TableSectionMutation<RowData>> == OutputElement {
 		return sections(signals: signals)
 	}
 	
-	public static func section<Value>(header: String? = nil, footer: String? = nil, rowSignal: Signal<TableRowMutation<Value>>) -> Signal<OutputValue> where TableSectionMutation<Value> == OutputValue {
-		return rowSignal.map(initialState: false) { (state: inout Bool, value: TableRowMutation<Value>) -> TableSectionMutation<Value> in
+	public static func section<Element>(header: String? = nil, footer: String? = nil, rowSignal: Signal<RangeMutation<Element>>) -> Signal<OutputElement> where TableSectionMutation<Element> == OutputElement {
+		return rowSignal.map(initialState: false) { (state: inout Bool, value: RangeMutation<Element>) -> TableSectionMutation<Element> in
 			if !state {
 				state = true
-				return TableSectionMutation<Value>(header: header, footer: footer, rowMutation: value)
+				return TableSectionMutation<Element>(header: header, footer: footer, rangeMutation: value)
 			} else {
-				return TableSectionMutation<Value>(rowMutation: value)
+				return TableSectionMutation<Element>(rangeMutation: value)
 			}
 		}
 	}

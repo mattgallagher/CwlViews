@@ -20,6 +20,9 @@ struct AlertViewState: CodableContainer {
 func alertView(_ alertState: AlertViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
 	return ViewController(
 		.navigationItem -- navigationItem,
+		.present <-- alertState.showAlert
+			.filter { $0 }
+			.map { _ in ModalPresentation(alert(alertState)) },
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
@@ -33,10 +36,7 @@ func alertView(_ alertState: AlertViewState, _ navigationItem: NavigationItem) -
 						.bind(to: alertState.showAlert)
 				))
 			)
-		),
-		.present <-- alertState.showAlert
-			.filter { $0 }
-			.map { _ in ModalPresentation(alert(alertState)) }
+		)
 	)
 }
 

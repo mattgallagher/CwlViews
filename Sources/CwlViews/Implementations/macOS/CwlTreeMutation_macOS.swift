@@ -30,7 +30,7 @@ public class TreeState<NodeData> {
 	public weak var parent: TreeState<NodeData>?
 	public var index: Int?
 	public var data: NodeData?
-	public var children: TableRowState<TreeState<NodeData>>?
+	public var children: RangeMutationState<TreeState<NodeData>>?
 	
 	public init(parent: TreeState<NodeData>?, index: Int) {
 		data = nil
@@ -55,8 +55,8 @@ public class TreeState<NodeData> {
 		}
 	}
 	
-	public static func childState(from m: TableRowMutation<TreeMutation<NodeData>>, ofParent: TreeState<NodeData>) -> TableRowState<TreeState<NodeData>> {
-		var newChildren = TableRowState<TreeState<NodeData>>()
+	public static func childState(from m: TableRowMutation<TreeMutation<NodeData>>, ofParent: TreeState<NodeData>) -> RangeMutationState<TreeState<NodeData>> {
+		var newChildren = RangeMutationState<TreeState<NodeData>>()
 		_ = apply(rowMutation: m, to: &newChildren, ofParent: ofParent)
 		return newChildren
 	}
@@ -79,7 +79,7 @@ public struct TreePath<NodeData>: Hashable {
 	}
 }
 
-public func apply<R>(rowMutation: TableRowMutation<TreeMutation<R>>, to treeState: inout TableRowState<TreeState<R>>, ofParent parent: TreeState<R>?) -> (NSOutlineView) -> Void {
+public func apply<R>(rowMutation: TableRowMutation<TreeMutation<R>>, to treeState: inout RangeMutationState<TreeState<R>>, ofParent parent: TreeState<R>?) -> (NSOutlineView) -> Void {
 	treeState.globalCount = rowMutation.globalCount
 	treeState.localOffset = rowMutation.localOffset
 	
@@ -188,7 +188,7 @@ public func apply<R>(rowMutation: TableRowMutation<TreeMutation<R>>, to treeStat
 			case .parentOnly(let d):
 				item.data = d
 				if item.children == nil {
-					item.children = TableRowState<TreeState<R>>()
+					item.children = RangeMutationState<TreeState<R>>()
 					animations.append { (outlineView: NSOutlineView) in outlineView.reloadItem(item, reloadChildren: true) }
 				} else {
 					needSignalUpdate = true
@@ -200,7 +200,7 @@ public func apply<R>(rowMutation: TableRowMutation<TreeMutation<R>>, to treeStat
 					let row = outlineView.row(forItem: item)
 					for columnIndex in 0..<outlineView.numberOfColumns {
 						if let cell = outlineView.view(atColumn: columnIndex, row: row, makeIfNecessary: false), let data = item.data {
-							getSignalInput(for: cell, valueType: R.self)?.send(value: data)
+							cellSignalInput(for: cell, valueType: R.self)?.send(value: data)
 						}
 					}
 				}

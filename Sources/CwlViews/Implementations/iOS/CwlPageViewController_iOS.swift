@@ -41,7 +41,7 @@ public extension PageViewController {
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case isDoubleSided(Dynamic<Bool>)
-		case pageData(Dynamic<SetAnimatable<[PageData], UIPageViewController.NavigationDirection>>)
+		case pageData(Dynamic<Animatable<[PageData], UIPageViewController.NavigationDirection>>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -249,7 +249,7 @@ public extension BindingName where Binding: PageViewControllerBinding {
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	static var isDoubleSided: PageViewControllerName<Dynamic<Bool>> { return .name(B.isDoubleSided) }
-	static var pageData: PageViewControllerName<Dynamic<SetAnimatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>> { return .name(B.pageData) }
+	static var pageData: PageViewControllerName<Dynamic<Animatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>> { return .name(B.pageData) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

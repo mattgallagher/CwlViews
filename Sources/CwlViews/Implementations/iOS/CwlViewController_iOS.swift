@@ -37,6 +37,7 @@ public extension ViewController {
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case additionalSafeAreaInsets(Dynamic<UIEdgeInsets>)
+		case children(Dynamic<[ViewControllerConvertible]>)
 		case definesPresentationContext(Dynamic<Bool>)
 		case edgesForExtendedLayout(Dynamic<UIRectEdge>)
 		case extendedLayoutIncludesOpaqueBars(Dynamic<Bool>)
@@ -67,6 +68,7 @@ public extension ViewController {
 		case willDisappear(SignalInput<Bool>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case childrenLayout(([UIView]) -> Layout)
 		case didReceiveMemoryWarning(() -> Void)
 		case loadView(() -> ViewConvertible)
 	}
@@ -86,8 +88,9 @@ public extension ViewController {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
-		public var view: InitialSubsequent<ViewConvertible>?
+		public var childrenLayout: (([UIView]) -> Layout)?
 		public var loadView: (() -> ViewConvertible)?
+		public var view: InitialSubsequent<ViewConvertible>?
 	}
 }
 
@@ -97,13 +100,14 @@ public extension ViewController.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .view(let x):
-			assert(loadView == nil, "Construct the view using either .loadView or .view, not both.")
-			view = x.initialSubsequent()
-
+		case .childrenLayout(let x):
+			childrenLayout = x
 		case .loadView(let x):
-			assert(view == nil, "Construct the view using either .loadView or .view, not both.")
+			precondition(view == nil, "Construct the view using either .loadView or .view, not both.")
 			loadView = x
+		case .view(let x):
+			precondition(loadView == nil, "Construct the view using either .loadView or .view, not both.")
+			view = x.initialSubsequent()
 		default: break
 		}
 	}
@@ -120,6 +124,9 @@ public extension ViewController.Preparer {
 		} else if let lv = loadView {
 			storage.viewConstructor = lv
 		}
+		
+		// The childrenLayout should be ready for when the children property starts
+		storage.childrenLayout = childrenLayout
 	}
 	
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
@@ -133,6 +140,33 @@ public extension ViewController.Preparer {
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .additionalSafeAreaInsets(let x): return x.apply(instance) { i, v in i.additionalSafeAreaInsets = v }
+		case .children(let x):
+			return x.apply(instance, storage) { i, s, v in
+				let existing = i.children
+				let next = v.map { $0.uiViewController() }
+				
+				for e in existing {
+					if !next.contains(e) {
+						e.willMove(toParent: nil)
+					}
+				}
+				for n in next {
+					if !existing.contains(n) {
+						i.addChild(n)
+					}
+				}
+				(storage.childrenLayout?(next.map { $0.view })).map(i.view.applyLayout)
+				for n in next {
+					if !existing.contains(n) {
+						n.didMove(toParent: i)
+					}
+				}
+				for e in existing {
+					if !next.contains(e) {
+						e.removeFromParent()
+					}
+				}
+			}
 		case .definesPresentationContext(let x): return x.apply(instance) { i, v in i.definesPresentationContext = v }
 		case .edgesForExtendedLayout(let x): return x.apply(instance) { i, v in i.edgesForExtendedLayout = v }
 		case .extendedLayoutIncludesOpaqueBars(let x): return x.apply(instance) { i, v in i.extendedLayoutIncludesOpaqueBars = v }
@@ -183,6 +217,7 @@ public extension ViewController.Preparer {
 			return x
 			
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .childrenLayout: return nil
 		case .didReceiveMemoryWarning(let x):
 			storage.didReceiveMemoryWarning = x
 			return nil
@@ -208,16 +243,17 @@ public extension ViewController.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension ViewController.Preparer {
 	open class Storage: EmbeddedObjectStorage {
-		open var traitCollectionDidChange: SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>?
-		open var didDisappear: SignalInput<Bool>?
-		open var willAppear: SignalInput<Bool>?
-		open var willDisappear: SignalInput<Bool>?
+		open var childrenLayout: (([UIView]) -> Layout)?
 		open var didAppear: SignalInput<Bool>?
-		open var queuedModalPresentations: [ModalPresentation] = []
+		open var didDisappear: SignalInput<Bool>?
+		open var didReceiveMemoryWarning: (() -> Void)?
 		open var presentationInProgress: Bool = false
+		open var queuedModalPresentations: [ModalPresentation] = []
+		open var traitCollectionDidChange: SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>?
 		open var view: ViewConvertible?
 		open var viewConstructor: (() -> ViewConvertible?)?
-		open var didReceiveMemoryWarning: (() -> Void)?
+		open var willAppear: SignalInput<Bool>?
+		open var willDisappear: SignalInput<Bool>?
 		
 		open override var isInUse: Bool {
 			return true
@@ -468,6 +504,7 @@ public extension BindingName where Binding: ViewControllerBinding {
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	static var additionalSafeAreaInsets: ViewControllerName<Dynamic<UIEdgeInsets>> { return .name(B.additionalSafeAreaInsets) }
+	static var children: ViewControllerName<Dynamic<[ViewControllerConvertible]>> { return .name(B.children) }
 	static var definesPresentationContext: ViewControllerName<Dynamic<Bool>> { return .name(B.definesPresentationContext) }
 	static var edgesForExtendedLayout: ViewControllerName<Dynamic<UIRectEdge>> { return .name(B.edgesForExtendedLayout) }
 	static var extendedLayoutIncludesOpaqueBars: ViewControllerName<Dynamic<Bool>> { return .name(B.extendedLayoutIncludesOpaqueBars) }
@@ -498,6 +535,7 @@ public extension BindingName where Binding: ViewControllerBinding {
 	static var willDisappear: ViewControllerName<SignalInput<Bool>> { return .name(B.willDisappear) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var childrenLayout: ViewControllerName<([UIView]) -> Layout> { return .name(B.childrenLayout) }
 	static var didReceiveMemoryWarning: ViewControllerName<() -> Void> { return .name(B.didReceiveMemoryWarning) }
 	static var loadView: ViewControllerName<() -> ViewConvertible> { return .name(B.loadView) }
 }

@@ -256,7 +256,7 @@ public extension OutlineView.Preparer {
 		case .rowHeight(let x): return x.apply(instance) { i, v in i.rowHeight = v }
 		case .rowSizeStyle(let x): return x.apply(instance) { i, v in i.rowSizeStyle = v }
 		case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
-		case .treeData(let x): return x.apply(instance, storage) { i, s, v in s.applyTableRowMutation(v, to: i) }
+		case .treeData(let x): return x.apply(instance, storage) { i, s, v in s.applyRangeMutation(v, to: i) }
 		case .userInterfaceLayoutDirection(let x): return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
 		case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance) { i, v in i.usesAlternatingRowBackgroundColors = v }
 		case .verticalMotionCanBeginDrag(let x): return x.apply(instance) { i, v in i.verticalMotionCanBeginDrag = v }
@@ -468,7 +468,7 @@ extension OutlineView.Preparer {
 		open override var isInUse: Bool { return true }
 		
 		open var actionTarget: SignalDoubleActionTarget? = nil
-		open var treeState = TableRowState<TreeState<NodeData>>()
+		open var treeState = RangeMutationState<TreeState<NodeData>>()
 		open var visibleTreePaths: Set<TreePath<NodeData>> = []
 		open var visibleTreePathsSignalInput: SignalInput<Set<TreePath<NodeData>>>? = nil
 		open var groupRowCellConstructor: ((Int) -> TableCellViewConvertible)?
@@ -532,7 +532,7 @@ extension OutlineView.Preparer {
 					let cellInput: SignalInput<NodeData>?
 					if let reusedView = outlineView.makeView(withIdentifier: identifier, owner: outlineView), let downcast = reusedView as? NSTableCellView {
 						cellView = downcast
-						cellInput = getSignalInput(for: cellView, valueType: NodeData.self)
+						cellInput = cellSignalInput(for: cellView, valueType: NodeData.self)
 					} else if let cc = col.element.cellConstructor {
 						let dataTuple = Signal<NodeData>.create()
 						let constructed = cc(identifier, dataTuple.signal.multicast()).nsTableCellView()
@@ -541,7 +541,7 @@ extension OutlineView.Preparer {
 						}
 						cellView = constructed
 						cellInput = dataTuple.input
-						setSignalInput(for: cellView, to: dataTuple.input)
+						setCellSignalInput(for: cellView, to: dataTuple.input)
 					} else {
 						return col.element.dataMissingCell?()?.nsTableCellView()
 					}
@@ -587,7 +587,7 @@ extension OutlineView.Preparer {
 			}
 		}
 		
-		open func applyTableRowMutation(_ rowMutation: TableRowMutation<TreeMutation<NodeData>>, to outlineView: NSOutlineView) {
+		open func applyRangeMutation(_ rowMutation: TableRowMutation<TreeMutation<NodeData>>, to outlineView: NSOutlineView) {
 			let animation = apply(rowMutation: rowMutation, to: &treeState, ofParent: nil)
 			animation(outlineView)
 		}
@@ -625,7 +625,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func item(forTreePath treePath: TreePath<NodeData>, in: NSOutlineView) -> Any? {
-			var state: TableRowState<TreeState<NodeData>>? = treeState
+			var state: RangeMutationState<TreeState<NodeData>>? = treeState
 			
 			// Walk the internal state structure, following the indicies in the tree path
 			for node in treePath.indexes.dropLast() {
@@ -639,7 +639,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func item(forIndexPath indexPath: IndexPath, in: NSOutlineView) -> Any? {
-			var state: TableRowState<TreeState<NodeData>>? = treeState
+			var state: RangeMutationState<TreeState<NodeData>>? = treeState
 			
 			// Walk the internal state structure, following the indicies in the tree path
 			for index in indexPath.dropLast() {

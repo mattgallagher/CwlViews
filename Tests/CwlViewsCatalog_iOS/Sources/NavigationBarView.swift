@@ -31,7 +31,7 @@ func navigationView(_ navigationViewState: NavigationBarViewState, _ navigationI
 									BarButtonItem(
 										.title -- .button1,
 										.action --> Input()
-											.map { _ in StackMutation<Int>.pop }
+											.map { _ in .pop }
 											.bind(to: navigationViewState.stack)
 									)
 								] : [],
@@ -39,7 +39,7 @@ func navigationView(_ navigationViewState: NavigationBarViewState, _ navigationI
 									BarButtonItem(
 										.title -- .button2,
 										.action --> Input()
-											.map { _ in StackMutation<Int>.push(value + 1) }
+											.map { _ in .push(value + 1) }
 											.bind(to: navigationViewState.stack)
 									)
 								]

@@ -18,15 +18,15 @@
 //
 
 extension TableViewBinding {
-	public static func tableStructure<S: Sequence>(in bindings: S) throws -> TableRowState<TableSectionState<RowDataType>> where S.Element == TableView<RowDataType>.Binding {
-		var found: TableRowState<TableSectionState<RowDataType>>? = nil
+	public static func tableStructure<S: Sequence>(in bindings: S) throws -> RangeMutationState<TableSectionState<RowDataType>> where S.Element == TableView<RowDataType>.Binding {
+		var found: RangeMutationState<TableSectionState<RowDataType>>? = nil
 		for b in bindings {
 			if case .tableData(let x) = b {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
 				let values = x.captureValues()
-				var sections = TableRowState<TableSectionState<RowDataType>>()
+				var sections = RangeMutationState<TableSectionState<RowDataType>>()
 				for v in values {
 					v.apply(to: &sections)
 				}

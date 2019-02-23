@@ -17,35 +17,39 @@
 //  OF THIS SOFTWARE.
 //
 
-#if os(iOS)
-
 /// A value abstraction of the arguments to some AppKit/UIKit methods with a `setValue(_:,animated:)` structure.
-public struct SetOrAnimate<Value> {
+public struct Animatable<Value, AnimationType> {
 	public let value: Value
-	public let isAnimated: Bool
+	public let animation: AnimationType?
 	
-	public static func set(_ value: Value) -> SetOrAnimate<Value> {
-		return SetOrAnimate<Value>(value: value, isAnimated: false)
+	public static func set(_ value: Value) -> Animatable<Value, AnimationType> {
+		return Animatable<Value, AnimationType>(value: value, animation: nil)
 	}
-	public static func animate(_ value: Value) -> SetOrAnimate<Value> {
-		return SetOrAnimate<Value>(value: value, isAnimated: true)
+	public static func animate(_ value: Value, animation: AnimationType) -> Animatable<Value, AnimationType> {
+		return Animatable<Value, AnimationType>(value: value, animation: animation)
+	}
+	
+	var isAnimated: Bool {
+		return animation != nil
+	}
+}
+
+public typealias SetOrAnimate<Value> = Animatable<Value, ()>
+
+extension Animatable where AnimationType == () {
+	public static func animate(_ value: Value) -> Animatable<Value, AnimationType> {
+		return Animatable<Value, AnimationType>(value: value, animation: ())
 	}
 }
 
 public extension BindingName {
-	/// Build a static binding (construction-only property) from a name and a constant value
-	///
-	/// - Parameters:
-	///   - name: the binding name
-	///   - value: the binding argument
-	/// - Returns: the binding
-	static func --<A>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Dynamic<SetOrAnimate<A>> == Value {
+	static func --<A, AnimationType>(name: BindingName<Value, Source, Binding>, value: A) -> Binding where Dynamic<Animatable<A, AnimationType>> == Value {
 		return name.binding(with: Value.constant(.set(value)))
 	}
 	
 }
 
-extension SetOrAnimate: ExpressibleByArrayLiteral where Value: ExpressibleByArrayLiteral, Value: RangeReplaceableCollection, Value.ArrayLiteralElement == Value.Element {
+extension Animatable: ExpressibleByArrayLiteral where Value: ExpressibleByArrayLiteral, Value: RangeReplaceableCollection, Value.ArrayLiteralElement == Value.Element {
 	public typealias ArrayLiteralElement = Value.ArrayLiteralElement
 	public init(arrayLiteral elements: Value.ArrayLiteralElement...) {
 		var value: Value = []
@@ -55,8 +59,7 @@ extension SetOrAnimate: ExpressibleByArrayLiteral where Value: ExpressibleByArra
 }
 
 extension SignalInterface {
-	/// A signal transformation which wraps the output in `SetOrAnimate` with the first value as in `set` but subsequent values as in `animate`
-	public func animate(_ choice: AnimationChoice = .subsequent) -> Signal<SetOrAnimate<OutputValue>> {
+	public func animate(_ choice: AnimationChoice = .subsequent) -> Signal<Animatable<OutputValue, ()>> {
 		return map(initialState: false) { (alreadyReceived: inout Bool, value: OutputValue) in
 			if alreadyReceived || choice == .always {
 				return .animate(value)
@@ -69,18 +72,3 @@ extension SignalInterface {
 		}
 	}
 }
-
-/// This is currently used in PageViewController but I feel like it should replace SetOrAnimate and possibly the animation in TableRowMution, too.
-public struct SetAnimatable<Value, Animation> {
-	public let value: Value
-	public let animation: Animation?
-	
-	public static func set(_ value: Value) -> SetAnimatable<Value, Animation> {
-		return SetAnimatable<Value, Animation>(value: value, animation: nil)
-	}
-	public static func animate(_ value: Value, animation: Animation) -> SetAnimatable<Value, Animation> {
-		return SetAnimatable<Value, Animation>(value: value, animation: animation)
-	}
-}
-
-#endif

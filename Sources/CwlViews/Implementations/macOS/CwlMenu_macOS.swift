@@ -185,7 +185,7 @@ public extension Menu.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension Menu.Preparer {
-	open class Storage: EmbeddedObjectStorage, NSMenuDelegate {}
+	open class Storage: AssociatedBinderStorage, NSMenuDelegate {}
 
 	open class Delegate: DynamicDelegate, NSMenuDelegate {
 		open func menuWillOpen(_ menu: NSMenu) {

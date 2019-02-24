@@ -270,7 +270,7 @@ public extension Application.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension Application.Preparer {
-	open class Storage: EmbeddedObjectStorage, NSApplicationDelegate {
+	open class Storage: AssociatedBinderStorage, NSApplicationDelegate {
 		open var dockMenu: NSMenu?
 		
 		open override var isInUse: Bool {

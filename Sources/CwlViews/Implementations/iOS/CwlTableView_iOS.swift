@@ -61,7 +61,7 @@ public extension TableView {
 		case separatorInset(Dynamic<UIEdgeInsets>)
 		case separatorInsetReference(Dynamic<UITableView.SeparatorInsetReference>)
 		case separatorStyle(Dynamic<UITableViewCell.SeparatorStyle>)
-		case tableData(Dynamic<TableSectionMutation<RowData>>)
+		case tableData(Dynamic<TableSectionAnimatable<RowData>>)
 		case tableFooterView(Dynamic<ViewConvertible?>)
 		case tableHeaderView(Dynamic<ViewConvertible?>)
 		
@@ -320,10 +320,12 @@ public extension TableView.Preparer {
 		case .selectionDidChange(let x):
 			return Signal.notifications(name: UITableView.selectionDidChangeNotification, object: instance).map { n -> ([TableRow<RowData>])? in
 				if let tableView = n.object as? UITableView, let selection = tableView.indexPathsForSelectedRows {
-					if let rows = (tableView.delegate as? Storage)?.sections.rows {
-						return selection.map { TableRow<RowData>(indexPath: $0, data: rows.at($0.section)?.rows.at($0.row)) }
+					if let sections = (tableView.delegate as? Storage)?.sections.values {
+						return selection.compactMap { indexPath in
+							return TableRow<RowData>(indexPath: indexPath, data: sections.at(indexPath.section)?.values?.at(indexPath.row))
+						}
 					} else {
-						return selection.map { TableRow<RowData>(indexPath: $0, data: nil) }
+						return selection.map { indexPath in TableRow<RowData>(indexPath: indexPath, data: nil) }
 					}
 				} else {
 					return nil
@@ -368,7 +370,7 @@ public extension TableView.Preparer {
 		case .shouldUpdateFocus: return nil
 		case .tableData(let x):
 			return x.apply(instance, storage) { i, s, v in
-				s.applyRangeMutation(v, to: i)
+				s.applySectionMutation(v, to: i)
 			}
 		case .targetIndexPathForMoveFromRow: return nil
 		case .titleForDeleteConfirmationButtonForRow: return nil
@@ -387,7 +389,7 @@ extension TableView.Preparer {
 	open class Storage: ScrollView.Preparer.Storage, UITableViewDelegate, UITableViewDataSource {
 		open override var isInUse: Bool { return true }
 		
-		open var sections = TableSectionState<TableRowState<RowData>>()
+		open var sections = TableSectionState<RowData>()
 		open var indexTitles: [String]? = nil
 		open var scrollJunction: (SignalCapture<SetOrAnimate<(IndexPath, UITableView.ScrollPosition)>>, SignalInput<SetOrAnimate<(IndexPath, UITableView.ScrollPosition)>>)? = nil
 		open var cellIdentifier: (TableRow<RowData>) -> String?
@@ -404,24 +406,24 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-			return sections.rows.at(section)?.globalCount ?? 0
+			return sections.values?.at(section)?.globalCount ?? 0
 		}
 		
 		open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-			let data = sections.rows.at(indexPath.section).flatMap { s in s.rows.at(indexPath.row - s.localOffset) }
+			let data = sections.values?.at(indexPath.section).flatMap { section in section.values?.at(indexPath.row - section.localOffset) }
 			let identifier = cellIdentifier(TableRow(indexPath: indexPath, data: data))
 			
 			let cellView: UITableViewCell
 			let cellInput: SignalInput<RowData>?
 			if let i = identifier, let reusedView = tableView.dequeueReusableCell(withIdentifier: i) {
 				cellView = reusedView
-				cellInput = cellSignalInput(for: reusedView, valueType: RowData.self)
+				cellInput = reusedView.associatedRowInput(valueType: RowData.self)
 			} else if let cc = cellConstructor {
 				let dataTuple = Signal<RowData>.channel().multicast()
 				let constructed = cc(identifier, dataTuple.signal).uiTableViewCell(reuseIdentifier: identifier)
 				cellView = constructed
 				cellInput = dataTuple.input
-				setCellSignalInput(for: constructed, to: dataTuple.input)
+				constructed.setAssociatedRowInput(to: dataTuple.input)
 			} else {
 				return dataMissingCell(indexPath).uiTableViewCell(reuseIdentifier: nil)
 			}
@@ -434,11 +436,11 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, titleForHeaderInSection: Int) -> String? {
-			return sections.rows.at(titleForHeaderInSection)?.metadata.header
+			return sections.values?.at(titleForHeaderInSection)?.leaf?.header
 		}
 		
 		open func tableView(_ tableView: UITableView, titleForFooterInSection: Int) -> String? {
-			return sections.rows.at(titleForFooterInSection)?.metadata.footer
+			return sections.values?.at(titleForFooterInSection)?.leaf?.footer
 		}
 		
 		open func sectionIndexTitles(for tableView: UITableView) -> [String]? {
@@ -449,9 +451,8 @@ extension TableView.Preparer {
 		open func notifyVisibleRowsChanged(in tableView: UITableView) {
 			Exec.mainAsync.invoke {
 				if let input = self.rowsChangedInput {
-					let indexPaths = tableView.indexPathsForVisibleRows
-					if let ip = indexPaths, ip.count > 0 {
-						input.send(value: ip.map { TableRow<RowData>(indexPath: $0, data: self.sections.rows.at($0.section)?.rows.at($0.row)) })
+					if let indexPaths = tableView.indexPathsForVisibleRows, indexPaths.count > 0 {
+						input.send(value: indexPaths.map { indexPath in TableRow<RowData>(indexPath: indexPath, data: self.sections.values?.at(indexPath.section)?.values?.at(indexPath.row)) })
 					} else {
 						input.send(value: [])
 					}
@@ -459,49 +460,65 @@ extension TableView.Preparer {
 			}
 		}
 		
-		open func applyRangeMutation(_ v: RangeMutation<RowData, TableSectionMetadata>, to i: UITableView) {
-			v.apply(to: &sections)
+		open func applySectionMutation(_ sectionAnimatable: TableSectionAnimatable<RowData>, to i: UITableView) {
+			let sectionMutation = sectionAnimatable.value
+			guard !sectionMutation.hasNoEffectOnValues else { return }
+
+			if case .update = sectionMutation.kind {
+				for (mutationIndex, rowIndex) in sectionMutation.indexSet.enumerated() {
+					sectionMutation.values[mutationIndex].apply(toSubrange: &sections.values![rowIndex])
+				}
+			} else {
+				sectionMutation.mapValues { rowMutation -> TableRowState<RowData> in
+					var rowState = TableRowState<RowData>()
+					rowMutation.apply(toSubrange: &rowState)
+					return rowState
+				}.apply(toSubrange: &sections)
+			}
 			
-			switch v.arrayMutation.kind {
+			let animation = sectionAnimatable.animation ?? .none
+			switch sectionMutation.kind {
 			case .delete:
-				i.deleteSections(v.arrayMutation.indexSet.offset(by: sections.localOffset), with: v.animation)
+				i.deleteSections(sectionMutation.indexSet.offset(by: sections.localOffset), with: animation)
 			case .move(let destination):
 				i.performBatchUpdates({
-					for (count, index) in v.arrayMutation.indexSet.offset(by: sections.localOffset).enumerated() {
+					for (count, index) in sectionMutation.indexSet.offset(by: sections.localOffset).enumerated() {
 						i.moveSection(index, toSection: destination + count)
 					}
-				})
+				}, completion: nil)
 			case .insert:
-				i.insertSections(v.arrayMutation.indexSet.offset(by: sections.localOffset), with: v.animation)
+				i.insertSections(sectionMutation.indexSet.offset(by: sections.localOffset), with: animation)
 			case .scroll:
-				i.reloadSections(v.arrayMutation.indexSet.offset(by: sections.localOffset), with: v.animation)
+				i.reloadSections(sectionMutation.indexSet.offset(by: sections.localOffset), with: animation)
 			case .update:
-				for (sectionIndex, change) in zip(v.arrayMutation.indexSet.offset(by: sections.localOffset), v.arrayMutation.values) {
-					if change.metadata != nil {
-						i.reloadSections([sectionIndex], with: v.animation)
-					} else {
-						let mappedIndices = change.rowMutation.arrayMutation.indexSet.map { IndexPath(row: $0, section: sectionIndex) }
-						switch change.rowMutation.arrayMutation.kind {
-						case .delete: i.deleteRows(at: mappedIndices, with: change.rowMutation.animation)
-						case .move(let destination):
-							for (count, index) in mappedIndices.enumerated() {
-								i.moveRow(at: index, to: IndexPath(row: destination + count, section: sectionIndex))
+				i.performBatchUpdates({
+					for (sectionIndex, change) in zip(sectionMutation.indexSet.offset(by: sections.localOffset), sectionMutation.values) {
+						if change.metadata?.leaf != nil {
+							i.reloadSections([sectionIndex], with: animation)
+						} else {
+							let mappedIndices = change.indexSet.map { rowIndex in IndexPath(row: rowIndex, section: sectionIndex) }
+							switch change.kind {
+							case .delete: i.deleteRows(at: mappedIndices, with: animation)
+							case .move(let destination):
+								for (count, index) in mappedIndices.enumerated() {
+									i.moveRow(at: index, to: IndexPath(row: destination + count, section: sectionIndex))
+								}
+							case .insert: i.insertRows(at: mappedIndices, with: animation)
+							case .scroll:
+								i.reloadRows(at: mappedIndices, with: animation)
+							case .update:
+								guard let section = sections.values?.at(sectionIndex - sections.localOffset) else { continue }
+								for indexPath in mappedIndices {
+									guard let cell = i.cellForRow(at: indexPath), let value = section.values?.at(indexPath.row - sections.localOffset) else { continue }
+									cell.associatedRowInput(valueType: RowData.self)?.send(value: value)
+								}
+								notifyVisibleRowsChanged(in: i)
+							case .reload:
+								i.reloadSections([sectionIndex], with: animation)
 							}
-						case .insert: i.insertRows(at: mappedIndices, with: change.rowMutation.animation)
-						case .scroll:
-							i.reloadRows(at: mappedIndices, with: change.rowMutation.animation)
-						case .update:
-							guard let section = sections.rows.at(sectionIndex - sections.localOffset) else { continue }
-							for indexPath in mappedIndices {
-								guard let cell = i.cellForRow(at: indexPath), let value = section.rows.at(indexPath.row - section.rowState.localOffset) else { continue }
-								cellSignalInput(for: cell, valueType: RowData.self)?.send(value: value)
-							}
-							notifyVisibleRowsChanged(in: i)
-						case .reload:
-							i.reloadSections([sectionIndex], with: change.rowMutation.animation)
 						}
 					}
-				}
+				}, completion: nil)
 			case .reload:
 				i.reloadData()
 			}
@@ -530,7 +547,7 @@ extension TableView.Preparer {
 		}
 
 		private func tableRowData(at indexPath: IndexPath, in tableView: UITableView) -> TableRow<RowData> {
-			return TableRow<RowData>(indexPath: indexPath, data: (tableView.delegate as? Storage)?.sections.rows.at(indexPath.section)?.rows.at(indexPath.row))
+			return TableRow<RowData>(indexPath: indexPath, data: (tableView.delegate as? Storage)?.sections.values?.at(indexPath.section)?.values?.at(indexPath.row))
 		}
 		
 		open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -748,7 +765,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var separatorInset: TableViewName<Dynamic<UIEdgeInsets>> { return .name(B.separatorInset) }
 	static var separatorInsetReference: TableViewName<Dynamic<UITableView.SeparatorInsetReference>> { return .name(B.separatorInsetReference) }
 	static var separatorStyle: TableViewName<Dynamic<UITableViewCell.SeparatorStyle>> { return .name(B.separatorStyle) }
-	static var tableData: TableViewName<Dynamic<TableSectionMutation<Binding.RowDataType>>> { return .name(B.tableData) }
+	static var tableData: TableViewName<Dynamic<TableSectionAnimatable<Binding.RowDataType>>> { return .name(B.tableData) }
 	static var tableFooterView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableFooterView) }
 	static var tableHeaderView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableHeaderView) }
 	
@@ -841,6 +858,22 @@ public extension TableView.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
+public struct TableSectionMetadata {
+	public let header: String?
+	public let footer: String?
+	public init(header: String? = nil, footer: String? = nil) {
+		(self.header, self.footer) = (header, footer)
+	}
+}
+
+public typealias TableRowMutation<Element> = SubrangeMutation<Element, TableSectionMetadata>
+public typealias TableRowAnimatable<Element> = Animatable<SubrangeMutation<Element, TableSectionMetadata>, UITableView.RowAnimation>
+public typealias TableSectionMutation<Element> = SubrangeMutation<TableRowMutation<Element>, ()>
+public typealias TableSectionAnimatable<Element> = Animatable<TableSectionMutation<Element>, UITableView.RowAnimation>
+
+public typealias TableRowState<Element> = SubrangeState<Element, TableSectionMetadata>
+public typealias TableSectionState<Element> = SubrangeState<TableRowState<Element>, ()>
+
 public struct TableScrollPosition {
 	public let indexPath: IndexPath
 	public let position: UITableView.ScrollPosition
@@ -866,16 +899,6 @@ public struct TableScrollPosition {
 	}
 }
 
-public func updateFirstRow<RowData>(_ storage: Var<IndexPath?>) -> SignalInput<[TableRow<RowData>]> {
-	return Input().map { $0.first?.indexPath }.bind(to: storage.update())
-}
-
-extension SignalInterface where OutputValue == IndexPath? {
-	public func restoreFirstRow() -> Signal<SetOrAnimate<TableScrollPosition>> {
-		return compactMap { $0.map { .top($0) } }.animate(.never)
-	}
-}
-
 public struct TableRow<RowData> {
 	public let indexPath: IndexPath
 	public let data: RowData?
@@ -883,6 +906,40 @@ public struct TableRow<RowData> {
 	public init(indexPath: IndexPath, data: RowData?) {
 		self.indexPath = indexPath
 		self.data = data
+	}
+}
+
+// MARK: - Signal, adapter and array interop with table data and table rows
+public extension Sequence {
+	func tableData() -> TableSectionAnimatable<Element> {
+		return .set(.reload([.reload(Array(self))]))
+	}
+}
+
+public extension Signal {
+	func tableData<RowData>(_ choice: AnimationChoice = .subsequent) -> Signal<TableSectionAnimatable<RowData>> where TableRowMutation<RowData> == OutputValue {
+		return map(initialState: false) { (alreadyReceived: inout Bool, rowMutation: OutputValue) -> TableSectionAnimatable<RowData> in
+			if alreadyReceived || choice == .always {
+				return .animate(.updated(rowMutation, at: 0), animation: .automatic)
+			} else {
+				if choice == .subsequent {
+					alreadyReceived = true
+				}
+				return .set(.reload([rowMutation]))
+			}
+		}
+	}
+}
+
+public extension Adapter where State == VarState<IndexPath?> {
+	func updateFirstRow<RowData>() -> SignalInput<[TableRow<RowData>]> {
+		return Input().map { $0.first?.indexPath }.bind(to: update())
+	}
+}
+
+extension SignalInterface where OutputValue == IndexPath? {
+	public func restoreFirstRow() -> Signal<SetOrAnimate<TableScrollPosition>> {
+		return compactMap { $0.map { .top($0) } }.animate(.never)
 	}
 }
 

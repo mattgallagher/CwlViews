@@ -116,7 +116,7 @@ public extension ViewController.Preparer {
 		inheritedPrepareInstance(instance, storage: storage)
 
 		// Need to set the embedded storage immediately (instead of waiting for the combine function) in case any of the swizzled methods get called (they rely on being able to access the embedded storage).
-		EmbeddedObjectStorage.setEmbeddedStorage(storage, for: instance)
+		instance.setAssociatedBinderStorage(storage)
 		
 		// The loadView function needs to be ready in case one of the bindings triggers a view load.
 		if let v = view?.initial?.uiView() {
@@ -234,7 +234,7 @@ public extension ViewController.Preparer {
 		}
 		
 		// We previously set the embedded storage so that any delegate methods triggered during setup would be able to resolve the storage. Now that we're done setting up, we need to *clear* the storage so the embed function doesn't complain that the storage is already set.
-		EmbeddedObjectStorage.setEmbeddedStorage(nil, for: instance)
+		instance.setAssociatedBinderStorage(nil)
 		
 		return lifetime
 	}
@@ -242,7 +242,7 @@ public extension ViewController.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension ViewController.Preparer {
-	open class Storage: EmbeddedObjectStorage {
+	open class Storage: AssociatedBinderStorage {
 		open var childrenLayout: (([UIView]) -> Layout)?
 		open var didAppear: SignalInput<Bool>?
 		open var didDisappear: SignalInput<Bool>?
@@ -378,7 +378,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				if storage.loadView(for: vc) {
 					return
@@ -395,7 +395,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				storage.traitCollectionDidChange(previous, vc.traitCollection)
 			}
@@ -410,7 +410,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				storage.viewWillAppear(controller: vc, animated: animated)
 			}
@@ -425,7 +425,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				storage.viewDidDisappear(controller: vc, animated: animated)
 			}
@@ -440,7 +440,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				storage.viewDidAppear(controller: vc, animated: animated)
 				
@@ -458,7 +458,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				storage.viewWillDisappear(controller: vc, animated: animated)
 			}
@@ -473,7 +473,7 @@ extension ViewController.Preparer {
 			assert(ViewController.Preparer.Storage.isSwizzled)
 			
 			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = Storage.embeddedStorage(subclass: Storage.self, for: self) {
+			if let storage = associatedBinderStorage(subclass: Storage.self) {
 				let vc = unsafeBitCast(self, to: UIViewController.self)
 				storage.controllerDidReceiveMemoryWarning(controller: vc)
 			}

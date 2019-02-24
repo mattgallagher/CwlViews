@@ -136,7 +136,7 @@ public extension ToolbarItem.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension ToolbarItem.Preparer {
-	public typealias Storage = EmbeddedObjectStorage
+	public typealias Storage = AssociatedBinderStorage
 }
 
 // MARK: - Binder Part 6: BindingNames

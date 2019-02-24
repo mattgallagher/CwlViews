@@ -712,11 +712,11 @@ public extension Layout.Dimension.Priority {
 }
 
 private var associatedLayoutKey = NSObject()
-private func setLayout(_ newValue: Layout.Storage?, for object: Layout.View) {
-	objc_setAssociatedObject(object, &associatedLayoutKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
-}
-private func getLayout(for view: Layout.View) -> Layout.Storage? {
-	return objc_getAssociatedObject(view, &associatedLayoutKey) as? Layout.Storage
+private extension Layout.View {
+	var associatedLayoutStorage: Layout.Storage? {
+		get { return objc_getAssociatedObject(self, &associatedLayoutKey) as? Layout.Storage }
+		set { return objc_setAssociatedObject(self, &associatedLayoutKey, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN) }
+	}
 }
 
 private extension Layout.View {
@@ -742,7 +742,7 @@ private func applyLayoutToView(view: Layout.View, params: (layout: Layout, bound
 	var removedViews = Set<Layout.View>()
 	
 	// Check for a previous layout and get the old views
-	let previous = getLayout(for: view)
+	let previous = view.associatedLayoutStorage
 	previous?.layout.forEachView { view in removedViews.insert(view) }
 	
 	guard let (layout, bounds) = params else {
@@ -788,7 +788,7 @@ private func applyLayoutToView(view: Layout.View, params: (layout: Layout, bound
 		
 		// If we're not animating, store the layout and we're done.
 		if !shouldAnimate {
-			setLayout(storage, for: view)
+			view.associatedLayoutStorage = storage
 			return
 		}
 		
@@ -815,9 +815,9 @@ private func applyLayoutToView(view: Layout.View, params: (layout: Layout, bound
 			// Reapply the new layout. Since the new views are already in-place
 			let reapplyStorage = Layout.Storage(layout: layout)
 			layout.add(to: view, containerBounds: bounds, storage: reapplyStorage)
-			setLayout(reapplyStorage, for: view)
+			view.associatedLayoutStorage = reapplyStorage
 		} else {
-			setLayout(storage, for: view)
+			view.associatedLayoutStorage = storage
 		}
 		
 		// Animate the frames of the new layout

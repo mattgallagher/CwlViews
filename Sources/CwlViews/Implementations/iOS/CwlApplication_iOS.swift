@@ -221,7 +221,7 @@ public extension Application.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension Application.Preparer {
-	open class Storage: EmbeddedObjectStorage, UIApplicationDelegate {
+	open class Storage: AssociatedBinderStorage, UIApplicationDelegate {
 		static var storedApplicationConstructor: (() -> Application)? = nil
 		static var storedStorage: Storage? = nil
 		

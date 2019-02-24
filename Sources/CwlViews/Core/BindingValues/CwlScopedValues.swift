@@ -21,20 +21,21 @@ import Foundation
 
 public struct ScopedValues<Scope, Value>: ExpressibleByArrayLiteral {
 	public typealias ArrayLiteralElement = ScopedValues<Scope, Value>
+
+	public let pairs: [(scope: Scope, value: Value)]
+	
 	public init(arrayLiteral elements: ScopedValues<Scope, Value>...) {
 		self.pairs = elements.flatMap { $0.pairs }
 	}
 	
-	public let pairs: [(scope: Scope, value: Value)]
-	public init(pairs: (Scope, Value)...) {
-		self.pairs = pairs
-	}
 	public init(pairs: [(Scope, Value)]) {
 		self.pairs = pairs
 	}
+	
 	public init(scope: Scope, value: Value) {
 		self.pairs = [(scope, value)]
 	}
+	
 	public static func value(_ value: Value, for scope: Scope) -> ScopedValues<Scope, Value> {
 		return ScopedValues(scope: scope, value: value)
 	}

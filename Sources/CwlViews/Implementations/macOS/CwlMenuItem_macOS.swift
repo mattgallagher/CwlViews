@@ -119,7 +119,7 @@ public extension MenuItem.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension MenuItem.Preparer {
-	public typealias Storage = EmbeddedObjectStorage
+	public typealias Storage = AssociatedBinderStorage
 }
 
 // MARK: - Binder Part 6: BindingNames

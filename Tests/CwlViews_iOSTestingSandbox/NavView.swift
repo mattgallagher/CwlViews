@@ -38,7 +38,7 @@ func navViewController(_ navState: NavViewState, _ doc: DocumentAdapter) -> View
 				return detailViewController(detailState, doc)
 			}
 		},
-		.poppedToCount --> navState.navStack.poppedToCount(),
+		.poppedToCount --> navState.navStack.popToCount(),
 		.navigationBar -- NavigationBar(
 			.barTintColor -- .barTint,
 			.titleTextAttributes -- [.foregroundColor: UIColor.white],

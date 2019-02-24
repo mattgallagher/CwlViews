@@ -152,6 +152,11 @@ public extension IndexedMutation {
 		return IndexedMutation<Element, Metadata>(movedIndexSet: IndexSet(integer: oldIndex), targetIndex: newIndex)
 	}
 	
+	/// Convenience constructor for reloading
+	static func reload(metadata: Metadata? = nil, _ values: [Element]) -> IndexedMutation<Element, Metadata> {
+		return IndexedMutation<Element, Metadata>(reload: values)
+	}
+	
 	/// Creates a new IndexedMutation by mapping the values array from this transform. NOTE: metdata is passed through unchanged.
 	func mapValues<Other>(_ transform: (Element) -> Other) -> IndexedMutation<Other, Metadata> {
 		return IndexedMutation<Other, Metadata>(kind: kind, metadata: metadata, indexSet: indexSet, values: values.map(transform))
@@ -177,10 +182,41 @@ public extension IndexedMutation {
 	}
 	
 	/// A no-op on rows is explicitly defined as an `.update` with an empty `values` array. Note that metadata may still be non-nil.
-	var hasNoEffectOnRows: Bool {
+	var hasNoEffectOnValues: Bool {
 		if case .update = kind, values.count == 0 {
 			return true
 		}
 		return false
+	}
+}
+
+public typealias ArrayMutation<Element> = IndexedMutation<Element, Void>
+
+extension IndexedMutation where Metadata == Void {
+	/// Apply the mutation described by this value to the provided array
+	func apply<C: RangeReplaceableCollection & MutableCollection>(to a: inout C) where C.Index == Int, C.Iterator.Element == Element {
+		switch kind {
+		case .delete:
+			indexSet.rangeView.reversed().forEach { a.removeSubrange($0) }
+		case .scroll(let offset):
+			a.removeSubrange(offset > 0 ? a.startIndex..<offset : (a.endIndex + offset)..<a.endIndex)
+			a.insert(contentsOf: values, at: offset > 0 ? a.endIndex : a.startIndex)
+		case .move(let index):
+			let moving = indexSet.map { a[$0] }
+			indexSet.rangeView.reversed().forEach { a.removeSubrange($0) }
+			a.insert(contentsOf: moving, at: index)
+		case .insert:
+			for (i, v) in zip(indexSet, values) {
+				a.insert(v, at: i)
+			}
+		case .update:
+			var progress = 0
+			indexSet.rangeView.forEach { r in
+				a.replaceSubrange(r, with: values[progress..<(progress + r.count)])
+				progress += r.count
+			}
+		case .reload:
+			a.replaceSubrange(a.startIndex..<a.endIndex, with: values)
+		}
 	}
 }

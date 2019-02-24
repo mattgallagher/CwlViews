@@ -30,8 +30,8 @@ extension Adapter where State == ModelState<Document, Document.Change, Document.
 		))
 	}
 	
-	func rowsSignal() -> Signal<ArrayMutation<String>> {
-		return slice(resume: .reload) { document, notification -> Signal<ArrayMutation<String>>.Next in
+	func rowsSignal() -> Signal<TableRowMutation<String>> {
+		return slice(resume: .reload) { document, notification -> Signal<TableRowMutation<String>>.Next in
 			switch notification {
 			case .addedRowIndex(let i): return .value(.inserted(document.rows[i], at: i))
 			case .removedRowIndex(let i): return .value(.deleted(at: i))

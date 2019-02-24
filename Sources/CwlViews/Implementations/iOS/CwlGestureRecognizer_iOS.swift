@@ -129,7 +129,7 @@ public extension GestureRecognizer.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension GestureRecognizer.Preparer {
-	open class Storage: EmbeddedObjectStorage, UIGestureRecognizerDelegate {}
+	open class Storage: AssociatedBinderStorage, UIGestureRecognizerDelegate {}
 
 	open class Delegate: DynamicDelegate, UIGestureRecognizerDelegate {
 		open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {

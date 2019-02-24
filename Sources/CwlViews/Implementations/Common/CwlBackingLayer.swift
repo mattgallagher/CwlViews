@@ -230,7 +230,7 @@ public extension BackingLayer.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension BackingLayer.Preparer {
-	open class Storage: EmbeddedObjectStorage, CAAction {
+	open class Storage: AssociatedBinderStorage, CAAction {
 		// LayerBinderStorage implementation
 		open var layerActions = [String: SignalInput<[AnyHashable: Any]?>]()
 		@objc open func run(forKey event: String, object anObject: Any, arguments dict: [AnyHashable: Any]?) {

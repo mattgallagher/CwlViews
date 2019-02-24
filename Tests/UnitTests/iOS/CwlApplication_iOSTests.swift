@@ -22,7 +22,7 @@ import XCTest
 
 extension Application: TestableBinder {
 	static func constructor(binding: Application.Binding) -> Preparer.Instance {
-		EmbeddedObjectStorage.setEmbeddedStorage(nil, for: UIApplication.shared)
+		AssociatedBinderStorage.setAssociatedBinderStorage(nil, for: UIApplication.shared)
 		Application.Preparer.Storage.storedApplicationConstructor = { Application(binding) }
 		let storage = Application.Preparer.Storage()
 		withExtendedLifetime(storage) {

@@ -49,15 +49,6 @@ public extension BindingName {
 	
 }
 
-extension Animatable: ExpressibleByArrayLiteral where Value: ExpressibleByArrayLiteral, Value: RangeReplaceableCollection, Value.ArrayLiteralElement == Value.Element {
-	public typealias ArrayLiteralElement = Value.ArrayLiteralElement
-	public init(arrayLiteral elements: Value.ArrayLiteralElement...) {
-		var value: Value = []
-		value.append(contentsOf: elements)
-		self = .set(value)
-	}
-}
-
 extension SignalInterface {
 	public func animate(_ choice: AnimationChoice = .subsequent) -> Signal<Animatable<OutputValue, ()>> {
 		return map(initialState: false) { (alreadyReceived: inout Bool, value: OutputValue) in

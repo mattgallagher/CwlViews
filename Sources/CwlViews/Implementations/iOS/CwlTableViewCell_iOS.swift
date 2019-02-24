@@ -237,5 +237,17 @@ public extension TableViewCell.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
+private var associatedInputKey = NSObject()
+public extension UITableViewCell {
+	func associatedRowInput<B>(valueType: B.Type) -> 
+		SignalInput<B>? {
+			return objc_getAssociatedObject(self, &associatedInputKey) as? SignalInput<B>
+	}
+	
+	func setAssociatedRowInput<B>(to input: SignalInput<B>) {
+		objc_setAssociatedObject(self, &associatedInputKey, input, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
+	}
+}
+
 
 #endif

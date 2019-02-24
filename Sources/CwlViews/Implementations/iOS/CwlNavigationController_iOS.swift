@@ -179,7 +179,7 @@ extension NavigationController.Preparer {
 			}
 			
 			// Handle removal of collapsed split view details
-			if animated, navigationController.viewControllers.count == expectedStackCount, let collapsed = collapsedController, let splitView = navigationController.splitViewController, let splitViewStorage = EmbeddedObjectStorage.embeddedStorage(subclass: SplitViewController.Preparer.Storage.self, for: splitView) {
+			if animated, navigationController.viewControllers.count == expectedStackCount, let collapsed = collapsedController, let splitView = navigationController.splitViewController, let splitViewStorage = splitView.associatedBinderStorage(subclass: SplitViewController.Preparer.Storage.self) {
 				collapsedController = nil
 				splitViewStorage.collapsedController(collapsed)
 			}

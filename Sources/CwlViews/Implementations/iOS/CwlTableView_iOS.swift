@@ -368,10 +368,7 @@ public extension TableView.Preparer {
 		case .shouldIndentWhileEditingRow: return nil
 		case .shouldShowMenuForRow: return nil
 		case .shouldUpdateFocus: return nil
-		case .tableData(let x):
-			return x.apply(instance, storage) { i, s, v in
-				s.applySectionMutation(v, to: i)
-			}
+		case .tableData(let x): return x.apply(instance, storage) { i, s, v in s.applySectionAnimation(v, to: i) }
 		case .targetIndexPathForMoveFromRow: return nil
 		case .titleForDeleteConfirmationButtonForRow: return nil
 		case .willBeginEditingRow: return nil
@@ -460,13 +457,12 @@ extension TableView.Preparer {
 			}
 		}
 		
-		open func applySectionMutation(_ sectionAnimatable: TableSectionAnimatable<RowData>, to i: UITableView) {
+		open func applySectionAnimation(_ sectionAnimatable: TableSectionAnimatable<RowData>, to i: UITableView) {
 			let sectionMutation = sectionAnimatable.value
-			guard !sectionMutation.hasNoEffectOnValues else { return }
-
+			
 			if case .update = sectionMutation.kind {
 				for (mutationIndex, rowIndex) in sectionMutation.indexSet.enumerated() {
-					sectionMutation.values[mutationIndex].apply(toSubrange: &sections.values![rowIndex])
+					sectionMutation.values[mutationIndex].mapMetadata { _ in () }.apply(to: &sections.values![rowIndex].values!)
 				}
 			} else {
 				sectionMutation.mapValues { rowMutation -> TableRowState<RowData> in
@@ -475,6 +471,7 @@ extension TableView.Preparer {
 					return rowState
 				}.apply(toSubrange: &sections)
 			}
+			sectionMutation.updateMetadata(&sections)
 			
 			let animation = sectionAnimatable.animation ?? .none
 			switch sectionMutation.kind {
@@ -496,19 +493,19 @@ extension TableView.Preparer {
 						if change.metadata?.leaf != nil {
 							i.reloadSections([sectionIndex], with: animation)
 						} else {
-							let mappedIndices = change.indexSet.map { rowIndex in IndexPath(row: rowIndex, section: sectionIndex) }
+							let indexPaths = change.indexSet.map { rowIndex in IndexPath(row: rowIndex, section: sectionIndex) }
 							switch change.kind {
-							case .delete: i.deleteRows(at: mappedIndices, with: animation)
+							case .delete: i.deleteRows(at: indexPaths, with: animation)
 							case .move(let destination):
-								for (count, index) in mappedIndices.enumerated() {
+								for (count, index) in indexPaths.enumerated() {
 									i.moveRow(at: index, to: IndexPath(row: destination + count, section: sectionIndex))
 								}
-							case .insert: i.insertRows(at: mappedIndices, with: animation)
+							case .insert: i.insertRows(at: indexPaths, with: animation)
 							case .scroll:
-								i.reloadRows(at: mappedIndices, with: animation)
+								i.reloadRows(at: indexPaths, with: animation)
 							case .update:
 								guard let section = sections.values?.at(sectionIndex - sections.localOffset) else { continue }
-								for indexPath in mappedIndices {
+								for indexPath in indexPaths {
 									guard let cell = i.cellForRow(at: indexPath), let value = section.values?.at(indexPath.row - sections.localOffset) else { continue }
 									cell.associatedRowInput(valueType: RowData.self)?.send(value: value)
 								}
@@ -522,6 +519,7 @@ extension TableView.Preparer {
 			case .reload:
 				i.reloadData()
 			}
+
 		}
 	}
 
@@ -867,7 +865,7 @@ public struct TableSectionMetadata {
 }
 
 public typealias TableRowMutation<Element> = SubrangeMutation<Element, TableSectionMetadata>
-public typealias TableRowAnimatable<Element> = Animatable<SubrangeMutation<Element, TableSectionMetadata>, UITableView.RowAnimation>
+public typealias TableRowAnimatable<Element> = Animatable<TableRowMutation<Element>, UITableView.RowAnimation>
 public typealias TableSectionMutation<Element> = SubrangeMutation<TableRowMutation<Element>, ()>
 public typealias TableSectionAnimatable<Element> = Animatable<TableSectionMutation<Element>, UITableView.RowAnimation>
 
@@ -909,7 +907,6 @@ public struct TableRow<RowData> {
 	}
 }
 
-// MARK: - Signal, adapter and array interop with table data and table rows
 public extension Sequence {
 	func tableData() -> TableSectionAnimatable<Element> {
 		return .set(.reload([.reload(Array(self))]))

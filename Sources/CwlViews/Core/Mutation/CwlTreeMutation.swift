@@ -18,26 +18,44 @@
 //  IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-public struct TreeMutation<Leaf> {
-	let mutations: IndexedMutation<TreeMutation<Leaf>, Leaf>
+public struct TreeMutation<Leaf>: ExpressibleByArrayLiteral {
+	public let mutations: IndexedMutation<TreeMutation<Leaf>, Leaf>
+	
+	public init(mutations: IndexedMutation<TreeMutation<Leaf>, Leaf>) {
+		self.mutations = mutations
+	}
+	
+	public init(arrayLiteral elements: TreeMutation<Leaf>...) {
+		self.mutations = .reload(elements)
+	}
+	
+	public static func leaf(_ value: Leaf, children: [TreeMutation<Leaf>]? = nil) -> TreeMutation<Leaf> {
+		return TreeMutation<Leaf>(mutations: children.map { IndexedMutation(metadata: value, reload: $0) } ?? IndexedMutation(metadata: value))
+	}
+	
+	public static func leaf<Value>(_ value: Value, children: [TreeMutation<Leaf>]? = nil) -> TreeMutation<Leaf> where Subrange<Value> == Leaf {
+		let subrange = Subrange(localOffset: children.map { _ in 0 }, globalCount: children.map { $0.count }, leaf: value)
+		return TreeMutation<Leaf>(mutations: children.map { IndexedMutation(metadata: subrange, reload: $0) } ?? IndexedMutation(metadata: subrange))
+	}
 }
 
-public struct TreeState<Metadata> {
+public class TreeState<Metadata> {
+	public weak var parent: TreeState<Metadata>?
 	public var metadata: Metadata? = nil
 	public var rows: Array<TreeState<Metadata>>? = nil
 	
-	public init() {}
+	public init(parent: TreeState<Metadata>?) {}
 	
-	public init(treeMutation: TreeMutation<Metadata>) {
-		self.init()
-		treeMutation.mutations.apply(toTree: &self)
+	public convenience init(parent: TreeState<Metadata>?, treeMutation: TreeMutation<Metadata>) {
+		self.init(parent: parent)
+		treeMutation.mutations.apply(toTree: self)
 	}
 }
 
 public typealias TreeSubrangeMutation<Leaf> = TreeMutation<Subrange<Leaf>>
 
 extension IndexedMutation where Element == TreeMutation<Metadata> {
-	public func apply(toTree treeState: inout TreeState<Metadata>) {
+	public func apply(toTree treeState: TreeState<Metadata>) {
 		if let metadata = metadata {
 			treeState.metadata = metadata
 		}
@@ -46,10 +64,10 @@ extension IndexedMutation where Element == TreeMutation<Metadata> {
 			var rows: Array<TreeState<Metadata>> = []
 			if case .update = kind {
 				for (mutationIndex, rowIndex) in indexSet.enumerated() {
-					values[mutationIndex].mutations.apply(toTree: &rows[rowIndex])
+					values[mutationIndex].mutations.apply(toTree: rows[rowIndex])
 				}
 			} else {
-				mapValues(TreeState<Metadata>.init).mapMetadata { _ in () }.apply(to: &rows)
+				mapValues { mutation in TreeState<Metadata>.init(parent: treeState, treeMutation: mutation) }.mapMetadata { _ in () }.apply(to: &rows)
 			}
 			treeState.rows = rows
 		}
@@ -58,26 +76,27 @@ extension IndexedMutation where Element == TreeMutation<Metadata> {
 
 public typealias TreeRangeMutation<Leaf> = TreeMutation<Subrange<Leaf>>
 
-public struct TreeSubrangeState<Leaf> {
+public class TreeSubrangeState<Leaf> {
+	public weak var parent: TreeSubrangeState<Leaf>?
 	public var state = SubrangeState<TreeSubrangeState<Leaf>, Leaf>()
 
-	public init() {}
+	public init(parent: TreeSubrangeState<Leaf>?) {}
 	
-	public init(treeSubrangeMutation: TreeSubrangeMutation<Leaf>) {
-		self.init()
-		treeSubrangeMutation.mutations.apply(toTreeSubrange: &self)
+	public convenience init(parent: TreeSubrangeState<Leaf>?, treeSubrangeMutation: TreeSubrangeMutation<Leaf>) {
+		self.init(parent: parent)
+		treeSubrangeMutation.mutations.apply(toTreeSubrange: self)
 	}
 }
 
 extension IndexedMutation where Element == TreeMutation<Metadata> {
-	public func apply<Leaf>(toTreeSubrange treeSubrangeState: inout TreeSubrangeState<Leaf>) where Subrange<Leaf> == Metadata {
+	public func apply<Leaf>(toTreeSubrange treeSubrangeState: TreeSubrangeState<Leaf>) where Subrange<Leaf> == Metadata {
 		if !hasNoEffectOnValues {
 			if case .update = kind {
 				for (mutationIndex, rowIndex) in indexSet.enumerated() {
-					values[mutationIndex].mutations.apply(toTreeSubrange: &treeSubrangeState.state.values![rowIndex])
+					values[mutationIndex].mutations.apply(toTreeSubrange: treeSubrangeState.state.values![rowIndex])
 				}
 			} else {
-				mapValues(TreeSubrangeState<Leaf>.init).apply(toSubrange: &treeSubrangeState.state)
+				mapValues { mutation in TreeSubrangeState<Leaf>.init(parent: treeSubrangeState, treeSubrangeMutation: mutation) }.apply(toSubrange: &treeSubrangeState.state)
 			}
 		}
 		updateMetadata(&treeSubrangeState.state)

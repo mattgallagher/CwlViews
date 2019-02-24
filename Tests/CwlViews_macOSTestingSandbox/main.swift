@@ -64,11 +64,11 @@ struct Document {
 			creationCount += 1
 			let value = Row(count: creationCount)
 			rows.append(value)
-			return Document.Action.Result(arrayMutation: ArrayMutation(insertedIndex: rows.count - 1, value: value), nonFatalError: nil)
+			return Document.Action.Result(arrayMutation: .inserted(value, at: rows.count - 1), nonFatalError: nil)
 		case .deleteRow(let index):
 			if rows.indices.contains(index) {
 				rows.remove(at: index)
-				return Document.Action.Result(arrayMutation: ArrayMutation(deletedIndex: index), nonFatalError: nil)
+				return Document.Action.Result(arrayMutation: .deleted(at: index), nonFatalError: nil)
 			} else {
 				return Document.Action.Result(arrayMutation: ArrayMutation(), nonFatalError: Document.Error.rowIndexOutOfBounds)
 			}
@@ -217,7 +217,7 @@ func mainWindow(model: DocumentAdapter) -> Window {
 						),
 						.rowHeight -- 22,
 						.columnAutoresizingStyle -- .lastColumnOnlyAutoresizingStyle,
-						.rows <-- viewModel.rowSignal.arrayMutationToRowMutation(),
+						.rows <-- viewModel.rowSignal.tableData(),
 						.selectionChanged --> Input().subscribeValuesUntilEnd { selection in viewModel.selectionChanged(selectedRows: selection.selectedRows) },
 						.columns -- [
 							TableColumn<Document.Row>(
@@ -285,7 +285,7 @@ func secondWindow(model: DocumentAdapter) -> Window {
 					.rowHeight -- 22,
 					.treeData -- [
 						.leaf("One"),
-						.branchAndChildren("Hello", [
+						.leaf("Hello", children: [
 							.leaf("Three")
 						]),
 						.leaf("Two")

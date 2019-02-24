@@ -249,5 +249,4 @@ public extension UITableViewCell {
 	}
 }
 
-
 #endif

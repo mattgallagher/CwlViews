@@ -15,16 +15,17 @@
 ///   - update: neither localOffset nor globalCount are changed
 ///   - move: neither localOffset nor globalCount are changed
 public struct Subrange<Leaf> {
-	/// This is offset for the visible range.
-	public let localOffset: Int
+	/// This is offset for the visible range. When not provided, the `localOffset` is automatically updated by `.scroll` and reset to `0` on `.reload`.
+	/// NOTE: `localOffset` doesn't affect the `IndexedMutation` itself (since the mutation operates entirely in local coordinates) but for animation purposes (which typically needs to occur in global coordinates), the `localOffset` is considered to apply *before* the animation (e.g. the scroll position shifts first, then the values in the new locations are updated).
+	public let localOffset: Int?
 	
-	/// This is the length of the greater array *after* the mutation is applied.
-	public let globalCount: Int
+	/// This is the length of the greater array after the mutation is applied. When not provided, the `globalCount` is automatically updated by `.insert`, `.delete` and reset to the local count on `.reload`.
+	public let globalCount: Int?
 	
 	/// Additional metadata for this tier
 	public let leaf: Leaf?
 	
-	public init(localOffset: Int, globalCount: Int, leaf: Leaf?) {
+	public init(localOffset: Int?, globalCount: Int?, leaf: Leaf?) {
 		self.localOffset = localOffset
 		self.globalCount = globalCount
 		self.leaf = leaf
@@ -50,23 +51,45 @@ public typealias SubrangeMutation<Element, Additional> = IndexedMutation<Element
 
 extension IndexedMutation {
 	public func updateMetadata<Value, Leaf>(_ state: inout SubrangeState<Value, Leaf>) where Subrange<Leaf> == Metadata {
-		if let subrange = metadata {
-			state.localOffset = subrange.localOffset
-			state.globalCount = subrange.globalCount
-			if let metadata = subrange.leaf {
-				state.leaf = metadata
+		switch kind {
+		case .reload:
+			state.localOffset = metadata?.localOffset ?? 0
+			state.globalCount = metadata?.globalCount ?? values.count
+			state.leaf = metadata?.leaf ?? nil
+		case .delete:
+			if let localOffset = metadata?.localOffset {
+				state.localOffset = localOffset
 			}
-		} else {
-			switch kind {
-			case .reload:
-				state.localOffset = 0
-				state.globalCount = values.count
-				state.leaf = nil
-			case .delete: state.globalCount -= indexSet.count
-			case .insert: state.globalCount += indexSet.count
-			case .scroll(let offset): state.localOffset += offset
-			case .update: break
-			case .move: break
+			state.globalCount = metadata?.globalCount ?? (state.globalCount - indexSet.count)
+			if let leaf = metadata?.leaf {
+				state.leaf = leaf
+			}
+		case .insert:
+			if let localOffset = metadata?.localOffset {
+				state.localOffset = localOffset
+			}
+			state.globalCount = metadata?.globalCount ?? (state.globalCount + indexSet.count)
+			if let leaf = metadata?.leaf {
+				state.leaf = leaf
+			}
+		case .scroll(let offset):
+			state.localOffset = metadata?.localOffset ?? (state.localOffset + offset)
+			if let globalCount = metadata?.globalCount {
+				state.globalCount = globalCount
+			}
+			if let leaf = metadata?.leaf {
+				state.leaf = leaf
+			}
+		case .update: fallthrough
+		case .move:
+			if let localOffset = metadata?.localOffset {
+				state.localOffset = localOffset
+			}
+			if let globalCount = metadata?.globalCount {
+				state.globalCount = globalCount
+			}
+			if let leaf = metadata?.leaf {
+				state.leaf = leaf
 			}
 		}
 	}

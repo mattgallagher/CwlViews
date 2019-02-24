@@ -769,7 +769,7 @@ private func applyLayoutToView(view: Layout.View, params: (layout: Layout, bound
 		view.remove(constraintsAndBoxes: previous, subviews: removedViews)
 		let storage = Layout.Storage(layout: layout)
 		layout.add(to: view, containerBounds: bounds, storage: storage)
-		setLayout(storage, for: view)
+		view.associatedLayoutStorage = storage
 		return
 	#else
 		// Now that we know the precise removed set, remove them.

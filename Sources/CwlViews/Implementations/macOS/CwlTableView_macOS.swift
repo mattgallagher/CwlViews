@@ -68,7 +68,7 @@ public extension TableView {
 		case headerView(Dynamic<TableHeaderViewConvertible?>)
 		case intercellSpacing(Dynamic<NSSize>)
 		case rowHeight(Dynamic<CGFloat>)
-		case rows(Dynamic<TableRowMutation<RowData>>)
+		case rows(Dynamic<TableRowAnimatable<RowData>>)
 		case rowSizeStyle(Dynamic<NSTableView.RowSizeStyle>)
 		case selectionHighlightStyle(Dynamic<NSTableView.SelectionHighlightStyle>)
 		case userInterfaceLayoutDirection(Dynamic<NSUserInterfaceLayoutDirection>)
@@ -319,7 +319,7 @@ public extension TableView.Preparer {
 		case .nextTypeSelectMatch: return nil
 		case .pasteboardWriter: return nil
 		case .rowActionsForRow: return nil
-		case .rows(let x): return x.apply(instance, storage) { i, s, v in s.applyRangeMutation(v, in: i) }
+		case .rows(let x): return x.apply(instance, storage) { i, s, v in s.applyRowAnimation(v, in: i) }
 		case .rowView: return nil
 		case .selectionIndexesForProposedSelection: return nil
 		case .selectionShouldChange: return nil
@@ -369,14 +369,14 @@ extension TableView.Preparer {
 		open override var isInUse: Bool { return true }
 
 		open var actionTarget: SignalDoubleActionTarget? = nil
-		open var rowState: RangeMutationState<RowData> = RangeMutationState<RowData>()
+		open var rowState: TableRowState<RowData> = TableRowState<RowData>()
 		open var visibleRows: IndexSet = []
 		open var visibleRowsSignalInput: SignalInput<CountableRange<Int>>? = nil
 		open var groupRowCellConstructor: ((Int) -> TableCellViewConvertible)?
 		open var columns: [TableColumn<RowData>.Preparer.Storage] = []
 		
 		fileprivate func rowData(at row: Int) -> RowData? {
-			return rowState.rows.at(row)
+			return rowState.values?.at(row)
 		}
 		
 		open func columnForIdentifier(_ identifier: NSUserInterfaceItemIdentifier) -> (offset: Int, element: TableColumn<RowData>.Preparer.Storage)? {
@@ -426,14 +426,14 @@ extension TableView.Preparer {
 		open func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 			if let tc = tableColumn {
 				if let col = columnForIdentifier(tc.identifier) {
-					let data = rowState.rows.at(row - rowState.localOffset)
+					let data = rowState.values?.at(row - rowState.localOffset)
 					let identifier = col.element.cellIdentifier?(data) ?? tc.identifier
 
 					let cellView: NSTableCellView
 					let cellInput: SignalInput<RowData>?
 					if let reusedView = tableView.makeView(withIdentifier: identifier, owner: tableView), let downcast = reusedView as? NSTableCellView {
 						cellView = downcast
-						cellInput = cellSignalInput(for: cellView, valueType: RowData.self)
+						cellInput = cellView.associatedRowInput(valueType: RowData.self)
 					} else if let cc = col.element.cellConstructor {
 						let dataTuple = Signal<RowData>.create()
 						let constructed = cc(identifier, dataTuple.signal.multicast()).nsTableCellView()
@@ -442,7 +442,7 @@ extension TableView.Preparer {
 						}
 						cellView = constructed
 						cellInput = dataTuple.input
-						setCellSignalInput(for: cellView, to: dataTuple.input)
+						cellView.setAssociatedRowInput(to: dataTuple.input)
 					} else {
 						return col.element.dataMissingCell?()?.nsTableCellView()
 					}
@@ -474,28 +474,35 @@ extension TableView.Preparer {
 			}
 		}
 
-		open func applyRangeMutation(_ rowMutation: TableRowMutation<RowData>, in tableView: NSTableView) {
-			rowMutation.apply(to: &rowState)
-			switch rowMutation.arrayMutation.kind {
+		open func applyRowAnimation(_ rowAnimation: TableRowAnimatable<RowData>, in tableView: NSTableView) {
+			rowAnimation.value.apply(toSubrange: &rowState)
+			rowAnimation.value.updateMetadata(&rowState)
+			
+			let animation = rowAnimation.animation ?? []
+			let indices = rowAnimation.value.indexSet.offset(by: rowState.localOffset)
+
+			switch rowAnimation.value.kind {
 			case .delete:
-				tableView.removeRows(at: rowMutation.arrayMutation.indexSet.offset(by: rowState.localOffset), withAnimation: rowMutation.animation)
+				tableView.removeRows(at: indices, withAnimation: animation)
 			case .move(let destination):
 				tableView.beginUpdates()
-				for (count, index) in rowMutation.arrayMutation.indexSet.offset(by: rowState.localOffset).enumerated() {
+				for (count, index) in indices.enumerated() {
 					tableView.moveRow(at: index, to: destination + count)
 				}
 				tableView.endUpdates()
 			case .insert:
-				tableView.insertRows(at: rowMutation.arrayMutation.indexSet.offset(by: rowState.localOffset), withAnimation: rowMutation.animation)
+				tableView.insertRows(at: indices, withAnimation: animation)
 			case .scroll:
-				tableView.reloadData(forRowIndexes: rowMutation.arrayMutation.indexSet.offset(by: rowState.localOffset), columnIndexes: IndexSet(integersIn: 0..<tableView.tableColumns.count))
+				tableView.reloadData(forRowIndexes: indices, columnIndexes: IndexSet(integersIn: 0..<tableView.tableColumns.count))
 			case .update:
-				for rowIndex in rowMutation.arrayMutation.indexSet {
+				tableView.beginUpdates()
+				for rowIndex in indices {
 					for columnIndex in 0..<tableView.numberOfColumns {
-						guard let cell = tableView.view(atColumn: columnIndex, row: rowIndex, makeIfNecessary: false), let value = rowState.rows.at(rowIndex - rowState.localOffset) else { continue }
-						cellSignalInput(for: cell, valueType: RowData.self)?.send(value: value)
+						guard let cell = tableView.view(atColumn: columnIndex, row: rowIndex, makeIfNecessary: false) as? NSTableCellView, let value = rowState.values?.at(rowIndex - rowState.localOffset) else { continue }
+						cell.associatedRowInput(valueType: RowData.self)?.send(value: value)
 					}
 				}
+				tableView.endUpdates()
 			case .reload:
 				tableView.reloadData()
 			}
@@ -644,7 +651,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var headerView: TableViewName<Dynamic<TableHeaderViewConvertible?>> { return .name(B.headerView) }
 	static var intercellSpacing: TableViewName<Dynamic<NSSize>> { return .name(B.intercellSpacing) }
 	static var rowHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.rowHeight) }
-	static var rows: TableViewName<Dynamic<TableRowMutation<Binding.RowDataType>>> { return .name(B.rows) }
+	static var rows: TableViewName<Dynamic<TableRowAnimatable<Binding.RowDataType>>> { return .name(B.rows) }
 	static var rowSizeStyle: TableViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(B.rowSizeStyle) }
 	static var selectionHighlightStyle: TableViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
 	static var userInterfaceLayoutDirection: TableViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
@@ -739,6 +746,11 @@ public extension TableView.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
+public typealias TableRowMutation<Element> = SubrangeMutation<Element, ()>
+public typealias TableRowAnimatable<Element> = Animatable<TableRowMutation<Element>, NSTableView.AnimationOptions>
+
+public typealias TableRowState<Element> = SubrangeState<Element, ()>
+
 public struct TableCell<RowData> {
 	public let row: Int
 	public let column: Int
@@ -757,6 +769,46 @@ public struct TableCell<RowData> {
 		self.column = tableView.column(withIdentifier: column.identifier)
 		self.columnIdentifier = column.identifier
 		self.data = (tableView.delegate as? TableView<RowData>.Preparer.Storage)?.rowData(at: row)
+	}
+}
+
+public extension Sequence {
+	func tableData() -> TableRowAnimatable<Element> {
+		return .set(.reload(Array(self)))
+	}
+}
+
+public extension Signal {
+	func tableData<RowData>(_ choice: AnimationChoice = .subsequent) -> Signal<TableRowAnimatable<RowData>> where IndexedMutation<RowData, ()> == OutputValue {
+		return map(initialState: false) { (alreadyReceived: inout Bool, rowMutation: OutputValue) -> TableRowAnimatable<RowData> in
+			if alreadyReceived || choice == .always {
+				return .animate(TableRowMutation(kind: rowMutation.kind, metadata: nil, indexSet: rowMutation.indexSet, values: rowMutation.values), animation: .effectFade)
+			} else {
+				if choice == .subsequent {
+					alreadyReceived = true
+				}
+				return .set(TableRowMutation(kind: rowMutation.kind, metadata: nil, indexSet: rowMutation.indexSet, values: rowMutation.values))
+			}
+		}
+	}
+
+	func tableData<RowData>(_ choice: AnimationChoice = .subsequent) -> Signal<TableRowAnimatable<RowData>> where TableRowMutation<RowData> == OutputValue {
+		return map(initialState: false) { (alreadyReceived: inout Bool, rowMutation: OutputValue) -> TableRowAnimatable<RowData> in
+			if alreadyReceived || choice == .always {
+				return .animate(rowMutation, animation: .effectFade)
+			} else {
+				if choice == .subsequent {
+					alreadyReceived = true
+				}
+				return .set(rowMutation)
+			}
+		}
+	}
+}
+
+public extension Adapter where State == VarState<Int?> {
+	func updateFirstRow() -> SignalInput<CountableRange<Int>> {
+		return Input().map { $0.first }.bind(to: update())
 	}
 }
 

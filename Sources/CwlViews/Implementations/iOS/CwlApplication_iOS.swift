@@ -73,18 +73,18 @@ public extension Application {
 		case willResignActive(SignalInput<Void>)
 
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
-		case continueUserActivity((Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool)
-		case didDecodeRestorableState((NSKeyedUnarchiver) -> Void)
-		case didFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
-		case didUpdate((NSUserActivity) -> Void)
-		case open((_ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool)
-		case shouldAllowExtensionPointIdentifier((UIApplication.ExtensionPointIdentifier) -> Bool)
-		case shouldRequestHealthAuthorization(() -> Void)
-		case viewControllerWithRestorationPath((_ path: [String], _ coder: NSCoder) -> UIViewController?)
-		case willContinueUserActivity((String) -> Bool)
-		case willEncodeRestorableState((NSKeyedArchiver) -> Void)
-		case willFinishLaunching(([UIApplication.LaunchOptionsKey: Any]?) -> Bool)
-		case willTerminate(() -> Void)
+		case continueUserActivity((_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool)
+		case didDecodeRestorableState((_ application: UIApplication, NSKeyedUnarchiver) -> Void)
+		case didFinishLaunching((_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool)
+		case didUpdate((_ application: UIApplication, NSUserActivity) -> Void)
+		case open((_ application: UIApplication, _ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool)
+		case shouldAllowExtensionPointIdentifier((_ application: UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool)
+		case shouldRequestHealthAuthorization((_ application: UIApplication) -> Void)
+		case viewControllerWithRestorationPath((_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController?)
+		case willContinueUserActivity((_ application: UIApplication, String) -> Bool)
+		case willEncodeRestorableState((_ application: UIApplication, NSKeyedArchiver) -> Void)
+		case willFinishLaunching((_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool)
+		case willTerminate((_ application: UIApplication) -> Void)
 	}
 }
 
@@ -225,12 +225,13 @@ extension Application.Preparer {
 		static var storedApplicationConstructor: (() -> Application)? = nil
 		static var storedStorage: Storage? = nil
 		
+		open var window: UIWindow? = nil
+		open var additionalWindows: [UIWindow] = []
+		open var willFinishLaunching: ((UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
+
 		open override var isInUse: Bool {
 			return true
 		}
-		
-		open var window: UIWindow? = nil
-		open var additionalWindows: [UIWindow] = []
 		
 		open func applyToSharedApplication() {
 			// If the storageApplicationConstructor is not set, this function is a no-op. This is useful during testing.
@@ -253,12 +254,11 @@ extension Application.Preparer {
 			window?.makeKeyAndVisible()
 		}
 		
-		open var willFinishLaunching: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool)?
 		public func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 			applyToSharedApplication()
 			
 			// Invoke any user-supplied code
-			return willFinishLaunching?(launchOptions) ?? true
+			return willFinishLaunching?(application, launchOptions) ?? true
 		}
 	}
 
@@ -284,11 +284,11 @@ extension Application.Preparer {
 		}
 		
 		open func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-			return handler(ofType: (([UIApplication.LaunchOptionsKey: Any]?) -> Bool).self)!(launchOptions)
+			return handler(ofType: ((UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool).self)!(application, launchOptions)
 		}
 		
 		open func applicationWillTerminate(_ application: UIApplication) {
-			return handler(ofType: (() -> Void).self)!()
+			return handler(ofType: ((UIApplication) -> Void).self)!(application)
 		}
 		
 		open func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
@@ -300,11 +300,11 @@ extension Application.Preparer {
 		}
 		
 		open func application(_ application: UIApplication, willEncodeRestorableStateWith coder: NSCoder) {
-			return handler(ofType: ((NSKeyedArchiver) -> Void).self)!(coder as! NSKeyedArchiver)
+			return handler(ofType: ((UIApplication, NSKeyedArchiver) -> Void).self)!(application, coder as! NSKeyedArchiver)
 		}
 		
 		open func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
-			return handler(ofType: ((NSKeyedUnarchiver) -> Void).self)!(coder as! NSKeyedUnarchiver)
+			return handler(ofType: ((UIApplication, NSKeyedUnarchiver) -> Void).self)!(application, coder as! NSKeyedUnarchiver)
 		}
 		
 		open func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
@@ -364,20 +364,19 @@ extension Application.Preparer {
 		}
 		
 		open func applicationShouldRequestHealthAuthorization(_ application: UIApplication) {
-			handler(ofType: (() -> Void).self)!()
+			handler(ofType: ((UIApplication) -> Void).self)!(application)
 		}
 		
 		open func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)!(userActivityType)
+			return handler(ofType: ((UIApplication, String) -> Bool).self)!(application, userActivityType)
 		}
 		
 		open func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-			let (input, _) = Signal<[UIUserActivityRestoring]?>.create { s in s.subscribeWhile { r in restorationHandler(r.value ?? nil); return false } }
-			return handler(ofType: ((Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool).self)!(Callback(userActivity, input))
+			return handler(ofType: ((UIApplication, NSUserActivity, @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool).self)!(application, userActivity, restorationHandler)
 		}
 		
 		open func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) {
-			handler(ofType: ((NSUserActivity) -> Void).self)!(userActivity)
+			handler(ofType: ((UIApplication, NSUserActivity) -> Void).self)!(application, userActivity)
 		}
 		
 		open func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
@@ -391,15 +390,15 @@ extension Application.Preparer {
 		}
 		
 		open func application(_ application: UIApplication, viewControllerWithRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
-			return handler(ofType: (([String], NSCoder) -> UIViewController?).self)!(identifierComponents, coder)
+			return handler(ofType: ((UIApplication, [String], NSCoder) -> UIViewController?).self)!(application, identifierComponents, coder)
 		}
 		
-		open func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-			return handler(ofType: ((URL, [UIApplication.OpenURLOptionsKey: Any]) -> Bool).self)!(url, options)
+		open func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+			return handler(ofType: ((UIApplication, URL, [UIApplication.OpenURLOptionsKey: Any]) -> Bool).self)!(application, url, options)
 		}
 		
 		open func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
-			return handler(ofType: ((UIApplication.ExtensionPointIdentifier) -> Bool).self)!(extensionPointIdentifier)
+			return handler(ofType: ((UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool).self)!(application, extensionPointIdentifier)
 		}
 		
 		open func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
@@ -454,18 +453,18 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var willResignActive: ApplicationName<SignalInput<Void>> { return .name(B.willResignActive) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var continueUserActivity: ApplicationName<(Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool> { return .name(B.continueUserActivity) }
-	static var didDecodeRestorableState: ApplicationName<(NSKeyedUnarchiver) -> Void> { return .name(B.didDecodeRestorableState) }
-	static var didFinishLaunching: ApplicationName<([UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.didFinishLaunching) }
-	static var didUpdate: ApplicationName<(NSUserActivity) -> Void> { return .name(B.didUpdate) }
-	static var open: ApplicationName<(_ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool> { return .name(B.open) }
-	static var shouldAllowExtensionPointIdentifier: ApplicationName<(UIApplication.ExtensionPointIdentifier) -> Bool> { return .name(B.shouldAllowExtensionPointIdentifier) }
-	static var shouldRequestHealthAuthorization: ApplicationName<() -> Void> { return .name(B.shouldRequestHealthAuthorization) }
-	static var viewControllerWithRestorationPath: ApplicationName<(_ path: [String], _ coder: NSCoder) -> UIViewController> { return .name(B.viewControllerWithRestorationPath) }
-	static var willContinueUserActivity: ApplicationName<(String) -> Bool> { return .name(B.willContinueUserActivity) }
-	static var willEncodeRestorableState: ApplicationName<(NSKeyedArchiver) -> Void> { return .name(B.willEncodeRestorableState) }
-	static var willFinishLaunching: ApplicationName<([UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.willFinishLaunching) }
-	static var willTerminate: ApplicationName<() -> Void> { return .name(B.willTerminate) }
+	static var continueUserActivity: ApplicationName<(_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool> { return .name(B.continueUserActivity) }
+	static var didDecodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedUnarchiver) -> Void> { return .name(B.didDecodeRestorableState) }
+	static var didFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.didFinishLaunching) }
+	static var didUpdate: ApplicationName<(_ application: UIApplication, NSUserActivity) -> Void> { return .name(B.didUpdate) }
+	static var open: ApplicationName<(_ application: UIApplication, _ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool> { return .name(B.open) }
+	static var shouldAllowExtensionPointIdentifier: ApplicationName<(_ application: UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool> { return .name(B.shouldAllowExtensionPointIdentifier) }
+	static var shouldRequestHealthAuthorization: ApplicationName<(_ application: UIApplication) -> Void> { return .name(B.shouldRequestHealthAuthorization) }
+	static var viewControllerWithRestorationPath: ApplicationName<(_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController?> { return .name(B.viewControllerWithRestorationPath) }
+	static var willContinueUserActivity: ApplicationName<(_ application: UIApplication, String) -> Bool> { return .name(B.willContinueUserActivity) }
+	static var willEncodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedArchiver) -> Void> { return .name(B.willEncodeRestorableState) }
+	static var willFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.willFinishLaunching) }
+	static var willTerminate: ApplicationName<(_ application: UIApplication) -> Void> { return .name(B.willTerminate) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

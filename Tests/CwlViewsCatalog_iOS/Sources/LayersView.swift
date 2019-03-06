@@ -1,5 +1,5 @@
 //
-//  SearchBarView.swift
+//  LayersView.swift
 //  CwlViewsCatalog_iOS
 //
 //  Created by Matt Gallagher on 10/2/19.
@@ -8,18 +8,18 @@
 
 import CwlViews
 
-struct SearchBarViewState: CodableContainer {
+struct LayersViewState: CodableContainer {
 	init() {
 	}
 }
 
-func searchBarView(_ searchBarViewState: SearchBarViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
+func layersView(_ layersViewState: LayersViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
 	return ViewController(
 		.navigationItem -- navigationItem,
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogViewState.CodingKeys.searchBar.rawValue))
+				.view(Label(.text -- CatalogName.textField.rawValue))
 			)
 		)
 	)

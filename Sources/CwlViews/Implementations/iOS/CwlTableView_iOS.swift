@@ -88,32 +88,32 @@ public extension TableView {
 		case visibleRowsChanged(SignalInput<[TableRow<RowData>]>)
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
-		case canEditRow((_ tableRowData: TableRow<RowData>) -> Bool)
-		case canFocusRow((_ tableRowData: TableRow<RowData>) -> Bool)
-		case canMoveRow((_ tableRowData: TableRow<RowData>) -> Bool)
-		case canPerformAction((_ action: Selector, _ tableRowData: TableRow<RowData>, _ sender: Any?) -> Bool)
+		case canEditRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Bool)
+		case canFocusRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Bool)
+		case canMoveRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Bool)
+		case canPerformAction((_ tableView: UITableView, _ action: Selector, _ tableRowData: TableRow<RowData>, _ sender: Any?) -> Bool)
 		case cellConstructor((_ identifier: String?, _ rowSignal: SignalMulti<RowData>) -> TableViewCellConvertible)
 		case cellIdentifier((TableRow<RowData>) -> String?)
 		case dataMissingCell((IndexPath) -> TableViewCellConvertible)
 		case didUpdateFocus((UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void)
-		case editActionsForRow((_ tableRowData: TableRow<RowData>) -> [UITableViewRowAction]?)
-		case editingStyleForRow((_ tableRowData: TableRow<RowData>) -> UITableViewCell.EditingStyle)
-		case estimatedHeightForFooter((_ section: Int) -> CGFloat)
-		case estimatedHeightForHeader((_ section: Int) -> CGFloat)
-		case estimatedHeightForRow((_ tableRowData: TableRow<RowData>) -> CGFloat)
-		case footerHeight((_ section: Int) -> CGFloat)
-		case footerView((_ section: Int, _ title: String?) -> ViewConvertible?)
-		case headerHeight((_ section: Int) -> CGFloat)
-		case headerView((_ section: Int, _ title: String?) -> ViewConvertible?)
-		case heightForRow((_ tableRowData: TableRow<RowData>) -> CGFloat)
-		case indentationLevelForRow((_ tableRowData: TableRow<RowData>) -> Int)
+		case editActionsForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> [UITableViewRowAction]?)
+		case editingStyleForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> UITableViewCell.EditingStyle)
+		case estimatedHeightForFooter((_ tableView: UITableView, _ section: Int) -> CGFloat)
+		case estimatedHeightForHeader((_ tableView: UITableView, _ section: Int) -> CGFloat)
+		case estimatedHeightForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> CGFloat)
+		case footerHeight((_ tableView: UITableView, _ section: Int) -> CGFloat)
+		case footerView((_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?)
+		case headerHeight((_ tableView: UITableView, _ section: Int) -> CGFloat)
+		case headerView((_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?)
+		case heightForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> CGFloat)
+		case indentationLevelForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Int)
 		case indexPathForPreferredFocusedView((UITableView) -> IndexPath)
-		case shouldHighlightRow((_ tableRowData: TableRow<RowData>) -> Bool)
-		case shouldIndentWhileEditingRow((_ tableRowData: TableRow<RowData>) -> Bool)
-		case shouldShowMenuForRow((_ tableRowData: TableRow<RowData>) -> Bool)
+		case shouldHighlightRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Bool)
+		case shouldIndentWhileEditingRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Bool)
+		case shouldShowMenuForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Bool)
 		case shouldUpdateFocus((UITableView, UITableViewFocusUpdateContext) -> Bool)
 		case targetIndexPathForMoveFromRow((_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath)
-		case titleForDeleteConfirmationButtonForRow((_ tableRowData: TableRow<RowData>) -> String?)
+		case titleForDeleteConfirmationButtonForRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> String?)
 		case willBeginEditingRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> Void)
 		case willDeselectRow((_ tableView: UITableView, _ tableRowData: TableRow<RowData>) -> IndexPath?)
 		case willDisplayFooter((_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void)
@@ -563,19 +563,19 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Bool).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canFocusRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Bool).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Bool).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-			return handler(ofType: ((Selector, TableRow<RowData>, Any?) -> Bool).self)!(action, tableRowData(at: indexPath, in: tableView), sender)
+			return handler(ofType: ((UITableView, Selector, TableRow<RowData>, Any?) -> Bool).self)!(tableView, action, tableRowData(at: indexPath, in: tableView), sender)
 		}
 		
 		open func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -616,47 +616,47 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-			return handler(ofType: ((TableRow<RowData>) -> [UITableViewRowAction]?).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> [UITableViewRowAction]?).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
-			return handler(ofType: ((TableRow<RowData>) -> UITableViewCell.EditingStyle).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> UITableViewCell.EditingStyle).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
-			return handler(ofType: ((Int) -> CGFloat).self)!(section)
+			return handler(ofType: ((UITableView, Int) -> CGFloat).self)!(tableView, section)
 		}
 		
 		open func tableView(_ tableView: UITableView, estimatedHeightForHeaderInSection section: Int) -> CGFloat {
-			return handler(ofType: ((Int) -> CGFloat).self)!(section)
+			return handler(ofType: ((UITableView, Int) -> CGFloat).self)!(tableView, section)
 		}
 		
 		open func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-			return handler(ofType: ((TableRow<RowData>) -> CGFloat).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> CGFloat).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-			return handler(ofType: ((Int) -> CGFloat).self)!(section)
+			return handler(ofType: ((UITableView, Int) -> CGFloat).self)!(tableView, section)
 		}
 		
 		open func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-			return handler(ofType: ((Int, String?) -> ViewConvertible?).self)!(section, tableView.dataSource?.tableView?(tableView, titleForFooterInSection: section))?.uiView()
+			return handler(ofType: ((UITableView, Int, String?) -> ViewConvertible?).self)!(tableView, section, tableView.dataSource?.tableView?(tableView, titleForFooterInSection: section))?.uiView()
 		}
 		
 		open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-			return handler(ofType: ((Int) -> CGFloat).self)!(section)
+			return handler(ofType: ((UITableView, Int) -> CGFloat).self)!(tableView, section)
 		}
 		
 		open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-			return handler(ofType: ((Int, String?) -> ViewConvertible?).self)!(section, tableView.dataSource?.tableView?(tableView, titleForHeaderInSection: section))?.uiView()
+			return handler(ofType: ((UITableView, Int, String?) -> ViewConvertible?).self)!(tableView, section, tableView.dataSource?.tableView?(tableView, titleForHeaderInSection: section))?.uiView()
 		}
 		
 		open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-			return handler(ofType: ((TableRow<RowData>) -> CGFloat).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> CGFloat).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-			return handler(ofType: ((TableRow<RowData>) -> Int).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Int).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func indexPathForPreferredFocusedView(in tableView: UITableView) -> IndexPath? {
@@ -668,15 +668,15 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Bool).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Bool).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldShowMenuForRowAt indexPath: IndexPath) -> Bool {
-			return handler(ofType: ((TableRow<RowData>) -> Bool).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> Bool).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, shouldUpdateFocusIn context: UITableViewFocusUpdateContext) -> Bool {
@@ -688,7 +688,7 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-			return handler(ofType: ((TableRow<RowData>) -> String?).self)!(tableRowData(at: indexPath, in: tableView))
+			return handler(ofType: ((UITableView, TableRow<RowData>) -> String?).self)!(tableView, tableRowData(at: indexPath, in: tableView))
 		}
 		
 		open func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
@@ -790,32 +790,32 @@ public extension BindingName where Binding: TableViewBinding {
 	static var visibleRowsChanged: TableViewName<SignalInput<[TableRow<Binding.RowDataType>]>> { return .name(B.visibleRowsChanged) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var canEditRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canEditRow) }
-	static var canFocusRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canFocusRow) }
-	static var canMoveRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canMoveRow) }
-	static var canPerformAction: TableViewName<(_ action: Selector, _ tableRowData: TableRow<Binding.RowDataType>, _ sender: Any?) -> Bool> { return .name(B.canPerformAction) }
+	static var canEditRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canEditRow) }
+	static var canFocusRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canFocusRow) }
+	static var canMoveRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canMoveRow) }
+	static var canPerformAction: TableViewName<(_ tableView: UITableView, _ action: Selector, _ tableRowData: TableRow<Binding.RowDataType>, _ sender: Any?) -> Bool> { return .name(B.canPerformAction) }
 	static var cellConstructor: TableViewName<(_ identifier: String?, _ rowSignal: SignalMulti<Binding.RowDataType>) -> TableViewCellConvertible> { return .name(B.cellConstructor) }
 	static var cellIdentifier: TableViewName<(TableRow<Binding.RowDataType>) -> String?> { return .name(B.cellIdentifier) }
 	static var dataMissingCell: TableViewName<(IndexPath) -> TableViewCellConvertible> { return .name(B.dataMissingCell) }
 	static var didUpdateFocus: TableViewName<(UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void> { return .name(B.didUpdateFocus) }
-	static var editActionsForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> [UITableViewRowAction]?> { return .name(B.editActionsForRow) }
-	static var editingStyleForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> UITableViewCell.EditingStyle> { return .name(B.editingStyleForRow) }
-	static var estimatedHeightForFooter: TableViewName<(_ section: Int) -> CGFloat> { return .name(B.estimatedHeightForFooter) }
-	static var estimatedHeightForHeader: TableViewName<(_ section: Int) -> CGFloat> { return .name(B.estimatedHeightForHeader) }
-	static var estimatedHeightForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(B.estimatedHeightForRow) }
-	static var footerHeight: TableViewName<(_ section: Int) -> CGFloat> { return .name(B.footerHeight) }
-	static var footerView: TableViewName<(_ section: Int, _ title: String?) -> ViewConvertible?> { return .name(B.footerView) }
-	static var headerHeight: TableViewName<(_ section: Int) -> CGFloat> { return .name(B.headerHeight) }
-	static var headerView: TableViewName<(_ section: Int, _ title: String?) -> ViewConvertible?> { return .name(B.headerView) }
-	static var heightForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(B.heightForRow) }
-	static var indentationLevelForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Int> { return .name(B.indentationLevelForRow) }
+	static var editActionsForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> [UITableViewRowAction]?> { return .name(B.editActionsForRow) }
+	static var editingStyleForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> UITableViewCell.EditingStyle> { return .name(B.editingStyleForRow) }
+	static var estimatedHeightForFooter: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.estimatedHeightForFooter) }
+	static var estimatedHeightForHeader: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.estimatedHeightForHeader) }
+	static var estimatedHeightForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(B.estimatedHeightForRow) }
+	static var footerHeight: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.footerHeight) }
+	static var footerView: TableViewName<(_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?> { return .name(B.footerView) }
+	static var headerHeight: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.headerHeight) }
+	static var headerView: TableViewName<(_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?> { return .name(B.headerView) }
+	static var heightForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(B.heightForRow) }
+	static var indentationLevelForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Int> { return .name(B.indentationLevelForRow) }
 	static var indexPathForPreferredFocusedView: TableViewName<(UITableView) -> IndexPath> { return .name(B.indexPathForPreferredFocusedView) }
-	static var shouldHighlightRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldHighlightRow) }
-	static var shouldIndentWhileEditingRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldIndentWhileEditingRow) }
-	static var shouldShowMenuForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldShowMenuForRow) }
+	static var shouldHighlightRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldHighlightRow) }
+	static var shouldIndentWhileEditingRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldIndentWhileEditingRow) }
+	static var shouldShowMenuForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldShowMenuForRow) }
 	static var shouldUpdateFocus: TableViewName<(UITableView, UITableViewFocusUpdateContext) -> Bool> { return .name(B.shouldUpdateFocus) }
 	static var targetIndexPathForMoveFromRow: TableViewName<(_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath> { return .name(B.targetIndexPathForMoveFromRow) }
-	static var titleForDeleteConfirmationButtonForRow: TableViewName<(_ tableRowData: TableRow<Binding.RowDataType>) -> String?> { return .name(B.titleForDeleteConfirmationButtonForRow) }
+	static var titleForDeleteConfirmationButtonForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> String?> { return .name(B.titleForDeleteConfirmationButtonForRow) }
 	static var willBeginEditingRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Void> { return .name(B.willBeginEditingRow) }
 	static var willDeselectRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> IndexPath?> { return .name(B.willDeselectRow) }
 	static var willDisplayFooter: TableViewName<(_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void> { return .name(B.willDisplayFooter) }

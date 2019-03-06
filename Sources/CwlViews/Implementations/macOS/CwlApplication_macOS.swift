@@ -94,25 +94,25 @@ public extension Application {
 		case willUpdate(SignalInput<Void>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case continueUserActivity((_ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool)
-		case didDecodeRestorableState((NSCoder) -> Void)
-		case didUpdateUserActivity((NSUserActivity) -> Void)
-		case openFile((_ filename: String) -> Bool)
-		case openFiles((_ filenames: [String]) -> Void)
-		case openFileWithoutUI((_ filename: String) -> Bool)
-		case openTempFile((_ filename: String) -> Bool)
-		case openUntitledFile(() -> Bool)
-		case printFile((_ filename: String) -> Bool)
-		case printFiles((_ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply)
-		case shouldHandleReopen((_ hasVisibleWindows: Bool) -> Bool)
-		case shouldOpenUntitledFile(() -> Bool)
-		case shouldTerminate(() -> ApplicationTerminateReply)
-		case shouldTerminateAfterLastWindowClosed(() -> Bool)
-		case userDidAcceptCloudKitShare((CKShare.Metadata) -> Void)
-		case willContinueUserActivity((_ type: String) -> Bool)
-		case willEncodeRestorableState((NSCoder) -> Void)
-		case willPresentError((Error) -> Error)
-		case willTerminate(() -> Void)
+		case continueUserActivity((_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool)
+		case didDecodeRestorableState((_ application: NSApplication, NSCoder) -> Void)
+		case didUpdateUserActivity((_ application: NSApplication, NSUserActivity) -> Void)
+		case openFile((_ application: NSApplication, _ filename: String) -> Bool)
+		case openFiles((_ application: NSApplication, _ filenames: [String]) -> Void)
+		case openFileWithoutUI((_ application: Any, _ filename: String) -> Bool)
+		case openTempFile((_ application: NSApplication, _ filename: String) -> Bool)
+		case openUntitledFile((_ application: NSApplication) -> Bool)
+		case printFile((_ application: NSApplication, _ filename: String) -> Bool)
+		case printFiles((_ application: NSApplication, _ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply)
+		case shouldHandleReopen((_ application: NSApplication, _ hasVisibleWindows: Bool) -> Bool)
+		case shouldOpenUntitledFile((_ application: NSApplication) -> Bool)
+		case shouldTerminate((_ application: NSApplication) -> ApplicationTerminateReply)
+		case shouldTerminateAfterLastWindowClosed((_ application: NSApplication) -> Bool)
+		case userDidAcceptCloudKitShare((_ application: NSApplication, CKShare.Metadata) -> Void)
+		case willContinueUserActivity((_ application: NSApplication, _ type: String) -> Bool)
+		case willEncodeRestorableState((_ application: NSApplication, NSCoder) -> Void)
+		case willPresentError((_ application: NSApplication, Error) -> Error)
+		case willTerminate((_ notification: Notification) -> Void)
 	}
 }
 
@@ -283,85 +283,85 @@ extension Application.Preparer {
 	}
 	
 	open class Delegate: DynamicDelegate, NSApplicationDelegate {
-		open func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-			switch handler(ofType: (() -> ApplicationTerminateReply).self)!() {
+		open func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {
+			switch handler(ofType: ((NSApplication) -> ApplicationTerminateReply).self)!(application) {
 			case .now: return NSApplication.TerminateReply.terminateNow
 			case .cancel: return NSApplication.TerminateReply.terminateCancel
 			case .later(let c):
 				// Run as a keep alive (effectively, owned by the input)
-				c.subscribeUntilEnd { [weak sender] result in
-					sender?.reply(toApplicationShouldTerminate: result.value == true)
+				c.subscribeUntilEnd { [weak application] result in
+					application?.reply(toApplicationShouldTerminate: result.value == true)
 				}
 				return NSApplication.TerminateReply.terminateLater
 			}
 		}
 		
-		open func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-			return handler(ofType: (() -> Bool).self)!()
+		open func applicationShouldTerminateAfterLastWindowClosed(_ application: NSApplication) -> Bool {
+			return handler(ofType: ((NSApplication) -> Bool).self)!(application)
 		}
 		
-		open func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
-			return handler(ofType: ((Bool) -> Bool).self)!(hasVisibleWindows)
+		open func applicationShouldHandleReopen(_ application: NSApplication, hasVisibleWindows: Bool) -> Bool {
+			return handler(ofType: ((NSApplication, Bool) -> Bool).self)!(application, hasVisibleWindows)
 		}
 		
 		open func application(_ application: NSApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
-			return handler(ofType: ((NSUserActivity, @escaping ([NSUserActivityRestoring]) -> Void) -> Bool).self)!(userActivity, restorationHandler)
+			return handler(ofType: ((NSApplication, NSUserActivity, @escaping ([NSUserActivityRestoring]) -> Void) -> Bool).self)!(application, userActivity, restorationHandler)
 		}
 		
 		open func application(_ application: NSApplication, willPresentError error: Error) -> Error {
-			return handler(ofType: ((Error) -> Error).self)!(error)
+			return handler(ofType: ((NSApplication, Error) -> Error).self)!(application, error)
 		}
 		
 		open func application(_ application: NSApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)!(userActivityType)
+			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, userActivityType)
 		}
 		
-		open func application(_ sender: Any, openFileWithoutUI filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)!(filename)
+		open func application(_ application: Any, openFileWithoutUI filename: String) -> Bool {
+			return handler(ofType: ((Any, String) -> Bool).self)!(application, filename)
 		}
 		
-		open func application(_ sender: NSApplication, openFile filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)!(filename)
+		open func application(_ application: NSApplication, openFile filename: String) -> Bool {
+			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, filename)
 		}
 		
-		open func application(_ sender: NSApplication, openFiles filenames: [String]) {
-			handler(ofType: (([String]) -> Void).self)!(filenames)
+		open func application(_ application: NSApplication, openFiles filenames: [String]) {
+			handler(ofType: ((NSApplication, [String]) -> Void).self)!(application, filenames)
 		}
 		
-		open func application(_ sender: NSApplication, printFile filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)!(filename)
+		open func application(_ application: NSApplication, printFile filename: String) -> Bool {
+			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, filename)
 		}
 		
 		open func application(_ application: NSApplication, printFiles filenames: [String], withSettings printSettings: [NSPrintInfo.AttributeKey: Any], showPrintPanels: Bool) -> NSApplication.PrintReply {
-			return handler(ofType: (([String], [NSPrintInfo.AttributeKey: Any], Bool) -> NSApplication.PrintReply).self)!(filenames, printSettings, showPrintPanels)
+			return handler(ofType: ((NSApplication, [String], [NSPrintInfo.AttributeKey: Any], Bool) -> NSApplication.PrintReply).self)!(application, filenames, printSettings, showPrintPanels)
 		}
 		
-		open func application(_ sender: NSApplication, openTempFile filename: String) -> Bool {
-			return handler(ofType: ((String) -> Bool).self)!(filename)
+		open func application(_ application: NSApplication, openTempFile filename: String) -> Bool {
+			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, filename)
 		}
 		
-		open func applicationOpenUntitledFile(_ sender: NSApplication) -> Bool {
-			return handler(ofType: (() -> Bool).self)!()
+		open func applicationOpenUntitledFile(_ application: NSApplication) -> Bool {
+			return handler(ofType: ((NSApplication) -> Bool).self)!(application)
 		}
 		
-		open func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-			return handler(ofType: (() -> Bool).self)!()
+		open func applicationShouldOpenUntitledFile(_ application: NSApplication) -> Bool {
+			return handler(ofType: ((NSApplication) -> Bool).self)!(application)
 		}
 		
 		open func applicationWillTerminate(_ notification: Notification) {
-			handler(ofType: (() -> Void).self)!()
+			handler(ofType: ((Notification) -> Void).self)!(notification)
 		}
 		
 		open func application(_ application: NSApplication, didUpdate userActivity: NSUserActivity) {
-			return handler(ofType: ((NSUserActivity) -> Void).self)!(userActivity)
+			return handler(ofType: ((NSApplication, NSUserActivity) -> Void).self)!(application, userActivity)
 		}
 		
 		open func application(_ application: NSApplication, willEncodeRestorableState coder: NSCoder) {
-			return handler(ofType: ((NSCoder) -> Void).self)!(coder)
+			return handler(ofType: ((NSApplication, NSCoder) -> Void).self)!(application, coder)
 		}
 		
 		open func application(_ application: NSApplication, didDecodeRestorableState coder: NSCoder) {
-			return handler(ofType: ((NSCoder) -> Void).self)!(coder)
+			return handler(ofType: ((NSApplication, NSCoder) -> Void).self)!(application, coder)
 		}
 		
 		open func application(_ application: NSApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
@@ -381,7 +381,7 @@ extension Application.Preparer {
 		}
 		
 		open func application(_ application: NSApplication, userDidAcceptCloudKitShareWith metadata: CKShare.Metadata) {
-			handler(ofType: ((CKShare.Metadata) -> Void).self)!(metadata)
+			handler(ofType: ((NSApplication, CKShare.Metadata) -> Void).self)!(application, metadata)
 		}
 	}
 }
@@ -449,25 +449,25 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var willUpdate: ApplicationName<SignalInput<Void>> { return .name(B.willUpdate) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var continueUserActivity: ApplicationName<(_ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool> { return .name(B.continueUserActivity) }
-	static var didDecodeRestorableState: ApplicationName<(NSCoder) -> Void> { return .name(B.didDecodeRestorableState) }
-	static var didUpdateUserActivity: ApplicationName<(NSUserActivity) -> Void> { return .name(B.didUpdateUserActivity) }
-	static var openFile: ApplicationName<(_ filename: String) -> Bool> { return .name(B.openFile) }
-	static var openFiles: ApplicationName<(_ filenames: [String]) -> Void> { return .name(B.openFiles) }
-	static var openFileWithoutUI: ApplicationName<(_ filename: String) -> Bool> { return .name(B.openFileWithoutUI) }
-	static var openTempFile: ApplicationName<(_ filename: String) -> Bool> { return .name(B.openTempFile) }
-	static var openUntitledFile: ApplicationName<() -> Bool> { return .name(B.openUntitledFile) }
-	static var printFile: ApplicationName<(_ filename: String) -> Bool> { return .name(B.printFile) }
-	static var printFiles: ApplicationName<(_ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply> { return .name(B.printFiles) }
-	static var shouldHandleReopen: ApplicationName<(_ hasVisibleWindows: Bool) -> Bool> { return .name(B.shouldHandleReopen) }
-	static var shouldOpenUntitledFile: ApplicationName<() -> Bool> { return .name(B.shouldOpenUntitledFile) }
-	static var shouldTerminate: ApplicationName<() -> ApplicationTerminateReply> { return .name(B.shouldTerminate) }
-	static var shouldTerminateAfterLastWindowClosed: ApplicationName<() -> Bool> { return .name(B.shouldTerminateAfterLastWindowClosed) }
-	static var userDidAcceptCloudKitShare: ApplicationName<(CKShare.Metadata) -> Void> { return .name(B.userDidAcceptCloudKitShare) }
-	static var willContinueUserActivity: ApplicationName<(_ type: String) -> Bool> { return .name(B.willContinueUserActivity) }
-	static var willEncodeRestorableState: ApplicationName<(NSCoder) -> Void> { return .name(B.willEncodeRestorableState) }
-	static var willPresentError: ApplicationName<(Error) -> Error> { return .name(B.willPresentError) }
-	static var willTerminate: ApplicationName<() -> Void> { return .name(B.willTerminate) }
+	static var continueUserActivity: ApplicationName<(_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool> { return .name(B.continueUserActivity) }
+	static var didDecodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(B.didDecodeRestorableState) }
+	static var didUpdateUserActivity: ApplicationName<(_ application: NSApplication, NSUserActivity) -> Void> { return .name(B.didUpdateUserActivity) }
+	static var openFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(B.openFile) }
+	static var openFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String]) -> Void> { return .name(B.openFiles) }
+	static var openFileWithoutUI: ApplicationName<(_ application: Any, _ filename: String) -> Bool> { return .name(B.openFileWithoutUI) }
+	static var openTempFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(B.openTempFile) }
+	static var openUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.openUntitledFile) }
+	static var printFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(B.printFile) }
+	static var printFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply> { return .name(B.printFiles) }
+	static var shouldHandleReopen: ApplicationName<(_ application: NSApplication, _ hasVisibleWindows: Bool) -> Bool> { return .name(B.shouldHandleReopen) }
+	static var shouldOpenUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.shouldOpenUntitledFile) }
+	static var shouldTerminate: ApplicationName<(_ application: NSApplication) -> ApplicationTerminateReply> { return .name(B.shouldTerminate) }
+	static var shouldTerminateAfterLastWindowClosed: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.shouldTerminateAfterLastWindowClosed) }
+	static var userDidAcceptCloudKitShare: ApplicationName<(_ application: NSApplication, CKShare.Metadata) -> Void> { return .name(B.userDidAcceptCloudKitShare) }
+	static var willContinueUserActivity: ApplicationName<(_ application: NSApplication, _ type: String) -> Bool> { return .name(B.willContinueUserActivity) }
+	static var willEncodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(B.willEncodeRestorableState) }
+	static var willPresentError: ApplicationName<(_ application: NSApplication, Error) -> Error> { return .name(B.willPresentError) }
+	static var willTerminate: ApplicationName<(_ notification: Notification) -> Void> { return .name(B.willTerminate) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

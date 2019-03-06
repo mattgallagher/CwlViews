@@ -70,19 +70,19 @@ public extension Adapter {
 	}
 }
 
-public protocol SingleValueAdapterState: AdapterState, Codable {
+public protocol PersistentAdapterState: AdapterState, Codable {
 	associatedtype PersistentValue: Codable
 	init(value: PersistentValue)
 	var value: PersistentValue { get }
 }
 
-extension Adapter where State: SingleValueAdapterState {
+extension Adapter where State: PersistentAdapterState {
 	public var state: Signal<State> {
 		return combinedSignal.compactMap { content in content.state }
 	}
 }
 
-public extension SingleValueAdapterState {
+public extension PersistentAdapterState {
 	init(from decoder: Decoder) throws {
 		let c = try decoder.singleValueContainer()
 		let p = try c.decode(PersistentValue.self)
@@ -95,7 +95,7 @@ public extension SingleValueAdapterState {
 	}
 }
 
-extension Adapter where State: SingleValueAdapterState {
+extension Adapter where State: PersistentAdapterState {
 	public func logJson(prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime {
 		return codableValueChanged
 			.startWith(())

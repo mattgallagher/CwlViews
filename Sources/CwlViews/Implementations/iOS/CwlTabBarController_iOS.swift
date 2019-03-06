@@ -50,11 +50,11 @@ public extension TabBarController {
 		case willEndCustomizing(SignalInput<([ItemIdentifier], Bool)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case animationControllerForTransition((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?)
-		case interactionControllerForAnimation((UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?)
-		case preferredInterfaceOrientationForPresentation(() -> UIInterfaceOrientation)
-		case shouldSelect((ItemIdentifier) -> Bool)
-		case supportedInterfaceOrientations(() -> UIInterfaceOrientationMask)
+		case animationControllerForTransition((UITabBarController, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?)
+		case interactionControllerForAnimation((UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?)
+		case preferredInterfaceOrientationForPresentation((UITabBarController) -> UIInterfaceOrientation)
+		case shouldSelect((UITabBarController, ItemIdentifier) -> Bool)
+		case supportedInterfaceOrientations((UITabBarController) -> UIInterfaceOrientationMask)
 		case tabConstructor((ItemIdentifier) -> ViewControllerConvertible)
 	}
 }
@@ -264,11 +264,11 @@ public extension BindingName where Binding: TabBarControllerBinding {
 	static var willEndCustomizing: TabBarControllerName<SignalInput<([Binding.ItemIdentifierType], Bool)>> { return .name(B.willEndCustomizing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var animationControllerForTransition: TabBarControllerName<(UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationControllerForTransition) }
-	static var interactionControllerForAnimation: TabBarControllerName<(UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(B.interactionControllerForAnimation) }
-	static var preferredInterfaceOrientationForPresentation: TabBarControllerName<() -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientationForPresentation) }
-	static var shouldSelect: TabBarControllerName<(Binding.ItemIdentifierType) -> Bool> { return .name(B.shouldSelect) }
-	static var supportedInterfaceOrientations: TabBarControllerName<() -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
+	static var animationControllerForTransition: TabBarControllerName<(UITabBarController, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationControllerForTransition) }
+	static var interactionControllerForAnimation: TabBarControllerName<(UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(B.interactionControllerForAnimation) }
+	static var preferredInterfaceOrientationForPresentation: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientationForPresentation) }
+	static var shouldSelect: TabBarControllerName<(UITabBarController, Binding.ItemIdentifierType) -> Bool> { return .name(B.shouldSelect) }
+	static var supportedInterfaceOrientations: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
 	static var tabConstructor: TabBarControllerName<(Binding.ItemIdentifierType) -> ViewControllerConvertible> { return .name(B.tabConstructor) }
 }
 

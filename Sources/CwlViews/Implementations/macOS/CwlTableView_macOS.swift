@@ -548,10 +548,9 @@ extension TableView.Preparer {
 			return handler(ofType: ((NSTableView, NSEvent, String?) -> Bool).self)!(tableView, event, searchString)
 		}
 
-		open var typeSelectString: ((TableCell<RowData>) -> String?)?
 		open func tableView(_ tableView: NSTableView, typeSelectStringFor tableColumn: NSTableColumn?, row: Int) -> String? {
 			guard let tc = tableColumn, row >= 0 else { return nil }
-			return typeSelectString!(TableCell(row: row, column: tc, tableView: tableView))
+			return handler(ofType: ((TableCell<RowData>) -> String?).self)!(TableCell(row: row, column: tc, tableView: tableView))
 		}
 
 		open func tableView(_ tableView: NSTableView, nextTypeSelectMatchFromRow startRow: Int, toRow endRow: Int, for searchString: String) -> Int {

@@ -372,7 +372,7 @@ class CwlApplicationTests: XCTestCase {
 	
 	func testUserDidAcceptCloudKitShare() {
 		var received: Bool = false
-		let handler = { (m: CKShare.Metadata) -> Void in
+		let handler = { (_: NSApplication, m: CKShare.Metadata) -> Void in
 			received = true
 		}
 		Application.testDelegateBinding(
@@ -384,7 +384,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testContinueUserActivity() {
 		var received: Bool = false
-		let handler = { (userActivity: NSUserActivity, restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool in
+		let handler = { (_: NSApplication, userActivity: NSUserActivity, restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool in
 			received = true
 			return true
 		}
@@ -400,7 +400,7 @@ class CwlApplicationTests: XCTestCase {
 		try! archiver.encodeEncodable("asdf", forKey: "qwer")
 		
 		var received: NSCoder? = nil
-		let handler = { (r: NSCoder) -> Void in
+		let handler = { (_: NSApplication, r: NSCoder) -> Void in
 			received = r
 		}
 		Application.testDelegateBinding(
@@ -412,7 +412,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testDidUpdateUserActivity() {
 		var received: Bool = false
-		let handler = { (userActivity: NSUserActivity) -> Void in
+		let handler = { (_: NSApplication, userActivity: NSUserActivity) -> Void in
 			received = true
 		}
 		Application.testDelegateBinding(
@@ -424,7 +424,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testOpenFile() {
 		var received: String? = nil
-		let handler = { (_ filename: String) -> Bool in
+		let handler = { (_: NSApplication, _ filename: String) -> Bool in
 			received = filename
 			return true
 		}
@@ -437,7 +437,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testOpenFiles() {
 		var received: [String] = []
-		let handler = { (_ filenames: [String]) -> Void in
+		let handler = { (_: NSApplication, _ filenames: [String]) -> Void in
 			received = filenames
 		}
 		Application.testDelegateBinding(
@@ -449,7 +449,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testOpenFileWithoutUI() {
 		var received: String? = nil
-		let handler = { (_ filename: String) -> Bool in
+		let handler = { (_: Any, _ filename: String) -> Bool in
 			received = filename
 			return true
 		}
@@ -462,7 +462,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testOpenTempFile() {
 		var received: String? = nil
-		let handler = { (_ filename: String) -> Bool in
+		let handler = { (_: NSApplication, _ filename: String) -> Bool in
 			received = filename
 			return true
 		}
@@ -475,7 +475,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testOpenUntitledFile() {
 		var received: Bool = false
-		let handler = { () -> Bool in
+		let handler = { (_: NSApplication) -> Bool in
 			received = true
 			return true
 		}
@@ -488,7 +488,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testPrintFile() {
 		var received: String? = nil
-		let handler = { (_ filename: String) -> Bool in
+		let handler = { (_: NSApplication, _ filename: String) -> Bool in
 			received = filename
 			return true
 		}
@@ -502,7 +502,7 @@ class CwlApplicationTests: XCTestCase {
 	func testPrintFiles() {
 		var received: [String] = []
 		var receivedA: [NSPrintInfo.AttributeKey: Any] = [:]
-		let handler = { (filenames: [String], a: [NSPrintInfo.AttributeKey: Any], p: Bool) -> NSApplication.PrintReply in
+		let handler = { (_: NSApplication, filenames: [String], a: [NSPrintInfo.AttributeKey: Any], p: Bool) -> NSApplication.PrintReply in
 			received = filenames
 			receivedA = a
 			return .printingSuccess
@@ -516,7 +516,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldHandleReopen() {
 		var received: Bool? = nil
-		let handler = { (_ hasVisibleWindows: Bool) -> Bool in
+		let handler = { (_: NSApplication, _ hasVisibleWindows: Bool) -> Bool in
 			received = hasVisibleWindows
 			return true
 		}
@@ -529,7 +529,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldOpenUntitledFile() {
 		var received: Bool = false
-		let handler = { () -> Bool in
+		let handler = { (_: NSApplication) -> Bool in
 			received = true
 			return true
 		}
@@ -542,7 +542,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldTerminate() {
 		var received: Bool = false
-		let handler = { () -> ApplicationTerminateReply in
+		let handler = { (_: NSApplication) -> ApplicationTerminateReply in
 			received = true
 			return ApplicationTerminateReply.later(Signal.just(true))
 		}
@@ -555,7 +555,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldTerminateAfterLastWindowClosed() {
 		var received: Bool = false
-		let handler = { () -> Bool in
+		let handler = { (_: NSApplication) -> Bool in
 			received = true
 			return true
 		}
@@ -568,7 +568,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testWillContinueUserActivity() {
 		var received: String? = nil
-		let handler = { (s: String) -> Bool in
+		let handler = { (_: NSApplication, s: String) -> Bool in
 			received = s
 			return true
 		}
@@ -584,7 +584,7 @@ class CwlApplicationTests: XCTestCase {
 		var received: NSCoder? = nil
 		Application.testDelegateBinding(
 			name: .willEncodeRestorableState,
-			handler: { r in received = r },
+			handler: { _, r in received = r },
 			trigger: { _ = $0.delegate?.application?($0, willEncodeRestorableState: archiver) },
 			validate: { received != nil }
 		)
@@ -593,7 +593,7 @@ class CwlApplicationTests: XCTestCase {
 		var received: Error? = nil
 		Application.testDelegateBinding(
 			name: .willPresentError,
-			handler: { e in received = e; return e },
+			handler: { _, e in received = e; return e },
 			trigger: { _ = $0.delegate?.application?($0, willPresentError: TestError("asdf")) },
 			validate: { received as? TestError == TestError("asdf") }
 		)
@@ -602,7 +602,7 @@ class CwlApplicationTests: XCTestCase {
 		var received: Bool = false
 		Application.testDelegateBinding(
 			name: .willTerminate,
-			handler: { received = true },
+			handler: { _ in received = true },
 			trigger: { NotificationCenter.default.post(Notification(name: NSApplication.willTerminateNotification, object: $0)) },
 			validate: { received }
 		)

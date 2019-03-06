@@ -122,11 +122,9 @@ public extension OutlineView {
 		case draggingSessionWillBegin((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void)
 		case groupRowCellConstructor((Int) -> TableCellViewConvertible)
 		case heightOfRow((_ indexPath: IndexPath) -> CGFloat)
-		case indexPathForPersistentObject((Any) -> IndexPath?)
 		case isIndexPathExpandable((IndexPath) -> Bool)
 		case nextTypeSelectMatch((_ outlineView: NSOutlineView, _ from: IndexPath, _ to: IndexPath, _ for: String) -> IndexPath?)
 		case pasteboardWriter((_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?)
-		case persistentObjectForIndexPath((IndexPath) -> Any?)
 		case rowView((_ indexPath: IndexPath) -> TableRowViewConvertible?)
 		case selectionIndexesForProposedSelection((_ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>)
 		case selectionShouldChange((_ outlineView: NSOutlineView) -> Bool)
@@ -182,11 +180,9 @@ public extension OutlineView.Preparer {
 		case .doubleAction(let x): doubleAction = x
 		case .draggingSessionEnded(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:draggingSession:endedAt:operation:)))
 		case .heightOfRow(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:heightOfRowByItem:)))
-		case .indexPathForPersistentObject(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:itemForPersistentObject:)))
 		case .mouseDownInHeaderOfTableColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:mouseDownInHeaderOf:)))
 		case .nextTypeSelectMatch(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:nextTypeSelectMatchFromItem:toItem:for:)))
 		case .pasteboardWriter(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:pasteboardWriterForItem:)))
-		case .persistentObjectForIndexPath(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:persistentObjectForItem:)))
 		case .rowView(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:rowViewForItem:)))
 		case .selectionIndexesForProposedSelection(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:selectionIndexesForProposedSelection:)))
 		case .selectionShouldChange(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.selectionShouldChange(in:)))
@@ -412,11 +408,9 @@ public extension OutlineView.Preparer {
 			storage.groupRowCellConstructor = x
 			return nil
 		case .heightOfRow: return nil
-		case .indexPathForPersistentObject: return nil
 		case .isIndexPathExpandable: return nil
 		case .nextTypeSelectMatch: return nil
 		case .pasteboardWriter: return nil
-		case .persistentObjectForIndexPath: return nil
 		case .rowView: return nil
 		case .selectionIndexesForProposedSelection: return nil
 		case .selectionShouldChange: return nil
@@ -479,6 +473,18 @@ extension OutlineView.Preparer {
 			return columns.enumerated().first { (tuple: (offset: Int, element: TableColumn<NodeData>.Preparer.Storage)) -> Bool in
 				tuple.element.tableColumn.identifier == identifier
 			}
+		}
+		
+		open func outlineView(_ outlineView: NSOutlineView, itemForPersistentObject object: Any) -> Any? {
+			guard let indexPath = object as? IndexPath else { return nil }
+			return item(forIndexPath: indexPath, in: outlineView)
+		}
+		
+		open func outlineView(_ outlineView: NSOutlineView, persistentObjectForItem item: Any?) -> Any? {
+			if let i = item, let indexPath = indexPath(forItem: i, in: outlineView) {
+				return indexPath
+			}
+			return nil
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didAdd: NSTableRowView, forRow: Int) {
@@ -649,18 +655,16 @@ extension OutlineView.Preparer {
 			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
 		}
 		
-		open var rowView: ((_ indexPath: IndexPath) -> TableRowViewConvertible?)?
 		open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return rowView!(indexPath)?.nsTableRowView()
+				return handler(ofType: ((IndexPath) -> TableRowViewConvertible?).self)!(indexPath)?.nsTableRowView()
 			}
 			return nil
 		}
 		
-		open var heightOfRow: ((_ indexPath: IndexPath) -> CGFloat)?
 		open func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return heightOfRow!(indexPath)
+				return handler(ofType: ((IndexPath) -> CGFloat).self)!(indexPath)
 			}
 			return outlineView.rowHeight
 		}
@@ -683,18 +687,16 @@ extension OutlineView.Preparer {
 			return handler(ofType: ((NSOutlineView, NSEvent, String?) -> Bool).self)!(outlineView, event, searchString)
 		}
 		
-		open var typeSelectString: ((_ outlineView: NSOutlineView, _ tableColumn: NSTableColumn?, _ indexPath: IndexPath) -> String?)?
 		open func outlineView(_ outlineView: NSOutlineView, typeSelectStringFor tableColumn: NSTableColumn?, item: Any) -> String? {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return typeSelectString!(outlineView, tableColumn, indexPath)
+				return handler(ofType: ((NSOutlineView, NSTableColumn?, IndexPath) -> String?).self)!(outlineView, tableColumn, indexPath)
 			}
 			return nil
 		}
 		
-		open var nextTypeSelectMatch: ((_ outlineView: NSOutlineView, _ startIndexPath: IndexPath, _ endIndexPath: IndexPath, _ searchString: String) -> IndexPath?)?
 		open func outlineView(_ outlineView: NSOutlineView, nextTypeSelectMatchFromItem startItem: Any, toItem endItem: Any, for searchString: String) -> Any? {
 			if let startIndexPath = storage(for: outlineView)?.indexPath(forItem: startItem, in: outlineView), let endIndexPath = storage(for: outlineView)?.indexPath(forItem: endItem, in: outlineView) {
-				if let indexPath = nextTypeSelectMatch!(outlineView, startIndexPath, endIndexPath, searchString) {
+				if let indexPath = handler(ofType: ((NSOutlineView, IndexPath, IndexPath, String) -> IndexPath?).self)!(outlineView, startIndexPath, endIndexPath, searchString) {
 					return storage(for: outlineView)?.item(forIndexPath: indexPath, in: outlineView)
 				}
 			}
@@ -705,7 +707,6 @@ extension OutlineView.Preparer {
 			return handler(ofType: ((NSOutlineView, NSTableColumn?) -> Bool).self)!(outlineView, tableColumn)
 		}
 		
-		open var selectionIndexesForProposedSelection: ((_ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>)?
 		open func outlineView(_ outlineView: NSOutlineView, selectionIndexesForProposedSelection proposedSelectionIndexes: IndexSet) -> IndexSet {
 			var indexPaths = Set<IndexPath>()
 			for index in proposedSelectionIndexes {
@@ -713,7 +714,7 @@ extension OutlineView.Preparer {
 					indexPaths.insert(path)
 				}
 			}
-			let indexPathResult = selectionIndexesForProposedSelection!(indexPaths)
+			let indexPathResult = handler(ofType: ((Set<IndexPath>) -> Set<IndexPath>).self)!(indexPaths)
 			var result = IndexSet()
 			for indexPath in indexPathResult {
 				if let index = storage(for: outlineView)?.row(forIndexPath: indexPath, in: outlineView) {
@@ -723,10 +724,9 @@ extension OutlineView.Preparer {
 			return result
 		}
 		
-		open var shouldSelectIndexPath: ((_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, shouldSelectItem item: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return shouldSelectIndexPath!(outlineView, indexPath)
+				return handler(ofType: ((NSOutlineView, IndexPath) -> Bool).self)!(outlineView, indexPath)
 			}
 			return false
 		}
@@ -735,32 +735,29 @@ extension OutlineView.Preparer {
 			return handler(ofType: ((NSOutlineView) -> Bool).self)!(outlineView)
 		}
 		
-		open var shouldExpand: ((_ indexPath: IndexPath) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, shouldExpandItem item: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return shouldExpand!(indexPath)
+				return handler(ofType: ((IndexPath) -> Bool).self)!(indexPath)
 			}
 			return false
 		}
 		
-		open var shouldCollapse: ((_ indexPath: IndexPath) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, shouldCollapseItem item: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return shouldCollapse!(indexPath)
+				return handler(ofType: ((IndexPath) -> Bool).self)!(indexPath)
 			}
 			return false
 		}
 		
-		open var acceptDrop: ((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ indexPath: IndexPath?, _ childIndex: Int) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
 			if let i = item {
 				if let indexPath = storage(for: outlineView)?.indexPath(forItem: i, in: outlineView) {
-					return acceptDrop!(outlineView, info, indexPath, index)
+					return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> Bool).self)!(outlineView, info, indexPath, index)
 				} else {
 					return false
 				}
 			}
-			return acceptDrop!(outlineView, info, nil, index)
+			return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> Bool).self)!(outlineView, info, nil, index)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
@@ -771,36 +768,21 @@ extension OutlineView.Preparer {
 			return handler(ofType: ((NSOutlineView, NSDraggingSession, NSPoint, NSDragOperation) -> Void).self)!(outlineView, session, screenPoint, operation)
 		}
 		
-		open var draggingSessionWillBegin: ((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void)?
 		open func outlineView(_ outlineView: NSOutlineView, draggingSession session: NSDraggingSession, willBeginAt screenPoint: NSPoint, forItems draggedItems: [Any]) {
 			let indexPaths = draggedItems.compactMap { storage(for: outlineView)?.indexPath(forItem: $0, in: outlineView) }
-			return draggingSessionWillBegin!(outlineView, session, screenPoint, indexPaths)
+			return handler(ofType: ((NSOutlineView, NSDraggingSession, NSPoint, [IndexPath]) -> Void).self)!(outlineView, session, screenPoint, indexPaths)
 		}
 		
-		open var isIndexPathExpandable: ((_ indexPath: IndexPath) -> Bool)?
 		open func outlineView(_ outlineView: NSOutlineView, isItemExpandable: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: isItemExpandable, in: outlineView) {
-				return isIndexPathExpandable!(indexPath)
+				return handler(ofType: ((IndexPath) -> Bool).self)!(indexPath)
 			}
 			return false
 		}
 		
-		open func outlineView(_ outlineView: NSOutlineView, itemForPersistentObject object: Any) -> Any? {
-			return handler(ofType: ((Any) -> IndexPath?).self)!(object).flatMap { storage(for: outlineView)?.item(forIndexPath: $0, in: outlineView) }
-		}
-		
-		open var persistentObjectForIndexPath: ((_ indexPath: IndexPath) -> Any?)?
-		open func outlineView(_ outlineView: NSOutlineView, persistentObjectForItem item: Any?) -> Any? {
-			if let i = item, let indexPath = storage(for: outlineView)?.indexPath(forItem: i, in: outlineView) {
-				return persistentObjectForIndexPath!(indexPath)
-			}
-			return nil
-		}
-		
-		open var pasteboardWriter: ((_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?)?
 		open func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> NSPasteboardWriting? {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return pasteboardWriter!(outlineView, indexPath)
+				return handler(ofType: ((NSOutlineView, IndexPath) -> NSPasteboardWriting?).self)!(outlineView, indexPath)
 			}
 			return nil
 		}
@@ -809,16 +791,15 @@ extension OutlineView.Preparer {
 			handler(ofType: ((NSOutlineView, NSDraggingInfo) -> Void).self)!(outlineView, draggingInfo)
 		}
 		
-		open var validateDrop: ((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedIndexPath: IndexPath?, _ proposedChildIndex: Int) -> NSDragOperation)?
 		open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem item: Any?, proposedChildIndex index: Int) -> NSDragOperation {
 			if let i = item {
 				if let indexPath = storage(for: outlineView)?.indexPath(forItem: i, in: outlineView) {
-					return validateDrop!(outlineView, info, indexPath, index)
+					return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> NSDragOperation).self)!(outlineView, info, indexPath, index)
 				} else {
 					return []
 				}
 			}
-			return validateDrop!(outlineView, info, nil, index)
+			return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> NSDragOperation).self)!(outlineView, info, nil, index)
 		}
 	}
 }
@@ -948,11 +929,9 @@ public extension BindingName where Binding: OutlineViewBinding {
 	static var draggingSessionWillBegin: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void> { return .name(B.draggingSessionWillBegin) }
 	static var groupRowCellConstructor: OutlineViewName<(Int) -> TableCellViewConvertible> { return .name(B.groupRowCellConstructor) }
 	static var heightOfRow: OutlineViewName<(_ indexPath: IndexPath) -> CGFloat> { return .name(B.heightOfRow) }
-	static var indexPathForPersistentObject: OutlineViewName<(Any) -> IndexPath?> { return .name(B.indexPathForPersistentObject) }
 	static var isIndexPathExpandable: OutlineViewName<(IndexPath) -> Bool> { return .name(B.isIndexPathExpandable) }
 	static var nextTypeSelectMatch: OutlineViewName<(_ outlineView: NSOutlineView, _ from: IndexPath, _ to: IndexPath, _ for: String) -> IndexPath?> { return .name(B.nextTypeSelectMatch) }
 	static var pasteboardWriter: OutlineViewName<(_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?> { return .name(B.pasteboardWriter) }
-	static var persistentObjectForIndexPath: OutlineViewName<(IndexPath) -> Any?> { return .name(B.persistentObjectForIndexPath) }
 	static var rowView: OutlineViewName<(_ indexPath: IndexPath) -> TableRowViewConvertible?> { return .name(B.rowView) }
 	static var selectionIndexesForProposedSelection: OutlineViewName<(_ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>> { return .name(B.selectionIndexesForProposedSelection) }
 	static var selectionShouldChange: OutlineViewName<(_ outlineView: NSOutlineView) -> Bool> { return .name(B.selectionShouldChange) }

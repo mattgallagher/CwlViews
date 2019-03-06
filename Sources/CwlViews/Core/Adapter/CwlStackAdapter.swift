@@ -22,7 +22,7 @@ import Foundation
 public typealias StackAdapter<PathElement: Codable> = Adapter<StackAdapterState<PathElement>>
 
 /// This "Adapter" is a `ModelSignalValue` that manages a stack of navigation items as might be used by a UINavigationController. The adapter converts `push`, `popToCount` and `reload` messages into updates to the array of `PathElement`. The adapter includes convenient input signals, animated output signals and includes automatic implementation of coding and notification protocols.
-public struct StackAdapterState<PathElement: Codable>: SingleValueAdapterState {
+public struct StackAdapterState<PathElement: Codable>: PersistentAdapterState {
 	public typealias Message = StackMutation<PathElement>
 	public typealias Notification = StackMutation<PathElement>
 	

@@ -1,6 +1,6 @@
 //
 //  TabBarController.swift
-//  CwlViews
+//  CwlViewsCatalog_iOS
 //
 //  Created by Matt Gallagher on 7/2/19.
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
@@ -43,7 +43,7 @@ func tabbedView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 						)
 					}
 				},
-				.animationControllerForTransition -- { source, destination -> UIViewControllerAnimatedTransitioning? in
+				.animationControllerForTransition -- { _, source, destination -> UIViewControllerAnimatedTransitioning? in
 					guard let navControllerView = source.navigationController?.view else { return nil }
 					UIView.transition(from: navControllerView, to: navControllerView, duration: 0.3, options: [.transitionCrossDissolve, .showHideTransitionViews])
 					return nil

@@ -75,7 +75,7 @@ public extension SearchBar {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case position((UIBarPositioning) -> UIBarPosition)
 		case shouldBeginEditing((UISearchBar) -> Bool)
-		case shouldChangeText((NSRange, String) -> Bool)
+		case shouldChangeText((UISearchBar, NSRange, String) -> Bool)
 		case shouldEndEditing((UISearchBar) -> Bool)
 	}
 }
@@ -255,7 +255,7 @@ extension SearchBar.Preparer {
 		}
 		
 		open func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return handler(ofType: ((NSRange, String) -> Bool).self)!(range, text)
+			return handler(ofType: ((UISearchBar, NSRange, String) -> Bool).self)!(searchBar, range, text)
 		}
 		
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
@@ -319,7 +319,7 @@ public extension BindingName where Binding: SearchBarBinding {
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var position: SearchBarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
 	static var shouldBeginEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(B.shouldBeginEditing) }
-	static var shouldChangeText: SearchBarName<(NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
+	static var shouldChangeText: SearchBarName<(UISearchBar, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
 	static var shouldEndEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(B.shouldEndEditing) }
 }
 

@@ -76,7 +76,7 @@ public extension Toolbar.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			
-			//	0. Static bindings are applied at construction and are subsequently immutable.
+		//	0. Static bindings are applied at construction and are subsequently immutable.
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .backgroundImage(let x):

@@ -26,7 +26,7 @@ extension Adapter: Lifetime {
 	}
 }
 
-extension Adapter: CodableContainer, Codable where State: Codable {
+extension Adapter: Codable where State: Codable {
 	public init(from decoder: Decoder) throws {
 		let c = try decoder.singleValueContainer()
 		let p = try c.decode(State.self)
@@ -39,7 +39,9 @@ extension Adapter: CodableContainer, Codable where State: Codable {
 			try c.encode(s)
 		}
 	}
-	
+}
+
+extension Adapter: CodableContainer where State: PersistentAdapterState {
 	public var childCodableContainers: [CodableContainer] {
 		if let state = try? combinedSignal.peek().state {
 			return (state as? CodableContainer)?.childCodableContainers ?? []

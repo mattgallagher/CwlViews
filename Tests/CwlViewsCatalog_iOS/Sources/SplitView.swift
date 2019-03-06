@@ -1,6 +1,6 @@
 //
 //  SplitViewController.swift
-//  CwlViews
+//  CwlViewsCatalog_iOS
 //
 //  Created by Matt Gallagher on 7/2/19.
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
@@ -30,7 +30,7 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 			.stack <-- viewState.rowSelection.map { [split = viewState.splitButtonVar] selection in
 				let navigationItem = NavigationItem(
 					.leftBarButtonItems() <-- split.optionalToArray(),
-					.title -- selection?.name.rawValue ?? ""
+					.title -- selection?.codingKey.rawValue ?? ""
 				)
 				switch selection {
 				case nil: return ViewController(.view -- View(.backgroundColor -- .white))
@@ -40,12 +40,14 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 				case .control(let state)?: return controlView(state, navigationItem)
 				case .gestureRecognizer(let state)?: return gestureRecognizerView(state, navigationItem)
 				case .imageView(let state)?: return imageView(state, navigationItem)
+				case .layersView(let state)?: return layersView(state, navigationItem)
 				case .navigationBar(let state)?: return navigationView(state, navigationItem)
 				case .pageViewController(let state)?: return pageView(state, navigationItem)
 				case .searchBar(let state)?: return searchBarView(state, navigationItem)
 				case .slider(let state)?: return sliderView(state, navigationItem)
 				case .switch(let state)?: return switchView(state, navigationItem)
 				case .textField(let state)?: return textFieldView(state, navigationItem)
+				case .webView(let state)?: return webView(state, navigationItem)
 				}
 			}.map { .reload([$0]) }
 		),

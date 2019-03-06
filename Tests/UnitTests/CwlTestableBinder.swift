@@ -62,7 +62,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssertEqual(getter(instance), outputs.2, "second condition failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				AssociatedBinderStorage.setAssociatedBinderStorage(nil, for: instance)
+				instance.setAssociatedBinderStorage(nil)
 			}
 		}
 		if Self.shoudPerformReleaseCheck {
@@ -89,7 +89,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssertEqual(getter(instance), outputs.2, "second condition failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				AssociatedBinderStorage.setAssociatedBinderStorage(nil, for: instance)
+				instance.setAssociatedBinderStorage(nil)
 			}
 		}
 		if Self.shoudPerformReleaseCheck {
@@ -119,7 +119,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssert(first.map { validate($0) } == true, "validation failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				AssociatedBinderStorage.setAssociatedBinderStorage(nil, for: instance)
+				instance.setAssociatedBinderStorage(nil)
 			}
 		}
 		withExtendedLifetime(subscriptionLifetime) {}
@@ -143,7 +143,7 @@ extension TestableBinder where Preparer.Instance: NSObject {
 			XCTAssert(validate(), "validation failed", file: file, line: line)
 			
 			if !Self.shoudPerformReleaseCheck {
-				AssociatedBinderStorage.setAssociatedBinderStorage(nil, for: instance)
+				instance.setAssociatedBinderStorage(nil)
 			}
 		}
 		if Self.shoudPerformReleaseCheck {

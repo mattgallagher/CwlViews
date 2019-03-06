@@ -69,7 +69,7 @@ public extension ViewController {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case childrenLayout(([UIView]) -> Layout)
-		case didReceiveMemoryWarning(() -> Void)
+		case didReceiveMemoryWarning((UIViewController) -> Void)
 		case loadView(() -> ViewConvertible)
 	}
 }
@@ -246,7 +246,7 @@ extension ViewController.Preparer {
 		open var childrenLayout: (([UIView]) -> Layout)?
 		open var didAppear: SignalInput<Bool>?
 		open var didDisappear: SignalInput<Bool>?
-		open var didReceiveMemoryWarning: (() -> Void)?
+		open var didReceiveMemoryWarning: ((UIViewController) -> Void)?
 		open var presentationInProgress: Bool = false
 		open var queuedModalPresentations: [ModalPresentation] = []
 		open var traitCollectionDidChange: SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>?
@@ -359,7 +359,7 @@ extension ViewController.Preparer {
 		}
 		
 		open func controllerDidReceiveMemoryWarning(controller: UIViewController) {
-			didReceiveMemoryWarning?()
+			didReceiveMemoryWarning?(controller)
 			
 			if viewConstructor != nil, let view = controller.viewIfLoaded, view.window == nil {
 				controller.view = nil
@@ -536,7 +536,7 @@ public extension BindingName where Binding: ViewControllerBinding {
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var childrenLayout: ViewControllerName<([UIView]) -> Layout> { return .name(B.childrenLayout) }
-	static var didReceiveMemoryWarning: ViewControllerName<() -> Void> { return .name(B.didReceiveMemoryWarning) }
+	static var didReceiveMemoryWarning: ViewControllerName<(UIViewController) -> Void> { return .name(B.didReceiveMemoryWarning) }
 	static var loadView: ViewControllerName<() -> ViewConvertible> { return .name(B.loadView) }
 }
 

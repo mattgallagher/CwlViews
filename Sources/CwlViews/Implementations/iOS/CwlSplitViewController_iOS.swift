@@ -98,16 +98,18 @@ public extension SplitViewController.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .primaryViewController(let x): primary = x.initialSubsequent()
-		case .secondaryViewController(let x): secondary = x.initialSubsequent()
-		case .willChangeDisplayMode(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:willChangeTo:)))
-		case .targetDisplayModeForAction(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.targetDisplayModeForAction(in:)))
+		case .collapseSecondary(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:collapseSecondary:onto:)))
 		case .preferredInterfaceOrientation(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerPreferredInterfaceOrientationForPresentation(_:)))
-		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerSupportedInterfaceOrientations(_:)))
+		case .primaryViewController(let x): primary = x.initialSubsequent()
 		case .primaryViewControllerForCollapsing(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.primaryViewController(forCollapsing:)))
 		case .primaryViewControllerForExpanding(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.primaryViewController(forExpanding:)))
+		case .secondaryViewController(let x): secondary = x.initialSubsequent()
+		case .separateSecondary(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:separateSecondaryFrom:)))
 		case .showPrimaryViewController(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:show:sender:)))
 		case .showSecondaryViewController(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:showDetail:sender:)))
+		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewControllerSupportedInterfaceOrientations(_:)))
+		case .targetDisplayModeForAction(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.targetDisplayModeForAction(in:)))
+		case .willChangeDisplayMode(let x): delegate().addHandler(x, #selector(UISplitViewControllerDelegate.splitViewController(_:willChangeTo:)))
 		default: break
 		}
 	}
@@ -162,15 +164,11 @@ public extension SplitViewController.Preparer {
 		case .willChangeDisplayMode: return nil
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case .collapseSecondary(let x):
-			storage.collapseSecondary = x
-			return nil
+		case .collapseSecondary: return nil
 		case .preferredInterfaceOrientation: return nil
 		case .primaryViewControllerForCollapsing: return nil
 		case .primaryViewControllerForExpanding: return nil
-		case .separateSecondary(let x):
-			storage.separateSecondary = x
-			return nil
+		case .separateSecondary: return nil
 		case .showPrimaryViewController: return nil
 		case .showSecondaryViewController: return nil
 		case .supportedInterfaceOrientations: return nil
@@ -211,16 +209,22 @@ extension SplitViewController.Preparer {
 			super.viewWillAppear(controller: controller, animated: animated)
 		}
 		
-		open var collapseSecondary: ((UISplitViewController, _ secondaryViewController: UIViewController, _ ontoPrimaryViewController: UIViewController) -> Bool)?
 		open func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
 			displayModeButton?.send(value: nil)
-			return (collapseSecondary?(splitViewController, secondaryViewController, primaryViewController) ?? false) || !shouldShowSecondary
+
+			if let dd = dynamicDelegate, dd.handlesSelector(#selector(UISplitViewControllerDelegate.splitViewController(_:collapseSecondary:onto:))) {
+				return ((dd as? UISplitViewControllerDelegate)?.splitViewController?(splitViewController, collapseSecondary: secondaryViewController, onto: primaryViewController) ?? false) || !shouldShowSecondary
+			}
+			return !shouldShowSecondary
 		}
 		
-		open var separateSecondary: ((UISplitViewController, _ fromPrimaryViewController: UIViewController) -> UIViewController?)?
 		open func splitViewController(_ splitViewController: UISplitViewController, separateSecondaryFrom primaryViewController: UIViewController) -> UIViewController? {
 			displayModeButton?.send(value: splitViewController.displayModeButtonItem)
-			return separateSecondary?(splitViewController, primaryViewController)
+
+			if let dd = dynamicDelegate, dd.handlesSelector(#selector(UISplitViewControllerDelegate.splitViewController(_:separateSecondaryFrom:))) {
+				return (dd as? UISplitViewControllerDelegate)?.splitViewController?(splitViewController, separateSecondaryFrom: primaryViewController)
+			}
+			return nil
 		}
 	}
 
@@ -255,6 +259,14 @@ extension SplitViewController.Preparer {
 		
 		open func splitViewController(_ splitViewController: UISplitViewController, showDetail vc: UIViewController, sender: Any?) -> Bool {
 			return handler(ofType: ((UISplitViewController, UIViewController, Any?) -> Bool).self)!(splitViewController, vc, sender)
+		}
+
+		open func splitViewController(_ splitViewController: UISplitViewController, _ secondaryViewController: UIViewController, _ ontoPrimaryViewController: UIViewController) -> Bool {
+			return handler(ofType: ((UISplitViewController, UIViewController, UIViewController) -> Bool).self)!(splitViewController, secondaryViewController, ontoPrimaryViewController)
+		}
+		
+		open func splitViewController(_ splitViewController: UISplitViewController, separateSecondaryFrom primaryViewController: UIViewController) -> UIViewController? {
+			return handler(ofType: ((UISplitViewController, UIViewController) -> UIViewController?).self)!(splitViewController, primaryViewController)
 		}
 	}
 }

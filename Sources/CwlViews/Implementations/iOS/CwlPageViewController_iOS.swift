@@ -46,14 +46,15 @@ public extension PageViewController {
 		// 2. Signal bindings are performed on the object after construction.
 
 		// 3. Action bindings are triggered by the object after construction.
+		case pageChanged(SignalInput<PageData>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case constructPage((PageData) -> ViewControllerConvertible)
-		case didFinishAnimating((Bool, [UIViewController], Bool) -> Void)
-		case interfaceOrientationForPresentation(() -> UIInterfaceOrientation)
-		case spineLocationFor((UIInterfaceOrientation) -> UIPageViewController.SpineLocation)
-		case supportedInterfaceOrientations(() -> UIInterfaceOrientationMask)
-		case willTransitionTo(([UIViewController]) -> Void)
+		case didFinishAnimating((UIPageViewController, Bool, [UIViewController], Bool) -> Void)
+		case interfaceOrientationForPresentation((UIPageViewController) -> UIInterfaceOrientation)
+		case spineLocationFor((UIPageViewController, UIInterfaceOrientation) -> UIPageViewController.SpineLocation)
+		case supportedInterfaceOrientations((UIPageViewController) -> UIInterfaceOrientationMask)
+		case willTransitionTo((UIPageViewController, [UIViewController]) -> Void)
 	}
 }
 
@@ -123,6 +124,9 @@ public extension PageViewController.Preparer {
 		// 2. Signal bindings are performed on the object after construction.
 
 		// 3. Action bindings are triggered by the object after construction.
+		case .pageChanged(let x):
+			storage.pageChanged = x
+			return x
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .constructPage: return nil
@@ -141,6 +145,7 @@ extension PageViewController.Preparer {
 		open var activeViewControllers: [(Int, Weak<UIViewController>)] = []
 		open var pageConstructor: ((PageData) -> ViewControllerConvertible)?
 		open var pageData: [PageData] = []
+		open var pageChanged: SignalInput<PageData>?
 		
 		public func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
 			if let i = index(of: viewController) {
@@ -203,27 +208,37 @@ extension PageViewController.Preparer {
 			}
 			return match
 		}
+
+		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+			if completed, let input = pageChanged, let vc = pageViewController.children.first, let index = index(of: vc), let data = pageData.at(index) {
+				input.send(value: data)
+			}
+			
+			if let dd = dynamicDelegate, dd.handlesSelector(#selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:))) {
+				(dd as? UIPageViewControllerDelegate)?.pageViewController?(pageViewController, didFinishAnimating: finished, previousViewControllers: previousViewControllers, transitionCompleted: completed)
+			}
+		}
 	}
 
 	open class Delegate: DynamicDelegate, UIPageViewControllerDelegate {
 		open func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
-			handler(ofType: (([UIViewController]) -> Void).self)!(pendingViewControllers)
-		}
-		
-		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-			handler(ofType: ((Bool, [UIViewController], Bool) -> Void).self)!(finished, previousViewControllers, completed)
+			handler(ofType: ((UIPageViewController, [UIViewController]) -> Void).self)!(pageViewController, pendingViewControllers)
 		}
 		
 		open func pageViewController(_ pageViewController: UIPageViewController, spineLocationFor orientation: UIInterfaceOrientation) -> UIPageViewController.SpineLocation {
-			return handler(ofType: ((UIInterfaceOrientation) -> UIPageViewController.SpineLocation).self)!(orientation)
+			return handler(ofType: ((UIPageViewController, UIInterfaceOrientation) -> UIPageViewController.SpineLocation).self)!(pageViewController, orientation)
 		}
 		
 		open func pageViewControllerSupportedInterfaceOrientations(_ pageViewController: UIPageViewController) -> UIInterfaceOrientationMask {
-			return handler(ofType: (() -> UIInterfaceOrientationMask).self)!()
+			return handler(ofType: ((UIPageViewController) -> UIInterfaceOrientationMask).self)!(pageViewController)
 		}
 		
 		open func pageViewControllerPreferredInterfaceOrientationForPresentation(_ pageViewController: UIPageViewController) -> UIInterfaceOrientation {
-			return handler(ofType: (() -> UIInterfaceOrientation).self)!()
+			return handler(ofType: ((UIPageViewController) -> UIInterfaceOrientation).self)!(pageViewController)
+		}
+		
+		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+			handler(ofType: ((UIPageViewController, Bool, [UIViewController], Bool) -> Void).self)!(pageViewController, finished, previousViewControllers, completed)
 		}
 	}
 }
@@ -257,11 +272,11 @@ public extension BindingName where Binding: PageViewControllerBinding {
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var constructPage: PageViewControllerName<(Binding.PageDataType) -> ViewControllerConvertible> { return .name(B.constructPage) }
-	static var didFinishAnimating: PageViewControllerName<(Bool, [UIViewController], Bool) -> Void> { return .name(B.didFinishAnimating) }
-	static var interfaceOrientationForPresentation: PageViewControllerName<() -> UIInterfaceOrientation> { return .name(B.interfaceOrientationForPresentation) }
-	static var spineLocationFor: PageViewControllerName<(UIInterfaceOrientation) -> UIPageViewController.SpineLocation> { return .name(B.spineLocationFor) }
-	static var supportedInterfaceOrientations: PageViewControllerName<() -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
-	static var willTransitionTo: PageViewControllerName<([UIViewController]) -> Void> { return .name(B.willTransitionTo) }
+	static var didFinishAnimating: PageViewControllerName<(UIPageViewController, Bool, [UIViewController], Bool) -> Void> { return .name(B.didFinishAnimating) }
+	static var interfaceOrientationForPresentation: PageViewControllerName<(UIPageViewController) -> UIInterfaceOrientation> { return .name(B.interfaceOrientationForPresentation) }
+	static var spineLocationFor: PageViewControllerName<(UIPageViewController, UIInterfaceOrientation) -> UIPageViewController.SpineLocation> { return .name(B.spineLocationFor) }
+	static var supportedInterfaceOrientations: PageViewControllerName<(UIPageViewController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
+	static var willTransitionTo: PageViewControllerName<(UIPageViewController, [UIViewController]) -> Void> { return .name(B.willTransitionTo) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -19,7 +19,7 @@
 
 public typealias Var<Value: Codable> = Adapter<VarState<Value>>
 
-public struct VarState<Value: Codable>: SingleValueAdapterState {
+public struct VarState<Value: Codable>: PersistentAdapterState {
 	public enum Message {
 		case set(Value)
 		case update(Value)

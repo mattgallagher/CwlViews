@@ -22,7 +22,7 @@ import XCTest
 
 extension Application: TestableBinder {
 	static func constructor(binding: Application.Binding) -> Preparer.Instance {
-		AssociatedBinderStorage.setAssociatedBinderStorage(nil, for: UIApplication.shared)
+		UIApplication.shared.setAssociatedBinderStorage(nil)
 		Application.Preparer.Storage.storedApplicationConstructor = { Application(binding) }
 		let storage = Application.Preparer.Storage()
 		withExtendedLifetime(storage) {
@@ -254,23 +254,14 @@ class CwlApplicationTests: XCTestCase {
 	// MARK: - 4. Delegate bindings
 	
 	func testContinueUserActivity() {
-		var callbackCalled: Bool = false
-		let callbackHandler = { (a: [UIUserActivityRestoring]?) -> Void in
-			callbackCalled = true
-		}
-		var received: Callback<NSUserActivity, [UIUserActivityRestoring]?>? = nil
-		let handler = { (r: Callback<NSUserActivity, [UIUserActivityRestoring]?>) -> Bool in
-			received = r
+		let handler = { (_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool in
 			return true
 		}
 		Application.testDelegateBinding(
 			name: .continueUserActivity,
 			handler: handler,
-			trigger: { _ = $0.delegate?.application?($0, continue: NSUserActivity(activityType: "asdf"), restorationHandler: callbackHandler) },
-			validate: {
-				received?.callback.send(value: [])
-				return callbackCalled
-			}
+			trigger: { _ = $0.delegate?.application?($0, continue: NSUserActivity(activityType: "asdf"), restorationHandler: { (_: [UIUserActivityRestoring]?) in }) },
+			validate: { true }
 		)
 	}
 	func testDidDecodeRestorableState() {
@@ -278,7 +269,7 @@ class CwlApplicationTests: XCTestCase {
 		try! archiver.encodeEncodable("asdf", forKey: "qwer")
 		
 		var received: NSKeyedUnarchiver? = nil
-		let handler = { (r: NSKeyedUnarchiver) -> Void in
+		let handler = { (a: UIApplication, r: NSKeyedUnarchiver) -> Void in
 			received = r
 		}
 		Application.testDelegateBinding(
@@ -290,7 +281,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testDidFinishLaunching() {
 		var received: [UIApplication.LaunchOptionsKey: Any]? = nil
-		let handler = { (r: [UIApplication.LaunchOptionsKey: Any]?) -> Bool in
+		let handler = { (_: UIApplication, r: [UIApplication.LaunchOptionsKey: Any]?) -> Bool in
 			received = r
 			return true
 		}
@@ -303,7 +294,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testDidUpdate() {
 		var received: NSUserActivity? = nil
-		let handler = { (r: NSUserActivity) -> Void in
+		let handler = { (_: UIApplication, r: NSUserActivity) -> Void in
 			received = r
 		}
 		Application.testDelegateBinding(
@@ -316,7 +307,7 @@ class CwlApplicationTests: XCTestCase {
 	func testOpen() {
 		var url: URL? = nil
 		var options: [UIApplication.OpenURLOptionsKey: Any]? = nil
-		let handler = { (u: URL, o: [UIApplication.OpenURLOptionsKey: Any]) -> Bool in
+		let handler = { (_: UIApplication, u: URL, o: [UIApplication.OpenURLOptionsKey: Any]) -> Bool in
 			url = u
 			options = o
 			return true
@@ -330,7 +321,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldAllowExtensionPointIdentifier() {
 		var received: UIApplication.ExtensionPointIdentifier? = nil
-		let handler = { (r: UIApplication.ExtensionPointIdentifier) -> Bool in
+		let handler = { (_: UIApplication, r: UIApplication.ExtensionPointIdentifier) -> Bool in
 			received = r
 			return true
 		}
@@ -343,7 +334,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldRequestHealthAuthorization() {
 		var received: Bool = false
-		let handler = { () -> Void in
+		let handler = { (_: UIApplication) -> Void in
 			received = true
 		}
 		Application.testDelegateBinding(
@@ -355,7 +346,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testViewControllerWithRestorationPath() {
 		var received: [String] = []
-		let handler = { (_ path: [String], _ coder: NSCoder) -> UIViewController in
+		let handler = { (_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController? in
 			received = path
 			return UIViewController(nibName: nil, bundle: nil)
 		}
@@ -368,7 +359,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testWillContinueUserActivity() {
 		var received: String? = nil
-		let handler = { (r: String) -> Bool in
+		let handler = { (_: UIApplication, r: String) -> Bool in
 			received = r
 			return true
 		}
@@ -382,7 +373,7 @@ class CwlApplicationTests: XCTestCase {
 	func testWillEncodeRestorableState() {
 		let archiver = NSKeyedArchiver(requiringSecureCoding: false)
 		var received: NSKeyedArchiver? = nil
-		let handler = { (r: NSKeyedArchiver) -> Void in
+		let handler = { (_: UIApplication, r: NSKeyedArchiver) -> Void in
 			received = r
 		}
 		Application.testDelegateBinding(
@@ -394,7 +385,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testWillFinishLaunching() {
 		var received: URL? = nil
-		let handler = { (r: [UIApplication.LaunchOptionsKey: Any]?) -> Bool in
+		let handler = { (_: UIApplication, r: [UIApplication.LaunchOptionsKey: Any]?) -> Bool in
 			received = r?[.url] as? URL
 			return true
 		}
@@ -407,7 +398,7 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testWillTerminate() {
 		var received: Bool = false
-		let handler = { () -> Void in
+		let handler = { (_: UIApplication) -> Void in
 			received = true
 		}
 		Application.testDelegateBinding(

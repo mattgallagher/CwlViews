@@ -19,17 +19,21 @@
 
 import Foundation
 
+#if os(iOS)
+
 extension Adapter {
-	public func storeToArchive<Value>() -> (NSKeyedArchiver) -> Void where State == VarState<Value> {
-		return { archiver in archiver.encodeLatest(from: self) }
+	public func storeToArchive<Value>() -> (UIApplication, NSKeyedArchiver) -> Void where State == VarState<Value> {
+		return { _, archiver in archiver.encodeLatest(from: self) }
 	}
 }
 
 extension Adapter {
-	public func loadFromArchive<Value>() -> (NSKeyedUnarchiver) -> Void where State == VarState<Value> {
-		return { unarchiver in unarchiver.decodeSend(to: self.set()) }
+	public func loadFromArchive<Value>() -> (UIApplication, NSKeyedUnarchiver) -> Void where State == VarState<Value> {
+		return { _, unarchiver in unarchiver.decodeSend(to: self.set()) }
 	}
 }
+
+#endif
 
 extension NSKeyedArchiver {
 	/// Gets the latest value from the signal and encodes the value as JSON data into self using the provided key

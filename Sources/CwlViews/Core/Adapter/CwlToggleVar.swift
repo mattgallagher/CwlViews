@@ -17,7 +17,7 @@
 //  OF THIS SOFTWARE.
 //
 
-public struct ToggleValue: SingleValueAdapterState {
+public struct ToggleValue: PersistentAdapterState {
 	public typealias Message = Void
 	public typealias Notification = Bool
 	

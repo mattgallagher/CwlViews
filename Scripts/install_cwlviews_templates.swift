@@ -189,7 +189,7 @@ func frameworkDefinition(_ name: String, _ targetIdentifier: String) -> [String:
 }
 
 func binderContent() -> String {
-	return """
+	return #"""
 		//
 		//  ___FILENAME___
 		//  ___PROJECTNAME___
@@ -205,86 +205,162 @@ func binderContent() -> String {
 		#endif
 
 		import CwlViews
-
+		
+		// MARK: - Binder Part 1: Binder
 		public class ___VARIABLE_basename___: Binder, ___VARIABLE_basename___Convertible {
-			public typealias Instance = ___VARIABLE_constructedType___
-			public typealias Inherited = ___VARIABLE_linkedBasename___
-			
-			public var state: BinderState<Instance, Binding>
-			public required init(subclass: Instance.Type = Instance.self, bindings: [Binding]) {
-				state = .pending(BinderSubclassParameters(subclass: subclass, bindings: bindings))
+			public var state: BinderState<Preparer>
+			public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+				state = .pending(type: type, parameters: parameters, bindings: bindings)
 			}
-			public static func bindingToInherited(_ binding: Binding) -> Inherited.Binding? {
-				if case .inheritedBinding(let s) = binding { return s } else { return nil }
-			}
-			public func ui___VARIABLE_basename___() -> Instance { return instance() }
-			
+		}
+		
+		// MARK: - Binder Part 2: Binding
+		public extension ___VARIABLE_basename___ {
 			enum Binding: ___VARIABLE_basename___Binding {
-				public typealias EnclosingBinder = ___VARIABLE_basename___
-				public static func ___VARIABLE_lowercaseBasename___Binding(_ binding: Binding) -> Binding { return binding }
 				case inheritedBinding(Preparer.Inherited.Binding)
 				
 				// 0. Static bindings are applied at construction and are subsequently immutable.
-				// e.g. case someProperty(Constant<PropertyType>)
+				/* case someProperty(Constant<PropertyType>) */
 
 				// 1. Value bindings may be applied at construction and may subsequently change.
-				// e.g. case someProperty(Dynamic<PropertyType>)
+				/* case someProperty(Dynamic<PropertyType>) */
 
 				// 2. Signal bindings are performed on the object after construction.
-				// e.g. case someFunction(Signal<FunctionParametersAsTuple>)
+				/* case someFunction(Signal<FunctionParametersAsTuple>) */
 
 				// 3. Action bindings are triggered by the object after construction.
-				// e.g. case someAction(SignalInput<CallbackParameters>)
+				/* case someAction(SignalInput<CallbackParameters>) */
 
 				// 4. Delegate bindings require synchronous evaluation within the object's context.
-				// e.g. case someDelegateFunction((Param) -> Result))
+				/* case someDelegateFunction((Param) -> Result)) */
 			}
+		}
 
-			struct Preparer: BinderConstructor {
-				public typealias EnclosingBinder = ___VARIABLE_basename___
-				public var linkedPreparer = Inherited.Preparer()
-
-				public func constructStorage() -> EnclosingBinder.Storage { return Storage() }
-				func constructInstance(type: EnclosingBinder.Instance.Type) -> EnclosingBinder.Instance { return subclass.init() }
-
+		// MARK: - Binder Part 3: Preparer
+		public extension ___VARIABLE_basename___ {
+			struct Preparer: BinderEmbedderConstructor /* or BinderDelegateEmbedderConstructor */ {
+				public typealias Binding = ___VARIABLE_basename___.Binding
+				public typealias Inherited = ___VARIABLE_linkedBasename___.Preparer
+				public typealias Instance = ___VARIABLE_platformPrefix______VARIABLE_basename___
+				
+				/*
+				// If instance construction requires parameters, uncomment this
+				public typealias Parameters = (paramOne, paramTwo)
+				*/
+				
+				public var inherited = Inherited()
 				public init() {}
-
-				func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Cancellable? {
-					switch binding {
-					// e.g. case .someProperty(let x): return x.apply(instance, storage) { i, s, v in inst.someProperty = val }
-					case .inheritedBinding(let b): return inherited.applyBinding(b, instance: instance, storage: storage)
-					}
+				
+				/*
+				// If Preparer is BinderDelegateEmbedderConstructor, use these instead of the `init` on the previous line
+				public var dynamicDelegate: Delegate? = nil
+				public let delegateClass: Delegate.Type
+				public init(delegateClass: Delegate.Type) {
+					self.delegateClass = delegateClass
+				}
+				*/
+				
+				public func constructStorage(instance: Instance) -> Storage { return Storage() }
+				public func inheritedBinding(from: Binding) -> Inherited.Binding? {
+					if case .inheritedBinding(let b) = from { return b } else { return nil }
 				}
 			}
-
-			public typealias Storage = ___VARIABLE_linkedBasename___.Storage
 		}
 
-		extension BindingName where Binding: ___VARIABLE_basename___Binding {
-			// You can easily convert the `Binding` cases to `BindingName` by copying them to here and using the following Xcode-style regex:
-			// Find:    case ([^\\(]+)\\((.+)\\)$
-			// Replace: public static var $1: BindingName<$2, Binding> { return BindingName<$2, Binding>({ v in .___VARIABLE_lowercaseBasename___Binding(___VARIABLE_basename___.Binding.$1(v)) }) }
+		// MARK: - Binder Part 4: Preparer overrides
+		public extension ___VARIABLE_basename___.Preparer {
+			/* If instance construction requires parameters, uncomment this
+			func constructInstance(type: Instance.Type, parameters: Preparer.Parameters) -> Instance {
+				return type.init(paramOne: parameters.0, paramTwo: parameters.1)
+			}
+			*/
+		
+			/* Enable if delegate bindings used or setup prior to other bindings required 
+			mutating func prepareBinding(_ binding: Binding) {
+				switch binding {
+				case .inheritedBinding(let x): inherited.prepareBinding(x)
+				case .someDelegate(let x): delegate().addHandler(x, #selector(someDelegateFunction))
+				default: break
+			}
+			*/
+		
+			func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
+				switch binding {
+				case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+				/* case .someStatic(let x): instance.someStatic = x.value */
+				/* case .someProperty(let x): return x.apply(instance) { i, v in i.someProperty = v } */
+				/* case .someSignal(let x): return x.apply(instance) { i, v in i.something(v) } */
+				/* case .someAction(let x): return instance.addListenerAndReturnLifetime(x) */
+				/* case .someDelegate(let x): return nil */
+				}
+			}
 		}
 		
+		// MARK: - Binder Part 5: Storage and Delegate
+		extension ___VARIABLE_basename___.Preparer {
+			public typealias Storage = ___VARIABLE_linkedBasename___.Preparer.Storage
+			/*
+			// Use instead of previous line if additional runtime storage is required
+			open class Storage: ___VARIABLE_linkedBasename___.Preparer.Storage {}
+			*/
+			
+			/*
+			// Enable if Preparer is BinderDelegateEmbedderConstructor
+			open class Delegate: DynamicDelegate, ___VARIABLE_platformPrefix______VARIABLE_basename___Delegate {
+				open func someDelegateFunction(_ ___VARIABLE_lowercaseBasename___: ___VARIABLE_platformPrefix______VARIABLE_basename___Delegate) -> Bool {
+					return handler(ofType: ((___VARIABLE_platformPrefix______VARIABLE_basename___Delegate) -> Bool).self)!(___VARIABLE_lowercaseBasename___)
+				}
+			}
+			*/
+		}
+		
+		// MARK: - Binder Part 6: BindingNames
+		extension BindingName where Binding: ___VARIABLE_basename___Binding {
+			public typealias ___VARIABLE_basename___Name<V> = BindingName<V, ___VARIABLE_basename___.Binding, Binding>
+			private typealias B = ___VARIABLE_basename___.Binding
+			private static func name<V>(_ source: @escaping (V) -> ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___Name<V> {
+				return ___VARIABLE_basename___Name<V>(source: source, downcast: Binding.___VARIABLE_lowercaseBasename___Binding)
+			}
+		}
+		public extension BindingName where Binding: ___VARIABLE_basename___Binding {
+			// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
+			// Replace: case ([^\(]+)\((.+)\)$
+			// With:    static var $1: ___VARIABLE_basename___Name<$2> { return .name(B.$1) }
+		}
+		
+		// MARK: - Binder Part 7: Convertible protocols (if constructible)
 		public protocol ___VARIABLE_basename___Convertible: ___VARIABLE_linkedBasename___Convertible {
-			func ui___VARIABLE_basename___() -> ___VARIABLE_basename___.Instance
+			func ___VARIABLE_lowercasePlatformPrefix______VARIABLE_basename___() -> ___VARIABLE_basename___.Instance
 		}
 		extension ___VARIABLE_basename___Convertible {
-			public func ui___VARIABLE_linkedBasename___() -> ___VARIABLE_linkedBasename___.Instance { return ui___VARIABLE_basename___() }
+			public func ___VARIABLE_lowercasePlatformPrefix______VARIABLE_linkedBasename___() -> ___VARIABLE_linkedBasename___.Instance { return ___VARIABLE_lowercasePlatformPrefix______VARIABLE_basename___() }
 		}
-		extension ___VARIABLE_basename___.Instance: ___VARIABLE_basename___Convertible {
-			public func ui___VARIABLE_basename___() -> ___VARIABLE_basename___.Instance { return self }
+		extension UI___VARIABLE_basename___: ___VARIABLE_basename___Convertible /* , HasDelegate // if Preparer is BinderDelegateEmbedderConstructor */ {
+			public func ___VARIABLE_lowercasePlatformPrefix______VARIABLE_basename___() -> ___VARIABLE_basename___.Instance { return self }
 		}
-		
+		public extension ___VARIABLE_basename___ {
+			func ___VARIABLE_lowercasePlatformPrefix______VARIABLE_basename___() -> ___VARIABLE_basename___.Instance { return instance() }
+		}
+
+		// MARK: - Binder Part 8: Downcast protocols
 		public protocol ___VARIABLE_basename___Binding: ___VARIABLE_linkedBasename___Binding {
 			static func ___VARIABLE_lowercaseBasename___Binding(_ binding: ___VARIABLE_basename___.Binding) -> Self
 		}
-		extension ___VARIABLE_basename___Binding {
-			public static func ___VARIABLE_linkedLowercaseBasename___Binding(_ binding: ___VARIABLE_linkedBasename___.Binding) -> Self {
+		public extension ___VARIABLE_basename___Binding {
+			static func ___VARIABLE_lowercaseLinkedBasename___Binding(_ binding: ___VARIABLE_linkedBasename___.Binding) -> Self {
 				return ___VARIABLE_lowercaseBasename___Binding(.inheritedBinding(binding))
 			}
 		}
-		"""
+		public extension ___VARIABLE_basename___.Binding {
+			typealias Preparer = ___VARIABLE_basename___.Preparer
+			static func ___VARIABLE_lowercaseBasename___Binding(_ binding: ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___.Binding {
+				return binding
+			}
+		}
+
+		// MARK: - Binder Part 9: Other supporting types
+		"""#
 }
 
 func binderTemplateInfo() -> [String: Any] {
@@ -293,7 +369,7 @@ func binderTemplateInfo() -> [String: Any] {
 			[
 				"Description": "This is the name use for the \"struct\" type and the base used for the protocols.",
 				"Identifier": "basename",
-				"Name": "EnclosingBinder name:",
+				"Name": "Binder name:",
 				"Required": 1 as NSNumber,
 				"Type": "text",
 				"NotPersisted": 1 as NSNumber,
@@ -302,20 +378,29 @@ func binderTemplateInfo() -> [String: Any] {
 			[
 				"Description": "EnclosingBinder name with lowercase initial letter used for function names.",
 				"Identifier": "lowercaseBasename",
-				"Name": "EnclosingBinder name with lowercase initial letter:",
+				"Name": "Name with lowercase initial:",
 				"Required": 1 as NSNumber,
 				"Type": "text",
 				"NotPersisted": 1 as NSNumber,
 				"Default": "viewSubclass"
 			] as [String: Any],
 			[
-				"Description": "The type that the binder constructs.",
-				"Identifier": "constructedType",
-				"Name": "Instance type:",
+				"Description": "The platform prefix.",
+				"Identifier": "platformPrefix",
+				"Name": "Platform prefix:",
 				"Required": 1 as NSNumber,
 				"Type": "text",
 				"NotPersisted": 1 as NSNumber,
-				"Default": "NSViewSubclass"
+				"Default": "NS"
+			] as [String: Any],
+			[
+				"Description": "The lowercased platform prefix.",
+				"Identifier": "lowercasePlatformPrefix",
+				"Name": "Lowercase platform prefix:",
+				"Required": 1 as NSNumber,
+				"Type": "text",
+				"NotPersisted": 1 as NSNumber,
+				"Default": "ns"
 			] as [String: Any],
 			[
 				"Description": "The previous binder in the inheritance chain (the binder for the Instance's superclass or `BaseBinder`).",
@@ -328,8 +413,8 @@ func binderTemplateInfo() -> [String: Any] {
 			] as [String: Any],
 			[
 				"Description": "The lowercase prefixed version of the previous binding in the inheritance chain.",
-				"Identifier": "linkedLowercaseBasename",
-				"Name": "Lowercase Inherited binder:",
+				"Identifier": "lowercaseLinkedBasename",
+				"Name": "Inherited with lowercase initial:",
 				"Required": 1 as NSNumber,
 				"Type": "text",
 				"NotPersisted": 1 as NSNumber,

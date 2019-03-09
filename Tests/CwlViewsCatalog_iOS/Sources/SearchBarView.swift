@@ -19,7 +19,7 @@ func searchBarView(_ searchBarViewState: SearchBarViewState, _ navigationItem: N
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogViewState.CodingKeys.searchBar.rawValue))
+				.view(Label(.text -- CatalogName.searchBar.rawValue))
 			)
 		)
 	)

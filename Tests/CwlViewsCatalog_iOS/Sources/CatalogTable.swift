@@ -8,8 +8,25 @@
 
 import CwlViews
 
-extension CatalogViewState {
-	enum CodingKeys: String, CodingKey, CaseIterable, Codable {
+enum CatalogName: String, Codable, CaseIterable {
+	case alert = "Alert"
+	case barButton = "BarButton"
+	case button = "Button"
+	case control = "Control"
+	case gestureRecognizer = "GestureRecognizer"
+	case imageView = "ImageView"
+	case layersView = "Layers"
+	case navigationBar = "NavigationBar"
+	case pageViewController = "PageViewController"
+	case searchBar = "SearchBar"
+	case slider = "Slider"
+	case `switch` = "Switch"
+	case textField = "TextField"
+	case webView = "WebView"
+}
+
+enum CatalogViewState: CodableContainer, CaseNameCodable {
+	enum CaseName: String, CaseNameDecoder {
 		case alert
 		case barButton
 		case button
@@ -24,10 +41,27 @@ extension CatalogViewState {
 		case `switch`
 		case textField
 		case webView
+		
+		func decode(from container: KeyedDecodingContainer<CaseName>) throws -> CatalogViewState {
+			switch self {
+			case .alert: return .alert(try container.decode(AlertViewState.self, forKey: self))
+			case .barButton: return .barButton(try container.decode(BarButtonViewState.self, forKey: self))
+			case .button: return .button(try container.decode(ButtonViewState.self, forKey: self))
+			case .control: return .control(try container.decode(ControlViewState.self, forKey: self))
+			case .gestureRecognizer: return .gestureRecognizer(try container.decode(GestureRecognizerViewState.self, forKey: self))
+			case .imageView: return .imageView(try container.decode(ImageViewState.self, forKey: self))
+			case .layersView: return .layersView(try container.decode(LayersViewState.self, forKey: self))
+			case .navigationBar: return .navigationBar(try container.decode(NavigationBarViewState.self, forKey: self))
+			case .pageViewController: return .pageViewController(try container.decode(PageViewState.self, forKey: self))
+			case .alert: return .alert(try container.decode(SearchBarViewState.self, forKey: self))
+			case .alert: return .alert(try container.decode(SliderViewState.self, forKey: self))
+			case .alert: return .alert(try container.decode(SwitchViewState.self, forKey: self))
+			case .textField: return .textField(try container.decode(TextFieldViewState.self, forKey: self))
+			case .webView: return .webView(try container.decode(WebViewState.self, forKey: self))
+			}
+		}
 	}
-}
-
-enum CatalogViewState: CodableContainer {
+	
 	case alert(AlertViewState)
 	case barButton(BarButtonViewState)
 	case button(ButtonViewState)
@@ -46,12 +80,12 @@ enum CatalogViewState: CodableContainer {
 
 func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
 	return ViewController(
-		.view -- TableView<CatalogViewState.CodingKeys>(
+		.view -- TableView<CatalogName>(
 			.backgroundColor -- .white,
 			.layoutMargins -- UIEdgeInsets(top: 0, left: 30, bottom: 0, right: 30),
 			.separatorInset -- UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 30),
 			.separatorInsetReference -- .fromAutomaticInsets,
-			.tableData -- CatalogViewState.CodingKeys.allCases.tableData(),
+			.tableData -- CatalogName.allCases.tableData(),
 			.cellConstructor -- { reuseIdentifier, cellData in
 				TableViewCell(.textLabel -- Label(.text <-- cellData.map { data in data.rawValue }))
 			},
@@ -61,7 +95,7 @@ func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
 	)
 }
 
-extension CatalogViewState.CodingKeys {
+extension CatalogName {
 	var viewState: CatalogViewState {
 		switch self {
 		case .alert: return .alert(AlertViewState())
@@ -83,7 +117,7 @@ extension CatalogViewState.CodingKeys {
 }
 
 extension CatalogViewState {
-	var codingKey: CatalogViewState.CodingKeys {
+	var name: CatalogName {
 		switch self {
 		case .alert: return .alert
 		case .barButton: return .barButton
@@ -104,7 +138,7 @@ extension CatalogViewState {
 	
 	init(from decoder: Decoder) throws {
 		var c = try decoder.unkeyedContainer()
-		let name = try c.decode(CatalogViewState.CodingKeys.self)
+		let name = try c.decode(CatalogName.self)
 		switch name {
 		case .alert: self = .alert(try c.decode(AlertViewState.self))
 		case .barButton: self = .barButton(try c.decode(BarButtonViewState.self))

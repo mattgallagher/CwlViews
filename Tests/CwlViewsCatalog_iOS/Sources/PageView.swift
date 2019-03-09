@@ -28,7 +28,7 @@ func pageView(_ pageViewState: PageViewState, _ navigationItem: NavigationItem) 
 		],
 		.childrenLayout -- { views in
 			.center(
-				.view(Label(.text -- CatalogViewState.CodingKeys.pageViewController.rawValue)),
+				.view(Label(.text -- CatalogName.pageViewController.rawValue)),
 				.view(PageControl(
 					.numberOfPages -- Pages.allCases.count
 				))

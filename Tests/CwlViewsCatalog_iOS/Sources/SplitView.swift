@@ -30,7 +30,7 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 			.stack <-- viewState.rowSelection.map { [split = viewState.splitButtonVar] selection in
 				let navigationItem = NavigationItem(
 					.leftBarButtonItems() <-- split.optionalToArray(),
-					.title -- selection?.name.rawValue ?? ""
+					.title -- selection?.caseName.localizedString ?? ""
 				)
 				switch selection {
 				case nil: return ViewController(.view -- View(.backgroundColor -- .white))

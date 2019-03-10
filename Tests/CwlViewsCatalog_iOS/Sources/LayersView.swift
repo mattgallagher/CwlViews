@@ -19,7 +19,7 @@ func layersView(_ layersViewState: LayersViewState, _ navigationItem: Navigation
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogName.textField.rawValue))
+				.view(Label(.text -- CatalogViewState.CaseName.textField.localizedString))
 			)
 		)
 	)

@@ -19,7 +19,7 @@ func switchView(_ switchViewState: SwitchViewState, _ navigationItem: Navigation
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogName.switch.rawValue))
+				.view(Label(.text -- CatalogViewState.CaseName.switch.localizedString))
 			)
 		)
 	)

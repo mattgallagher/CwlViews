@@ -19,7 +19,7 @@ func textFieldView(_ textFieldViewState: TextFieldViewState, _ navigationItem: N
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogName.textField.rawValue))
+				.view(Label(.text -- CatalogViewState.CaseName.textField.localizedString))
 			)
 		)
 	)

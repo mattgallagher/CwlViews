@@ -19,7 +19,7 @@ func webView(_ webViewState: WebViewState, _ navigationItem: NavigationItem) -> 
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogName.textField.rawValue))
+				.view(Label(.text -- CatalogViewState.CaseName.textField.localizedString))
 			)
 		)
 	)

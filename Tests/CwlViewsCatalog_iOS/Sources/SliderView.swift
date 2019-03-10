@@ -19,7 +19,7 @@ func sliderView(_ sliderViewState: SliderViewState, _ navigationItem: Navigation
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogName.slider.rawValue))
+				.view(Label(.text -- CatalogViewState.CaseName.slider.localizedString))
 			)
 		)
 	)

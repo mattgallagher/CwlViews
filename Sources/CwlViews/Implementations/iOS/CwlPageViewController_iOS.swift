@@ -44,9 +44,10 @@ public extension PageViewController {
 		case pageData(Dynamic<Animatable<[PageData], UIPageViewController.NavigationDirection>>)
 
 		// 2. Signal bindings are performed on the object after construction.
+		case changeCurrentPage(Signal<Animatable<Int, UIPageViewController.NavigationDirection>>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		case pageChanged(SignalInput<PageData>)
+		case pageChanged(SignalInput<(index: Int, data: PageData)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case constructPage((PageData) -> ViewControllerConvertible)
@@ -86,6 +87,12 @@ public extension PageViewController {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension PageViewController.Preparer {
+	var delegateIsRequired: Bool { return true }
+	
+	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
+		return type.init(transitionStyle: transitionStyle, navigationOrientation: navigationOrientation, options: [UIPageViewController.OptionsKey.spineLocation: spineLocation.rawValue, UIPageViewController.OptionsKey.interPageSpacing: pageSpacing])
+	}
+	
 	mutating func prepareBinding(_ binding: PageViewController<PageData>.Binding) {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.prepareBinding(x)
@@ -102,6 +109,14 @@ public extension PageViewController.Preparer {
 		case .interfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
 		default: break
 		}
+	}
+	
+	func prepareInstance(_ instance: Instance, storage: Storage) {
+		storage.pageConstructor = pageConstructor
+		prepareDelegate(instance: instance, storage: storage)
+		instance.dataSource = storage
+
+		inheritedPrepareInstance(instance, storage: storage)
 	}
 	
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
@@ -122,6 +137,10 @@ public extension PageViewController.Preparer {
 			}
 
 		// 2. Signal bindings are performed on the object after construction.
+		case .changeCurrentPage(let x):
+			return x.apply(instance, storage) { i, s, v in
+				s.changeCurrentPage(v.value, in: i, animation: v.animation)
+			}
 
 		// 3. Action bindings are triggered by the object after construction.
 		case .pageChanged(let x):
@@ -145,7 +164,7 @@ extension PageViewController.Preparer {
 		open var activeViewControllers: [(Int, Weak<UIViewController>)] = []
 		open var pageConstructor: ((PageData) -> ViewControllerConvertible)?
 		open var pageData: [PageData] = []
-		open var pageChanged: SignalInput<PageData>?
+		open var pageChanged: SignalInput<(index: Int, data: PageData)>?
 		
 		public func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
 			if let i = index(of: viewController) {
@@ -160,17 +179,26 @@ extension PageViewController.Preparer {
 			}
 			return nil
 		}
+
+		open func changeCurrentPage(_ index: Int, in pvc: UIPageViewController, animation: UIPageViewController.NavigationDirection?) {
+			if let vc = viewController(at: index), !(vc === pvc.viewControllers?.first) {
+				pvc.setViewControllers([vc], direction: animation ?? .forward, animated: animation != nil, completion: nil)
+			}
+		}
 		
 		open func changePageData(_ newPageData: [PageData], in pvc: UIPageViewController, animation: UIPageViewController.NavigationDirection?) {
 			let indexes = pvc.viewControllers?.compactMap { self.index(of: $0) }.sorted() ?? (newPageData.isEmpty ? [] : [0])
 			pageData = newPageData
 			activeViewControllers.removeAll()
-			let newViewControllers = indexes.compactMap { self.viewController(at: $0) }
+			var newViewControllers = indexes.compactMap { self.viewController(at: $0) }
+			if !newPageData.isEmpty && newViewControllers.isEmpty, let vc = viewController(at: 0) {
+				newViewControllers.append(vc)
+			}
 			pvc.setViewControllers(newViewControllers, direction: animation ?? .forward, animated: animation != nil, completion: nil)
 		}
 		
 		open func viewController(at: Int) -> UIViewController? {
-			guard let binding = pageConstructor, pageData.indices.contains(at) else { return nil }
+			guard let constructor = pageConstructor, pageData.indices.contains(at) else { return nil }
 			var i = 0
 			var match: UIViewController? = nil
 			while i < activeViewControllers.count {
@@ -187,7 +215,7 @@ extension PageViewController.Preparer {
 			if let m = match {
 				return m
 			}
-			let vc = binding(pageData[at]).uiViewController()
+			let vc = constructor(pageData[at]).uiViewController()
 			activeViewControllers.append((at, Weak(vc)))
 			return vc
 		}
@@ -208,10 +236,19 @@ extension PageViewController.Preparer {
 			}
 			return match
 		}
+		
+		open func presentationCount(for pageViewController: UIPageViewController) -> Int {
+			return pageData.count
+		}
+		
+		open func presentationIndex(for pageViewController: UIPageViewController) -> Int {
+			guard let vc = pageViewController.viewControllers?.first else { return 0 }
+			return index(of: vc) ?? 0
+		}
 
 		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
 			if completed, let input = pageChanged, let vc = pageViewController.children.first, let index = index(of: vc), let data = pageData.at(index) {
-				input.send(value: data)
+				input.send(value: (index, data))
 			}
 			
 			if let dd = dynamicDelegate, dd.handlesSelector(#selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:))) {
@@ -267,8 +304,10 @@ public extension BindingName where Binding: PageViewControllerBinding {
 	static var pageData: PageViewControllerName<Dynamic<Animatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>> { return .name(B.pageData) }
 	
 	// 2. Signal bindings are performed on the object after construction.
+	static var changeCurrentPage: PageViewControllerName<Signal<Animatable<Int, UIPageViewController.NavigationDirection>>> { return .name(B.changeCurrentPage) }
 	
 	// 3. Action bindings are triggered by the object after construction.
+	static var pageChanged: PageViewControllerName<SignalInput<(index: Int, data: Binding.PageDataType)>> { return .name(B.pageChanged) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var constructPage: PageViewControllerName<(Binding.PageDataType) -> ViewControllerConvertible> { return .name(B.constructPage) }

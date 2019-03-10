@@ -13,7 +13,9 @@ enum Pages: String, CaseIterable {
 }
 
 struct PageViewState: CodableContainer {
+	let selectedPageIndex: Var<Int>
 	init() {
+		selectedPageIndex = Var(0)
 	}
 }
 
@@ -23,16 +25,54 @@ func pageView(_ pageViewState: PageViewState, _ navigationItem: NavigationItem) 
 		.view -- View(.backgroundColor -- .white),
 		.children -- [
 			PageViewController<Pages>(
-				.pageData -- Pages.allCases
+				.transitionStyle -- .pageCurl,
+				.pageData -- Pages.allCases,
+				.pageChanged --> Input().map { $0.index }.bind(to: pageViewState.selectedPageIndex),
+				.changeCurrentPage <-- pageViewState.selectedPageIndex.map(initialState: nil as Int?, pageAnimation),
+				.constructPage -- { data in
+					ViewController(
+						.view -- View(
+							.backgroundColor -- .darkGray,
+							.layout -- .center(
+								.view(
+									Label(
+										.text -- "\(data.rawValue)",
+										.textColor -- .white
+									)
+								)
+							)
+						)
+					)
+				}
 			)
 		],
 		.childrenLayout -- { views in
 			.center(
-				.view(Label(.text -- CatalogName.pageViewController.rawValue)),
+				.view(
+					length: .equalTo(ratio: 1.0),
+					breadth: .equalTo(ratio: 0.75),
+					relativity: .lengthRelativeToBreadth,
+					views.first ?? View()
+				),
 				.view(PageControl(
-					.numberOfPages -- Pages.allCases.count
+					.currentPage <-- pageViewState.selectedPageIndex,
+					.currentPageIndicatorTintColor -- .blue,
+					.pageIndicatorTintColor -- .lightGray,
+					.numberOfPages -- Pages.allCases.count,
+					.action(.valueChanged, \.currentPage) --> pageViewState.selectedPageIndex
 				))
 			)
 		}
 	)
+}
+
+func pageAnimation(prev: inout Int?, next: Int) -> Animatable<Int, UIPageViewController.NavigationDirection> {
+	let result: Animatable<Int, UIPageViewController.NavigationDirection>
+	if let p = prev, prev != nil {
+		result = .animate(next, animation: p > next ? .reverse : .forward)
+	} else {
+		result = .set(next)
+	}
+	prev = next
+	return result
 }

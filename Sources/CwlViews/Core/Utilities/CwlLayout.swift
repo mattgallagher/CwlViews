@@ -156,13 +156,13 @@ public struct Layout {
 	}
 	
 	/// A convenience constructor for a nested pair of layouts that combine to form a single centered arrangment
-	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Layout {
-		return .center(axis: axis, alignment: alignment, marginEdges: marginEdges, animate: animate, length: length, breadth: breadth, relative: relative, entities: entities)
+	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: Entity...) -> Layout {
+		return .center(axis: axis, alignment: alignment, marginEdges: marginEdges, animate: animate, length: length, breadth: breadth, relativity: relativity, entities: entities)
 	}
-	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, entities: [Entity]) -> Layout {
+	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, entities: [Entity]) -> Layout {
 		switch axis {
 		case .vertical:
-			let v = Entity.sublayout(axis: .vertical, align: alignment, length: length, breadth: breadth, relative: relative, entities: entities)
+			let v = Entity.sublayout(axis: .vertical, align: alignment, length: length, breadth: breadth, relativity: relativity, entities: entities)
 			let matched = Entity.matchedPair(
 				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
 				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
@@ -170,7 +170,7 @@ public struct Layout {
 			)
 			return Layout(axis: .vertical, align: .center, marginEdges: marginEdges, animate: animate, entities: [matched])
 		case .horizontal:
-			let h = Entity.sublayout(axis: .horizontal, align: alignment, length: length, breadth: breadth, relative: relative, entities: entities)
+			let h = Entity.sublayout(axis: .horizontal, align: alignment, length: length, breadth: breadth, relativity: relativity, entities: entities)
 			let matched = Entity.matchedPair(
 				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
 				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
@@ -182,10 +182,10 @@ public struct Layout {
 	}
 	
 	/// A convenience constructor for a vertical layout
-	public static func fill(axis: Layout.Axis = .vertical, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ view: ViewConvertible) -> Layout {
+	public static func fill(axis: Layout.Axis = .vertical, align: Alignment = .fill, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ view: ViewConvertible) -> Layout {
 		switch axis {
-		case .horizontal: return .horizontal(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relative: relative, view))
-		case .vertical: return .vertical(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relative: relative, view))
+		case .horizontal: return .horizontal(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relativity: relativity, view))
+		case .vertical: return .vertical(align: align, marginEdges: marginEdges, animate: animate, .view(length: length, breadth: breadth, relativity: relativity, view))
 		@unknown default: fatalError()
 		}
 	}
@@ -239,8 +239,8 @@ public struct Layout {
 			return Entity(.space(dimension))
 		}
 		
-		public static func view(length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ view: ViewConvertible) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func view(length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ view: ViewConvertible) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			#if os(macOS)
 				return Entity(.sizedView(view.nsView(), size))
 			#else
@@ -248,33 +248,33 @@ public struct Layout {
 			#endif
 		}
 
-		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: Entity...) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			return Entity(.layout(Layout(axis: axis, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
-		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, entities: [Entity]) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, entities: [Entity]) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			return Entity(.layout(Layout(axis: axis, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
-		public static func horizontal(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func horizontal(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: Entity...) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			return Entity(.layout(Layout(axis: .horizontal, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
-		public static func horizontal(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: [Entity]) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func horizontal(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: [Entity]) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			return Entity(.layout(Layout(axis: .horizontal, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
-		public static func vertical(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, _ entities: Entity...) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func vertical(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: Entity...) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			return Entity(.layout(Layout(axis: .vertical, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
-		public static func vertical(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relative: Bool = false, entities: [Entity]) -> Entity {
-			let size = Size(length: length, breadth: breadth, relative: relative)
+		public static func vertical(align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, entities: [Entity]) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
 			return Entity(.layout(Layout(axis: .vertical, align: align, marginEdges: .none, entities: entities), size: size))
 		}
 		
@@ -321,14 +321,26 @@ public struct Layout {
 
 	/// A `Size` is the combination of both length (size of a layout object in the direction of layout) or breadth (size of a layout object perpendicular to the layout direction). If the length includes a ratio, it is relative to the parent container but the breadth can be relative to the length, allowing for specifying an aspect ratio.
 	public struct Size {
+		public enum Relativity {
+			case independent
+			case lengthRelativeToBreadth
+			case breadthRelativeToLength
+			
+			var isLengthRelativeToBreadth: Bool {
+				if case .lengthRelativeToBreadth = self { return true } else { return false }
+			}
+			var isBreadthRelativeToLength: Bool {
+				if case .breadthRelativeToLength = self { return true } else { return false }
+			}
+		}
 		public let length: Dimension?
 		public let breadth: Dimension?
-		public let relative: Bool
+		public let relativity: Relativity
 		
-		public init(length: Dimension? = nil, breadth: Dimension?, relative: Bool = false) {
+		public init(length: Dimension? = nil, breadth: Dimension?, relativity: Relativity = .independent) {
 			self.length = length
 			self.breadth = breadth
-			self.relative = relative
+			self.relativity = relativity
 		}
 	}
 
@@ -521,16 +533,16 @@ public struct Layout {
 		constraints.append(secondLow)
 	}
 	
-	private func constrain(bounds: Bounds, leading: Dimension, length: Dimension?, breadth: Dimension?, relative: Bool, state: inout State) {
+	private func constrain(bounds: Bounds, leading: Dimension, length: Dimension?, breadth: Dimension?, relativity: Size.Relativity, state: inout State) {
 		switch axis {
 		case .horizontal:
 			leading.unscaledConstraintBetween(first: bounds.leading, second: state.containerBounds.leading, constraints: &state.storage.constraints)
 			
 			if let l = length {
-				l.scaledConstraintBetween(first: bounds.width, second: state.containerBounds.width, constraints: &state.storage.constraints)
+				l.scaledConstraintBetween(first: bounds.width, second: relativity.isLengthRelativeToBreadth ? bounds.height : state.containerBounds.width, constraints: &state.storage.constraints)
 			}
 			if let b = breadth {
-				b.scaledConstraintBetween(first: bounds.height, second: relative ? bounds.width : state.containerBounds.height, constraints: &state.storage.constraints)
+				b.scaledConstraintBetween(first: bounds.height, second: relativity.isBreadthRelativeToLength ? bounds.width : state.containerBounds.height, constraints: &state.storage.constraints)
 			}
 			
 			switch self.align {
@@ -549,11 +561,11 @@ public struct Layout {
 			leading.unscaledConstraintBetween(first: bounds.top, second: state.containerBounds.top, constraints: &state.storage.constraints)
 			
 			if let l = length {
-				l.scaledConstraintBetween(first: bounds.height, second: state.containerBounds.height, constraints: &state.storage.constraints)
+				l.scaledConstraintBetween(first: bounds.height, second: relativity.isLengthRelativeToBreadth ? bounds.width : state.containerBounds.height, constraints: &state.storage.constraints)
 			}
 			
 			if let b = breadth {
-				b.scaledConstraintBetween(first: bounds.width, second: relative ? bounds.height : state.containerBounds.width, constraints: &state.storage.constraints)
+				b.scaledConstraintBetween(first: bounds.width, second: relativity.isBreadthRelativeToLength ? bounds.height : state.containerBounds.width, constraints: &state.storage.constraints)
 			}
 			
 			switch self.align {
@@ -580,14 +592,14 @@ public struct Layout {
 				let box = Layout.Box()
 				state.view.addLayoutBox(box)
 				state.storage.boxes.append(box)
-				constrain(bounds: Bounds(box: box), leading: Dimension(), length: d, breadth: nil, relative: false, state: &state)
+				constrain(bounds: Bounds(box: box), leading: Dimension(), length: d, breadth: nil, relativity: .independent, state: &state)
 				state.previousEntityBounds = nil
 			}
 			if dimension.ratio != 0 || needDimensionAnchor {
 				let box = Layout.Box()
 				state.view.addLayoutBox(box)
 				state.storage.boxes.append(box)
-				constrain(bounds: Bounds(box: box), leading: Dimension(), length: dimension, breadth: nil, relative: false, state: &state)
+				constrain(bounds: Bounds(box: box), leading: Dimension(), length: dimension, breadth: nil, relativity: .independent, state: &state)
 				state.previousEntityBounds = Bounds(box: box)
 				return axis == .horizontal ? box.widthAnchor : box.heightAnchor
 			}
@@ -599,7 +611,7 @@ public struct Layout {
 			state.storage.boxes.append(box)
 			let bounds = Bounds(box: box)
 			l.add(to: state.view, containerBounds: bounds, storage: state.storage)
-			constrain(bounds: bounds, leading: state.dimension ?? Dimension(), length: size?.length, breadth: size?.breadth, relative: size?.relative ?? false, state: &state)
+			constrain(bounds: bounds, leading: state.dimension ?? Dimension(), length: size?.length, breadth: size?.breadth, relativity: size?.relativity ?? .independent, state: &state)
 			state.dimension = nil
 			state.previousEntityBounds = bounds
 			return needDimensionAnchor ? (axis == .horizontal ? box.widthAnchor : box.heightAnchor) : nil
@@ -633,7 +645,7 @@ public struct Layout {
 			#endif
 			view.translatesAutoresizingMaskIntoConstraints = false
 			state.view.addSubview(view)
-			constrain(bounds: Bounds(view: view, marginEdges: .none), leading: state.dimension ?? Dimension(), length: size?.length, breadth: size?.breadth, relative: size?.relative ?? false, state: &state)
+			constrain(bounds: Bounds(view: view, marginEdges: .none), leading: state.dimension ?? Dimension(), length: size?.length, breadth: size?.breadth, relativity: size?.relativity ?? .independent, state: &state)
 			state.dimension = nil
 			state.previousEntityBounds = Bounds(view: view, marginEdges: .none)
 			return needDimensionAnchor ? (axis == .horizontal ? view.widthAnchor : view.heightAnchor) : nil

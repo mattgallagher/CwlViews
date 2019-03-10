@@ -21,7 +21,7 @@ func imageView(_ imageViewState: ImageViewState, _ navigationItem: NavigationIte
 			.layout -- .center(
 				marginEdges: .allLayout,
 				breadth: .equalTo(ratio: 1.0),
-				relative: true,
+				relativity: .breadthRelativeToLength,
 				.view(ImageView(.image -- .drawn(width: 512, height: 512, drawIcon)))
 			)
 		)

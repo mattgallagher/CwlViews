@@ -528,19 +528,19 @@ extension TableView.Preparer {
 
 		open override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
 			super.scrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
-			guard !decelerate, let tableView = scrollView as? UITableView, let topVisibleRow = tableView.indexPathsForVisibleRows?.last else { return }
+			guard !decelerate, let tableView = scrollView as? UITableView, let topVisibleRow = tableView.indexPathsForVisibleRows?.first else { return }
 			userDidScrollToRow?.send(value: tableRowData(at: topVisibleRow, in: tableView))
 		}
 		
 		open override func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
 			super.scrollViewDidScrollToTop(scrollView)
-			guard let tableView = scrollView as? UITableView, let topVisibleRow = tableView.indexPathsForVisibleRows?.last else { return }
+			guard let tableView = scrollView as? UITableView, let topVisibleRow = tableView.indexPathsForVisibleRows?.first else { return }
 				userDidScrollToRow?.send(value: tableRowData(at: topVisibleRow, in: tableView))
 		}
 		
 		open override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
 			super.scrollViewDidEndDecelerating(scrollView)
-			guard let tableView = scrollView as? UITableView, let topVisibleRow = tableView.indexPathsForVisibleRows?.last else { return }
+			guard let tableView = scrollView as? UITableView, let topVisibleRow = tableView.indexPathsForVisibleRows?.first else { return }
 			userDidScrollToRow?.send(value: tableRowData(at: topVisibleRow, in: tableView))
 		}
 
@@ -591,7 +591,7 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-			handler(ofType: SignalInput<TableRow<RowData>>.self)!.send(value: tableRowData(at: indexPath, in: tableView))
+			handler(ofType: SignalInput<TableRow<RowData>>.self)?.send(value: tableRowData(at: indexPath, in: tableView))
 			(tableView.delegate as? Storage)?.notifyVisibleRowsChanged(in: tableView)
 		}
 		

@@ -33,7 +33,7 @@ public extension BinderConstructor where Instance: DefaultConstructable {
 }
 
 /// All NSObject instances can use AssociatedBinderStorage which embeds lifetimes in the Objective-C associated object storage.
-public protocol BinderEmbedder: BinderApplyable where Instance: NSObject, Storage: AssociatedBinderStorage, Output == Instance {}
+public protocol BinderEmbedder: BinderApplyable where Instance: NSObjectProtocol, Storage: AssociatedBinderStorage, Output == Instance {}
 public extension BinderEmbedder {
 	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Output {
 		storage.embed(lifetimes: lifetimes, in: instance)

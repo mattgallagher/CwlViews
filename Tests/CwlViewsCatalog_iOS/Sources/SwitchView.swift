@@ -9,7 +9,9 @@
 import CwlViews
 
 struct SwitchViewState: CodableContainer {
+	let value: Var<Bool>
 	init() {
+		value = Var(true)
 	}
 }
 
@@ -19,8 +21,25 @@ func switchView(_ switchViewState: SwitchViewState, _ navigationItem: Navigation
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				.view(Label(.text -- CatalogViewState.CaseName.switch.localizedString))
+				.view(
+					Label(
+						.text <-- switchViewState.value.map { .localizedStringWithFormat(.valueFormat, $0 ? String.on : String.off) }
+					)
+				),
+				.space(),
+				.view(
+					Switch(
+						.isOn <-- switchViewState.value.distinctUntilChanged().animate(),
+						.action(.valueChanged, \.isOn) --> switchViewState.value
+					)
+				)
 			)
 		)
 	)
+}
+
+private extension String {
+	static let valueFormat = NSLocalizedString("Switch is %@", comment: "")
+	static let on = NSLocalizedString("on", comment: "")
+	static let off = NSLocalizedString("off", comment: "")
 }

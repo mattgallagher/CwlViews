@@ -99,6 +99,7 @@ public extension ScrollView {
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
+		
 		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }

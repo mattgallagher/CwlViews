@@ -91,7 +91,7 @@ func navItem(tableState: TableViewState, doc: DocumentAdapter) -> NavigationItem
 	)
 }
 
-fileprivate extension String {
+private extension String {
 	static let textRowIdentifier = "TextRow"
 	static let rowText = NSLocalizedString("This is row #%@", comment: "")
 	static let helloWorld = NSLocalizedString("Hello, world!", comment: "")

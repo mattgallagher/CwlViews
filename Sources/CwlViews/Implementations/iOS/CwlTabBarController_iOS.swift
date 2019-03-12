@@ -213,23 +213,23 @@ extension TabBarController.Preparer {
 		
 		open func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
 			guard let storage = tabBarController.delegate as? Storage, let identifier = storage.identifier(for: viewController) else { return false }
-			return handler(ofType: ((ItemIdentifier) -> Bool).self)!(identifier)
+			return handler(ofType: ((UITabBarController, ItemIdentifier) -> Bool).self)!(tabBarController, identifier)
 		}
 		
 		open func tabBarControllerSupportedInterfaceOrientations(_ tabBarController: UITabBarController) -> UIInterfaceOrientationMask {
-			return handler(ofType: (() -> UIInterfaceOrientationMask).self)!()
+			return handler(ofType: ((UITabBarController) -> UIInterfaceOrientationMask).self)!(tabBarController)
 		}
 		
 		open func tabBarControllerPreferredInterfaceOrientationForPresentation(_ tabBarController: UITabBarController) -> UIInterfaceOrientation {
-			return handler(ofType: (() -> UIInterfaceOrientation).self)!()
+			return handler(ofType: ((UITabBarController) -> UIInterfaceOrientation).self)!(tabBarController)
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-			return handler(ofType: ((UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)!(animationController)
+			return handler(ofType: ((UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)!(tabBarController, animationController)
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, animationControllerForTransitionFrom fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-			return handler(ofType: ((UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)!(fromVC, toVC)
+			return handler(ofType: ((UITabBarController, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)!(tabBarController, fromVC, toVC)
 		}
 	}
 }

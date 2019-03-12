@@ -288,6 +288,7 @@ func binderContent() -> String {
 				switch binding {
 				case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 		
+				/* All bindings should have an "apply" (although some might simply return nil). Here are some typical examples... */
 				/* case .someStatic(let x): instance.someStatic = x.value */
 				/* case .someProperty(let x): return x.apply(instance) { i, v in i.someProperty = v } */
 				/* case .someSignal(let x): return x.apply(instance) { i, v in i.something(v) } */
@@ -336,7 +337,7 @@ func binderContent() -> String {
 		extension ___VARIABLE_basename___Convertible {
 			public func ___VARIABLE_lowercasePlatformPrefix______VARIABLE_linkedBasename___() -> ___VARIABLE_linkedBasename___.Instance { return ___VARIABLE_lowercasePlatformPrefix______VARIABLE_basename___() }
 		}
-		extension UI___VARIABLE_basename___: ___VARIABLE_basename___Convertible /* , HasDelegate // if Preparer is BinderDelegateEmbedderConstructor */ {
+		extension ___VARIABLE_platformPrefix______VARIABLE_basename___: ___VARIABLE_basename___Convertible /* , HasDelegate // if Preparer is BinderDelegateEmbedderConstructor */ {
 			public func ___VARIABLE_lowercasePlatformPrefix______VARIABLE_basename___() -> ___VARIABLE_basename___.Instance { return self }
 		}
 		public extension ___VARIABLE_basename___ {
@@ -985,7 +986,7 @@ func iOSTableViewContent() -> String {
 			)
 		}
 
-		fileprivate extension String {
+		private extension String {
 			static let textRowIdentifier = "TextRow"
 			static let rowText = NSLocalizedString("This is row #%@", comment: "")
 			static let helloWorld = NSLocalizedString("Hello, world!", comment: "")
@@ -1017,7 +1018,7 @@ func iOSDetailViewContent() -> String {
 			)
 		}
 
-		fileprivate extension String {
+		private extension String {
 			static let titleText = NSLocalizedString("Row #%@", comment: "")
 			static let detailText = NSLocalizedString("Detail view for row #%@", comment: "")
 		}
@@ -1108,7 +1109,7 @@ func documentContent() -> String {
 			}
 		}
 
-		fileprivate extension String {
+		private extension String {
 			static let documentFileName = "document.json"
 		}
 		"""
@@ -1796,7 +1797,7 @@ func macMainMenuContent() -> String {
 			)
 		}
 		
-		fileprivate extension String {
+		private extension String {
 			// Application menu
 			static let about = NSLocalizedString("About %@", tableName: "MainMenu", comment: "")
 			static let preferences = NSLocalizedString("Preferences…", tableName: "MainMenu", comment: "")

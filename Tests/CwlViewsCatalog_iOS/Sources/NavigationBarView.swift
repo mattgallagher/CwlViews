@@ -22,6 +22,7 @@ func navigationView(_ navigationViewState: NavigationBarViewState, _ navigationI
 			.backgroundColor -- .white,
 			.layout -- .horizontal(
 				align: .center,
+				marginEdges: .allLayout,
 				.view(
 					NavigationBar(
 						.items <-- navigationViewState.stack.stackMap { value -> NavigationItemConvertible in

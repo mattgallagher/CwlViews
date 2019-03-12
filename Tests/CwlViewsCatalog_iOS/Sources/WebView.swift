@@ -17,10 +17,28 @@ func webView(_ webViewState: WebViewState, _ navigationItem: NavigationItem) -> 
 	return ViewController(
 		.navigationItem -- navigationItem,
 		.view -- View(
-			.backgroundColor -- .white,
-			.layout -- .center(
-				.view(Label(.text -- CatalogViewState.CaseName.textField.localizedString))
+			.layoutMargins -- UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20),
+			.backgroundColor -- .darkGray,
+			.layout -- .fill(
+				marginEdges: .allLayout,
+				WebView(
+					.loadHTMLString <-- Signal<(string: String, baseURL: URL?)>.just((.htmlString, nil)).ignoreCallback()
+				)
 			)
 		)
 	)
+}
+
+private extension String {
+	static let htmlString = """
+		<html>
+			<head>
+				<meta name="viewport" content="width=450">
+			</head>
+			<body>
+				<h1>Hello, there!</h1>
+				<p>This text is loaded in a WKWebView.</p>
+			</body>
+		</html>
+		"""
 }

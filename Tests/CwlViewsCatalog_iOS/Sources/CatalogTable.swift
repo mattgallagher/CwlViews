@@ -15,13 +15,14 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case control(ControlViewState)
 	case gestureRecognizer(GestureRecognizerViewState)
 	case imageView(ImageViewState)
-	case layersView(LayersViewState)
+	case layers(LayersViewState)
 	case navigationBar(NavigationBarViewState)
 	case pageViewController(PageViewState)
 	case searchBar(SearchBarViewState)
 	case slider(SliderViewState)
 	case `switch`(SwitchViewState)
 	case textField(TextFieldViewState)
+	case textView(TextViewState)
 	case webView(WebViewState)
 }
 
@@ -43,62 +44,67 @@ func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
 }
 
 extension CatalogViewState {
-	enum CaseName: String, CaseNameDecoder, CaseIterable {
+	enum CaseName: String, CaseIterable {
 		case alert
 		case barButton
 		case button
 		case control
 		case gestureRecognizer
 		case imageView
-		case layersView
+		case layers
 		case navigationBar
 		case pageViewController
 		case searchBar
 		case slider
 		case `switch`
 		case textField
+		case textView
 		case webView
-		
-		var localizedString: String {
-			switch self {
-			case .alert: return NSLocalizedString("Alert", comment: "")
-			case .barButton: return NSLocalizedString("BarButton", comment: "")
-			case .button: return NSLocalizedString("Button", comment: "")
-			case .control: return NSLocalizedString("Control", comment: "")
-			case .gestureRecognizer: return NSLocalizedString("GestureRecognizer", comment: "")
-			case .imageView: return NSLocalizedString("ImageView", comment: "")
-			case .layersView: return NSLocalizedString("LayersView", comment: "")
-			case .navigationBar: return NSLocalizedString("NavigationBar", comment: "")
-			case .pageViewController: return NSLocalizedString("PageViewController", comment: "")
-			case .searchBar: return NSLocalizedString("SearchBar", comment: "")
-			case .slider: return NSLocalizedString("Slider", comment: "")
-			case .`switch`: return NSLocalizedString("Switch", comment: "")
-			case .textField: return NSLocalizedString("TextField", comment: "")
-			case .webView: return NSLocalizedString("WebView", comment: "")
-			}
+	}
+}
+
+extension CatalogViewState.CaseName: CaseNameDecoder {
+	var localizedString: String {
+		switch self {
+		case .alert: return NSLocalizedString("Alert", comment: "")
+		case .barButton: return NSLocalizedString("BarButton", comment: "")
+		case .button: return NSLocalizedString("Button", comment: "")
+		case .control: return NSLocalizedString("Control", comment: "")
+		case .gestureRecognizer: return NSLocalizedString("GestureRecognizer", comment: "")
+		case .imageView: return NSLocalizedString("ImageView", comment: "")
+		case .layers: return NSLocalizedString("Layers", comment: "")
+		case .navigationBar: return NSLocalizedString("NavigationBar", comment: "")
+		case .pageViewController: return NSLocalizedString("PageViewController", comment: "")
+		case .searchBar: return NSLocalizedString("SearchBar", comment: "")
+		case .slider: return NSLocalizedString("Slider", comment: "")
+		case .`switch`: return NSLocalizedString("Switch", comment: "")
+		case .textField: return NSLocalizedString("TextField", comment: "")
+		case .textView: return NSLocalizedString("TextView", comment: "")
+		case .webView: return NSLocalizedString("WebView", comment: "")
 		}
-		
-		var viewState: CatalogViewState {
-			return try! decode(from: KeyedDecodingContainer<CaseName>.empty())
-		}
-		
-		func decode(from container: KeyedDecodingContainer<CaseName>) throws -> CatalogViewState {
-			switch self {
-			case .alert: return .alert(try container.decodeIfPresent(AlertViewState.self, forKey: self) ?? .init())
-			case .barButton: return .barButton(try container.decodeIfPresent(BarButtonViewState.self, forKey: self) ?? .init())
-			case .button: return .button(try container.decodeIfPresent(ButtonViewState.self, forKey: self) ?? .init())
-			case .control: return .control(try container.decodeIfPresent(ControlViewState.self, forKey: self) ?? .init())
-			case .gestureRecognizer: return .gestureRecognizer(try container.decodeIfPresent(GestureRecognizerViewState.self, forKey: self) ?? .init())
-			case .imageView: return .imageView(try container.decodeIfPresent(ImageViewState.self, forKey: self) ?? .init())
-			case .layersView: return .layersView(try container.decodeIfPresent(LayersViewState.self, forKey: self) ?? .init())
-			case .navigationBar: return .navigationBar(try container.decodeIfPresent(NavigationBarViewState.self, forKey: self) ?? .init())
-			case .pageViewController: return .pageViewController(try container.decodeIfPresent(PageViewState.self, forKey: self) ?? .init())
-			case .searchBar: return .searchBar(try container.decodeIfPresent(SearchBarViewState.self, forKey: self) ?? .init())
-			case .slider: return .slider(try container.decodeIfPresent(SliderViewState.self, forKey: self) ?? .init())
-			case .switch: return .switch(try container.decodeIfPresent(SwitchViewState.self, forKey: self) ?? .init())
-			case .textField: return .textField(try container.decodeIfPresent(TextFieldViewState.self, forKey: self) ?? .init())
-			case .webView: return .webView(try container.decodeIfPresent(WebViewState.self, forKey: self) ?? .init())
-			}
+	}
+	
+	var viewState: CatalogViewState {
+		return try! decode(from: KeyedDecodingContainer<CatalogViewState.CaseName>.empty())
+	}
+	
+	func decode(from container: KeyedDecodingContainer<CatalogViewState.CaseName>) throws -> CatalogViewState {
+		switch self {
+		case .alert: return .alert(try container.decodeIfPresent(AlertViewState.self, forKey: self) ?? .init())
+		case .barButton: return .barButton(try container.decodeIfPresent(BarButtonViewState.self, forKey: self) ?? .init())
+		case .button: return .button(try container.decodeIfPresent(ButtonViewState.self, forKey: self) ?? .init())
+		case .control: return .control(try container.decodeIfPresent(ControlViewState.self, forKey: self) ?? .init())
+		case .gestureRecognizer: return .gestureRecognizer(try container.decodeIfPresent(GestureRecognizerViewState.self, forKey: self) ?? .init())
+		case .imageView: return .imageView(try container.decodeIfPresent(ImageViewState.self, forKey: self) ?? .init())
+		case .layers: return .layers(try container.decodeIfPresent(LayersViewState.self, forKey: self) ?? .init())
+		case .navigationBar: return .navigationBar(try container.decodeIfPresent(NavigationBarViewState.self, forKey: self) ?? .init())
+		case .pageViewController: return .pageViewController(try container.decodeIfPresent(PageViewState.self, forKey: self) ?? .init())
+		case .searchBar: return .searchBar(try container.decodeIfPresent(SearchBarViewState.self, forKey: self) ?? .init())
+		case .slider: return .slider(try container.decodeIfPresent(SliderViewState.self, forKey: self) ?? .init())
+		case .switch: return .switch(try container.decodeIfPresent(SwitchViewState.self, forKey: self) ?? .init())
+		case .textField: return .textField(try container.decodeIfPresent(TextFieldViewState.self, forKey: self) ?? .init())
+		case .textView: return .textView(try container.decodeIfPresent(TextViewState.self, forKey: self) ?? .init())
+		case .webView: return .webView(try container.decodeIfPresent(WebViewState.self, forKey: self) ?? .init())
 		}
 	}
 }

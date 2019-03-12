@@ -58,19 +58,12 @@ public extension ViewController {
 		case view(Dynamic<ViewConvertible>)
 		
 		// 2. Signal bindings are performed on the object after construction.
-		case present(Signal<ModalPresentation>)
+		case present(Signal<Animatable<ModalPresentation?, ()>>)
 		
 		// 3. Action bindings are triggered by the object after construction.
-		case didAppear(SignalInput<Bool>)
-		case didDisappear(SignalInput<Bool>)
-		case traitCollectionDidChange(SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>)
-		case willAppear(SignalInput<Bool>)
-		case willDisappear(SignalInput<Bool>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case childrenLayout(([UIView]) -> Layout)
-		case didReceiveMemoryWarning((UIViewController) -> Void)
-		case loadView(() -> ViewConvertible)
 	}
 }
 
@@ -89,7 +82,6 @@ public extension ViewController {
 		}
 		
 		public var childrenLayout: (([UIView]) -> Layout)?
-		public var loadView: (() -> ViewConvertible)?
 		public var view: InitialSubsequent<ViewConvertible>?
 	}
 }
@@ -100,14 +92,8 @@ public extension ViewController.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .childrenLayout(let x):
-			childrenLayout = x
-		case .loadView(let x):
-			precondition(view == nil, "Construct the view using either .loadView or .view, not both.")
-			loadView = x
-		case .view(let x):
-			precondition(loadView == nil, "Construct the view using either .loadView or .view, not both.")
-			view = x.initialSubsequent()
+		case .childrenLayout(let x): childrenLayout = x
+		case .view(let x): view = x.initialSubsequent()
 		default: break
 		}
 	}
@@ -120,9 +106,7 @@ public extension ViewController.Preparer {
 		
 		// The loadView function needs to be ready in case one of the bindings triggers a view load.
 		if let v = view?.initial?.uiView() {
-			storage.view = v
-		} else if let lv = loadView {
-			storage.viewConstructor = lv
+			instance.view = v
 		}
 		
 		// The childrenLayout should be ready for when the children property starts
@@ -200,38 +184,14 @@ public extension ViewController.Preparer {
 			}
 			
 		// 3. Action bindings are triggered by the object after construction.
-		case .didAppear(let x):
-			storage.didAppear = x
-			return x
-		case .didDisappear(let x):
-			storage.didDisappear = x
-			return x
-		case .traitCollectionDidChange(let x):
-			storage.traitCollectionDidChange = x
-			return x
-		case .willAppear(let x):
-			storage.willAppear = x
-			return x
-		case .willDisappear(let x):
-			storage.willDisappear = x
-			return x
 			
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .childrenLayout: return nil
-		case .didReceiveMemoryWarning(let x):
-			storage.didReceiveMemoryWarning = x
-			return nil
-		case .loadView: return nil
 		}
 	}
 	
 	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 		let lifetime = inheritedFinalizedInstance(instance, storage: storage)
-		
-		// Send the initial "traitsCollection" once construction is complete.
-		if let tcdc = storage.traitCollectionDidChange {
-			tcdc.send(value: (previous: nil, new: instance.traitCollection))
-		}
 		
 		// We previously set the embedded storage so that any delegate methods triggered during setup would be able to resolve the storage. Now that we're done setting up, we need to *clear* the storage so the embed function doesn't complain that the storage is already set.
 		instance.setAssociatedBinderStorage(nil)
@@ -242,246 +202,86 @@ public extension ViewController.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension ViewController.Preparer {
-	open class Storage: AssociatedBinderStorage {
-		open var childrenLayout: (([UIView]) -> Layout)?
-		open var didAppear: SignalInput<Bool>?
-		open var didDisappear: SignalInput<Bool>?
-		open var didReceiveMemoryWarning: ((UIViewController) -> Void)?
-		open var presentationInProgress: Bool = false
-		open var queuedModalPresentations: [ModalPresentation] = []
-		open var traitCollectionDidChange: SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>?
+	private static var presenterKey = NSObject()
+	
+	open class Storage: AssociatedBinderStorage, UIPopoverPresentationControllerDelegate {
 		open var view: ViewConvertible?
-		open var viewConstructor: (() -> ViewConvertible?)?
-		open var willAppear: SignalInput<Bool>?
-		open var willDisappear: SignalInput<Bool>?
+		open var childrenLayout: (([UIView]) -> Layout)?
+		
+		open var presentationAnimationInProgress: Bool = false
+		open var currentModalPresentation: ModalPresentation? = nil
+		open var queuedModalPresentations: [Animatable<ModalPresentation?, ()>] = []
 		
 		open override var isInUse: Bool {
 			return true
 		}
 		
-		private static var isSwizzled: Bool = false
-		private static let ensureSwizzled: () = {
-			if isSwizzled {
-				assertionFailure("This line should be unreachable")
+		private func presentationDismissed(viewController: UIViewController) {
+			currentModalPresentation?.completion?.send(value: ())
+			currentModalPresentation = nil
+			processModalPresentations(viewController: viewController)
+		}
+		
+		private func presentationAnimationCompleted(viewController: UIViewController, dismissed: Bool) {
+			self.queuedModalPresentations.removeFirst()
+			self.presentationAnimationInProgress = false
+			if dismissed {
+				presentationDismissed(viewController: viewController)
+			}
+		}
+		
+		open func popoverPresentationControllerDidDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) {
+			presentationDismissed(viewController: popoverPresentationController.presentingViewController)
+		}
+		
+		private func present(viewController: UIViewController, modalPresentation: ModalPresentation, animated: Bool) {
+			presentationAnimationInProgress = true
+			currentModalPresentation = modalPresentation
+			let presentation = modalPresentation.viewController.uiViewController()
+			if let popover = presentation.popoverPresentationController, let configure = modalPresentation.popoverPositioning {
+				configure(viewController, popover)
+				popover.delegate = self
+			} else if let presenter = presentation.presentationController {
+				objc_setAssociatedObject(presenter, &presenterKey, OnDelete {
+					guard presentation === self.currentModalPresentation?.viewController.uiViewController() else { return }
+					self.presentationDismissed(viewController: viewController)
+				}, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
+			}
+			viewController.present(presentation, animated: animated) {
+				self.presentationAnimationCompleted(viewController: viewController, dismissed: false)
+			}
+		}
+		
+		private func dismiss(viewController: UIViewController, animated: Bool) {
+			presentationAnimationInProgress = true
+			guard let vc = viewController.presentedViewController else {
+				self.presentationAnimationCompleted(viewController: viewController, dismissed: true)
 				return
 			}
-			
-			let loadViewSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.loadView))!
-			let loadViewDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledLoadView))!
-			method_exchangeImplementations(loadViewSource, loadViewDestination)
-			
-			let traitCollectionDidChangeSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.traitCollectionDidChange(_:)))!
-			let traitCollectionDidChangeDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledTraitCollectionDidChange(_:)))!
-			method_exchangeImplementations(traitCollectionDidChangeSource, traitCollectionDidChangeDestination)
-			
-			let willAppearSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.viewWillAppear(_:)))!
-			let willAppearDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledViewWillAppear(_:)))!
-			method_exchangeImplementations(willAppearSource, willAppearDestination)
-			
-			let didDisappearSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.viewDidDisappear(_:)))!
-			let didDisappearDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledViewDidDisappear(_:)))!
-			method_exchangeImplementations(didDisappearSource, didDisappearDestination)
-			
-			let didAppearSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.viewDidAppear(_:)))!
-			let didAppearDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledViewDidAppear(_:)))!
-			method_exchangeImplementations(didAppearSource, didAppearDestination)
-			
-			let willDisappearSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.viewWillDisappear(_:)))!
-			let willDisappearDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledViewWillDisappear(_:)))!
-			method_exchangeImplementations(willDisappearSource, willDisappearDestination)
-			
-			let didReceiveMemoryWarningSource = class_getInstanceMethod(UIViewController.self, #selector(UIViewController.didReceiveMemoryWarning))!
-			let didReceiveMemoryWarningDestination = class_getInstanceMethod(ViewController.Preparer.Storage.self, #selector(ViewController.Preparer.Storage.swizzledDidReceiveMemoryWarning))!
-			method_exchangeImplementations(didReceiveMemoryWarningSource, didReceiveMemoryWarningDestination)
-			
-			isSwizzled = true
-		}()
-		
-		public override init() {
-			ViewController.Preparer.Storage.ensureSwizzled
-			super.init()
+			guard !(vc === currentModalPresentation?.viewController.uiViewController()) || vc.isBeingDismissed else {
+				assertionFailure("Presentations interleaved with other APIs is not supported.")
+				let completionHandlers = queuedModalPresentations.compactMap {
+					$0.value?.completion
+				}
+				queuedModalPresentations.removeAll()
+				presentationAnimationInProgress = false
+				currentModalPresentation?.completion?.send(value: ())
+				completionHandlers.forEach { $0.send(value: ()) }
+				return
+			}
+			vc.dismiss(animated: animated, completion: { () -> Void in
+				self.presentationAnimationCompleted(viewController: viewController, dismissed: true)
+			})
 		}
 		
 		open func processModalPresentations(viewController: UIViewController) {
-			if presentationInProgress {
-				return
+			guard !presentationAnimationInProgress, let first = queuedModalPresentations.first else { return }
+			if let modalPresentation = first.value {
+				guard viewController.view.window != nil else { return }
+				present(viewController: viewController, modalPresentation: modalPresentation, animated: first.isAnimated)
+			} else {
+				dismiss(viewController: viewController, animated: first.isAnimated)
 			}
-			if let mp = queuedModalPresentations.first {
-				if let vc = mp.viewController {
-					guard viewController.view.window != nil else {
-						presentationInProgress = false
-						return
-					}
-					presentationInProgress = true
-					viewController.present(vc.uiViewController(), animated: mp.animated) {
-						mp.completion?.send(value: ())
-						self.queuedModalPresentations.removeFirst()
-						self.presentationInProgress = false
-						self.processModalPresentations(viewController: viewController)
-					}
-				} else {
-					presentationInProgress = true
-					if let vc = viewController.presentedViewController, !vc.isBeingDismissed {
-						vc.dismiss(animated: mp.animated, completion: { () -> Void in
-							mp.completion?.send(value: ())
-							self.queuedModalPresentations.removeFirst()
-							self.presentationInProgress = false
-							self.processModalPresentations(viewController: viewController)
-						})
-					} else {
-						mp.completion?.send(value: ())
-						self.queuedModalPresentations.removeFirst()
-						self.presentationInProgress = false
-						self.processModalPresentations(viewController: viewController)
-					}
-				}
-			}
-		}
-		
-		open func traitCollectionDidChange(_ previous: UITraitCollection?, _ new: UITraitCollection) {
-			traitCollectionDidChange?.send(value: (previous: previous, new: new))
-		}
-		
-		open func viewWillAppear(controller: UIViewController, animated: Bool) {
-			willAppear?.send(value: animated)
-		}
-		
-		open func viewDidDisappear(controller: UIViewController, animated: Bool) {
-			didDisappear?.send(value: animated)
-		}
-		
-		open func viewDidAppear(controller: UIViewController, animated: Bool) {
-			didAppear?.send(value: animated)
-		}
-		
-		open func viewWillDisappear(controller: UIViewController, animated: Bool) {
-			willDisappear?.send(value: animated)
-		}
-		
-		open func controllerDidReceiveMemoryWarning(controller: UIViewController) {
-			didReceiveMemoryWarning?(controller)
-			
-			if viewConstructor != nil, let view = controller.viewIfLoaded, view.window == nil {
-				controller.view = nil
-			}
-		}
-		
-		open func loadView(for viewController: UIViewController) -> Bool {
-			if let wrapper = view ?? viewConstructor?() {
-				viewController.view = wrapper.uiView()
-				return true
-			}
-			return false
-		}
-		
-		@objc dynamic private func swizzledLoadView() {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				if storage.loadView(for: vc) {
-					return
-				}
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledLoadView)
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector) -> Void).self)(self, sel)
-		}
-		
-		@objc dynamic private func swizzledTraitCollectionDidChange(_ previous: UITraitCollection?) {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				storage.traitCollectionDidChange(previous, vc.traitCollection)
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledTraitCollectionDidChange(_:))
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector, UITraitCollection?) -> Void).self)(self, sel, previous)
-		}
-		
-		@objc dynamic private func swizzledViewWillAppear(_ animated: Bool) {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				storage.viewWillAppear(controller: vc, animated: animated)
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledViewWillAppear(_:))
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector, Bool) -> Void).self)(self, sel, animated)
-		}
-		
-		@objc dynamic private func swizzledViewDidDisappear(_ animated: Bool) {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				storage.viewDidDisappear(controller: vc, animated: animated)
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledViewDidDisappear(_:))
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector, Bool) -> Void).self)(self, sel, animated)
-		}
-		
-		@objc dynamic private func swizzledViewDidAppear(_ animated: Bool) {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				storage.viewDidAppear(controller: vc, animated: animated)
-				
-				// Handle any modal presentation that were deferred until adding to the window
-				storage.processModalPresentations(viewController: vc)
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledViewDidAppear(_:))
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector, Bool) -> Void).self)(self, sel, animated)
-		}
-		
-		@objc dynamic private func swizzledViewWillDisappear(_ animated: Bool) {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				storage.viewWillDisappear(controller: vc, animated: animated)
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledViewWillDisappear(_:))
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector, Bool) -> Void).self)(self, sel, animated)
-		}
-		
-		@objc dynamic private func swizzledDidReceiveMemoryWarning() {
-			assert(ViewController.Preparer.Storage.isSwizzled)
-			
-			// SWIZZLED METHOD WARNING: `self` is an instance of UIViewController, not ViewController.Preparer.Storage. Don't access any instance members on `self`.
-			if let storage = associatedBinderStorage(subclass: Storage.self) {
-				let vc = unsafeBitCast(self, to: UIViewController.self)
-				storage.controllerDidReceiveMemoryWarning(controller: vc)
-			}
-			
-			// Relay back to the original implementation
-			let sel = #selector(ViewController.Preparer.Storage.swizzledDidReceiveMemoryWarning)
-			let m = class_getMethodImplementation(ViewController.Preparer.Storage.self, sel)!
-			unsafeBitCast(m, to: (@convention(c) (NSObjectProtocol, Selector) -> Void).self)(self, sel)
 		}
 	}
 }
@@ -525,19 +325,12 @@ public extension BindingName where Binding: ViewControllerBinding {
 	static var view: ViewControllerName<Dynamic<ViewConvertible>> { return .name(B.view) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var present: ViewControllerName<Signal<ModalPresentation>> { return .name(B.present) }
+	static var present: ViewControllerName<Signal<Animatable<ModalPresentation?, ()>>> { return .name(B.present) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didAppear: ViewControllerName<SignalInput<Bool>> { return .name(B.didAppear) }
-	static var didDisappear: ViewControllerName<SignalInput<Bool>> { return .name(B.didDisappear) }
-	static var traitCollectionDidChange: ViewControllerName<SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>> { return .name(B.traitCollectionDidChange) }
-	static var willAppear: ViewControllerName<SignalInput<Bool>> { return .name(B.willAppear) }
-	static var willDisappear: ViewControllerName<SignalInput<Bool>> { return .name(B.willDisappear) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var childrenLayout: ViewControllerName<([UIView]) -> Layout> { return .name(B.childrenLayout) }
-	static var didReceiveMemoryWarning: ViewControllerName<(UIViewController) -> Void> { return .name(B.didReceiveMemoryWarning) }
-	static var loadView: ViewControllerName<() -> ViewConvertible> { return .name(B.loadView) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
@@ -569,23 +362,23 @@ public extension ViewController.Binding {
 
 // MARK: - Binder Part 9: Other supporting types
 public struct ModalPresentation {
-	let viewController: ViewControllerConvertible?
-	let animated: Bool
+	let viewController: ViewControllerConvertible
+	let popoverPositioning: ((_ presenter: UIViewController, _ popover: UIPopoverPresentationController) -> Void)?
 	let completion: SignalInput<Void>?
 	
-	public init(_ viewController: ViewControllerConvertible? = nil, animated: Bool = true, completion: SignalInput<Void>? = nil) {
+	public init(_ viewController: ViewControllerConvertible, popoverPositioning: ((_ presenter: UIViewController, _ popover: UIPopoverPresentationController) -> Void)? = nil, completion: SignalInput<Void>? = nil) {
 		self.viewController = viewController
-		self.animated = animated
+		self.popoverPositioning = popoverPositioning
 		self.completion = completion
 	}
 }
 
 extension SignalInterface {
-	public func modalPresentation<T>(_ construct: @escaping (T) -> ViewControllerConvertible) -> Signal<ModalPresentation> where OutputValue == Optional<T> {
+	public func modalPresentation<T>(_ construct: @escaping (T) -> ViewControllerConvertible) -> Signal<ModalPresentation?> where OutputValue == Optional<T> {
 		return transform { result in
 			switch result {
 			case .success(.some(let t)): return .value(ModalPresentation(construct(t)))
-			case .success: return .value(ModalPresentation(nil))
+			case .success: return .value(nil)
 			case .failure(let e): return .end(e)
 			}
 		}

@@ -34,7 +34,7 @@ func layoutWithAnimation(_ buttonViewState: ButtonViewState) -> Signal<Layout> {
 	let childView = View(
 		.backgroundColor <-- buttonViewState.showChild.map { show in show ? .orange : .red },
 		.layout <-- buttonViewState.showChild.map { show in
-			show ? .center(.view(Label(.text -- .helloWorld))) : .horizontal()
+			show ? .center(axis: .horizontal, .view(Label(.text -- .helloWorld))) : .horizontal()
 		}
 	)
 	return buttonViewState.showChild.map { show -> Layout in

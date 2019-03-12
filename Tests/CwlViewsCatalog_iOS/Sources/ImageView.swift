@@ -21,8 +21,13 @@ func imageView(_ imageViewState: ImageViewState, _ navigationItem: NavigationIte
 			.layout -- .center(
 				marginEdges: .allLayout,
 				breadth: .equalTo(ratio: 1.0),
-				relativity: .breadthRelativeToLength,
-				.view(ImageView(.image -- .drawn(width: 512, height: 512, drawIcon)))
+				.view(
+					breadth: .equalTo(ratio: 1.0),
+					relativity: .breadthRelativeToLength,
+					ImageView(.image -- .drawn(width: 512, height: 512, drawIcon))
+				),
+				.space(),
+				.view(Label(.text -- .captionText, .numberOfLines -- 0, .textColor -- .white))
 			)
 		)
 	)
@@ -56,19 +61,29 @@ func drawIcon(context: CGContext, canvas: CGRect) {
 	context.saveGState()
 	context.addEllipse(in: ellipseCenter)
 	context.clip()
-	let bottomGlow = CGGradient(colorSpace: colorSpace, colorComponents: [
-		0.0, 0.94, 0.82, 1.0,
-		0.0, 0.62, 0.56, 1.0,
-		0.0, 0.05, 0.35, 1.0,
-		0.0, 0.00, 0.00, 1.0
-	], locations: [0.0, 0.35, 0.60, 0.7], count: 4)!
+	let bottomGlow = CGGradient(
+		colorSpace: colorSpace,
+		colorComponents: [
+			0.0, 0.94, 0.82, 1.0,
+			0.0, 0.62, 0.56, 1.0,
+			0.0, 0.05, 0.35, 1.0,
+			0.0, 0.00, 0.00, 1.0
+		],
+		locations: [0.0, 0.35, 0.60, 0.7],
+		count: 4
+	)!
 	let bottomCenter = CGPoint(x: ellipseCenter.midX, y: ellipseCenter.midY + ellipseCenter.height * 0.1)
 	context.drawRadialGradient(bottomGlow, startCenter: bottomCenter, startRadius: 0, endCenter: bottomCenter, endRadius: ellipseCenter.height * 0.8, options: [])
-	let topGlow = CGGradient(colorSpace: colorSpace, colorComponents: [
-		0.0, 0.68, 1.00, 0.75,
-		0.0, 0.45, 0.62, 0.55,
-		0.0, 0.45, 0.62, 0.00
-		], locations: [0.0, 0.25, 0.40], count: 3)!
+	let topGlow = CGGradient(
+		colorSpace: colorSpace,
+		colorComponents: [
+			0.0, 0.68, 1.00, 0.75,
+			0.0, 0.45, 0.62, 0.55,
+			0.0, 0.45, 0.62, 0.00
+		],
+		locations: [0.0, 0.25, 0.40],
+		count: 3
+	)!
 	let topCenter = CGPoint(x: ellipseCenter.midX, y: ellipseCenter.midY - ellipseCenter.height * 0.2)
 	context.drawRadialGradient(topGlow, startCenter: topCenter, startRadius: 0, endCenter: topCenter, endRadius: ellipseCenter.height * 0.8, options: [])
 	let centerGlow = CGGradient(colorSpace: colorSpace, colorComponents: [
@@ -109,4 +124,8 @@ func drawIcon(context: CGContext, canvas: CGRect) {
 	let clippedRect = context.boundingBoxOfClipPath
 	context.drawLinearGradient(glossGradient, start: CGPoint(x: ellipseCenter.midX, y: clippedRect.minY), end: CGPoint(x: ellipseCenter.midX, y: clippedRect.maxY), options: [])
 	context.restoreGState()
+}
+
+private extension String {
+	static let captionText = NSLocalizedString("This image is drawn in code, rendered to a UIImage and then displayed in a UIImageView.", comment: "")
 }

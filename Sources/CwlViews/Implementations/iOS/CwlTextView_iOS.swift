@@ -58,11 +58,11 @@ public extension TextView {
 		
 		//	3. Action bindings are triggered by the object after construction.
 		case didBeginEditing(SignalInput<UITextView>)
-		case didChange(SignalInput<UITextView>)
 		case didChangeSelection(SignalInput<UITextView>)
 		case didEndEditing(SignalInput<UITextView>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case didChange((UITextView) -> Void)
 		case shouldBeginEditing((UITextView) -> Bool)
 		case shouldChangeText((UITextView, NSRange, String) -> Bool)
 		case shouldEndEditing((UITextView) -> Bool)
@@ -199,7 +199,7 @@ extension TextView.Preparer {
 		}
 		
 		open func textViewDidChange(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
+			handler(ofType: ((UITextView) -> Void).self)!(textView)
 		}
 		
 		open func textViewDidChangeSelection(_ textView: UITextView) {
@@ -247,16 +247,32 @@ public extension BindingName where Binding: TextViewBinding {
 	
 	//	3. Action bindings are triggered by the object after construction.
 	static var didBeginEditing: TextViewName<SignalInput<UITextView>> { return .name(B.didBeginEditing) }
-	static var didChange: TextViewName<SignalInput<UITextView>> { return .name(B.didChange) }
 	static var didChangeSelection: TextViewName<SignalInput<UITextView>> { return .name(B.didChangeSelection) }
 	static var didEndEditing: TextViewName<SignalInput<UITextView>> { return .name(B.didEndEditing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didChange: TextViewName<(UITextView) -> Void> { return .name(B.didChange) }
 	static var shouldBeginEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldBeginEditing) }
 	static var shouldChangeText: TextViewName<(UITextView, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
 	static var shouldEndEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldEndEditing) }
 	static var shouldInteractWithAttachment: TextViewName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithAttachment) }
 	static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithURL) }
+	
+	// Composite binding names
+	static var textChanged: TextViewName<SignalInput<String>> {
+		return Binding.compositeName(
+			value: { input in { textView in _ = input.send(value: textView.text) } },
+			binding: TextView.Binding.didChange,
+			downcast: Binding.textViewBinding
+		)
+	}
+	static var attributedTextChanged: TextViewName<SignalInput<NSAttributedString>> {
+		return Binding.compositeName(
+			value: { input in { textView in _ = input.send(value: textView.attributedText) } },
+			binding: TextView.Binding.didChange,
+			downcast: Binding.textViewBinding
+		)
+	}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

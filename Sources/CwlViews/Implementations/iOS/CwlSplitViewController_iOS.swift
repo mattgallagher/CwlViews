@@ -180,6 +180,9 @@ public extension SplitViewController.Preparer {
 		if !instance.isCollapsed {
 			storage.displayModeButton?.send(value: instance.displayModeButtonItem)
 		}
+		if let secondary = storage.secondaryViewController {
+			instance.viewControllers.append(secondary)
+		}
 		return inheritedFinalizedInstance(instance, storage: storage)
 	}
 }
@@ -202,13 +205,6 @@ extension SplitViewController.Preparer {
 			}
 		}
 
-		open override func viewWillAppear(controller: UIViewController, animated: Bool) {
-			if let secondary = secondaryViewController, let splitViewController = controller as? UISplitViewController {
-				splitViewController.viewControllers.append(secondary)
-			}
-			super.viewWillAppear(controller: controller, animated: animated)
-		}
-		
 		open func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
 			displayModeButton?.send(value: nil)
 

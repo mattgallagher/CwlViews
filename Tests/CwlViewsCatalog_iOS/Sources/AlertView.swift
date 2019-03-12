@@ -9,10 +9,10 @@
 import CwlViews
 
 struct AlertViewState: CodableContainer {
-	let showAlert: ToggleVar
+	let toggleAlert: ToggleVar
 	let lastSelectedValue: Var<String>
 	init() {
-		showAlert = ToggleVar(false)
+		toggleAlert = ToggleVar(false)
 		lastSelectedValue = Var(.noValue)
 	}
 }
@@ -20,20 +20,28 @@ struct AlertViewState: CodableContainer {
 func alertView(_ alertState: AlertViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
 	return ViewController(
 		.navigationItem -- navigationItem,
-		.present <-- alertState.showAlert
+		.present <-- alertState.toggleAlert
 			.filter { $0 }
-			.map { _ in ModalPresentation(alert(alertState)) },
+			.map { _ in
+				ModalPresentation(
+					alert(alertState),
+					popoverPositioning: popoverPositioning,
+					completion: alertState.toggleAlert.input
+				)
+			}
+			.animate(.always),
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
 				.view(Label(.text <-- alertState.lastSelectedValue)),
 				.space(),
 				.view(Button(
+					.tag -- ViewTags.alertButton.rawValue,
 					.title -- .normal(.trigger),
 					.titleColor -- .normal(.orange),
 					.action(.primaryActionTriggered) --> Input()
 						.map { _ in () }
-						.bind(to: alertState.showAlert)
+						.bind(to: alertState.toggleAlert)
 				))
 			)
 		)
@@ -42,8 +50,8 @@ func alertView(_ alertState: AlertViewState, _ navigationItem: NavigationItem) -
 
 private func alert(_ alertState: AlertViewState) -> ViewControllerConvertible {
 	return AlertController(
-		.willDisappear --> Input().map { _ in () }.bind(to: alertState.showAlert),
 		.title -- .alertTitle,
+		.preferredStyle -- .actionSheet,
 		.actions -- [
 			AlertAction(
 				.title -- .first,
@@ -56,6 +64,19 @@ private func alert(_ alertState: AlertViewState) -> ViewControllerConvertible {
 		],
 		.preferredActionIndex -- 0
 	)
+}
+
+private func popoverPositioning(_ viewController: UIViewController, _ popover: UIPopoverPresentationController) {
+	if let button = viewController.view.viewWithTag(ViewTags.alertButton.rawValue) {
+		popover.sourceView = button
+	} else {
+		popover.sourceView = viewController.view
+	}
+}
+
+private enum ViewTags: Int {
+	case none
+	case alertButton
 }
 
 private extension String {

@@ -33,7 +33,7 @@ public extension View {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case layer(Constant<BackingLayer>)
+		case layer(Constant<Layer>)
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case alpha(Dynamic<(CGFloat)>)
@@ -156,7 +156,7 @@ public extension BindingName where Binding: ViewBinding {
 	// With:    static var $1: ViewName<$2> { return .name(B.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var layer: ViewName<Constant<BackingLayer>> { return .name(B.layer) }
+	static var layer: ViewName<Constant<Layer>> { return .name(B.layer) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	static var alpha: ViewName<Dynamic<(CGFloat)>> { return .name(B.alpha) }

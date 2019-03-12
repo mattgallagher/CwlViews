@@ -81,7 +81,7 @@ func layoutWithAnimation(_ detailState: DetailViewState) -> Signal<Layout> {
 	}
 }
 
-fileprivate extension String {
+private extension String {
 	static let contentText = NSLocalizedString("Hello there!", comment: "")
 	static let detailText = NSLocalizedString("Detail view for row #%@", comment: "")
 	static let titleText = NSLocalizedString("Row #%@", comment: "")

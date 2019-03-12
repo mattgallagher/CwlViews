@@ -156,24 +156,24 @@ public struct Layout {
 	}
 	
 	/// A convenience constructor for a nested pair of layouts that combine to form a single centered arrangment
-	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: Entity...) -> Layout {
+	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = .equalTo(ratio: 1.0), relativity: Size.Relativity = .independent, _ entities: Entity...) -> Layout {
 		return .center(axis: axis, alignment: alignment, marginEdges: marginEdges, animate: animate, length: length, breadth: breadth, relativity: relativity, entities: entities)
 	}
-	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, entities: [Entity]) -> Layout {
+	public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, marginEdges: MarginEdges = .allSafeArea, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = .equalTo(ratio: 1.0), relativity: Size.Relativity = .independent, entities: [Entity]) -> Layout {
 		switch axis {
 		case .vertical:
 			let v = Entity.sublayout(axis: .vertical, align: alignment, length: length, breadth: breadth, relativity: relativity, entities: entities)
 			let matched = Entity.matchedPair(
-				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
-				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
+				.space(.fillRemaining),
+				.space(.fillRemaining),
 				separator: v
 			)
 			return Layout(axis: .vertical, align: .center, marginEdges: marginEdges, animate: animate, entities: [matched])
 		case .horizontal:
 			let h = Entity.sublayout(axis: .horizontal, align: alignment, length: length, breadth: breadth, relativity: relativity, entities: entities)
 			let matched = Entity.matchedPair(
-				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
-				.space(.greaterThanOrEqualTo(constant: 0, priority: .userHigh)),
+				.space(.fillRemaining),
+				.space(.fillRemaining),
 				separator: h
 			)
 			return Layout(axis: .horizontal, align: .center, marginEdges: marginEdges, animate: animate, entities: [matched])
@@ -283,7 +283,7 @@ public struct Layout {
 				first: left,
 				subsequent: [
 					.free(separator),
-					.dependent(.init(entity: right, dimension: .equalTo(ratio: 1.0, priority: priority)))
+					.dependent(.init(dimension: .equalTo(ratio: 1.0, priority: priority), right))
 				]
 			)))
 		}
@@ -300,11 +300,14 @@ public struct Layout {
 	/// A `Matched` element in a layout is a first element, followed by an array of free and dependent elements. The dependent elements all have a dimension  relationship to the first element (e.g. same size).
 	public struct Matched {
 		public struct Dependent {
-			public let entity: Entity
 			public let dimension: Dimension
-			public init(entity: Entity, dimension: Dimension) {
+			public let entity: Entity
+			public init(dimension: Dimension, _ entity: Entity) {
 				self.entity = entity
 				self.dimension = dimension
+			}
+			public static func same(_ entity: Entity) -> Dependent {
+				return .init(dimension: Dimension.equalTo(ratio: 1), entity)
 			}
 		}
 		public enum Element {
@@ -379,7 +382,7 @@ public struct Layout {
 			self.init(constant: CGFloat(value))
 		}
 		
-		public static var standardSpace: Dimension = 8
+		public static var standardSpace = Dimension(ratio: 0, constant: 8, relationship: .equal, priority: .userHigh) 
 		
 		public static func lessThanOrEqualTo(ratio: CGFloat = 0, constant: CGFloat = 0, priority: Dimension.Priority = .required) -> Dimension {
 			return Dimension(ratio: ratio, constant: constant, relationship: .lessThanOrEqual, priority: priority)
@@ -629,7 +632,8 @@ public struct Layout {
 				let first = layout(entity: matched.first, state: &state, needDimensionAnchor: true)!
 				for element in matched.subsequent {
 					switch element {
-					case .free(let entity): layout(entity: entity, state: &state)
+					case .free(let free):
+						layout(entity: free, state: &state)
 					case .dependent(let dependent):
 						let match = layout(entity: dependent.entity, state: &state, needDimensionAnchor: true)!
 						dependent.dimension.scaledConstraintBetween(first: match, second: first, constraints: &state.storage.constraints)
@@ -747,7 +751,12 @@ private extension Layout.View {
 // Applying a rolloing set of priorities reduces the chance of ambiguity. Later constraints will always take precedence.
 // NOTE: this does not eliminate ambiguity due to conflicting `.required` contraints or views with equal hugging or compression resistance.
 private func adjustedPriority(_ priority: Layout.Dimension.Priority, count: Int) -> Layout.Dimension.Priority {
-	return min(.required, priority + Float(count) + (1 / 128))
+	if priority == .required {
+		return priority
+	}
+	
+	let fitting = Layout.Dimension.Priority.fittingSizeLevel.rawValue + (1 / 128)
+	return Layout.Dimension.Priority(rawValue: max(fitting, priority.rawValue - Float(count) / 128))
 }
 
 private func applyLayoutToView(view: Layout.View, params: (layout: Layout, bounds: Layout.Bounds)?) {

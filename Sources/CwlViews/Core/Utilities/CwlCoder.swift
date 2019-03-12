@@ -63,6 +63,6 @@ extension NSKeyedUnarchiver {
 	}
 }
 
-extension String {
-	public static let viewStateKey = "viewStateData"
+public extension String {
+	static let viewStateKey = "viewStateData"
 }

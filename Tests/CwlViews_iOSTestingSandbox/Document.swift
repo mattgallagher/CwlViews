@@ -67,6 +67,6 @@ struct Document: Codable {
 	}
 }
 
-fileprivate extension String {
+private extension String {
 	static let documentFileName = "document.json"
 }

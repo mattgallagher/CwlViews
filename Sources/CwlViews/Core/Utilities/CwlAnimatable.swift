@@ -62,4 +62,17 @@ extension SignalInterface {
 			}
 		}
 	}
+
+	public func animate(_ choice: AnimationChoice = .subsequent) -> Signal<Animatable<OutputValue?, ()>> {
+		return map(initialState: false) { (alreadyReceived: inout Bool, value: OutputValue) in
+			if alreadyReceived || choice == .always {
+				return .animate(value)
+			} else {
+				if choice == .subsequent {
+					alreadyReceived = true
+				}
+				return .set(value)
+			}
+		}
+	}
 }

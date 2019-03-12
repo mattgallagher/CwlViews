@@ -25,16 +25,11 @@ public struct VarState<Value: Codable>: PersistentAdapterState {
 		case update(Value)
 		case notify(Value)
 	}
-	public typealias DefaultMessage = Value
 	public typealias Notification = Value
 	
 	public let value: Value
 	public init(value: Value) {
 		self.value = value
-	}
-	
-	public static func message(from: Value) -> VarState<Value>.Message {
-		return .set(from)
 	}
 	
 	public func reduce(message: Message, feedback: SignalMultiInput<Message>) -> Output {
@@ -95,6 +90,14 @@ public extension Adapter {
 	
 	func notify<Value>() -> SignalInput<Value> where State.Message == VarState<Value>.Message {
 		return Input<Value>().map { VarState<Value>.Message.notify($0) }.bind(to: self)
+	}
+	
+	func allChanges<Value>() -> Signal<Value> where State == VarState<Value> {
+		return combinedSignal.compactMap { combined in combined.notification ?? combined.state.value }
+	}
+	
+	func stateChanges<Value>() -> Signal<Value> where State == VarState<Value> {
+		return combinedSignal.compactMap { combined in combined.state.value }
 	}
 }
 

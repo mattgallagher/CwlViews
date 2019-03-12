@@ -20,33 +20,44 @@ func gestureRecognizerView(_ gestureRecognizerViewState: GestureRecognizerViewSt
 		.navigationItem -- navigationItem,
 		.view -- View(
 			.backgroundColor -- .white,
-			.layout -- .vertical(
-				marginEdges: MarginEdges.allLayout.subtracting(.trailingLayout),
-				.vertical(
-					align: .center,
-					.space(Layout.Dimension.init(integerLiteral: 24)),
-					.view(Label(.text <-- gestureRecognizerViewState.lastEvent)),
-					.space(),
-					gestureArea(text: .longPanTap, color: .magenta, recognizers: [
-						LongPressGestureRecognizer(.action --> Input().map { _ in .longPressGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
-						PanGestureRecognizer(.action --> Input().map { _ in .panGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
-						TapGestureRecognizer(.action --> Input().map { _ in .tapGesture }.bind(to: gestureRecognizerViewState.lastEvent))
-					]),
-					.space(.equalTo(ratio: 0.05, priority: .defaultHigh)),
-					gestureArea(text: .pinchRotateSwipe, color: .orange, recognizers: [
-						PinchGestureRecognizer(.action --> Input().map { _ in .pinchGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
-						RotationGestureRecognizer(.action --> Input().map { _ in .rotationGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
-						SwipeGestureRecognizer(.action --> Input().map { _ in .swipeGesture }.bind(to: gestureRecognizerViewState.lastEvent))
-					]),
-					.space(.equalTo(ratio: 0.05, priority: .defaultHigh)),
-					gestureArea(text: .screenEdge, color: .green, recognizers: [
-						ScreenEdgePanGestureRecognizer(
-							.edges -- UIRectEdge.right,
-							.action --> Input().map { _ in .screenEdgePanGesture }.bind(to: gestureRecognizerViewState.lastEvent)
-						)
-					]),
-					.space(.fillRemaining)
-				)
+			.layout -- gestureLayout(
+				gestureRecognizerViewState,
+				gestureArea(text: .longPanTap, color: .magenta, recognizers: [
+					LongPressGestureRecognizer(.action --> Input().map { _ in .longPressGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
+					PanGestureRecognizer(.action --> Input().map { _ in .panGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
+					TapGestureRecognizer(.action --> Input().map { _ in .tapGesture }.bind(to: gestureRecognizerViewState.lastEvent))
+				]),
+				gestureArea(text: .pinchRotateSwipe, color: .orange, recognizers: [
+					PinchGestureRecognizer(.action --> Input().map { _ in .pinchGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
+					RotationGestureRecognizer(.action --> Input().map { _ in .rotationGesture }.bind(to: gestureRecognizerViewState.lastEvent)),
+					SwipeGestureRecognizer(.action --> Input().map { _ in .swipeGesture }.bind(to: gestureRecognizerViewState.lastEvent))
+				]),
+				gestureArea(text: .screenEdge, color: .green, recognizers: [
+					ScreenEdgePanGestureRecognizer(
+						.edges -- UIRectEdge.right,
+						.action --> Input().map { _ in .screenEdgePanGesture }.bind(to: gestureRecognizerViewState.lastEvent)
+					)
+				])
+			)
+		)
+	)
+}
+
+func gestureLayout(_ gestureRecognizerViewState: GestureRecognizerViewState, _ longPanTap: Layout.Entity, _ pinchRotateSwipe: Layout.Entity, _ screenEdge: Layout.Entity) -> Layout {
+	return .vertical(
+		marginEdges: MarginEdges.allLayout.subtracting(.trailingLayout),
+		.vertical(
+			align: .center,
+			.space(Layout.Dimension.init(integerLiteral: 24)),
+			.view(Label(.text <-- gestureRecognizerViewState.lastEvent)),
+			.space(),
+			longPanTap,
+			.matched(
+				.space(.fillRemaining),
+				.free(pinchRotateSwipe),
+				.dependent(.same(.space(.fillRemaining))),
+				.free(screenEdge),
+				.dependent(.same(.space(.fillRemaining)))
 			)
 		)
 	)
@@ -58,7 +69,7 @@ func gestureArea(text: String, color: UIColor, recognizers: [GestureRecognizerCo
 		breadth: .equalTo(ratio: 1),
 		View(
 			.backgroundColor -- color,
-			.layer -- BackingLayer(
+			.layer -- Layer(
 				.borderWidth -- 1,
 				.borderColor -- UIColor.darkGray.cgColor,
 				.cornerRadius -- 8,

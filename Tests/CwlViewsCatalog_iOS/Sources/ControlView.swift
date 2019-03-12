@@ -28,7 +28,7 @@ func controlView(_ controlViewState: ControlViewState, _ navigationItem: Navigat
 					breadth: 220,
 					Control(
 						.backgroundColor -- .orange,
-						.layer -- BackingLayer(.borderWidth -- 2, .borderColor -- UIColor.brown.cgColor, .cornerRadius -- 8),
+						.layer -- Layer(.borderWidth -- 2, .borderColor -- UIColor.brown.cgColor, .cornerRadius -- 8),
 						.action(.touchDown) --> Input().map { _ in .touchDownEvent }.bind(to: controlViewState.lastEvent),
 						.action(.touchUpInside) --> Input().map { _ in .touchUpEvent }.bind(to: controlViewState.lastEvent)
 					)

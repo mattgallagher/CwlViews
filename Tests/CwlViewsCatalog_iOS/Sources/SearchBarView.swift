@@ -58,6 +58,6 @@ fileprivate func tableView(_ searchBarViewState: SearchBarViewState) -> TableVie
 	)
 }
 
-extension String {
+private extension String {
 	static let searchTimezones = NSLocalizedString("Search timezones...", comment: "")
 }

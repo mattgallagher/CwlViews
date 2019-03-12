@@ -34,7 +34,7 @@ open class AssociatedBinderStorage: NSObject {
 	/// - Parameters:
 	///   - lifetimes: lifetimes that will be stored in this storage
 	///   - instance: an NSObject where this storage will embed itself
-	public func embed(lifetimes: [Lifetime], in instance: NSObject) {
+	public func embed(lifetimes: [Lifetime], in instance: NSObjectProtocol) {
 		assert(self.lifetimes == nil, "Bindings should be set once only")
 		self.lifetimes = lifetimes
 		guard isInUse else { return }
@@ -123,7 +123,7 @@ open class DynamicDelegate: NSObject, DefaultConstructable {
 }
 
 private var associatedBinderStorageKey = NSObject()
-public extension NSObject {
+public extension NSObjectProtocol {
 	/// Accessor for any embedded AssociatedBinderStorage on an NSObject. This method is provided for debugging purposes; you should never normally need to access the storage obbject.
 	///
 	/// - Parameter for: an NSObject

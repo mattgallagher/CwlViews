@@ -33,7 +33,7 @@ public extension View {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static styles are applied at construction and are subsequently immutable.
-		case layer(Constant<BackingLayer>)
+		case layer(Constant<Layer>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case appearance(Dynamic<NSAppearance?>)
@@ -82,7 +82,7 @@ public extension View {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
-		var backingLayer: BackingLayer? = nil
+		var backingLayer: Layer? = nil
 		var postsFrameChangedNotifications: Bool = false
 	}
 }
@@ -185,7 +185,7 @@ public extension BindingName where Binding: ViewBinding {
 	// With:    static var $1: ViewName<$2> { return .name(B.$1) }
 	
 	//	0. Static styles are applied at construction and are subsequently immutable.
-	static var layer: ViewName<Constant<BackingLayer>> { return .name(B.layer) }
+	static var layer: ViewName<Constant<Layer>> { return .name(B.layer) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	static var appearance: ViewName<Dynamic<NSAppearance?>> { return .name(B.appearance) }

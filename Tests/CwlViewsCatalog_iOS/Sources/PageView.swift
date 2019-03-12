@@ -50,7 +50,7 @@ func pageView(_ pageViewState: PageViewState, _ navigationItem: NavigationItem) 
 			.center(
 				.view(
 					length: .equalTo(ratio: 1.0),
-					breadth: .equalTo(ratio: 0.75),
+					breadth: .equalTo(ratio: 0.5),
 					relativity: .lengthRelativeToBreadth,
 					views.first ?? View()
 				),

@@ -197,7 +197,7 @@ func mainWindow(model: DocumentAdapter) -> Window {
 			]
 		),
 		.contentView -- View(
-			.layer -- BackingLayer(
+			.layer -- Layer(
 				.addAnimation <-- viewModel.animateOutput.map { _ in .push(from: .left) },
 				.sublayers -- [
 					GradientLayer(
@@ -210,7 +210,7 @@ func mainWindow(model: DocumentAdapter) -> Window {
 				.edgeInsets -- NSEdgeInsets(top: 5, left: 5, bottom: 15, right: 5),
 				.arrangedSubviews -- [
 					TableView<Document.Row>.scrollEmbedded(
-						.layer -- BackingLayer(
+						.layer -- Layer(
 							.shadowOpacity -- 1,
 							.shadowRadius -- 3,
 							.shadowOffset -- CGSize(width: 0, height: 2)

@@ -33,8 +33,27 @@ public extension WebView {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case configuration(Constant<WKWebViewConfiguration>)
+		case allowsAirPlayForMediaPlayback(Constant<Bool>)
+		case allowsInlineMediaPlayback(Constant<Bool>)
+		case allowsPictureInPictureForMediaPlayback(Constant<Bool>)
+		case applicationNameForUserAgent(Constant<String?>)
+		case dataDetectorTypes(Constant<WKDataDetectorTypes>)
+		case ignoresViewportScaleLimits(Constant<Bool>)
+		case javaScriptCanOpenWindowsAutomatically(Constant<Bool>)
+		case javaScriptEnabled(Constant<Bool>)
+		case mediaTypesRequiringUserActionForPlayback(Constant<WKAudiovisualMediaTypes>)
+		case minimumFontSize(Constant<CGFloat>)
+		case processPool(Constant<WKProcessPool>)
+		case selectionGranularity(Constant<WKSelectionGranularity>)
+		case suppressesIncrementalRendering(Constant<Bool>)
+		case urlSchemeHandlers(Constant<[String: WKURLSchemeHandler]>)
+		case userContentController(Constant<WKUserContentController>)
 
+		@available(macOS 10.10, *) @available(iOS, unavailable) case javaEnabled(Constant<Bool>)
+		@available(macOS 10.10, *) @available(iOS, unavailable) case plugInsEnabled(Constant<Bool>)
+		@available(macOS 10.10, *) @available(iOS, unavailable) case tabFocusesLinks(Constant<Bool>)
+		@available(macOS 10.12, *) @available(iOS, unavailable) case userInterfaceDirectionPolicy(Constant<WKUserInterfaceDirectionPolicy>)
+		@available(macOS, unavailable) @available(iOS 9, *) case allowsPictureInPictureMediaPlayback(Constant<Bool>)
 		@available(macOS, unavailable) @available(iOS 11, *) case scrollView(Constant<ScrollView>)
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
@@ -86,14 +105,20 @@ public extension WebView {
 
 	#if os(macOS)
 		typealias UIViewController = ()
+		typealias WKDataDetectorTypes = ()
 		typealias WKPreviewElementInfo = ()
 		typealias WKPreviewActionItem = ()
 		typealias WKOpenPanelParameters = WebKit.WKOpenPanelParameters
+		typealias WKSelectionGranularity = ()
+		typealias WKUserInterfaceDirectionPolicy = WebKit.WKUserInterfaceDirectionPolicy
 	#else
 		typealias UIViewController = UIKit.UIViewController
+		typealias WKDataDetectorTypes = WebKit.WKDataDetectorTypes
 		typealias WKOpenPanelParameters = ()
 		typealias WKPreviewElementInfo = WebKit.WKPreviewElementInfo
 		typealias WKPreviewActionItem = WebKit.WKPreviewActionItem
+		typealias WKSelectionGranularity = WebKit.WKSelectionGranularity
+		typealias WKUserInterfaceDirectionPolicy = ()
 	#endif
 }
 
@@ -115,7 +140,19 @@ public extension WebView {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
-		var configuration: WKWebViewConfiguration?
+		mutating func webConfiguration() -> WKWebViewConfiguration {
+			if let pwc = possibleWebConfiguration {
+				return pwc
+			}
+			let newConfiguration = WKWebViewConfiguration()
+			possibleWebConfiguration = newConfiguration
+			return newConfiguration
+		}
+		var possibleWebConfiguration: WKWebViewConfiguration?
+		
+		mutating func webPreferences() -> WKPreferences {
+			return webConfiguration().preferences
+		}
 	}
 }
 
@@ -125,7 +162,52 @@ public extension WebView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .configuration(let x): configuration = x.value
+		case .allowsAirPlayForMediaPlayback(let x): webConfiguration().allowsAirPlayForMediaPlayback = x.value
+		case .allowsInlineMediaPlayback(let x):
+			#if os(iOS)
+				webConfiguration().allowsInlineMediaPlayback = x.value
+			#endif
+		case .allowsPictureInPictureMediaPlayback(let x):
+			#if os(iOS)
+				webConfiguration().allowsPictureInPictureMediaPlayback = x.value
+			#endif
+		case .applicationNameForUserAgent(let x): webConfiguration().applicationNameForUserAgent = x.value
+		case .dataDetectorTypes(let x): 
+			#if os(iOS)
+				webConfiguration().dataDetectorTypes = x.value
+			#endif
+		case .ignoresViewportScaleLimits(let x):
+			#if os(iOS)
+				webConfiguration().ignoresViewportScaleLimits = x.value
+			#endif
+		case .javaEnabled(let x):
+			#if os(macOS)
+				webPreferences().javaEnabled = x.value
+			#endif
+		case .javaScriptCanOpenWindowsAutomatically(let x): webPreferences().javaScriptCanOpenWindowsAutomatically = x.value
+		case .javaScriptEnabled(let x): webPreferences().javaScriptEnabled = x.value
+		case .mediaTypesRequiringUserActionForPlayback(let x): webConfiguration().mediaTypesRequiringUserActionForPlayback = x.value
+		case .minimumFontSize(let x): webPreferences().minimumFontSize = x.value
+		case .plugInsEnabled(let x):
+			#if os(macOS)
+				webPreferences().plugInsEnabled = x.value
+			#endif
+		case .processPool(let x): webConfiguration().processPool = x.value
+		case .selectionGranularity(let x): 
+			#if os(iOS)
+				webConfiguration().selectionGranularity = x.value
+			#endif
+		case .suppressesIncrementalRendering(let x): webConfiguration().suppressesIncrementalRendering = x.value
+		case .tabFocusesLinks(let x):
+			#if os(macOS)
+				webPreferences().tabFocusesLinks = x.value
+			#endif
+		case .urlSchemeHandlers(let x):
+			for (key, value) in x.value {
+				webConfiguration().setURLSchemeHandler(value, forURLScheme: key)
+			}
+		case .userContentController(let x): webConfiguration().userContentController = x.value
+
 		case .didCommit(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didCommit:)))
 		case .didStartProvisionalNavigation(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didStartProvisionalNavigation:)))
 		case .didReceiveServerRedirectForProvisionalNavigation(let x): delegate().addHandler(x, #selector(WKNavigationDelegate.webView(_:didReceiveServerRedirectForProvisionalNavigation:)))
@@ -161,6 +243,14 @@ public extension WebView.Preparer {
 		}
 	}
 	
+	func constructInstance(type: WKWebView.Type, parameters: ()) -> WKWebView {
+		if let configuration = possibleWebConfiguration {
+			return type.init(frame: .zero, configuration: configuration)
+		} else {
+			return type.init(frame: .zero)
+		}
+	}
+	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		prepareDelegate(instance: instance, storage: storage)
 		if delegateIsRequired {
@@ -175,7 +265,26 @@ public extension WebView.Preparer {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case .configuration: return nil
+		case .allowsAirPlayForMediaPlayback: return nil
+		case .allowsInlineMediaPlayback: return nil
+		case .allowsPictureInPictureForMediaPlayback: return nil
+		case .applicationNameForUserAgent: return nil
+		case .dataDetectorTypes: return nil
+		case .ignoresViewportScaleLimits: return nil
+		case .javaScriptCanOpenWindowsAutomatically: return nil
+		case .javaScriptEnabled: return nil
+		case .mediaTypesRequiringUserActionForPlayback: return nil
+		case .minimumFontSize: return nil
+		case .processPool: return nil
+		case .selectionGranularity: return nil
+		case .suppressesIncrementalRendering: return nil
+		case .urlSchemeHandlers: return nil
+		case .userContentController: return nil
+		case .javaEnabled: return nil
+		case .plugInsEnabled: return nil
+		case .tabFocusesLinks: return nil
+		case .userInterfaceDirectionPolicy: return nil
+		case .allowsPictureInPictureMediaPlayback: return nil
 		
 		case .scrollView(let x):
 			#if os(macOS)
@@ -350,8 +459,27 @@ public extension BindingName where Binding: WebViewBinding {
 	// With:    static var $1: WebViewName<$2> { return .name(B.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var configuration: WebViewName<Constant<WKWebViewConfiguration>> { return .name(B.configuration) }
+	static var allowsAirPlayForMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsAirPlayForMediaPlayback) }
+	static var allowsInlineMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsInlineMediaPlayback) }
+	static var allowsPictureInPictureForMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsPictureInPictureForMediaPlayback) }
+	static var applicationNameForUserAgent: WebViewName<Constant<String?>> { return .name(B.applicationNameForUserAgent) }
+	static var dataDetectorTypes: WebViewName<Constant<WebView.WKDataDetectorTypes>> { return .name(B.dataDetectorTypes) }
+	static var ignoresViewportScaleLimits: WebViewName<Constant<Bool>> { return .name(B.ignoresViewportScaleLimits) }
+	static var javaScriptCanOpenWindowsAutomatically: WebViewName<Constant<Bool>> { return .name(B.javaScriptCanOpenWindowsAutomatically) }
+	static var javaScriptEnabled: WebViewName<Constant<Bool>> { return .name(B.javaScriptEnabled) }
+	static var mediaTypesRequiringUserActionForPlayback: WebViewName<Constant<WKAudiovisualMediaTypes>> { return .name(B.mediaTypesRequiringUserActionForPlayback) }
+	static var minimumFontSize: WebViewName<Constant<CGFloat>> { return .name(B.minimumFontSize) }
+	static var processPool: WebViewName<Constant<WKProcessPool>> { return .name(B.processPool) }
+	static var selectionGranularity: WebViewName<Constant<WebView.WKSelectionGranularity>> { return .name(B.selectionGranularity) }
+	static var suppressesIncrementalRendering: WebViewName<Constant<Bool>> { return .name(B.suppressesIncrementalRendering) }
+	static var urlSchemeHandlers: WebViewName<Constant<[String: WKURLSchemeHandler]>> { return .name(B.urlSchemeHandlers) }
+	static var userContentController: WebViewName<Constant<WKUserContentController>> { return .name(B.userContentController) }
 	
+	@available(macOS 10.10, *) @available(iOS, unavailable) static var javaEnabled: WebViewName<Constant<Bool>> { return .name(B.javaEnabled) }
+	@available(macOS 10.10, *) @available(iOS, unavailable) static var plugInsEnabled: WebViewName<Constant<Bool>> { return .name(B.plugInsEnabled) }
+	@available(macOS 10.10, *) @available(iOS, unavailable) static var tabFocusesLinks: WebViewName<Constant<Bool>> { return .name(B.tabFocusesLinks) }
+	@available(macOS 10.12, *) @available(iOS, unavailable) static var userInterfaceDirectionPolicy: WebViewName<Constant<WebView.WKUserInterfaceDirectionPolicy>> { return .name(B.userInterfaceDirectionPolicy) }
+	@available(macOS, unavailable) @available(iOS 9, *) static var allowsPictureInPictureMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsPictureInPictureMediaPlayback) }
 	@available(macOS, unavailable) @available(iOS 11, *) static var scrollView: WebViewName<Constant<ScrollView>> { return .name(B.scrollView) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
@@ -441,3 +569,4 @@ public extension WebView.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
+

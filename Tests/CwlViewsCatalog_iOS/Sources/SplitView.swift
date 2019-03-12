@@ -40,13 +40,14 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 				case .control(let state)?: return controlView(state, navigationItem)
 				case .gestureRecognizer(let state)?: return gestureRecognizerView(state, navigationItem)
 				case .imageView(let state)?: return imageView(state, navigationItem)
-				case .layersView(let state)?: return layersView(state, navigationItem)
+				case .layers(let state)?: return layersView(state, navigationItem)
 				case .navigationBar(let state)?: return navigationView(state, navigationItem)
 				case .pageViewController(let state)?: return pageView(state, navigationItem)
 				case .searchBar(let state)?: return searchBarView(state, navigationItem)
 				case .slider(let state)?: return sliderView(state, navigationItem)
 				case .switch(let state)?: return switchView(state, navigationItem)
 				case .textField(let state)?: return textFieldView(state, navigationItem)
+				case .textView(let state)?: return textView(state, navigationItem)
 				case .webView(let state)?: return webView(state, navigationItem)
 				}
 			}.map { .reload([$0]) }

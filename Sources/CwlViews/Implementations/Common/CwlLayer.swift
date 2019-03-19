@@ -95,6 +95,8 @@ public extension Layer {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case display((CALayer) -> Void)
 		case draw((CALayer, CGContext) -> Void)
+		case layoutSublayers((CALayer) -> Void)
+		case willDraw((CALayer) -> Void)
 	}
 
 	#if os(macOS)
@@ -133,8 +135,10 @@ public extension Layer.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
-		case .display(let x): delegate().addHandler(x, #selector(CALayerDelegate.display(_:)))
-		case .draw(let x): delegate().addHandler(x, #selector(CALayerDelegate.draw(_:in:)))
+		case .display(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.display(_:)))
+		case .draw(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.draw(_:in:)))
+		case .willDraw(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.layerWillDraw(_:)))
+		case .layoutSublayers(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.layoutSublayers(of:)))
 		default: break
 		}
 	}
@@ -248,6 +252,8 @@ public extension Layer.Preparer {
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case .display: return nil
 		case .draw: return nil
+		case .layoutSublayers: return nil
+		case .willDraw: return nil
 		}
 	}
 }
@@ -260,23 +266,27 @@ extension Layer.Preparer {
 		@objc open func run(forKey event: String, object anObject: Any, arguments dict: [AnyHashable: Any]?) {
 			_ = layerActions[event]?.send(value: dict)
 		}
+
+		open func action(for layer: CALayer, forKey event: String) -> CAAction? {
+			return layerActions[event] != nil ? self : nil
+		}
 	}
 	
 	open class Delegate: DynamicDelegate, CALayerDelegate {
+		open func layerWillDraw(_ layer: CALayer) {
+			multiHandler(layer)
+		}
+		
 		open func display(_ layer: CALayer) {
-			handler(ofType: ((CALayer) -> Void).self)!(layer)
+			multiHandler(layer)
 		}
 		
 		@objc(drawLayer:inContext:) open func draw(_ layer: CALayer, in ctx: CGContext) {
-			handler(ofType: ((CALayer, CGContext) -> Void).self)!(layer, ctx)
+			multiHandler(layer, ctx)
 		}
 		
 		open func layoutSublayers(of layer: CALayer) {
-			handler(ofType: ((CALayer) -> Void).self)!(layer)
-		}
-		
-		open func action(for layer: CALayer, forKey event: String) -> CAAction? {
-			return handler(ofType: ((CALayer, String) -> CAAction?).self)!(layer, event)
+			multiHandler(layer)
 		}
 	}
 }
@@ -359,6 +369,8 @@ public extension BindingName where Binding: LayerBinding {
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 	static var display: LayerName<(CALayer) -> Void> { return .name(B.display) }
 	static var draw: LayerName<(CALayer, CGContext) -> Void> { return .name(B.draw) }
+	static var layoutSublayers: LayerName<(CALayer) -> Void> { return .name(B.layoutSublayers) }
+	static var willDraw: LayerName<(CALayer) -> Void> { return .name(B.willDraw) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

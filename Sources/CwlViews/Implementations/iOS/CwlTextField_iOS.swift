@@ -105,12 +105,12 @@ public extension TextField.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didEndEditingWithReason(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
-		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
-		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
-		case .shouldChangeCharacters(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
-		case .shouldClear(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
-		case .shouldReturn(let x): delegate().addHandler(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
+		case .didEndEditingWithReason(let x): delegate().addMultiHandler(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
+		case .shouldChangeCharacters(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
+		case .shouldClear(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
+		case .shouldReturn(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
 		default: break
 		}
 	}
@@ -174,27 +174,27 @@ extension TextField.Preparer {
 	
 	open class Delegate: DynamicDelegate, UITextFieldDelegate {
 		open func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
+			return singleHandler(textField)
 		}
 		
 		open func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
+			return singleHandler(textField)
 		}
 		
 		open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-			return handler(ofType: ((UITextField, NSRange, String) -> Bool).self)!(textField, range, string)
+			return singleHandler(textField, range, string)
 		}
 		
 		open func textFieldShouldClear(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
+			return singleHandler(textField)
 		}
 		
 		open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-			return handler(ofType: ((UITextField) -> Bool).self)!(textField)
+			return singleHandler(textField)
 		}
 		
 		open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
-			handler(ofType: ((UITextField, UITextField.DidEndEditingReason) -> Void).self)!(textField, reason)
+			multiHandler(textField, reason)
 		}
 	}
 }

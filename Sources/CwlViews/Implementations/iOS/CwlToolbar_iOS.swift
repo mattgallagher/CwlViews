@@ -67,7 +67,7 @@ public extension Toolbar.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .position(let x): delegate().addHandler(x, #selector(UIToolbarDelegate.position(for:)))
+		case .position(let x): delegate().addSingleHandler(x, #selector(UIToolbarDelegate.position(for:)))
 		default: break
 		}
 	}
@@ -112,24 +112,8 @@ extension Toolbar.Preparer {
 	open class Storage: View.Preparer.Storage, UIToolbarDelegate {}
 	
 	open class Delegate: DynamicDelegate, UIToolbarDelegate {
-		open func navigationBar(_ navigationBar: UIToolbar, shouldPop item: UIBarButtonItem) -> Bool {
-			return handler(ofType: ((UIToolbar, UIBarButtonItem) -> Bool).self)!(navigationBar, item)
-		}
-		
-		open func navigationBar(_ navigationBar: UIToolbar, shouldPush item: UIBarButtonItem) -> Bool {
-			return handler(ofType: ((UIToolbar, UIBarButtonItem) -> Bool).self)!(navigationBar, item)
-		}
-		
-		open func navigationBar(_ navigationBar: UIToolbar, didPop item: UIBarButtonItem) {
-			handler(ofType: SignalInput<UIBarButtonItem>.self)!.send(value: item)
-		}
-		
-		open func navigationBar(_ navigationBar: UIToolbar, didPush item: UIBarButtonItem) {
-			handler(ofType: SignalInput<UIBarButtonItem>.self)!.send(value: item)
-		}
-		
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)!(bar)
+			return singleHandler(bar)
 		}
 	}
 }

@@ -67,21 +67,21 @@ public extension ScrollView {
 		case zoom(Signal<(rect: CGRect, animated: Bool)>)
 		
 		// 3. Action bindings are triggered by the object after construction.
-		case didEndDecelerating(SignalInput<CGPoint>)
-		case didEndDragging(SignalInput<(CGPoint, Bool)>)
-		case didEndScrollingAnimation(SignalInput<CGPoint>)
-		case didEndZooming(SignalInput<CGFloat>)
-		case didScroll(SignalInput<CGPoint>)
-		case didScrollToTop(SignalInput<Void>)
-		case didZoom(SignalInput<CGFloat>)
 		case userDidScroll(SignalInput<CGPoint>)
-		case willBeginDecelerating(SignalInput<Void>)
-		case willBeginDragging(SignalInput<CGPoint>)
-		case willBeginZooming(SignalInput<CGFloat>)
-		
+
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case didEndDecelerating((UIScrollView) -> Void)
+		case didEndDragging((UIScrollView, Bool) -> Void)
+		case didEndScrollingAnimation((UIScrollView) -> Void)
+		case didEndZooming((UIScrollView, UIView?, CGFloat) -> Void)
+		case didScroll((UIScrollView, CGPoint) -> Void)
+		case didScrollToTop((UIScrollView) -> Void)
+		case didZoom((UIScrollView) -> Void)
 		case shouldScrollToTop((_ scrollView: UIScrollView) -> Bool)
 		case viewForZooming((_ scrollView: UIScrollView) -> UIView?)
+		case willBeginDecelerating((UIScrollView) -> Void)
+		case willBeginDragging((UIScrollView) -> Void)
+		case willBeginZooming((UIScrollView, UIView?) -> Void)
 		case willEndDragging((_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>) -> Void)
 	}
 }
@@ -113,24 +113,32 @@ public extension ScrollView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .didEndDecelerating(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:)))
-		case .didEndDragging(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
-		case .didEndScrollingAnimation(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndScrollingAnimation(_:)))
-		case .didEndZooming(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndZooming(_:with:atScale:)))
-		case .didScroll(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)))
-		case .didScrollToTop(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:)))
-		case .didZoom(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewDidZoom(_:)))
-		case .shouldScrollToTop(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewShouldScrollToTop(_:)))
+		case .didEndDecelerating(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:)))
+		case .didEndDragging(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
+		case .didEndScrollingAnimation(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndScrollingAnimation(_:)))
+		case .didEndZooming(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndZooming(_:with:atScale:)))
+		case .didScroll(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)))
+		case .didScrollToTop(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:)))
+		case .didZoom(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidZoom(_:)))
+		case .shouldScrollToTop(let x): delegate().addSingleHandler(x, #selector(UIScrollViewDelegate.scrollViewShouldScrollToTop(_:)))
 		case .userDidScroll(let x):
-			delegate().userDidScroll = x
-			delegate().ensureHandler(for: #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:)))
-			delegate().ensureHandler(for: #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
-			delegate().ensureHandler(for: #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:)))
-		case .viewForZooming(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.viewForZooming(in:)))
-		case .willBeginDecelerating(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDecelerating(_:)))
-		case .willBeginDragging(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDragging(_:)))
-		case .willBeginZooming(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginZooming(_:with:)))
-		case .willEndDragging(let x): delegate().addHandler(x, #selector(UIScrollViewDelegate.scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)))
+			delegate().addMultiHandler(
+				{ (sv: UIScrollView) -> Void in x.send(value: sv.contentOffset) },
+				#selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:))
+			)
+			delegate().addMultiHandler(
+				{ (sv: UIScrollView, d: Bool) -> Void in if !d { x.send(value: sv.contentOffset) } },
+				#selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:))
+			)
+			delegate().addMultiHandler(
+				{ (sv: UIScrollView) -> Void in x.send(value: sv.contentOffset) },
+				#selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:))
+			)
+		case .viewForZooming(let x): delegate().addSingleHandler(x, #selector(UIScrollViewDelegate.viewForZooming(in:)))
+		case .willBeginDecelerating(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDecelerating(_:)))
+		case .willBeginDragging(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDragging(_:)))
+		case .willBeginZooming(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginZooming(_:with:)))
+		case .willEndDragging(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)))
 		default: break
 		}
 	}
@@ -205,64 +213,56 @@ extension ScrollView.Preparer {
 	open class Storage: View.Preparer.Storage, UIScrollViewDelegate {}
 	
 	open class Delegate: DynamicDelegate, UIScrollViewDelegate {
-		open var userDidScroll: SignalInput<CGPoint>?
-		
 		open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-			if !decelerate {
-				userDidScroll?.send(value: scrollView.contentOffset)
-			}
-			handler(ofType: SignalInput<(CGPoint, Bool)>.self)?.send(value: (scrollView.contentOffset, decelerate))
+			multiHandler(scrollView, decelerate)
 		}
 		
 		open func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
-			userDidScroll?.send(value: scrollView.contentOffset)
-			handler(ofType: SignalInput<Void>.self)?.send(value: ())
+			multiHandler(scrollView)
 		}
 		
 		open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-			userDidScroll?.send(value: scrollView.contentOffset)
-			handler(ofType: SignalInput<CGPoint>.self)?.send(value: scrollView.contentOffset)
+			multiHandler(scrollView)
 		}
 		
-		open var didScroll: SignalInput<CGPoint>?
 		open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-			didScroll?.send(value: scrollView.contentOffset)
+			multiHandler(scrollView)
 		}
 		
 		open func scrollViewDidZoom(_ scrollView: UIScrollView) {
-			handler(ofType: SignalInput<CGFloat>.self)!.send(value: scrollView.zoomScale)
+			multiHandler(scrollView)
 		}
 		
 		open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-			handler(ofType: SignalInput<CGPoint>.self)!.send(value: scrollView.contentOffset)
+			multiHandler(scrollView)
 		}
 		
 		open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(scrollView)
 		}
 		
 		open func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-			handler(ofType: SignalInput<CGFloat>.self)!.send(value: scrollView.contentScaleFactor)
+			multiHandler(scrollView, view)
 		}
 		
 		open func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-			handler(ofType: SignalInput<CGFloat>.self)!.send(value: scale)
+			multiHandler(scrollView, view, scale)
 		}
 		
 		open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-			handler(ofType: SignalInput<CGPoint>.self)!.send(value: scrollView.contentOffset)
+			multiHandler(scrollView)
 		}
 		
 		open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-			handler(ofType: ((UIScrollView, CGPoint, UnsafeMutablePointer<CGPoint>) -> Void).self)!(scrollView, velocity, targetContentOffset)
+			multiHandler(scrollView, velocity, targetContentOffset)
 		}
 		
 		open func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
-			return handler(ofType: ((UIScrollView) -> Bool).self)!(scrollView)
+			return singleHandler(scrollView)
 		}
 		
 		open func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-			return handler(ofType: ((UIScrollView) -> UIView?).self)!(scrollView)
+			return singleHandler(scrollView)
 		}
 	}
 }
@@ -315,21 +315,21 @@ public extension BindingName where Binding: ScrollViewBinding {
 	static var zoom: ScrollViewName<Signal<(rect: CGRect, animated: Bool)>> { return .name(B.zoom) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didEndDecelerating: ScrollViewName<SignalInput<CGPoint>> { return .name(B.didEndDecelerating) }
-	static var didEndDragging: ScrollViewName<SignalInput<(CGPoint, Bool)>> { return .name(B.didEndDragging) }
-	static var didEndScrollingAnimation: ScrollViewName<SignalInput<CGPoint>> { return .name(B.didEndScrollingAnimation) }
-	static var didEndZooming: ScrollViewName<SignalInput<CGFloat>> { return .name(B.didEndZooming) }
-	static var didScroll: ScrollViewName<SignalInput<CGPoint>> { return .name(B.didScroll) }
-	static var didScrollToTop: ScrollViewName<SignalInput<Void>> { return .name(B.didScrollToTop) }
-	static var didZoom: ScrollViewName<SignalInput<CGFloat>> { return .name(B.didZoom) }
 	static var userDidScroll: ScrollViewName<SignalInput<CGPoint>> { return .name(B.userDidScroll) }
-	static var willBeginDecelerating: ScrollViewName<SignalInput<Void>> { return .name(B.willBeginDecelerating) }
-	static var willBeginDragging: ScrollViewName<SignalInput<CGPoint>> { return .name(B.willBeginDragging) }
-	static var willBeginZooming: ScrollViewName<SignalInput<CGFloat>> { return .name(B.willBeginZooming) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didEndDecelerating: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didEndDecelerating) }
+	static var didEndDragging: ScrollViewName<(UIScrollView, Bool) -> Void> { return .name(B.didEndDragging) }
+	static var didEndScrollingAnimation: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didEndScrollingAnimation) }
+	static var didEndZooming: ScrollViewName<(UIScrollView, UIView?, CGFloat) -> Void> { return .name(B.didEndZooming) }
+	static var didScroll: ScrollViewName<(UIScrollView, CGPoint) -> Void> { return .name(B.didScroll) }
+	static var didScrollToTop: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didScrollToTop) }
+	static var didZoom: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didZoom) }
 	static var shouldScrollToTop: ScrollViewName<(_ scrollView: UIScrollView) -> Bool> { return .name(B.shouldScrollToTop) }
 	static var viewForZooming: ScrollViewName<(_ scrollView: UIScrollView) -> UIView?> { return .name(B.viewForZooming) }
+	static var willBeginDecelerating: ScrollViewName<(UIScrollView) -> Void> { return .name(B.willBeginDecelerating) }
+	static var willBeginDragging: ScrollViewName<(UIScrollView) -> Void> { return .name(B.willBeginDragging) }
+	static var willBeginZooming: ScrollViewName<(UIScrollView, UIView?) -> Void> { return .name(B.willBeginZooming) }
 	static var willEndDragging: ScrollViewName<(_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>) -> Void> { return .name(B.willEndDragging) }
 }
 

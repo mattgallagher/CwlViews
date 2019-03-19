@@ -50,10 +50,10 @@ public extension NavigationBar {
 		// 2. Signal bindings are performed on the object after construction.
 		
 		//	3. Action bindings are triggered by the object after construction.
-		case didPop(SignalInput<UINavigationItem>)
-		case didPush(SignalInput<UINavigationItem>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case didPop((UINavigationBar, UINavigationItem) -> Void)
+		case didPush((UINavigationBar, UINavigationItem) -> Void)
 		case position((UIBarPositioning) -> UIBarPosition)
 		case shouldPop((UINavigationBar, UINavigationItem) -> Bool)
 		case shouldPush((UINavigationBar, UINavigationItem) -> Bool)
@@ -83,14 +83,14 @@ public extension NavigationBar {
 // MARK: - Binder Part 4: Preparer overrides
 public extension NavigationBar.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
-		switch binding {
+		switch binding { 
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
-		case .didPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
-		case .position(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.position(for:)))
-		case .shouldPop(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
-		case .shouldPush(let x): delegate().addHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
+		case .didPop(let x): delegate().addMultiHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
+		case .didPush(let x): delegate().addMultiHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
+		case .position(let x): delegate().addSingleHandler(x, #selector(UINavigationBarDelegate.position(for:)))
+		case .shouldPop(let x): delegate().addSingleHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
+		case .shouldPush(let x): delegate().addSingleHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
 		default: break
 		}
 	}
@@ -156,23 +156,23 @@ extension NavigationBar.Preparer {
 
 	open class Delegate: DynamicDelegate, UINavigationBarDelegate {
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPop item: UINavigationItem) -> Bool {
-			return handler(ofType: ((UINavigationBar, UINavigationItem) -> Bool).self)!(navigationBar, item)
+			return singleHandler(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, shouldPush item: UINavigationItem) -> Bool {
-			return handler(ofType: ((UINavigationBar, UINavigationItem) -> Bool).self)!(navigationBar, item)
+			return singleHandler(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, didPop item: UINavigationItem) {
-			handler(ofType: SignalInput<UINavigationItem>.self)!.send(value: item)
+			multiHandler(navigationBar, item)
 		}
 		
 		open func navigationBar(_ navigationBar: UINavigationBar, didPush item: UINavigationItem) {
-			handler(ofType: SignalInput<UINavigationItem>.self)!.send(value: item)
+			multiHandler(navigationBar, item)
 		}
 		
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)!(bar)
+			return singleHandler(bar)
 		}
 	}
 }
@@ -208,10 +208,10 @@ public extension BindingName where Binding: NavigationBarBinding {
 	// 2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var didPop: NavigationBarName<SignalInput<UINavigationItem>> { return .name(B.didPop) }
-	static var didPush: NavigationBarName<SignalInput<UINavigationItem>> { return .name(B.didPush) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Void> { return .name(B.didPop) }
+	static var didPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Void> { return .name(B.didPush) }
 	static var position: NavigationBarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
 	static var shouldPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(B.shouldPop) }
 	static var shouldPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(B.shouldPush) }

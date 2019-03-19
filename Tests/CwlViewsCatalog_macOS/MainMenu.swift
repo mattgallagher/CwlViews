@@ -115,12 +115,12 @@ func fileMenu() -> Menu {
 			),
 			MenuItem(
 				.title -- NSLocalizedString("Save…", tableName: "MainMenu", comment: ""),
-				.action --> #selector(NSDocumentController.openDocument(_:)),
+				.action --> #selector(NSDocument.save(_:)),
 				.keyEquivalent -- "s"
 			),
 			MenuItem(
 				.title -- NSLocalizedString("Save As…", tableName: "MainMenu", comment: ""),
-				.action --> #selector(NSDocumentController.openDocument(_:)),
+				.action --> #selector(NSDocument.saveAs(_:)),
 				.keyEquivalent -- "s",
 				.keyEquivalentModifierMask -- [.shift, .command]
 			),

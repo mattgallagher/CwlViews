@@ -44,18 +44,18 @@ public extension TabBarController {
 		case selectItem(Signal<ItemIdentifier>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		case didEndCustomizing(SignalInput<([ItemIdentifier], Bool)>)
-		case didSelect(SignalInput<ItemIdentifier>)
-		case willBeginCustomizing(SignalInput<[ItemIdentifier]>)
-		case willEndCustomizing(SignalInput<([ItemIdentifier], Bool)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case animationControllerForTransition((UITabBarController, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?)
+		case animationControllerForTransition((UITabBarController, UIViewController, ItemIdentifier, UIViewController, ItemIdentifier) -> UIViewControllerAnimatedTransitioning?)
+		case didEndCustomizing((UITabBarController, [UIViewController], [ItemIdentifier], Bool) -> Void)
+		case didSelect((UITabBarController, UIViewController, ItemIdentifier) -> Void)
 		case interactionControllerForAnimation((UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?)
 		case preferredInterfaceOrientationForPresentation((UITabBarController) -> UIInterfaceOrientation)
-		case shouldSelect((UITabBarController, ItemIdentifier) -> Bool)
+		case shouldSelect((UITabBarController, UIViewController, ItemIdentifier) -> Bool)
 		case supportedInterfaceOrientations((UITabBarController) -> UIInterfaceOrientationMask)
 		case tabConstructor((ItemIdentifier) -> ViewControllerConvertible)
+		case willBeginCustomizing((UITabBarController, [UIViewController], [ItemIdentifier]) -> Void)
+		case willEndCustomizing((UITabBarController, [UIViewController], [ItemIdentifier], Bool) -> Void)
 	}
 }
 
@@ -89,16 +89,16 @@ public extension TabBarController.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .animationControllerForTransition(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:animationControllerForTransitionFrom:to:)))
-		case .didEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didEndCustomizing:changed:)))
-		case .didSelect(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didSelect:)))
-		case .interactionControllerForAnimation(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:interactionControllerFor:)))
-		case .preferredInterfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerPreferredInterfaceOrientationForPresentation(_:)))
-		case .shouldSelect(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:shouldSelect:)))
-		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerSupportedInterfaceOrientations(_:)))
+		case .animationControllerForTransition(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:animationControllerForTransitionFrom:to:)))
+		case .didEndCustomizing(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didEndCustomizing:changed:)))
+		case .didSelect(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didSelect:)))
+		case .interactionControllerForAnimation(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:interactionControllerFor:)))
+		case .preferredInterfaceOrientationForPresentation(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .shouldSelect(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:shouldSelect:)))
+		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerSupportedInterfaceOrientations(_:)))
 		case .tabConstructor(let x): tabConstructor = x
-		case .willBeginCustomizing(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willBeginCustomizing:)))
-		case .willEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willEndCustomizing:changed:)))
+		case .willBeginCustomizing(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willBeginCustomizing:)))
+		case .willEndCustomizing(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willEndCustomizing:changed:)))
 		default: break
 		}
 	}
@@ -184,52 +184,54 @@ extension TabBarController.Preparer {
 	open class Delegate: DynamicDelegate, UITabBarControllerDelegate {
 		open func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
 			guard let identifier = (tabBarController.delegate as? Storage)?.identifier(for: viewController) else { return }
-			handler(ofType: SignalInput<ItemIdentifier>.self)!.send(value: identifier)
+			multiHandler(tabBarController, viewController, identifier)
 		}
 
 		open func tabBarController(_ tabBarController: UITabBarController, willBeginCustomizing viewControllers: [UIViewController]) {
 			guard let storage = tabBarController.delegate as? Storage else { return }
 			let identifiers = viewControllers.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<[ItemIdentifier]>.self)!.send(value: identifiers)
+			multiHandler(tabBarController, viewControllers, identifiers)
 		}
 
 		open func tabBarController(_ tabBarController: UITabBarController, didBeginCustomizing viewControllers: [UIViewController]) {
 			guard let storage = tabBarController.delegate as? Storage else { return }
 			let identifiers = viewControllers.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<[ItemIdentifier]>.self)!.send(value: identifiers)
+			multiHandler(tabBarController, viewControllers, identifiers)
 		}
 
 		open func tabBarController(_ tabBarController: UITabBarController, willEndCustomizing viewControllers: [UIViewController], changed: Bool) {
 			guard let storage = tabBarController.delegate as? Storage else { return }
 			let identifiers = viewControllers.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<([ItemIdentifier], Bool)>.self)!.send(value: (identifiers, changed))
+			multiHandler(tabBarController, viewControllers, identifiers, changed)
 		}
 
 		open func tabBarController(_ tabBarController: UITabBarController, didEndCustomizing viewControllers: [UIViewController], changed: Bool) {
 			guard let storage = tabBarController.delegate as? Storage else { return }
 			let identifiers = viewControllers.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<([ItemIdentifier], Bool)>.self)!.send(value: (identifiers, changed))
+			multiHandler(tabBarController, viewControllers, identifiers, changed)
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
 			guard let storage = tabBarController.delegate as? Storage, let identifier = storage.identifier(for: viewController) else { return false }
-			return handler(ofType: ((UITabBarController, ItemIdentifier) -> Bool).self)!(tabBarController, identifier)
+			return singleHandler(tabBarController, viewController, identifier)
 		}
 		
 		open func tabBarControllerSupportedInterfaceOrientations(_ tabBarController: UITabBarController) -> UIInterfaceOrientationMask {
-			return handler(ofType: ((UITabBarController) -> UIInterfaceOrientationMask).self)!(tabBarController)
+			return singleHandler(tabBarController)
 		}
 		
 		open func tabBarControllerPreferredInterfaceOrientationForPresentation(_ tabBarController: UITabBarController) -> UIInterfaceOrientation {
-			return handler(ofType: ((UITabBarController) -> UIInterfaceOrientation).self)!(tabBarController)
+			return singleHandler(tabBarController)
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-			return handler(ofType: ((UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)!(tabBarController, animationController)
+			return singleHandler(tabBarController, animationController)
 		}
 		
 		open func tabBarController(_ tabBarController: UITabBarController, animationControllerForTransitionFrom fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-			return handler(ofType: ((UITabBarController, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)!(tabBarController, fromVC, toVC)
+			guard let identifierFrom = (tabBarController.delegate as? Storage)?.identifier(for: fromVC) else { return nil }
+			guard let identifierTo = (tabBarController.delegate as? Storage)?.identifier(for: toVC) else { return nil }
+			return singleHandler(tabBarController, fromVC, identifierFrom, toVC, identifierTo)
 		}
 	}
 }
@@ -258,18 +260,18 @@ public extension BindingName where Binding: TabBarControllerBinding {
 	static var selectItem: TabBarControllerName<Signal<Binding.ItemIdentifierType>> { return .name(B.selectItem) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didEndCustomizing: TabBarControllerName<SignalInput<([Binding.ItemIdentifierType], Bool)>> { return .name(B.didEndCustomizing) }
-	static var didSelect: TabBarControllerName<SignalInput<Binding.ItemIdentifierType>> { return .name(B.didSelect) }
-	static var willBeginCustomizing: TabBarControllerName<SignalInput<[Binding.ItemIdentifierType]>> { return .name(B.willBeginCustomizing) }
-	static var willEndCustomizing: TabBarControllerName<SignalInput<([Binding.ItemIdentifierType], Bool)>> { return .name(B.willEndCustomizing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var animationControllerForTransition: TabBarControllerName<(UITabBarController, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationControllerForTransition) }
+	static var animationControllerForTransition: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType, UIViewController, Binding.ItemIdentifierType) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationControllerForTransition) }
+	static var didEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.didEndCustomizing) }
+	static var didSelect: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType) -> Void> { return .name(B.didSelect) }
 	static var interactionControllerForAnimation: TabBarControllerName<(UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(B.interactionControllerForAnimation) }
 	static var preferredInterfaceOrientationForPresentation: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientationForPresentation) }
-	static var shouldSelect: TabBarControllerName<(UITabBarController, Binding.ItemIdentifierType) -> Bool> { return .name(B.shouldSelect) }
+	static var shouldSelect: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType) -> Bool> { return .name(B.shouldSelect) }
 	static var supportedInterfaceOrientations: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
 	static var tabConstructor: TabBarControllerName<(Binding.ItemIdentifierType) -> ViewControllerConvertible> { return .name(B.tabConstructor) }
+	static var willBeginCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType]) -> Void> { return .name(B.willBeginCustomizing) }
+	static var willEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.willEndCustomizing) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

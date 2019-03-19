@@ -56,34 +56,34 @@ public extension Application {
 		case registerForRemoteNotifications(Signal<Bool>)
 
 		//	3. Action bindings are triggered by the object after construction.
-		case didBecomeActive(SignalInput<Void>)
-		case didEnterBackground(SignalInput<Void>)
-		case didFailToContinueUserActivity(SignalInput<(String, Error)>)
-		case didReceiveMemoryWarning(SignalInput<Void>)
-		case didReceiveRemoteNotification(SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>)
-		case didRegisterRemoteNotifications(SignalInput<Result<Data, Error>>)
-		case handleEventsForBackgroundURLSession(SignalInput<Callback<String, ()>>)
-		case handleWatchKitExtensionRequest(SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>)
-		case performAction(SignalInput<Callback<UIApplicationShortcutItem, Bool>>)
-		case performFetch(SignalInput<SignalInput<UIBackgroundFetchResult>>)
-		case protectedDataDidBecomeAvailable(SignalInput<Void>)
-		case protectedDataWillBecomeUnavailable(SignalInput<Void>)
-		case significantTimeChange(SignalInput<Void>)
-		case willEnterForeground(SignalInput<Void>)
-		case willResignActive(SignalInput<Void>)
 
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case continueUserActivity((_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool)
-		case didDecodeRestorableState((_ application: UIApplication, NSKeyedUnarchiver) -> Void)
+		case didBecomeActive((UIApplication) -> Void)
+		case didDecodeRestorableState((UIApplication, NSKeyedUnarchiver) -> Void)
+		case didEnterBackground((UIApplication) -> Void)
+		case didFailToContinueUserActivity((UIApplication, String, Error) -> Void)
 		case didFinishLaunching((_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool)
+		case didReceiveMemoryWarning((UIApplication) -> Void)
+		case didReceiveRemoteNotification((UIApplication, [AnyHashable: Any], @escaping (UIBackgroundFetchResult) -> Void) -> Void)
+		case didRegisterRemoteNotifications((UIApplication, Error) -> Void)
 		case didUpdate((_ application: UIApplication, NSUserActivity) -> Void)
+		case handleEventsForBackgroundURLSession((UIApplication, String, @escaping () -> Void) -> Void)
+		case handleWatchKitExtensionRequest((UIApplication, [AnyHashable : Any]?, @escaping ([AnyHashable : Any]?) -> Void) -> Void)
 		case open((_ application: UIApplication, _ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool)
+		case performAction((UIApplication, UIApplicationShortcutItem, @escaping (Bool) -> Void) -> Void)
+		case performFetch((UIApplication, @escaping (UIBackgroundFetchResult) -> Void) -> Void)
+		case protectedDataDidBecomeAvailable((UIApplication) -> Void)
+		case protectedDataWillBecomeUnavailable((UIApplication) -> Void)
 		case shouldAllowExtensionPointIdentifier((_ application: UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool)
 		case shouldRequestHealthAuthorization((_ application: UIApplication) -> Void)
+		case significantTimeChange((UIApplication) -> Void)
 		case viewControllerWithRestorationPath((_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController?)
 		case willContinueUserActivity((_ application: UIApplication, String) -> Bool)
 		case willEncodeRestorableState((_ application: UIApplication, NSKeyedArchiver) -> Void)
+		case willEnterForeground((UIApplication) -> Void)
 		case willFinishLaunching((_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool)
+		case willResignActive((UIApplication) -> Void)
 		case willTerminate((_ application: UIApplication) -> Void)
 	}
 }
@@ -116,37 +116,38 @@ public extension Application.Preparer {
 		switch binding {
 		case .inheritedBinding(let s): inherited.prepareBinding(s)
 
-		case .continueUserActivity(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:continue:restorationHandler:)))
-		case .didBecomeActive(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationDidBecomeActive(_:)))
+		case .continueUserActivity(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:continue:restorationHandler:)))
+		case .didBecomeActive(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationDidBecomeActive(_:)))
 		case .didDecodeRestorableState(let x):
-			delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didDecodeRestorableStateWith:)))
-			delegate().ensureHandler(for: #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:)))
-		case .didEnterBackground(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
-		case .didFailToContinueUserActivity(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
-		case .didFinishLaunching(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)))
-		case .didReceiveMemoryWarning(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:)))
-		case .didReceiveRemoteNotification(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)))
+			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didDecodeRestorableStateWith:)))
+			delegate().addSingleHandler({ (a: UIApplication, c: NSCoder) in true }, #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:)))
+		case .didEnterBackground(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
+		case .didFailToContinueUserActivity(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
+		case .didFinishLaunching(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)))
+		case .didReceiveMemoryWarning(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:)))
+		case .didReceiveRemoteNotification(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)))
 		case .didRegisterRemoteNotifications(let x):
-			delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
-			delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
-		case .didUpdate(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:didUpdate:)))
-		case .handleEventsForBackgroundURLSession(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:)))
-		case .handleWatchKitExtensionRequest(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:)))
-		case .open(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:open:options:)))
-		case .performAction(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:)))
-		case .performFetch(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:)))
-		case .protectedDataWillBecomeUnavailable(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:)))
-		case .protectedDataDidBecomeAvailable(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataDidBecomeAvailable(_:)))
-		case .shouldAllowExtensionPointIdentifier(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:shouldAllowExtensionPointIdentifier:)))
-		case .shouldRequestHealthAuthorization(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationShouldRequestHealthAuthorization(_:)))
-		case .viewControllerWithRestorationPath(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:viewControllerWithRestorationIdentifierPath:coder:)))
-		case .willContinueUserActivity(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:willContinueUserActivityWithType:)))
+			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
+			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
+		case .didUpdate(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didUpdate:)))
+		case .handleEventsForBackgroundURLSession(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:)))
+		case .handleWatchKitExtensionRequest(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:)))
+		case .open(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:open:options:)))
+		case .performAction(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:)))
+		case .performFetch(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:)))
+		case .protectedDataWillBecomeUnavailable(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:)))
+		case .protectedDataDidBecomeAvailable(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataDidBecomeAvailable(_:)))
+		case .shouldAllowExtensionPointIdentifier(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:shouldAllowExtensionPointIdentifier:)))
+		case .shouldRequestHealthAuthorization(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationShouldRequestHealthAuthorization(_:)))
+		case .significantTimeChange(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationSignificantTimeChange(_:)))
+		case .viewControllerWithRestorationPath(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:viewControllerWithRestorationIdentifierPath:coder:)))
+		case .willContinueUserActivity(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:willContinueUserActivityWithType:)))
 		case .willEncodeRestorableState(let x):
-			delegate().addHandler(x, #selector(UIApplicationDelegate.application(_:willEncodeRestorableStateWith:)))
-			delegate().ensureHandler(for: #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:)))
-		case .willEnterForeground(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationWillEnterForeground(_:)))
-		case .willResignActive(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationWillResignActive(_:)))
-		case .willTerminate(let x): delegate().addHandler(x, #selector(UIApplicationDelegate.applicationWillTerminate(_:)))
+			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:willEncodeRestorableStateWith:)))
+			delegate().addSingleHandler({ (a: UIApplication, c: NSCoder) in true }, #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:)))
+		case .willEnterForeground(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationWillEnterForeground(_:)))
+		case .willResignActive(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationWillResignActive(_:)))
+		case .willTerminate(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationWillTerminate(_:)))
 		default: break
 		}
 	}
@@ -184,6 +185,8 @@ public extension Application.Preparer {
 			}
 
 		//	3. Action bindings are triggered by the object after construction.
+
+		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case .didBecomeActive: return nil
 		case .didEnterBackground: return nil
 		case .didFailToContinueUserActivity: return nil
@@ -196,11 +199,9 @@ public extension Application.Preparer {
 		case .performFetch: return nil
 		case .protectedDataDidBecomeAvailable: return nil
 		case .protectedDataWillBecomeUnavailable: return nil
-		case .significantTimeChange(let x): return Signal.notifications(name: UIApplication.significantTimeChangeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .significantTimeChange: return nil
 		case .willEnterForeground: return nil
 		case .willResignActive: return nil
-
-		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case .continueUserActivity: return nil
 		case .didDecodeRestorableState: return nil
 		case .didFinishLaunching: return nil
@@ -263,147 +264,130 @@ extension Application.Preparer {
 	}
 
 	open class Delegate: DynamicDelegate, UIApplicationDelegate {
-		open func applicationDidBecomeActive(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationDidBecomeActive(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func applicationWillResignActive(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationWillResignActive(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func applicationDidEnterBackground(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationDidEnterBackground(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func applicationWillEnterForeground(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationWillEnterForeground(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-			return handler(ofType: ((UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool).self)!(application, launchOptions)
+		public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+			return singleHandler(application, launchOptions)
 		}
 		
-		open func applicationWillTerminate(_ application: UIApplication) {
-			return handler(ofType: ((UIApplication) -> Void).self)!(application)
+		public func applicationWillTerminate(_ application: UIApplication) {
+			return singleHandler(application)
 		}
 		
-		open func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationProtectedDataWillBecomeUnavailable(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+		public func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func application(_ application: UIApplication, willEncodeRestorableStateWith coder: NSCoder) {
-			return handler(ofType: ((UIApplication, NSKeyedArchiver) -> Void).self)!(application, coder as! NSKeyedArchiver)
+		public func application(_ application: UIApplication, willEncodeRestorableStateWith coder: NSCoder) {
+			return singleHandler(application, coder as! NSKeyedArchiver)
 		}
 		
-		open func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
-			return handler(ofType: ((UIApplication, NSKeyedUnarchiver) -> Void).self)!(application, coder as! NSKeyedUnarchiver)
+		public func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
+			return singleHandler(application, coder as! NSKeyedUnarchiver)
 		}
 		
-		open func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-			let (input, _) = Signal<UIBackgroundFetchResult>.create { s in
-				s.subscribeUntilEnd { r in
-					switch r {
-					case .success(let bfr): completionHandler(bfr)
-					case .failure: completionHandler(UIBackgroundFetchResult.failed)
-					}
-				}
-			}
-			handler(ofType: SignalInput<SignalInput<UIBackgroundFetchResult>>.self)!.send(value: input)
+		public func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+			multiHandler(application, completionHandler)
 		}
 		
-		open func application(_ application: UIApplication, handleEventsForBackgroundURLSession session: String, completionHandler: @escaping () -> Void) {
-			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handler(ofType: SignalInput<Callback<String, ()>>.self)!.send(value: Callback(session, input))
+		public func application(_ application: UIApplication, handleEventsForBackgroundURLSession session: String, completionHandler: @escaping () -> Void) {
+			multiHandler(application, session, completionHandler)
 		}
 		
-		open func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-			handler(ofType: SignalInput<Result<Data, Error>>.self)!.send(value: Result.success(deviceToken))
+		public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+			multiHandler(application, deviceToken)
 		}
 		
-		open func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-			handler(ofType: SignalInput<Result<Data, Error>>.self)!.send(value: Result.failure(error))
+		public func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+			multiHandler(application, error)
 		}
 		
-		open func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-			let (input, _) = Signal<UIBackgroundFetchResult>.create { s in
-				s.subscribeUntilEnd { r in
-					switch r {
-					case .success(let bfr): completionHandler(bfr)
-					case .failure: completionHandler(UIBackgroundFetchResult.failed)
-					}
-				}
-			}
-			handler(ofType: SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>.self)!.send(value: Callback(userInfo, input))
+		public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+			multiHandler(application, userInfo, completionHandler)
 		}
 		
-		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
-			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handler(ofType: SignalInput<Callback<(String?, [AnyHashable: Any]), ()>>.self)!.send(value: Callback((identifier, userInfo), input))
+		public func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
+			multiHandler(application, identifier, userInfo, completionHandler)
 		}
 		
-		open func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], withResponseInfo responseInfo: [AnyHashable : Any], completionHandler: @escaping () -> Void) {
-			let (input, _) = Signal<Void>.create { s in s.subscribeWhile { r in completionHandler(); return false } }
-			handler(ofType: SignalInput<Callback<(String?, [AnyHashable: Any], [AnyHashable : Any]), ()>>.self)!.send(value: Callback((identifier, userInfo, responseInfo), input))
+		public func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, forRemoteNotification userInfo: [AnyHashable: Any], withResponseInfo responseInfo: [AnyHashable : Any], completionHandler: @escaping () -> Void) {
+			multiHandler(application, identifier, userInfo, responseInfo, completionHandler)
 		}
 		
-		open func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
-			handler(ofType: SignalInput<(String, Error)>.self)!.send(value: (userActivityType, error))
+		public func application(_ application: UIApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
+			multiHandler(application, userActivityType, error)
 		}
 		
-		open func application(_ application: UIApplication, handleWatchKitExtensionRequest userInfo: [AnyHashable : Any]?, reply: @escaping ([AnyHashable : Any]?) -> Void) {
-			let (input, _) = Signal<[AnyHashable: Any]?>.create { s in s.subscribeWhile { r in reply(r.value ?? nil); return false } }
-			handler(ofType: SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>.self)!.send(value: Callback(userInfo, input))
+		public func application(_ application: UIApplication, handleWatchKitExtensionRequest userInfo: [AnyHashable : Any]?, reply: @escaping ([AnyHashable : Any]?) -> Void) {
+			multiHandler(application, userInfo, reply)
 		}
 		
-		open func applicationShouldRequestHealthAuthorization(_ application: UIApplication) {
-			handler(ofType: ((UIApplication) -> Void).self)!(application)
+		public func applicationShouldRequestHealthAuthorization(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
-			return handler(ofType: ((UIApplication, String) -> Bool).self)!(application, userActivityType)
+		public func application(_ application: UIApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
+			return singleHandler(application, userActivityType)
 		}
 		
-		open func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-			return handler(ofType: ((UIApplication, NSUserActivity, @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool).self)!(application, userActivity, restorationHandler)
+		public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+			return singleHandler(application, userActivity, restorationHandler)
 		}
 		
-		open func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) {
-			handler(ofType: ((UIApplication, NSUserActivity) -> Void).self)!(application, userActivity)
+		public func application(_ application: UIApplication, didUpdate userActivity: NSUserActivity) {
+			multiHandler(application, userActivity)
 		}
 		
-		open func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+		public func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
 			// The existence of this selector on the dynamic delegate triggers an always true response
 			return true
 		}
 		
-		open func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
+		public func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
 			// The existence of this selector on the dynamic delegate triggers an always true response
 			return true
 		}
 		
-		open func application(_ application: UIApplication, viewControllerWithRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
-			return handler(ofType: ((UIApplication, [String], NSCoder) -> UIViewController?).self)!(application, identifierComponents, coder)
+		public func applicationSignificantTimeChange(_ application: UIApplication) {
+			multiHandler(application)
 		}
 		
-		open func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-			return handler(ofType: ((UIApplication, URL, [UIApplication.OpenURLOptionsKey: Any]) -> Bool).self)!(application, url, options)
+		public func application(_ application: UIApplication, viewControllerWithRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
+			return singleHandler(application, identifierComponents, coder)
 		}
 		
-		open func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
-			return handler(ofType: ((UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool).self)!(application, extensionPointIdentifier)
+		public func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+			return singleHandler(application, url, options)
 		}
 		
-		open func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
-			let (input, _) = Signal<Bool>.create { s in s.subscribeWhile { r in completionHandler(r.value ?? false); return false } }
-			handler(ofType: SignalInput<Callback<UIApplicationShortcutItem, Bool>>.self)!.send(value: Callback(shortcutItem, input))
+		public func application(_ application: UIApplication, shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier) -> Bool {
+			return singleHandler(application, extensionPointIdentifier)
+		}
+		
+		public func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+			multiHandler(application, shortcutItem, completionHandler)
 		}
 	}
 }
@@ -436,34 +420,34 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var registerForRemoteNotifications: ApplicationName<Signal<Bool>> { return .name(B.registerForRemoteNotifications) }
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var didBecomeActive: ApplicationName<SignalInput<Void>> { return .name(B.didBecomeActive) }
-	static var didEnterBackground: ApplicationName<SignalInput<Void>> { return .name(B.didEnterBackground) }
-	static var didFailToContinueUserActivity: ApplicationName<SignalInput<(String, Error)>> { return .name(B.didFailToContinueUserActivity) }
-	static var didReceiveMemoryWarning: ApplicationName<SignalInput<Void>> { return .name(B.didReceiveMemoryWarning) }
-	static var didReceiveRemoteNotification: ApplicationName<SignalInput<Callback<[AnyHashable: Any], UIBackgroundFetchResult>>> { return .name(B.didReceiveRemoteNotification) }
-	static var didRegisterRemoteNotifications: ApplicationName<SignalInput<Result<Data, Error>>> { return .name(B.didRegisterRemoteNotifications) }
-	static var handleEventsForBackgroundURLSession: ApplicationName<SignalInput<Callback<String, ()>>> { return .name(B.handleEventsForBackgroundURLSession) }
-	static var handleWatchKitExtensionRequest: ApplicationName<SignalInput<Callback<[AnyHashable: Any]?, [AnyHashable: Any]?>>> { return .name(B.handleWatchKitExtensionRequest) }
-	static var performAction: ApplicationName<SignalInput<Callback<UIApplicationShortcutItem, Bool>>> { return .name(B.performAction) }
-	static var performFetch: ApplicationName<SignalInput<SignalInput<UIBackgroundFetchResult>>> { return .name(B.performFetch) }
-	static var protectedDataDidBecomeAvailable: ApplicationName<SignalInput<Void>> { return .name(B.protectedDataDidBecomeAvailable) }
-	static var protectedDataWillBecomeUnavailable: ApplicationName<SignalInput<Void>> { return .name(B.protectedDataWillBecomeUnavailable) }
-	static var significantTimeChange: ApplicationName<SignalInput<Void>> { return .name(B.significantTimeChange) }
-	static var willEnterForeground: ApplicationName<SignalInput<Void>> { return .name(B.willEnterForeground) }
-	static var willResignActive: ApplicationName<SignalInput<Void>> { return .name(B.willResignActive) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 	static var continueUserActivity: ApplicationName<(_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool> { return .name(B.continueUserActivity) }
+	static var didBecomeActive: ApplicationName<(UIApplication) -> Void> { return .name(B.didBecomeActive) }
 	static var didDecodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedUnarchiver) -> Void> { return .name(B.didDecodeRestorableState) }
+	static var didEnterBackground: ApplicationName<(UIApplication) -> Void> { return .name(B.didEnterBackground) }
+	static var didFailToContinueUserActivity: ApplicationName<(UIApplication, String, Error) -> Void> { return .name(B.didFailToContinueUserActivity) }
 	static var didFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.didFinishLaunching) }
+	static var didReceiveMemoryWarning: ApplicationName<(UIApplication) -> Void> { return .name(B.didReceiveMemoryWarning) }
+	static var didReceiveRemoteNotification: ApplicationName<(UIApplication, [AnyHashable: Any], @escaping (UIBackgroundFetchResult) -> Void) -> Void> { return .name(B.didReceiveRemoteNotification) }
+	static var didRegisterRemoteNotifications: ApplicationName<(UIApplication, Error) -> Void> { return .name(B.didRegisterRemoteNotifications) }
 	static var didUpdate: ApplicationName<(_ application: UIApplication, NSUserActivity) -> Void> { return .name(B.didUpdate) }
+	static var handleEventsForBackgroundURLSession: ApplicationName<(UIApplication, String, @escaping () -> Void) -> Void> { return .name(B.handleEventsForBackgroundURLSession) }
+	static var handleWatchKitExtensionRequest: ApplicationName<(UIApplication, [AnyHashable : Any]?, @escaping ([AnyHashable : Any]?) -> Void) -> Void> { return .name(B.handleWatchKitExtensionRequest) }
 	static var open: ApplicationName<(_ application: UIApplication, _ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool> { return .name(B.open) }
+	static var performAction: ApplicationName<(UIApplication, UIApplicationShortcutItem, @escaping (Bool) -> Void) -> Void> { return .name(B.performAction) }
+	static var performFetch: ApplicationName<(UIApplication, @escaping (UIBackgroundFetchResult) -> Void) -> Void> { return .name(B.performFetch) }
+	static var protectedDataDidBecomeAvailable: ApplicationName<(UIApplication) -> Void> { return .name(B.protectedDataDidBecomeAvailable) }
+	static var protectedDataWillBecomeUnavailable: ApplicationName<(UIApplication) -> Void> { return .name(B.protectedDataWillBecomeUnavailable) }
 	static var shouldAllowExtensionPointIdentifier: ApplicationName<(_ application: UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool> { return .name(B.shouldAllowExtensionPointIdentifier) }
 	static var shouldRequestHealthAuthorization: ApplicationName<(_ application: UIApplication) -> Void> { return .name(B.shouldRequestHealthAuthorization) }
+	static var significantTimeChange: ApplicationName<(UIApplication) -> Void> { return .name(B.significantTimeChange) }
 	static var viewControllerWithRestorationPath: ApplicationName<(_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController?> { return .name(B.viewControllerWithRestorationPath) }
 	static var willContinueUserActivity: ApplicationName<(_ application: UIApplication, String) -> Bool> { return .name(B.willContinueUserActivity) }
 	static var willEncodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedArchiver) -> Void> { return .name(B.willEncodeRestorableState) }
+	static var willEnterForeground: ApplicationName<(UIApplication) -> Void> { return .name(B.willEnterForeground) }
 	static var willFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.willFinishLaunching) }
+	static var willResignActive: ApplicationName<(UIApplication) -> Void> { return .name(B.willResignActive) }
 	static var willTerminate: ApplicationName<(_ application: UIApplication) -> Void> { return .name(B.willTerminate) }
 }
 

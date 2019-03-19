@@ -279,7 +279,7 @@ func binderContent() -> String {
 			mutating func prepareBinding(_ binding: Binding) {
 				switch binding {
 				case .inheritedBinding(let x): inherited.prepareBinding(x)
-				case .someDelegate(let x): delegate().addHandler(x, #selector(someDelegateFunction))
+				case .someDelegate(let x): delegate().addMultiHandler(x, #selector(someDelegateFunction))
 				default: break
 			}
 			*/
@@ -310,7 +310,7 @@ func binderContent() -> String {
 			// Enable if Preparer is BinderDelegateEmbedderConstructor
 			open class Delegate: DynamicDelegate, ___VARIABLE_platformPrefix______VARIABLE_basename___Delegate {
 				open func someDelegateFunction(_ ___VARIABLE_lowercaseBasename___: ___VARIABLE_platformPrefix______VARIABLE_basename___Delegate) -> Bool {
-					return handler(ofType: ((___VARIABLE_platformPrefix______VARIABLE_basename___Delegate) -> Bool).self)!(___VARIABLE_lowercaseBasename___)
+					return singleHandler(___VARIABLE_lowercaseBasename___)
 				}
 			}
 			*/

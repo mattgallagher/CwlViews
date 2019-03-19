@@ -71,7 +71,7 @@ public extension ExtendedView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .sizeDidChange(let x): delegate().addHandler(x, #selector(ViewDelegate.layoutSubviews(view:)))
+		case .sizeDidChange(let x): delegate().addMultiHandler({ s in x.send(value: s) }, #selector(ViewDelegate.layoutSubviews(view:)))
 		}
 	}
 
@@ -90,7 +90,7 @@ extension ExtendedView.Preparer {
 	
 	open class Delegate: DynamicDelegate, ViewDelegate {
 		open func layoutSubviews(view: UIView) {
-			return handler(ofType: SignalInput<CGSize>.self)!.send(view.bounds.size)
+			multiHandler(view.bounds.size)
 		}
 	}
 }

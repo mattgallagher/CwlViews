@@ -76,13 +76,9 @@ public extension Application {
 		case didBecomeActive(SignalInput<Void>)
 		case didChangeOcclusionState(SignalInput<Void>)
 		case didChangeScreenParameters(SignalInput<Void>)
-		case didFailToContinueUserActivity(SignalInput<(userActivityType: String, error: Error)>)
-		case didFailToRegisterForRemoteNotifications(SignalInput<Error>)
 		case didFinishLaunching(SignalInput<[AnyHashable: Any]>)
 		case didFinishRestoringWindows(SignalInput<Void>)
 		case didHide(SignalInput<Void>)
-		case didReceiveRemoteNotification(SignalInput<[String: Any]>)
-		case didRegisterForRemoteNotifications(SignalInput<Data>)
 		case didResignActive(SignalInput<Void>)
 		case didUnhide(SignalInput<Void>)
 		case didUpdate(SignalInput<Void>)
@@ -96,6 +92,10 @@ public extension Application {
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case continueUserActivity((_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool)
 		case didDecodeRestorableState((_ application: NSApplication, NSCoder) -> Void)
+		case didFailToContinueUserActivity((_ application: NSApplication, _ userActivityType: String, _ error: Error) -> Void)
+		case didFailToRegisterForRemoteNotifications((_ application: NSApplication, _ error: Error) -> Void)
+		case didReceiveRemoteNotification((_ application: NSApplication, _ notification: [String: Any]) -> Void)
+		case didRegisterForRemoteNotifications((_ application: NSApplication, _ token: Data) -> Void)
 		case didUpdateUserActivity((_ application: NSApplication, NSUserActivity) -> Void)
 		case openFile((_ application: NSApplication, _ filename: String) -> Bool)
 		case openFiles((_ application: NSApplication, _ filenames: [String]) -> Void)
@@ -106,7 +106,7 @@ public extension Application {
 		case printFiles((_ application: NSApplication, _ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply)
 		case shouldHandleReopen((_ application: NSApplication, _ hasVisibleWindows: Bool) -> Bool)
 		case shouldOpenUntitledFile((_ application: NSApplication) -> Bool)
-		case shouldTerminate((_ application: NSApplication) -> ApplicationTerminateReply)
+		case shouldTerminate((_ application: NSApplication) -> NSApplication.TerminateReply)
 		case shouldTerminateAfterLastWindowClosed((_ application: NSApplication) -> Bool)
 		case userDidAcceptCloudKitShare((_ application: NSApplication, CKShare.Metadata) -> Void)
 		case willContinueUserActivity((_ application: NSApplication, _ type: String) -> Bool)
@@ -146,30 +146,30 @@ public extension Application.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .continueUserActivity(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:continue:restorationHandler:)))
+		case .continueUserActivity(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:continue:restorationHandler:)))
 		case .dockMenu: dockMenuInUse = true
-		case .didDecodeRestorableState(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:didDecodeRestorableState:)))
-		case .didFailToContinueUserActivity(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
-		case .didFailToRegisterForRemoteNotifications(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
-		case .didReceiveRemoteNotification(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:didReceiveRemoteNotification:)))
-		case .didRegisterForRemoteNotifications(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
-		case .didUpdateUserActivity(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:didUpdate:)))
-		case .openFile(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:openFile:)))
-		case .openFiles(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:openFiles:)))
-		case .openFileWithoutUI(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:openFileWithoutUI:)))
-		case .openTempFile(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:openTempFile:)))
-		case .openUntitledFile(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationOpenUntitledFile(_:)))
-		case .printFile(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:printFile:)))
-		case .printFiles(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:printFiles:withSettings:showPrintPanels:)))
-		case .shouldHandleReopen(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldHandleReopen(_:hasVisibleWindows:)))
-		case .shouldOpenUntitledFile(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldOpenUntitledFile(_:)))
-		case .shouldTerminate(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldTerminate(_:)))
-		case .shouldTerminateAfterLastWindowClosed(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationShouldTerminateAfterLastWindowClosed(_:)))
-		case .userDidAcceptCloudKitShare(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:userDidAcceptCloudKitShareWith:)))
-		case .willContinueUserActivity(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:willContinueUserActivityWithType:)))
-		case .willEncodeRestorableState(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:willEncodeRestorableState:)))
-		case .willPresentError(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.application(_:willPresentError:)))
-		case .willTerminate(let x): delegate().addHandler(x, #selector(NSApplicationDelegate.applicationWillTerminate(_:)))
+		case .didDecodeRestorableState(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:didDecodeRestorableState:)))
+		case .didFailToContinueUserActivity(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
+		case .didFailToRegisterForRemoteNotifications(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
+		case .didReceiveRemoteNotification(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:didReceiveRemoteNotification:)))
+		case .didRegisterForRemoteNotifications(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
+		case .didUpdateUserActivity(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:didUpdate:)))
+		case .openFile(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:openFile:)))
+		case .openFiles(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:openFiles:)))
+		case .openFileWithoutUI(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:openFileWithoutUI:)))
+		case .openTempFile(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:openTempFile:)))
+		case .openUntitledFile(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.applicationOpenUntitledFile(_:)))
+		case .printFile(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:printFile:)))
+		case .printFiles(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:printFiles:withSettings:showPrintPanels:)))
+		case .shouldHandleReopen(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.applicationShouldHandleReopen(_:hasVisibleWindows:)))
+		case .shouldOpenUntitledFile(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.applicationShouldOpenUntitledFile(_:)))
+		case .shouldTerminate(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.applicationShouldTerminate(_:)))
+		case .shouldTerminateAfterLastWindowClosed(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.applicationShouldTerminateAfterLastWindowClosed(_:)))
+		case .userDidAcceptCloudKitShare(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:userDidAcceptCloudKitShareWith:)))
+		case .willContinueUserActivity(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:willContinueUserActivityWithType:)))
+		case .willEncodeRestorableState(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.application(_:willEncodeRestorableState:)))
+		case .willPresentError(let x): delegate().addSingleHandler(x, #selector(NSApplicationDelegate.application(_:willPresentError:)))
+		case .willTerminate(let x): delegate().addMultiHandler(x, #selector(NSApplicationDelegate.applicationWillTerminate(_:)))
 		default: break
 		}
 	}
@@ -221,18 +221,12 @@ public extension Application.Preparer {
 		case .unhideAllApplications(let x): return x.apply(instance) { i, v in i.unhideAllApplications(nil) }
 			
 		// 3. Action bindings are triggered by the object after construction.
-		case .didBecomeActive(let x): return Signal.notifications(name: NSApplication.didBecomeActiveNotification, object: instance).map { n in
-				return ()
-			}.cancellableBind(to: x)
+		case .didBecomeActive(let x): return Signal.notifications(name: NSApplication.didBecomeActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .didChangeOcclusionState(let x): return Signal.notifications(name: NSApplication.didChangeOcclusionStateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .didChangeScreenParameters(let x): return Signal.notifications(name: NSApplication.didChangeScreenParametersNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didFailToContinueUserActivity: return nil
-		case .didFailToRegisterForRemoteNotifications: return nil
 		case .didFinishLaunching(let x): return Signal.notifications(name: NSApplication.didFinishLaunchingNotification, object: instance).compactMap { n -> [AnyHashable: Any] in n.userInfo ?? [:] }.cancellableBind(to: x)
 		case .didFinishRestoringWindows(let x): return Signal.notifications(name: NSApplication.didFinishRestoringWindowsNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .didHide(let x): return Signal.notifications(name: NSApplication.didHideNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didReceiveRemoteNotification: return nil
-		case .didRegisterForRemoteNotifications: return nil
 		case .didResignActive(let x): return Signal.notifications(name: NSApplication.didResignActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .didUnhide(let x): return Signal.notifications(name: NSApplication.didUnhideNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .didUpdate(let x): return Signal.notifications(name: NSApplication.didUpdateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
@@ -242,6 +236,11 @@ public extension Application.Preparer {
 		case .willResignActive(let x): return Signal.notifications(name: NSApplication.willResignActiveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .willUnhide(let x): return Signal.notifications(name: NSApplication.willUnhideNotification, object: instance).map { n in return () }.cancellableBind(to: x)
 		case .willUpdate(let x): return Signal.notifications(name: NSApplication.willUpdateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+
+		case .didFailToContinueUserActivity: return nil
+		case .didFailToRegisterForRemoteNotifications: return nil
+		case .didReceiveRemoteNotification: return nil
+		case .didRegisterForRemoteNotifications: return nil
 			
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .continueUserActivity: return nil
@@ -284,104 +283,95 @@ extension Application.Preparer {
 	
 	open class Delegate: DynamicDelegate, NSApplicationDelegate {
 		open func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {
-			switch handler(ofType: ((NSApplication) -> ApplicationTerminateReply).self)!(application) {
-			case .now: return NSApplication.TerminateReply.terminateNow
-			case .cancel: return NSApplication.TerminateReply.terminateCancel
-			case .later(let c):
-				// Run as a keep alive (effectively, owned by the input)
-				c.subscribeUntilEnd { [weak application] result in
-					application?.reply(toApplicationShouldTerminate: result.value == true)
-				}
-				return NSApplication.TerminateReply.terminateLater
-			}
+			return singleHandler(application)
 		}
 		
 		open func applicationShouldTerminateAfterLastWindowClosed(_ application: NSApplication) -> Bool {
-			return handler(ofType: ((NSApplication) -> Bool).self)!(application)
+			return singleHandler(application)
 		}
 		
 		open func applicationShouldHandleReopen(_ application: NSApplication, hasVisibleWindows: Bool) -> Bool {
-			return handler(ofType: ((NSApplication, Bool) -> Bool).self)!(application, hasVisibleWindows)
+			return singleHandler(application, hasVisibleWindows)
 		}
 		
 		open func application(_ application: NSApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
-			return handler(ofType: ((NSApplication, NSUserActivity, @escaping ([NSUserActivityRestoring]) -> Void) -> Bool).self)!(application, userActivity, restorationHandler)
+			return singleHandler(application, userActivity, restorationHandler)
 		}
 		
 		open func application(_ application: NSApplication, willPresentError error: Error) -> Error {
-			return handler(ofType: ((NSApplication, Error) -> Error).self)!(application, error)
+			return singleHandler(application, error)
 		}
 		
 		open func application(_ application: NSApplication, willContinueUserActivityWithType userActivityType: String) -> Bool {
-			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, userActivityType)
+			return singleHandler(application, userActivityType)
 		}
 		
 		open func application(_ application: Any, openFileWithoutUI filename: String) -> Bool {
-			return handler(ofType: ((Any, String) -> Bool).self)!(application, filename)
+			return singleHandler(application, filename)
 		}
 		
 		open func application(_ application: NSApplication, openFile filename: String) -> Bool {
-			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, filename)
+			return singleHandler(application, filename)
 		}
 		
 		open func application(_ application: NSApplication, openFiles filenames: [String]) {
-			handler(ofType: ((NSApplication, [String]) -> Void).self)!(application, filenames)
+			multiHandler(application, filenames)
 		}
 		
 		open func application(_ application: NSApplication, printFile filename: String) -> Bool {
-			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, filename)
+			return singleHandler(application, filename)
 		}
 		
 		open func application(_ application: NSApplication, printFiles filenames: [String], withSettings printSettings: [NSPrintInfo.AttributeKey: Any], showPrintPanels: Bool) -> NSApplication.PrintReply {
-			return handler(ofType: ((NSApplication, [String], [NSPrintInfo.AttributeKey: Any], Bool) -> NSApplication.PrintReply).self)!(application, filenames, printSettings, showPrintPanels)
+			return singleHandler(application, filenames, printSettings, showPrintPanels)
 		}
 		
 		open func application(_ application: NSApplication, openTempFile filename: String) -> Bool {
-			return handler(ofType: ((NSApplication, String) -> Bool).self)!(application, filename)
+			return singleHandler(application, filename)
 		}
 		
 		open func applicationOpenUntitledFile(_ application: NSApplication) -> Bool {
-			return handler(ofType: ((NSApplication) -> Bool).self)!(application)
+			return singleHandler(application)
 		}
 		
 		open func applicationShouldOpenUntitledFile(_ application: NSApplication) -> Bool {
-			return handler(ofType: ((NSApplication) -> Bool).self)!(application)
+			return singleHandler(application)
 		}
 		
 		open func applicationWillTerminate(_ notification: Notification) {
-			handler(ofType: ((Notification) -> Void).self)!(notification)
+			multiHandler(notification)
 		}
 		
 		open func application(_ application: NSApplication, didUpdate userActivity: NSUserActivity) {
-			return handler(ofType: ((NSApplication, NSUserActivity) -> Void).self)!(application, userActivity)
+			return singleHandler(application, userActivity)
 		}
 		
 		open func application(_ application: NSApplication, willEncodeRestorableState coder: NSCoder) {
-			return handler(ofType: ((NSApplication, NSCoder) -> Void).self)!(application, coder)
+			return singleHandler(application, coder)
 		}
 		
 		open func application(_ application: NSApplication, didDecodeRestorableState coder: NSCoder) {
-			return handler(ofType: ((NSApplication, NSCoder) -> Void).self)!(application, coder)
+			return singleHandler(application, coder)
 		}
 		
 		open func application(_ application: NSApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
-			handler(ofType: SignalInput<(userActivityType: String, error: Error)>.self)!.send(value: (userActivityType, error))
+			multiHandler(application, userActivityType, error)
 		}
 		
 		open func application(_ application: NSApplication, didReceiveRemoteNotification userInfo: [String: Any]) {
-			handler(ofType: SignalInput<[String: Any]>.self)!.send(value: userInfo)
+			multiHandler(application, userInfo)
 		}
 		
 		open func application(_ application: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-			handler(ofType: SignalInput<Data>.self)!.send(value: deviceToken)
+			multiHandler(application, deviceToken)
 		}
 		
 		open func application(_ application: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-			handler(ofType: SignalInput<Error>.self)!.send(value: error)
+			multiHandler(application, error)
 		}
 		
 		open func application(_ application: NSApplication, userDidAcceptCloudKitShareWith metadata: CKShare.Metadata) {
-			handler(ofType: ((NSApplication, CKShare.Metadata) -> Void).self)!(application, metadata)
+			multiHandler(application, metadata)
 		}
 	}
 }
@@ -431,13 +421,13 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var didBecomeActive: ApplicationName<SignalInput<Void>> { return .name(B.didBecomeActive) }
 	static var didChangeOcclusionState: ApplicationName<SignalInput<Void>> { return .name(B.didChangeOcclusionState) }
 	static var didChangeScreenParameters: ApplicationName<SignalInput<Void>> { return .name(B.didChangeScreenParameters) }
-	static var didFailToContinueUserActivity: ApplicationName<SignalInput<(userActivityType: String, error: Error)>> { return .name(B.didFailToContinueUserActivity) }
-	static var didFailToRegisterForRemoteNotifications: ApplicationName<SignalInput<Error>> { return .name(B.didFailToRegisterForRemoteNotifications) }
+	static var didFailToContinueUserActivity: ApplicationName<(NSApplication, String, Error) -> Void> { return .name(B.didFailToContinueUserActivity) }
+	static var didFailToRegisterForRemoteNotifications: ApplicationName<(NSApplication, Error) -> Void> { return .name(B.didFailToRegisterForRemoteNotifications) }
 	static var didFinishLaunching: ApplicationName<SignalInput<[AnyHashable: Any]>> { return .name(B.didFinishLaunching) }
 	static var didFinishRestoringWindows: ApplicationName<SignalInput<Void>> { return .name(B.didFinishRestoringWindows) }
 	static var didHide: ApplicationName<SignalInput<Void>> { return .name(B.didHide) }
-	static var didReceiveRemoteNotification: ApplicationName<SignalInput<[String: Any]>> { return .name(B.didReceiveRemoteNotification) }
-	static var didRegisterForRemoteNotifications: ApplicationName<SignalInput<Data>> { return .name(B.didRegisterForRemoteNotifications) }
+	static var didReceiveRemoteNotification: ApplicationName<(NSApplication, [String: Any]) -> Void> { return .name(B.didReceiveRemoteNotification) }
+	static var didRegisterForRemoteNotifications: ApplicationName<(NSApplication, Data) -> Void> { return .name(B.didRegisterForRemoteNotifications) }
 	static var didResignActive: ApplicationName<SignalInput<Void>> { return .name(B.didResignActive) }
 	static var didUnhide: ApplicationName<SignalInput<Void>> { return .name(B.didUnhide) }
 	static var didUpdate: ApplicationName<SignalInput<Void>> { return .name(B.didUpdate) }
@@ -461,7 +451,7 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var printFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply> { return .name(B.printFiles) }
 	static var shouldHandleReopen: ApplicationName<(_ application: NSApplication, _ hasVisibleWindows: Bool) -> Bool> { return .name(B.shouldHandleReopen) }
 	static var shouldOpenUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.shouldOpenUntitledFile) }
-	static var shouldTerminate: ApplicationName<(_ application: NSApplication) -> ApplicationTerminateReply> { return .name(B.shouldTerminate) }
+	static var shouldTerminate: ApplicationName<(_ application: NSApplication) -> NSApplication.TerminateReply> { return .name(B.shouldTerminate) }
 	static var shouldTerminateAfterLastWindowClosed: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.shouldTerminateAfterLastWindowClosed) }
 	static var userDidAcceptCloudKitShare: ApplicationName<(_ application: NSApplication, CKShare.Metadata) -> Void> { return .name(B.userDidAcceptCloudKitShare) }
 	static var willContinueUserActivity: ApplicationName<(_ application: NSApplication, _ type: String) -> Bool> { return .name(B.willContinueUserActivity) }
@@ -490,10 +480,5 @@ public extension Application.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
-public enum ApplicationTerminateReply {
-	case now
-	case cancel
-	case later(Signal<Bool>)
-}
 
 #endif

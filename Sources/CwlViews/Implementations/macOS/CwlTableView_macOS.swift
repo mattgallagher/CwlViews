@@ -95,21 +95,20 @@ public extension TableView {
 		// 3. Action bindings are triggered by the object after construction.
 		case columnMoved(SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>)
 		case columnResized(SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>)
-		case didClickTableColumn(SignalInput<NSUserInterfaceItemIdentifier>)
-		case didDragTableColumn(SignalInput<NSUserInterfaceItemIdentifier>)
 		case doubleAction(TargetAction)
-		case mouseDownInHeaderOfTableColumn(SignalInput<NSUserInterfaceItemIdentifier>)
 		case selectionChanged(SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedRows: IndexSet)>)
-		case sortDescriptorsDidChange(SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>)
 		case visibleRowsChanged(SignalInput<CountableRange<Int>>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case acceptDrop((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> Bool)
+		case didClickTableColumn((NSTableView, NSTableColumn) -> Void)
+		case didDragTableColumn((NSTableView, NSTableColumn) -> Void)
 		case draggingSessionEnded((_ tableView: NSTableView, _ session: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void)
 		case draggingSessionWillBegin((_ tableView: NSTableView, _ session: NSDraggingSession, _ willBeginAt: NSPoint, _ forRowIndexes: IndexSet) -> Void)
 		case groupRowCellConstructor((Int) -> TableCellViewConvertible)
 		case heightOfRow((_ row: Int, _ rowData: RowData?) -> CGFloat)
 		case isGroupRow((_ row: Int, _ rowData: RowData?) -> Bool)
+		case mouseDownInHeaderOfTableColumn((NSTableView, NSTableColumn) -> Void)
 		case nextTypeSelectMatch((_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int)
 		case pasteboardWriter((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> NSPasteboardWriting)
 		case rowActionsForRow((_ row: Int, _ data: RowData?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction])
@@ -121,6 +120,7 @@ public extension TableView {
 		case shouldSelectTableColumn((_ tableView: NSTableView, _ column: NSTableColumn?) -> Bool)
 		case shouldTypeSelectForEvent((_ tableView: NSTableView, _ event: NSEvent, _ searchString: String?) -> Bool)
 		case sizeToFitWidthOfColumn((_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier) -> CGFloat)
+		case sortDescriptorsDidChange((NSTableView, [NSSortDescriptor]) -> Void)
 		case typeSelectString((TableCell<RowData>) -> String?)
 		case updateDraggingItems((_ tableView: NSTableView, _ forDrag: NSDraggingInfo) -> Void)
 		case validateDrop((_ tableView: NSTableView, _ info: NSDraggingInfo, _ proposedRow: Int, _ proposedDropOperation: NSTableView.DropOperation) -> NSDragOperation)
@@ -140,13 +140,14 @@ public extension TableView {
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func constructStorage(instance: Instance) -> Storage { return Storage(visibleRowsChanged: visibleRowsChanged) }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 		
 		var singleAction: TargetAction?
 		var doubleAction: TargetAction?
+		var visibleRowsChanged: MultiOutput<CountableRange<Int>>?
 	}
 }
 
@@ -159,30 +160,33 @@ public extension TableView.Preparer {
 		case .inheritedBinding(.action(let x)): singleAction = x
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .acceptDrop(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:acceptDrop:row:dropOperation:)))
-		case .didDragTableColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:didDrag:)))
-		case .didClickTableColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:didClick:)))
+		case .acceptDrop(let x): delegate().addSingleHandler(x, #selector(NSTableViewDataSource.tableView(_:acceptDrop:row:dropOperation:)))
+		case .didDragTableColumn(let x): delegate().addMultiHandler(x, #selector(NSTableViewDelegate.tableView(_:didDrag:)))
+		case .didClickTableColumn(let x): delegate().addMultiHandler(x, #selector(NSTableViewDelegate.tableView(_:didClick:)))
 		case .doubleAction(let x): doubleAction = x
-		case .draggingSessionEnded(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:draggingSession:endedAt:operation:)))
-		case .draggingSessionWillBegin(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:draggingSession:willBeginAt:forRowIndexes:)))
-		case .heightOfRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:heightOfRow:)))
-		case .isGroupRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:isGroupRow:)))
-		case .mouseDownInHeaderOfTableColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:mouseDownInHeaderOf:)))
-		case .nextTypeSelectMatch(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:nextTypeSelectMatchFromRow:toRow:for:)))
-		case .pasteboardWriter(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:pasteboardWriterForRow:)))
-		case .rowActionsForRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:rowActionsForRow:edge:)))
-		case .rowView(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:rowViewForRow:)))
-		case .selectionIndexesForProposedSelection(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:selectionIndexesForProposedSelection:)))
-		case .selectionShouldChange(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.selectionShouldChange(in:)))
-		case .shouldReorderColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldReorderColumn:toColumn:)))
-		case .shouldSelectRow(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldSelectRow:)))
-		case .shouldSelectTableColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldSelect:)))
-		case .shouldTypeSelectForEvent(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldTypeSelectFor:withCurrentSearch:)))
-		case .sizeToFitWidthOfColumn(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:sizeToFitWidthOfColumn:)))
-		case .sortDescriptorsDidChange(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:sortDescriptorsDidChange:)))
-		case .typeSelectString(let x): delegate().addHandler(x, #selector(NSTableViewDelegate.tableView(_:typeSelectStringFor:row:)))
-		case .updateDraggingItems(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:updateDraggingItemsForDrag:)))
-		case .validateDrop(let x): delegate().addHandler(x, #selector(NSTableViewDataSource.tableView(_:validateDrop:proposedRow:proposedDropOperation:)))
+		case .draggingSessionEnded(let x): delegate().addMultiHandler(x, #selector(NSTableViewDataSource.tableView(_:draggingSession:endedAt:operation:)))
+		case .draggingSessionWillBegin(let x): delegate().addMultiHandler(x, #selector(NSTableViewDataSource.tableView(_:draggingSession:willBeginAt:forRowIndexes:)))
+		case .heightOfRow(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:heightOfRow:)))
+		case .isGroupRow(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:isGroupRow:)))
+		case .mouseDownInHeaderOfTableColumn(let x): delegate().addMultiHandler(x, #selector(NSTableViewDelegate.tableView(_:mouseDownInHeaderOf:)))
+		case .nextTypeSelectMatch(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:nextTypeSelectMatchFromRow:toRow:for:)))
+		case .pasteboardWriter(let x): delegate().addSingleHandler(x, #selector(NSTableViewDataSource.tableView(_:pasteboardWriterForRow:)))
+		case .rowActionsForRow(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:rowActionsForRow:edge:)))
+		case .rowView(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:rowViewForRow:)))
+		case .selectionIndexesForProposedSelection(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:selectionIndexesForProposedSelection:)))
+		case .selectionShouldChange(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.selectionShouldChange(in:)))
+		case .shouldReorderColumn(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldReorderColumn:toColumn:)))
+		case .shouldSelectRow(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldSelectRow:)))
+		case .shouldSelectTableColumn(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldSelect:)))
+		case .shouldTypeSelectForEvent(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:shouldTypeSelectFor:withCurrentSearch:)))
+		case .sizeToFitWidthOfColumn(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:sizeToFitWidthOfColumn:)))
+		case .sortDescriptorsDidChange(let x): delegate().addMultiHandler(x, #selector(NSTableViewDataSource.tableView(_:sortDescriptorsDidChange:)))
+		case .typeSelectString(let x): delegate().addSingleHandler(x, #selector(NSTableViewDelegate.tableView(_:typeSelectStringFor:row:)))
+		case .updateDraggingItems(let x): delegate().addMultiHandler(x, #selector(NSTableViewDataSource.tableView(_:updateDraggingItemsForDrag:)))
+		case .validateDrop(let x): delegate().addSingleHandler(x, #selector(NSTableViewDataSource.tableView(_:validateDrop:proposedRow:proposedDropOperation:)))
+		case .visibleRowsChanged(let x):
+			visibleRowsChanged = visibleRowsChanged ?? Input().multicast()
+			visibleRowsChanged?.signal.bind(to: x)
 		default: break
 		}
 	}
@@ -302,9 +306,7 @@ public extension TableView.Preparer {
 				return (selectedColumns: selectedColumns, selectedRows: selectedRowIndexes as IndexSet)
 			}.cancellableBind(to: x)
 		case .sortDescriptorsDidChange: return nil
-		case .visibleRowsChanged(let x):
-			storage.visibleRowsSignalInput = x
-			return nil
+		case .visibleRowsChanged: return nil
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .acceptDrop: return nil
@@ -366,14 +368,19 @@ public extension TableView.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension TableView.Preparer {
 	open class Storage: View.Preparer.Storage, NSTableViewDelegate, NSTableViewDataSource {
-		open override var isInUse: Bool { return true }
+		public let visibleRowsChanged: MultiOutput<CountableRange<Int>>?
 
 		open var actionTarget: SignalDoubleActionTarget? = nil
 		open var rowState: TableRowState<RowData> = TableRowState<RowData>()
 		open var visibleRows: IndexSet = []
-		open var visibleRowsSignalInput: SignalInput<CountableRange<Int>>? = nil
 		open var groupRowCellConstructor: ((Int) -> TableCellViewConvertible)?
 		open var columns: [TableColumn<RowData>.Preparer.Storage] = []
+		
+		public init(visibleRowsChanged: MultiOutput<CountableRange<Int>>?) {
+			self.visibleRowsChanged = visibleRowsChanged
+		}
+		
+		open override var isInUse: Bool { return true }
 		
 		fileprivate func rowData(at row: Int) -> RowData? {
 			return rowState.values?.at(row)
@@ -390,8 +397,8 @@ extension TableView.Preparer {
 		}
 
 		open func tableView(_ tableView: NSTableView, didAdd: NSTableRowView, forRow: Int) {
-			Exec.mainAsync.invoke {
-				if let vrsi = self.visibleRowsSignalInput {
+			DispatchQueue.main.async {
+				if let vrsi = self.visibleRowsChanged?.input {
 					let previousMin = self.visibleRows.min() ?? 0
 					let previousMax = self.visibleRows.max() ?? previousMin
 					self.visibleRows.insert(forRow)
@@ -405,8 +412,8 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: NSTableView, didRemove: NSTableRowView, forRow: Int) {
-			Exec.mainAsync.invoke {
-				if let vrsi = self.visibleRowsSignalInput {
+			DispatchQueue.main.async {
+				if let vrsi = self.visibleRowsChanged?.input {
 					let previousMin = self.visibleRows.min() ?? 0
 					let previousMax = self.visibleRows.max() ?? previousMin
 					self.visibleRows.remove(forRow)
@@ -515,102 +522,102 @@ extension TableView.Preparer {
 		}
 		
 		open func tableView(_ tableView: NSTableView, didDrag tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
+			multiHandler(tableView, tableColumn)
 		}
 
 		open func tableView(_ tableView: NSTableView, didClick tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
+			multiHandler(tableView, tableColumn)
 		}
 
 		open func tableView(_ tableView: NSTableView, mouseDownInHeaderOf tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
+			multiHandler(tableView, tableColumn)
 		}
 
 		open func tableView(_ tableView: NSTableView, rowViewForRow rowIndex: Int) -> NSTableRowView? {
-			return handler(ofType: ((Int, RowData?) -> TableRowViewConvertible?).self)!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))?.nsTableRowView()
+			return (singleHandler(rowIndex, storage(for: tableView)?.rowData(at: rowIndex)) as TableRowViewConvertible?)?.nsTableRowView()
 		}
 
 		open func tableView(_ tableView: NSTableView, shouldReorderColumn columnIndex: Int, toColumn newColumnIndex: Int) -> Bool {
 			if let column = tableView.tableColumns.at(columnIndex) {
-				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier, Int) -> Bool).self)!(tableView, column.identifier, newColumnIndex)
+				return singleHandler(tableView, column.identifier, newColumnIndex)
 			}
 			return false
 		}
 
 		open func tableView(_ tableView: NSTableView, sizeToFitWidthOfColumn column: Int) -> CGFloat {
 			if let column = tableView.tableColumns.at(column) {
-				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier) -> CGFloat).self)!(tableView, column.identifier)
+				return singleHandler(tableView, column.identifier)
 			}
 			return 0
 		}
 
 		open func tableView(_ tableView: NSTableView, shouldTypeSelectFor event: NSEvent, withCurrentSearch searchString: String?) -> Bool {
-			return handler(ofType: ((NSTableView, NSEvent, String?) -> Bool).self)!(tableView, event, searchString)
+			return singleHandler(tableView, event, searchString)
 		}
 
 		open func tableView(_ tableView: NSTableView, typeSelectStringFor tableColumn: NSTableColumn?, row: Int) -> String? {
 			guard let tc = tableColumn, row >= 0 else { return nil }
-			return handler(ofType: ((TableCell<RowData>) -> String?).self)!(TableCell(row: row, column: tc, tableView: tableView))
+			return singleHandler(TableCell<RowData>(row: row, column: tc, tableView: tableView))
 		}
 
 		open func tableView(_ tableView: NSTableView, nextTypeSelectMatchFromRow startRow: Int, toRow endRow: Int, for searchString: String) -> Int {
-			return handler(ofType: ((NSTableView, Int, Int, String) -> Int).self)!(tableView, startRow, endRow, searchString)
+			return singleHandler(tableView, startRow, endRow, searchString)
 		}
 
 		open func tableView(_ tableView: NSTableView, heightOfRow rowIndex: Int) -> CGFloat {
-			return handler(ofType: ((Int, RowData?) -> CGFloat).self)!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return singleHandler(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
 		open func tableView(_ tableView: NSTableView, shouldSelect tableColumn: NSTableColumn?) -> Bool {
-			return handler(ofType: ((NSTableView, NSTableColumn?) -> Bool).self)!(tableView, tableColumn)
+			return singleHandler(tableView, tableColumn)
 		}
 
 		open func tableView(_ tableView: NSTableView, selectionIndexesForProposedSelection proposedSelectionIndexes: IndexSet) -> IndexSet {
-			return handler(ofType: ((NSTableView, IndexSet) -> IndexSet).self)!(tableView, proposedSelectionIndexes)
+			return singleHandler(tableView, proposedSelectionIndexes)
 		}
 
 		open func tableView(_ tableView: NSTableView, shouldSelectRow rowIndex: Int) -> Bool {
-			return handler(ofType: ((Int, RowData?) -> Bool).self)!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return singleHandler(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
 		open func selectionShouldChange(in tableView: NSTableView) -> Bool {
-			return handler(ofType: ((NSTableView) -> Bool).self)!(tableView)
+			return singleHandler(tableView)
 		}
 
 		open func tableView(_ tableView: NSTableView, isGroupRow rowIndex: Int) -> Bool {
-			return handler(ofType: ((Int, RowData?) -> Bool).self)!(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return singleHandler(rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
 		open func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
-			handler(ofType: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>.self)!.send(value: (new: tableView.sortDescriptors, old: oldDescriptors))
+			multiHandler(tableView, oldDescriptors)
 		}
 
 		open func tableView(_ tableView: NSTableView, pasteboardWriterForRow rowIndex: Int) -> NSPasteboardWriting? {
-			return handler(ofType: ((NSTableView, Int, RowData?) -> NSPasteboardWriting?).self)!(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return singleHandler(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
 		open func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row rowIndex: Int, dropOperation: NSTableView.DropOperation) -> Bool {
-			return handler(ofType: ((NSTableView, Int, RowData?) -> Bool).self)!(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
+			return singleHandler(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
 
 		open func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int, proposedDropOperation dropOperation: NSTableView.DropOperation) -> NSDragOperation {
-			return handler(ofType: ((NSTableView, NSDraggingInfo, Int, NSTableView.DropOperation) -> NSDragOperation).self)!(tableView, info, row, dropOperation)
+			return singleHandler(tableView, info, row, dropOperation)
 		}
 
 		open func tableView(_ tableView: NSTableView, draggingSession session: NSDraggingSession, willBeginAt screenPoint: NSPoint, forRowIndexes rowIndexes: IndexSet) {
-			return handler(ofType: ((NSTableView, NSDraggingSession, NSPoint, IndexSet) -> Void).self)!(tableView, session, screenPoint, rowIndexes)
+			return singleHandler(tableView, session, screenPoint, rowIndexes)
 		}
 
 		open func tableView(_ tableView: NSTableView, updateDraggingItemsForDrag draggingInfo: NSDraggingInfo) {
-			return handler(ofType: ((NSTableView, NSDraggingInfo) -> Void).self)!(tableView, draggingInfo)
+			return singleHandler(tableView, draggingInfo)
 		}
 
 		open func tableView(_ tableView: NSTableView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-			return handler(ofType: ((NSTableView, NSDraggingSession, NSPoint, NSDragOperation) -> Void).self)!(tableView, session, screenPoint, operation)
+			return singleHandler(tableView, session, screenPoint, operation)
 		}
 
 		open func tableView(_ tableView: NSTableView, rowActionsForRow row: Int, edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction] {
-			return handler(ofType: ((NSTableView, Int, NSTableView.RowActionEdge) -> [NSTableViewRowAction]).self)!(tableView, row, edge)
+			return singleHandler(tableView, row, edge)
 		}
 	}
 }
@@ -677,21 +684,20 @@ public extension BindingName where Binding: TableViewBinding {
 	// 3. Action bindings are triggered by the object after construction.
 	static var columnMoved: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }
 	static var columnResized: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(B.columnResized) }
-	static var didClickTableColumn: TableViewName<SignalInput<NSUserInterfaceItemIdentifier>> { return .name(B.didClickTableColumn) }
-	static var didDragTableColumn: TableViewName<SignalInput<NSUserInterfaceItemIdentifier>> { return .name(B.didDragTableColumn) }
 	static var doubleAction: TableViewName<TargetAction> { return .name(B.doubleAction) }
-	static var mouseDownInHeaderOfTableColumn: TableViewName<SignalInput<NSUserInterfaceItemIdentifier>> { return .name(B.mouseDownInHeaderOfTableColumn) }
 	static var selectionChanged: TableViewName<SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedRows: IndexSet)>> { return .name(B.selectionChanged) }
-	static var sortDescriptorsDidChange: TableViewName<SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>> { return .name(B.sortDescriptorsDidChange) }
 	static var visibleRowsChanged: TableViewName<SignalInput<CountableRange<Int>>> { return .name(B.visibleRowsChanged) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var acceptDrop: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> Bool> { return .name(B.acceptDrop) }
+	static var didClickTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(B.didClickTableColumn) }
+	static var didDragTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(B.didDragTableColumn) }
 	static var draggingSessionEnded: TableViewName<(_ tableView: NSTableView, _ session: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void> { return .name(B.draggingSessionEnded) }
 	static var draggingSessionWillBegin: TableViewName<(_ tableView: NSTableView, _ session: NSDraggingSession, _ willBeginAt: NSPoint, _ forRowIndexes: IndexSet) -> Void> { return .name(B.draggingSessionWillBegin) }
 	static var groupRowCellConstructor: TableViewName<(Int) -> TableCellViewConvertible> { return .name(B.groupRowCellConstructor) }
 	static var heightOfRow: TableViewName<(_ row: Int, _ rowData: Binding.RowDataType?) -> CGFloat> { return .name(B.heightOfRow) }
 	static var isGroupRow: TableViewName<(_ row: Int, _ rowData: Binding.RowDataType?) -> Bool> { return .name(B.isGroupRow) }
+	static var mouseDownInHeaderOfTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(B.mouseDownInHeaderOfTableColumn) }
 	static var nextTypeSelectMatch: TableViewName<(_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int> { return .name(B.nextTypeSelectMatch) }
 	static var pasteboardWriter: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> NSPasteboardWriting> { return .name(B.pasteboardWriter) }
 	static var rowActionsForRow: TableViewName<(_ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(B.rowActionsForRow) }
@@ -703,6 +709,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var shouldSelectTableColumn: TableViewName<(_ tableView: NSTableView, _ column: NSTableColumn?) -> Bool> { return .name(B.shouldSelectTableColumn) }
 	static var shouldTypeSelectForEvent: TableViewName<(_ tableView: NSTableView, _ event: NSEvent, _ searchString: String?) -> Bool> { return .name(B.shouldTypeSelectForEvent) }
 	static var sizeToFitWidthOfColumn: TableViewName<(_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier) -> CGFloat> { return .name(B.sizeToFitWidthOfColumn) }
+	static var sortDescriptorsDidChange: TableViewName<(NSTableView, [NSSortDescriptor]) -> Void> { return .name(B.sortDescriptorsDidChange) }
 	static var typeSelectString: TableViewName<(TableCell<Binding.RowDataType>) -> String?> { return .name(B.typeSelectString) }
 	static var updateDraggingItems: TableViewName<(_ tableView: NSTableView, _ forDrag: NSDraggingInfo) -> Void> { return .name(B.updateDraggingItems) }
 	static var validateDrop: TableViewName<(_ tableView: NSTableView, _ info: NSDraggingInfo, _ proposedRow: Int, _ proposedDropOperation: NSTableView.DropOperation) -> NSDragOperation> { return .name(B.validateDrop) }

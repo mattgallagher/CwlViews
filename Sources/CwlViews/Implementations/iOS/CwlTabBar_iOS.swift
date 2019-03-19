@@ -54,14 +54,14 @@ public extension TabBar {
 		case selectItem(Signal<ItemIdentifier>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		case didBeginCustomizing(SignalInput<[ItemIdentifier]>)
-		case didEndCustomizing(SignalInput<([ItemIdentifier], Bool)>)
-		case didSelectItem(SignalInput<ItemIdentifier>)
-		case willBeginCustomizing(SignalInput<[ItemIdentifier]>)
-		case willEndCustomizing(SignalInput<([ItemIdentifier], Bool)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case didBeginCustomizing((UITabBar, [UITabBarItem], [ItemIdentifier]) -> Void)
+		case didEndCustomizing((UITabBar, [UITabBarItem], [ItemIdentifier], Bool) -> Void)
+		case didSelectItem((UITabBar, UITabBarItem, ItemIdentifier) -> Void)
 		case itemConstructor((ItemIdentifier) -> TabBarItemConvertible)
+		case willBeginCustomizing((UITabBar, [UITabBarItem], [ItemIdentifier]) -> Void)
+		case willEndCustomizing((UITabBar, [UITabBarItem], [ItemIdentifier], Bool) -> Void)
 	}
 }
 
@@ -95,12 +95,12 @@ public extension TabBar.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 
-		case .didBeginCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:didBeginCustomizing:)))
-		case .didEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:didEndCustomizing:changed:)))
-		case .didSelectItem(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:didSelect:)))
+		case .didBeginCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:didBeginCustomizing:)))
+		case .didEndCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:didEndCustomizing:changed:)))
+		case .didSelectItem(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:didSelect:)))
 		case .itemConstructor(let x): tabBarItemConstructor = x
-		case .willBeginCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:willBeginCustomizing:)))
-		case .willEndCustomizing(let x): delegate().addHandler(x, #selector(UITabBarDelegate.tabBar(_:willEndCustomizing:changed:)))
+		case .willBeginCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:willBeginCustomizing:)))
+		case .willEndCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:willEndCustomizing:changed:)))
 		default: break
 		}
 	}
@@ -190,31 +190,31 @@ extension TabBar.Preparer {
 	open class Delegate: DynamicDelegate, UITabBarDelegate {
 		open func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
 			guard let identifier = (tabBar.delegate as? Storage)?.identifier(for: item) else { return }
-			handler(ofType: SignalInput<ItemIdentifier>.self)!.send(value: identifier)
+			multiHandler(tabBar, item, identifier)
 		}
 
 		open func tabBar(_ tabBar: UITabBar, willBeginCustomizing items: [UITabBarItem]) {
 			guard let storage = tabBar.delegate as? Storage else { return }
 			let identifiers = items.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<[ItemIdentifier]>.self)!.send(value: identifiers)
+			multiHandler(tabBar, items, identifiers)
 		}
 
 		open func tabBar(_ tabBar: UITabBar, didBeginCustomizing items: [UITabBarItem]) {
 			guard let storage = tabBar.delegate as? Storage else { return }
 			let identifiers = items.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<[ItemIdentifier]>.self)!.send(value: identifiers)
+			multiHandler(tabBar, items, identifiers)
 		}
 
 		open func tabBar(_ tabBar: UITabBar, willEndCustomizing items: [UITabBarItem], changed: Bool) {
 			guard let storage = tabBar.delegate as? Storage else { return }
 			let identifiers = items.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<([ItemIdentifier], Bool)>.self)!.send(value: (identifiers, changed))
+			multiHandler(tabBar, items, identifiers, changed)
 		}
 
 		open func tabBar(_ tabBar: UITabBar, didEndCustomizing items: [UITabBarItem], changed: Bool) {
 			guard let storage = tabBar.delegate as? Storage else { return }
 			let identifiers = items.compactMap { storage.identifier(for: $0) }
-			handler(ofType: SignalInput<([ItemIdentifier], Bool)>.self)!.send(value: (identifiers, changed))
+			multiHandler(tabBar, items, identifiers, changed)
 		}
 	}
 }
@@ -253,14 +253,14 @@ public extension BindingName where Binding: TabBarBinding {
 	static var selectItem: TabBarName<Signal<Binding.ItemIdentifierType>> { return .name(B.selectItem) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didBeginCustomizing: TabBarName<SignalInput<[Binding.ItemIdentifierType]>> { return .name(B.didBeginCustomizing) }
-	static var didEndCustomizing: TabBarName<SignalInput<([Binding.ItemIdentifierType], Bool)>> { return .name(B.didEndCustomizing) }
-	static var didSelectItem: TabBarName<SignalInput<Binding.ItemIdentifierType>> { return .name(B.didSelectItem) }
-	static var willBeginCustomizing: TabBarName<SignalInput<[Binding.ItemIdentifierType]>> { return .name(B.willBeginCustomizing) }
-	static var willEndCustomizing: TabBarName<SignalInput<([Binding.ItemIdentifierType], Bool)>> { return .name(B.willEndCustomizing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didBeginCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType]) -> Void> { return .name(B.didBeginCustomizing) }
+	static var didEndCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.didEndCustomizing) }
+	static var didSelectItem: TabBarName<(UITabBar, UITabBarItem, Binding.ItemIdentifierType) -> Void> { return .name(B.didSelectItem) }
 	static var itemConstructor: TabBarName<(Binding.ItemIdentifierType) -> TabBarItemConvertible> { return .name(B.itemConstructor) }
+	static var willBeginCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType]) -> Void> { return .name(B.willBeginCustomizing) }
+	static var willEndCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.willEndCustomizing) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

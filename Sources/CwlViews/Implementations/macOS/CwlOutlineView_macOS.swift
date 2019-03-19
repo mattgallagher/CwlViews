@@ -103,13 +103,9 @@ public extension OutlineView {
 		// 3. Action bindings are triggered by the object after construction.
 		case columnMoved(SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>)
 		case columnResized(SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>)
-		case didClickTableColumn(SignalInput<NSUserInterfaceItemIdentifier>)
-		case didDragTableColumn(SignalInput<NSUserInterfaceItemIdentifier>)
 		case doubleAction(TargetAction)
-		case mouseDownInHeaderOfTableColumn(SignalInput<NSUserInterfaceItemIdentifier>)
 		case selectionChanged(SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedIndexPaths: Set<IndexPath>)>)
 		case selectionIsChanging(SignalInput<Void>)
-		case sortDescriptorsDidChange(SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>)
 		case indexPathDidCollapse(SignalInput<IndexPath>)
 		case indexPathDidExpand(SignalInput<IndexPath>)
 		case indexPathWillCollapse(SignalInput<IndexPath>)
@@ -118,23 +114,27 @@ public extension OutlineView {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case acceptDrop((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ indexPath: IndexPath?, _ childIndex: Int) -> Bool)
+		case didClickTableColumn((NSOutlineView, NSTableColumn) -> Void)
+		case didDragTableColumn((NSOutlineView, NSTableColumn) -> Void)
 		case draggingSessionEnded((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void)
 		case draggingSessionWillBegin((_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void)
 		case groupRowCellConstructor((Int) -> TableCellViewConvertible)
 		case heightOfRow((_ indexPath: IndexPath) -> CGFloat)
 		case isIndexPathExpandable((IndexPath) -> Bool)
+		case mouseDownInHeaderOfTableColumn((NSOutlineView, NSTableColumn) -> Void)
 		case nextTypeSelectMatch((_ outlineView: NSOutlineView, _ from: IndexPath, _ to: IndexPath, _ for: String) -> IndexPath?)
 		case pasteboardWriter((_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?)
-		case rowView((_ indexPath: IndexPath) -> TableRowViewConvertible?)
+		case rowView((_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> TableRowViewConvertible?)
 		case selectionIndexesForProposedSelection((_ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>)
 		case selectionShouldChange((_ outlineView: NSOutlineView) -> Bool)
 		case shouldCollapse((_ indexPath: IndexPath) -> Bool)
 		case shouldExpand((_ indexPath: IndexPath) -> Bool)
 		case shouldReorderColumn((_ outlineView: NSOutlineView, _ column: NSTableColumn, _ newIndex: Int) -> Bool)
-		case shouldSelectTableColumn((_ outlineView: NSOutlineView, _ column: NSTableColumn?) -> Bool)
 		case shouldSelectIndexPath((_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool)
+		case shouldSelectTableColumn((_ outlineView: NSOutlineView, _ column: NSTableColumn?) -> Bool)
 		case shouldTypeSelectForEvent((_ outlineView: NSOutlineView, _ event: NSEvent, _ searchString: String?) -> Bool)
 		case sizeToFitWidthOfColumn((_ outlineView: NSOutlineView, _ column: NSTableColumn) -> CGFloat)
+		case sortDescriptorsDidChange((NSOutlineView, [NSSortDescriptor]) -> Void)
 		case typeSelectString((_ outlineView: NSOutlineView, _ column: NSTableColumn?, _ indexPath: IndexPath) -> String?)
 		case updateDraggingItems((_ outlineView: NSOutlineView, _ forDrag: NSDraggingInfo) -> Void)
 		case validateDrop((_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedIndexPath: IndexPath?, _ proposedChildIndex: Int) -> NSDragOperation)
@@ -154,7 +154,7 @@ public extension OutlineView {
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func constructStorage(instance: Instance) -> Storage { return Storage(visibleIndexPathsChanged: visibleIndexPathsChanged) }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -162,6 +162,7 @@ public extension OutlineView {
 		var singleAction: TargetAction?
 		var doubleAction: TargetAction?
 		var outlineColumn: NSUserInterfaceItemIdentifier? = nil
+		var visibleIndexPathsChanged: MultiOutput<Set<IndexPath>>?
 	}
 }
 
@@ -174,29 +175,32 @@ public extension OutlineView.Preparer {
 		case .inheritedBinding(.action(let x)): singleAction = x
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .acceptDrop(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:acceptDrop:item:childIndex:)))
-		case .didClickTableColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:didClick:)))
-		case .didDragTableColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:didDrag:)))
+		case .acceptDrop(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:acceptDrop:item:childIndex:)))
+		case .didClickTableColumn(let x): delegate().addMultiHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:didClick:)))
+		case .didDragTableColumn(let x): delegate().addMultiHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:didDrag:)))
 		case .doubleAction(let x): doubleAction = x
-		case .draggingSessionEnded(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:draggingSession:endedAt:operation:)))
-		case .heightOfRow(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:heightOfRowByItem:)))
-		case .mouseDownInHeaderOfTableColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:mouseDownInHeaderOf:)))
-		case .nextTypeSelectMatch(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:nextTypeSelectMatchFromItem:toItem:for:)))
-		case .pasteboardWriter(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:pasteboardWriterForItem:)))
-		case .rowView(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:rowViewForItem:)))
-		case .selectionIndexesForProposedSelection(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:selectionIndexesForProposedSelection:)))
-		case .selectionShouldChange(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.selectionShouldChange(in:)))
-		case .shouldCollapse(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldCollapseItem:)))
-		case .shouldExpand(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldExpandItem:)))
-		case .shouldReorderColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldReorderColumn:toColumn:)))
-		case .shouldSelectTableColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldSelect:)))
-		case .shouldSelectIndexPath(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldSelectItem:)))
-		case .shouldTypeSelectForEvent(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldTypeSelectFor:withCurrentSearch:)))
-		case .sizeToFitWidthOfColumn(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:sizeToFitWidthOfColumn:)))
-		case .sortDescriptorsDidChange(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:sortDescriptorsDidChange:)))
-		case .typeSelectString(let x): delegate().addHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:typeSelectStringFor:item:)))
-		case .updateDraggingItems(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:updateDraggingItemsForDrag:)))
-		case .validateDrop(let x): delegate().addHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:validateDrop:proposedItem:proposedChildIndex:)))
+		case .draggingSessionEnded(let x): delegate().addMultiHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:draggingSession:endedAt:operation:)))
+		case .heightOfRow(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:heightOfRowByItem:)))
+		case .mouseDownInHeaderOfTableColumn(let x): delegate().addMultiHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:mouseDownInHeaderOf:)))
+		case .nextTypeSelectMatch(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:nextTypeSelectMatchFromItem:toItem:for:)))
+		case .pasteboardWriter(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:pasteboardWriterForItem:)))
+		case .rowView(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:rowViewForItem:)))
+		case .selectionIndexesForProposedSelection(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:selectionIndexesForProposedSelection:)))
+		case .selectionShouldChange(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.selectionShouldChange(in:)))
+		case .shouldCollapse(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldCollapseItem:)))
+		case .shouldExpand(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldExpandItem:)))
+		case .shouldReorderColumn(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldReorderColumn:toColumn:)))
+		case .shouldSelectTableColumn(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldSelect:)))
+		case .shouldSelectIndexPath(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldSelectItem:)))
+		case .shouldTypeSelectForEvent(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:shouldTypeSelectFor:withCurrentSearch:)))
+		case .sizeToFitWidthOfColumn(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:sizeToFitWidthOfColumn:)))
+		case .sortDescriptorsDidChange(let x): delegate().addMultiHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:sortDescriptorsDidChange:)))
+		case .typeSelectString(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDelegate.outlineView(_:typeSelectStringFor:item:)))
+		case .updateDraggingItems(let x): delegate().addMultiHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:updateDraggingItemsForDrag:)))
+		case .validateDrop(let x): delegate().addSingleHandler(x, #selector(NSOutlineViewDataSource.outlineView(_:validateDrop:proposedItem:proposedChildIndex:)))
+		case .visibleIndexPathsChanged(let x):
+			visibleIndexPathsChanged = visibleIndexPathsChanged ?? Input().multicast()
+			visibleIndexPathsChanged?.signal.bind(to: x)
 		default: break
 		}
 	}
@@ -396,9 +400,7 @@ public extension OutlineView.Preparer {
 				guard let b = storage, let i = instance else { return nil }
 				return notification.userInfo?["NSObject"].flatMap { b.indexPath(forItem: $0, in: i) }
 				}.cancellableBind(to: x)
-		case .visibleIndexPathsChanged(let x):
-			storage.visibleIndexPathsSignalInput = x
-			return nil
+		case .visibleIndexPathsChanged: return nil
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .acceptDrop: return nil
@@ -459,15 +461,20 @@ public extension OutlineView.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension OutlineView.Preparer {
 	open class Storage: View.Preparer.Storage, NSOutlineViewDelegate, NSOutlineViewDataSource {
-		open override var isInUse: Bool { return true }
+		public let visibleIndexPathsChanged: MultiOutput<Set<IndexPath>>?
 		
 		open var actionTarget: SignalDoubleActionTarget? = nil
 		open var treeState = TreeSubrangeState<NodeData>(parent: nil)
 		open var visibleIndexPaths: Set<IndexPath> = []
-		open var visibleIndexPathsSignalInput: SignalInput<Set<IndexPath>>? = nil
 		open var groupRowCellConstructor: ((Int) -> TableCellViewConvertible)?
 		open var columns: [TableColumn<NodeData>.Preparer.Storage] = []
 		open var outlineColumnIdentifier: NSUserInterfaceItemIdentifier? = nil
+		
+		public init(visibleIndexPathsChanged: MultiOutput<Set<IndexPath>>?) {
+			self.visibleIndexPathsChanged = visibleIndexPathsChanged
+		}
+
+		open override var isInUse: Bool { return true }
 		
 		open func columnForIdentifier(_ identifier: NSUserInterfaceItemIdentifier) -> (offset: Int, element: TableColumn<NodeData>.Preparer.Storage)? {
 			return columns.enumerated().first { (tuple: (offset: Int, element: TableColumn<NodeData>.Preparer.Storage)) -> Bool in
@@ -488,17 +495,21 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didAdd: NSTableRowView, forRow: Int) {
-			if let vrsi = visibleIndexPathsSignalInput, let path = indexPath(forRow: forRow, in: outlineView) {
-				if visibleIndexPaths.insert(path).inserted {
-					vrsi.send(value: visibleIndexPaths)
+			DispatchQueue.main.async {
+				if let vrsi = self.visibleIndexPathsChanged?.input, let path = self.indexPath(forRow: forRow, in: outlineView) {
+					if self.visibleIndexPaths.insert(path).inserted {
+						vrsi.send(value: self.visibleIndexPaths)
+					}
 				}
 			}
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didRemove: NSTableRowView, forRow: Int) {
-			if let vrsi = visibleIndexPathsSignalInput, let path = indexPath(forRow: forRow, in: outlineView) {
-				if visibleIndexPaths.insert(path).inserted {
-					vrsi.send(value: visibleIndexPaths)
+			DispatchQueue.main.async {
+				if let vrsi = self.visibleIndexPathsChanged?.input, let path = self.indexPath(forRow: forRow, in: outlineView) {
+					if self.visibleIndexPaths.insert(path).inserted {
+						vrsi.send(value: self.visibleIndexPaths)
+					}
 				}
 			}
 		}
@@ -644,59 +655,59 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didDrag tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
+			multiHandler(outlineView, tableColumn)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, didClick tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
+			multiHandler(outlineView, tableColumn)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, mouseDownInHeaderOf tableColumn: NSTableColumn) {
-			handler(ofType: SignalInput<NSUserInterfaceItemIdentifier>.self)!.send(value: tableColumn.identifier)
+			multiHandler(outlineView, tableColumn)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((IndexPath) -> TableRowViewConvertible?).self)!(indexPath)?.nsTableRowView()
+				return (singleHandler(outlineView, indexPath) as NSTableRowView?)?.nsTableRowView()
 			}
 			return nil
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((IndexPath) -> CGFloat).self)!(indexPath)
+				return singleHandler(indexPath)
 			}
 			return outlineView.rowHeight
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldReorderColumn columnIndex: Int, toColumn newColumnIndex: Int) -> Bool {
 			if let column = outlineView.tableColumns.at(columnIndex) {
-				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier, Int) -> Bool).self)!(outlineView, column.identifier, newColumnIndex)
+				return singleHandler(outlineView, column.identifier, newColumnIndex)
 			}
 			return false
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, sizeToFitWidthOfColumn column: Int) -> CGFloat {
 			if let column = outlineView.tableColumns.at(column) {
-				return handler(ofType: ((NSTableView, NSUserInterfaceItemIdentifier) -> CGFloat).self)!(outlineView, column.identifier)
+				return singleHandler(outlineView, column.identifier)
 			}
 			return 0
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldTypeSelectFor event: NSEvent, withCurrentSearch searchString: String?) -> Bool {
-			return handler(ofType: ((NSOutlineView, NSEvent, String?) -> Bool).self)!(outlineView, event, searchString)
+			return singleHandler(outlineView, event, searchString)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, typeSelectStringFor tableColumn: NSTableColumn?, item: Any) -> String? {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((NSOutlineView, NSTableColumn?, IndexPath) -> String?).self)!(outlineView, tableColumn, indexPath)
+				return singleHandler(outlineView, tableColumn, indexPath)
 			}
 			return nil
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, nextTypeSelectMatchFromItem startItem: Any, toItem endItem: Any, for searchString: String) -> Any? {
 			if let startIndexPath = storage(for: outlineView)?.indexPath(forItem: startItem, in: outlineView), let endIndexPath = storage(for: outlineView)?.indexPath(forItem: endItem, in: outlineView) {
-				if let indexPath = handler(ofType: ((NSOutlineView, IndexPath, IndexPath, String) -> IndexPath?).self)!(outlineView, startIndexPath, endIndexPath, searchString) {
+				if let indexPath = singleHandler(outlineView, startIndexPath, endIndexPath, searchString) as IndexPath? {
 					return storage(for: outlineView)?.item(forIndexPath: indexPath, in: outlineView)
 				}
 			}
@@ -704,7 +715,7 @@ extension OutlineView.Preparer {
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldSelect tableColumn: NSTableColumn?) -> Bool {
-			return handler(ofType: ((NSOutlineView, NSTableColumn?) -> Bool).self)!(outlineView, tableColumn)
+			return singleHandler(outlineView, tableColumn)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, selectionIndexesForProposedSelection proposedSelectionIndexes: IndexSet) -> IndexSet {
@@ -714,7 +725,7 @@ extension OutlineView.Preparer {
 					indexPaths.insert(path)
 				}
 			}
-			let indexPathResult = handler(ofType: ((Set<IndexPath>) -> Set<IndexPath>).self)!(indexPaths)
+			let indexPathResult = singleHandler(indexPaths) as [IndexPath]
 			var result = IndexSet()
 			for indexPath in indexPathResult {
 				if let index = storage(for: outlineView)?.row(forIndexPath: indexPath, in: outlineView) {
@@ -726,25 +737,25 @@ extension OutlineView.Preparer {
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldSelectItem item: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((NSOutlineView, IndexPath) -> Bool).self)!(outlineView, indexPath)
+				return singleHandler(outlineView, indexPath)
 			}
 			return false
 		}
 		
 		open func selectionShouldChange(in outlineView: NSOutlineView) -> Bool {
-			return handler(ofType: ((NSOutlineView) -> Bool).self)!(outlineView)
+			return singleHandler(outlineView)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldExpandItem item: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((IndexPath) -> Bool).self)!(indexPath)
+				return singleHandler(indexPath)
 			}
 			return false
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, shouldCollapseItem item: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((IndexPath) -> Bool).self)!(indexPath)
+				return singleHandler(indexPath)
 			}
 			return false
 		}
@@ -752,54 +763,54 @@ extension OutlineView.Preparer {
 		open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
 			if let i = item {
 				if let indexPath = storage(for: outlineView)?.indexPath(forItem: i, in: outlineView) {
-					return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> Bool).self)!(outlineView, info, indexPath, index)
+					return singleHandler(outlineView, info, indexPath, index)
 				} else {
 					return false
 				}
 			}
-			return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> Bool).self)!(outlineView, info, nil, index)
+			return singleHandler(outlineView, info, nil as IndexPath?, index)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
-			handler(ofType: SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>.self)!.send(value: (new: outlineView.sortDescriptors, old: oldDescriptors))
+			multiHandler(outlineView, oldDescriptors)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-			return handler(ofType: ((NSOutlineView, NSDraggingSession, NSPoint, NSDragOperation) -> Void).self)!(outlineView, session, screenPoint, operation)
+			return singleHandler(outlineView, session, screenPoint, operation)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, draggingSession session: NSDraggingSession, willBeginAt screenPoint: NSPoint, forItems draggedItems: [Any]) {
 			let indexPaths = draggedItems.compactMap { storage(for: outlineView)?.indexPath(forItem: $0, in: outlineView) }
-			return handler(ofType: ((NSOutlineView, NSDraggingSession, NSPoint, [IndexPath]) -> Void).self)!(outlineView, session, screenPoint, indexPaths)
+			return singleHandler(outlineView, session, screenPoint, indexPaths)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, isItemExpandable: Any) -> Bool {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: isItemExpandable, in: outlineView) {
-				return handler(ofType: ((IndexPath) -> Bool).self)!(indexPath)
+				return singleHandler(indexPath)
 			}
 			return false
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> NSPasteboardWriting? {
 			if let indexPath = storage(for: outlineView)?.indexPath(forItem: item, in: outlineView) {
-				return handler(ofType: ((NSOutlineView, IndexPath) -> NSPasteboardWriting?).self)!(outlineView, indexPath)
+				return singleHandler(outlineView, indexPath)
 			}
 			return nil
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, updateDraggingItemsForDrag draggingInfo: NSDraggingInfo) {
-			handler(ofType: ((NSOutlineView, NSDraggingInfo) -> Void).self)!(outlineView, draggingInfo)
+			multiHandler(outlineView, draggingInfo)
 		}
 		
 		open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem item: Any?, proposedChildIndex index: Int) -> NSDragOperation {
 			if let i = item {
 				if let indexPath = storage(for: outlineView)?.indexPath(forItem: i, in: outlineView) {
-					return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> NSDragOperation).self)!(outlineView, info, indexPath, index)
+					return singleHandler(outlineView, info, indexPath, index)
 				} else {
 					return []
 				}
 			}
-			return handler(ofType: ((NSOutlineView, NSDraggingInfo, IndexPath?, Int) -> NSDragOperation).self)!(outlineView, info, nil, index)
+			return singleHandler(outlineView, info, nil as IndexPath?, index)
 		}
 	}
 }
@@ -910,13 +921,9 @@ public extension BindingName where Binding: OutlineViewBinding {
 	// 3. Action bindings are triggered by the object after construction.
 	static var columnMoved: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }
 	static var columnResized: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(B.columnResized) }
-	static var didClickTableColumn: OutlineViewName<SignalInput<NSUserInterfaceItemIdentifier>> { return .name(B.didClickTableColumn) }
-	static var didDragTableColumn: OutlineViewName<SignalInput<NSUserInterfaceItemIdentifier>> { return .name(B.didDragTableColumn) }
 	static var doubleAction: OutlineViewName<TargetAction> { return .name(B.doubleAction) }
-	static var mouseDownInHeaderOfTableColumn: OutlineViewName<SignalInput<NSUserInterfaceItemIdentifier>> { return .name(B.mouseDownInHeaderOfTableColumn) }
 	static var selectionChanged: OutlineViewName<SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedIndexPaths: Set<IndexPath>)>> { return .name(B.selectionChanged) }
 	static var selectionIsChanging: OutlineViewName<SignalInput<Void>> { return .name(B.selectionIsChanging) }
-	static var sortDescriptorsDidChange: OutlineViewName<SignalInput<(new: [NSSortDescriptor], old: [NSSortDescriptor])>> { return .name(B.sortDescriptorsDidChange) }
 	static var indexPathDidCollapse: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathDidCollapse) }
 	static var indexPathDidExpand: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathDidExpand) }
 	static var indexPathWillCollapse: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathWillCollapse) }
@@ -925,23 +932,27 @@ public extension BindingName where Binding: OutlineViewBinding {
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var acceptDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ indexPath: IndexPath?, _ childIndex: Int) -> Bool> { return .name(B.acceptDrop) }
+	static var didClickTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(B.didClickTableColumn) }
+	static var didDragTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(B.didDragTableColumn) }
 	static var draggingSessionEnded: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void> { return .name(B.draggingSessionEnded) }
 	static var draggingSessionWillBegin: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void> { return .name(B.draggingSessionWillBegin) }
 	static var groupRowCellConstructor: OutlineViewName<(Int) -> TableCellViewConvertible> { return .name(B.groupRowCellConstructor) }
 	static var heightOfRow: OutlineViewName<(_ indexPath: IndexPath) -> CGFloat> { return .name(B.heightOfRow) }
 	static var isIndexPathExpandable: OutlineViewName<(IndexPath) -> Bool> { return .name(B.isIndexPathExpandable) }
+	static var mouseDownInHeaderOfTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(B.mouseDownInHeaderOfTableColumn) }
 	static var nextTypeSelectMatch: OutlineViewName<(_ outlineView: NSOutlineView, _ from: IndexPath, _ to: IndexPath, _ for: String) -> IndexPath?> { return .name(B.nextTypeSelectMatch) }
 	static var pasteboardWriter: OutlineViewName<(_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?> { return .name(B.pasteboardWriter) }
-	static var rowView: OutlineViewName<(_ indexPath: IndexPath) -> TableRowViewConvertible?> { return .name(B.rowView) }
+	static var rowView: OutlineViewName<(_ outlineView: NSOutlineView,_ indexPath: IndexPath) -> TableRowViewConvertible?> { return .name(B.rowView) }
 	static var selectionIndexesForProposedSelection: OutlineViewName<(_ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>> { return .name(B.selectionIndexesForProposedSelection) }
 	static var selectionShouldChange: OutlineViewName<(_ outlineView: NSOutlineView) -> Bool> { return .name(B.selectionShouldChange) }
 	static var shouldCollapse: OutlineViewName<(_ indexPath: IndexPath) -> Bool> { return .name(B.shouldCollapse) }
 	static var shouldExpand: OutlineViewName<(_ indexPath: IndexPath) -> Bool> { return .name(B.shouldExpand) }
 	static var shouldReorderColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn, _ newIndex: Int) -> Bool> { return .name(B.shouldReorderColumn) }
-	static var shouldSelectTableColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?) -> Bool> { return .name(B.shouldSelectTableColumn) }
 	static var shouldSelectIndexPath: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(B.shouldSelectIndexPath) }
+	static var shouldSelectTableColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?) -> Bool> { return .name(B.shouldSelectTableColumn) }
 	static var shouldTypeSelectForEvent: OutlineViewName<(_ outlineView: NSOutlineView, _ event: NSEvent, _ searchString: String?) -> Bool> { return .name(B.shouldTypeSelectForEvent) }
 	static var sizeToFitWidthOfColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn) -> CGFloat> { return .name(B.sizeToFitWidthOfColumn) }
+	static var sortDescriptorsDidChange: OutlineViewName<(NSOutlineView, [NSSortDescriptor]) -> Void> { return .name(B.sortDescriptorsDidChange) }
 	static var typeSelectString: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?, _ indexPath: IndexPath) -> String?> { return .name(B.typeSelectString) }
 	static var updateDraggingItems: OutlineViewName<(_ outlineView: NSOutlineView, _ forDrag: NSDraggingInfo) -> Void> { return .name(B.updateDraggingItems) }
 	static var validateDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedIndexPath: IndexPath?, _ proposedChildIndex: Int) -> NSDragOperation> { return .name(B.validateDrop) }

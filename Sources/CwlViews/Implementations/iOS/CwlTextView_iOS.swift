@@ -57,12 +57,12 @@ public extension TextView {
 		case scrollRangeToVisible(Signal<NSRange>)
 		
 		//	3. Action bindings are triggered by the object after construction.
-		case didBeginEditing(SignalInput<UITextView>)
-		case didChangeSelection(SignalInput<UITextView>)
-		case didEndEditing(SignalInput<UITextView>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case didBeginEditing((UITextView) -> Void)
 		case didChange((UITextView) -> Void)
+		case didChangeSelection((UITextView) -> Void)
+		case didEndEditing((UITextView) -> Void)
 		case shouldBeginEditing((UITextView) -> Bool)
 		case shouldChangeText((UITextView, NSRange, String) -> Bool)
 		case shouldEndEditing((UITextView) -> Bool)
@@ -104,18 +104,18 @@ public extension TextView.Preparer {
 		// 2. Signal bindings are performed on the object after construction.
 			
 		//	3. Action bindings are triggered by the object after construction.
-		case .didBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
-		case .didChange(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
-		case .didChangeSelection(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
-		case .didEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
+		case .didBeginEditing(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
+		case .didChange(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
+		case .didChangeSelection(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
+		case .didEndEditing(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
 			
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
-		case .shouldChangeText(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
-		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
+		case .shouldChangeText(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
 		
-		case .shouldInteractWithAttachment(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
-		case .shouldInteractWithURL(let x): delegate().addHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithAttachment(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithURL(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
 		default: break
 		}
 	}
@@ -171,39 +171,39 @@ extension TextView.Preparer {
 	
 	open class Delegate: ScrollView.Preparer.Delegate, UITextViewDelegate {
 		open func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
-			return handler(ofType: ((UITextView) -> Bool).self)!(textView)
+			return singleHandler(textView)
 		}
 		
 		open func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
-			return handler(ofType: ((UITextView) -> Bool).self)!(textView)
+			return singleHandler(textView)
 		}
 		
 		open func textViewDidBeginEditing(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
+			multiHandler(textView)
 		}
 		
 		open func textViewDidEndEditing(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
+			multiHandler(textView)
 		}
 		
 		open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return handler(ofType: ((UITextView, NSRange, String) -> Bool).self)!(textView, range, text)
+			return singleHandler(textView, range, text)
 		}
 		
 		open func textView(_ textView: UITextView, shouldInteractWith textAttachment: NSTextAttachment, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-			return handler(ofType: ((UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool).self)!(textView, textAttachment, characterRange, interaction)
+			return singleHandler(textView, textAttachment, characterRange, interaction)
 		}
 		
 		open func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-			return handler(ofType: ((UITextView, URL, NSRange, UITextItemInteraction) -> Bool).self)!(textView, url, characterRange, interaction)
+			return singleHandler(textView, url, characterRange, interaction)
 		}
 		
 		open func textViewDidChange(_ textView: UITextView) {
-			handler(ofType: ((UITextView) -> Void).self)!(textView)
+			multiHandler(textView)
 		}
 		
 		open func textViewDidChangeSelection(_ textView: UITextView) {
-			handler(ofType: SignalInput<UITextView>.self)!.send(value: textView)
+			multiHandler(textView)
 		}
 	}
 }
@@ -246,12 +246,12 @@ public extension BindingName where Binding: TextViewBinding {
 	static var scrollRangeToVisible: TextViewName<Signal<NSRange>> { return .name(B.scrollRangeToVisible) }
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var didBeginEditing: TextViewName<SignalInput<UITextView>> { return .name(B.didBeginEditing) }
-	static var didChangeSelection: TextViewName<SignalInput<UITextView>> { return .name(B.didChangeSelection) }
-	static var didEndEditing: TextViewName<SignalInput<UITextView>> { return .name(B.didEndEditing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didBeginEditing: TextViewName<(UITextView) -> Void> { return .name(B.didBeginEditing) }
 	static var didChange: TextViewName<(UITextView) -> Void> { return .name(B.didChange) }
+	static var didChangeSelection: TextViewName<(UITextView) -> Void> { return .name(B.didChangeSelection) }
+	static var didEndEditing: TextViewName<(UITextView) -> Void> { return .name(B.didEndEditing) }
 	static var shouldBeginEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldBeginEditing) }
 	static var shouldChangeText: TextViewName<(UITextView, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
 	static var shouldEndEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldEndEditing) }

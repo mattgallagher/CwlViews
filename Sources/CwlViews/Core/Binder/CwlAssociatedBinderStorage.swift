@@ -83,7 +83,8 @@ open class AssociatedBinderStorage: NSObject {
 	/// - Parameter selector: Objective-C selector that may be implemented by the dynamicDelegate
 	/// - Returns: true if the dynamicDelegate implements the selector, otherwise returns the super implementation
 	open override func responds(to selector: Selector) -> Bool {
-		if let dd = dynamicDelegate, dd.implementedSelectors[selector] != nil {
+		if let dd = dynamicDelegate, let value = dd.implementedSelectors[selector] {
+			dd.associatedHandler = value
 			return true
 		}
 		return super.responds(to: selector)
@@ -99,25 +100,71 @@ open class DynamicDelegate: NSObject, DefaultConstructable {
 		super.init()
 	}
 	
-	open func handlesSelector(_ selector: Selector) -> Bool {
+	public func handlesSelector(_ selector: Selector) -> Bool {
 		return implementedSelectors[selector] != nil
 	}
 	
-	open func handler<Value>(ofType: Value.Type) -> Value? {
-		if let v = associatedHandler as? Value {
-			associatedHandler = nil
-			return v
-		}
-		return nil
+	public func multiHandler<T>(_ t: T) {
+		defer { associatedHandler = nil }
+		(associatedHandler as! [(T) -> Void]).forEach { f in f(t) }
 	}
 	
-	open func addHandler(_ value: Any, _ selector: Selector) {
+	public func multiHandler<T, U>(_ t: T, _ u: U) {
+		defer { associatedHandler = nil }
+		(associatedHandler as! [(T, U) -> Void]).forEach { f in f(t, u) }
+	}
+	
+	public func multiHandler<T, U, V>(_ t: T, _ u: U, _ v: V) {
+		defer { associatedHandler = nil }
+		(associatedHandler as! [(T, U, V) -> Void]).forEach { f in f(t, u, v) }
+	}
+	
+	public func multiHandler<T, U, V, W>(_ t: T, _ u: U, _ v: V, _ w: W) {
+		defer { associatedHandler = nil }
+		(associatedHandler as! [(T, U, V, W) -> Void]).forEach { f in f(t, u, v, w) }
+	}
+	
+	public func multiHandler<T, U, V, W, X>(_ t: T, _ u: U, _ v: V, _ w: W, _ x: X) {
+		defer { associatedHandler = nil }
+		(associatedHandler as! [(T, U, V, W, X) -> Void]).forEach { f in f(t, u, v, w, x) }
+	}
+	
+	public func singleHandler<T, R>(_ t: T) -> R {
+		defer { associatedHandler = nil }
+		return (associatedHandler as! ((T) -> R))(t)
+	}
+	
+	public func singleHandler<T, U, R>(_ t: T, _ u: U) -> R {
+		defer { associatedHandler = nil }
+		return (associatedHandler as! ((T, U) -> R))(t, u)
+	}
+	
+	public func singleHandler<T, U, V, R>(_ t: T, _ u: U, _ v: V) -> R {
+		defer { associatedHandler = nil }
+		return (associatedHandler as! ((T, U, V) -> R))(t, u, v)
+	}
+	
+	public func singleHandler<T, U, V, W, R>(_ t: T, _ u: U, _ v: V, _ w: W) -> R {
+		defer { associatedHandler = nil }
+		return (associatedHandler as! ((T, U, V, W) -> R))(t, u, v, w)
+	}
+	
+	public func singleHandler<T, U, V, W, X, R>(_ t: T, _ u: U, _ v: V, _ w: W, _ x: X) -> R {
+		defer { associatedHandler = nil }
+		return (associatedHandler as! ((T, U, V, W, X) -> R))(t, u, v, w, x)
+	}
+	
+	public func addSingleHandler(_ value: Any, _ selector: Selector) {
+		precondition(implementedSelectors[selector] == nil, "It is not possible to add multiple handlers to a delegate that returns a value.")
 		implementedSelectors[selector] = value
 	}
 	
-	open func ensureHandler(for selector: Selector) {
-		if !handlesSelector(selector) {
-			implementedSelectors[selector] = ()
+	public func addMultiHandler<T>(_ value: @escaping (T) -> Void, _ selector: Selector) {
+		if let existing = implementedSelectors[selector] {
+			var existingArray = existing as! [(T) -> Void]
+			existingArray.append(value)
+		} else {
+			implementedSelectors[selector] = [value] as [(T) -> Void]
 		}
 	}
 }

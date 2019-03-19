@@ -183,23 +183,20 @@ public extension Window {
 		var key: Dynamic<Bool>? = nil
 		var main: Dynamic<Bool>? = nil
 		var order: Dynamic<WindowOrder>? = nil
-		
-		static let defaultWindowSize = NSSize(width: 400, height: 400)
 	}
 }
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension Window.Preparer {
 	func constructInstance(type: NSWindow.Type, parameters: Void) -> NSWindow {
-		let width = contentWidth.initial ?? WindowSize(constant: Window.Preparer.defaultWindowSize.width)
-		let height = contentHeight.initial ?? WindowSize(constant: Window.Preparer.defaultWindowSize.height)
+		let width = contentWidth.initial ?? WindowSize(constant: WindowSize.fallbackWindowSize)
+		let height = contentHeight.initial ?? WindowSize(constant: WindowSize.fallbackWindowSize)
 		let screen = self.screen.initial ?? NSScreen.screens.first
 		let styleMask = self.styleMask.initial ?? [.titled, .resizable, .closable, .miniaturizable]
 		let backingType = self.backingType.initial ?? .buffered
 		
 		// Apply the ContentSize binding
-		var contentSize = width.applyWidthToContentSize(NSZeroSize, onScreen: screen, windowClass: type, styleMask: styleMask)
-		contentSize = height.applyHeightToContentSize(contentSize, onScreen: screen, windowClass: type, styleMask: styleMask)
+		let contentSize = WindowSize.contentSize(width: width, height: height, onScreen: screen, windowClass: type, styleMask: styleMask)
 		
 		var frameRect = type.frameRect(forContentRect: NSRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height), styleMask: styleMask)
 		frameRect.origin.y = screen.map { $0.visibleFrame.origin.y + $0.visibleFrame.size.height - frameRect.size.height } ?? 0
@@ -233,15 +230,15 @@ public extension Window.Preparer {
 		case .main(let x): main = x
 		case .order(let x): order = x
 		case .screen(let x): screen = x.initialSubsequent()
-		case .shouldClose(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
-		case .shouldPopUpDocumentPathMenu(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
-		case .shouldZoom(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
+		case .shouldClose(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
+		case .shouldPopUpDocumentPathMenu(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
+		case .shouldZoom(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
 		case .styleMask(let x): styleMask = x.initialSubsequent()
-		case .willResize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
-		case .willResizeForVersionBrowser(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
-		case .willUseFullScreenContentSize(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
-		case .willUseFullScreenPresentationOptions(let x): delegate().addHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
-		case .willUseStandardFrame(let x): delegate().addHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
+		case .willResize(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
+		case .willResizeForVersionBrowser(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
+		case .willUseFullScreenContentSize(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
+		case .willUseFullScreenPresentationOptions(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
+		case .willUseStandardFrame(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
 		default: break
 		}
 	}
@@ -271,11 +268,17 @@ public extension Window.Preparer {
 		case .collectionBehavior(let x): return x.apply(instance) { i, v in i.collectionBehavior = v }
 		case .colorSpace(let x): return x.apply(instance) { i, v in i.colorSpace = v }
 		case .contentAspectRatio(let x): return x.apply(instance) { i, v in i.contentAspectRatio = v }
-		case .contentHeight: return contentHeight.resume()?.apply(instance) { i, v in i.setContentSize(v.applyHeightToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
+		case .contentHeight: return contentHeight.resume()?.apply(instance) { i, v in
+			let widthSize = WindowSize(anchor: .screen, ratio: 0, constant: i.contentView!.frame.size.width)
+			i.setContentSize(WindowSize.contentSize(width: widthSize, height: v, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
+		}
 		case .contentMaxSize(let x): return x.apply(instance) { i, v in i.contentMaxSize = v }
 		case .contentMinSize(let x): return x.apply(instance) { i, v in i.contentMinSize = v }
 		case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
-		case .contentWidth: return contentWidth.resume()?.apply(instance) { i, v in i.setContentSize(v.applyWidthToContentSize(i.contentView!.frame.size, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask)) }
+		case .contentWidth: return contentWidth.resume()?.apply(instance) { i, v in
+			let heightSize = WindowSize(anchor: .screen, ratio: 0, constant: i.contentView!.frame.size.height)
+			i.setContentSize(WindowSize.contentSize(width: v, height: heightSize, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
+		}
 		case .depthLimit(let x): return x.apply(instance) { i, v in v.map { i.depthLimit = $0 } ?? i.setDynamicDepthLimit(true) }
 		case .displaysWhenScreenProfileChanges(let x): return x.apply(instance) { i, v in i.displaysWhenScreenProfileChanges = v }
 		case .frameAutosaveName: return nil
@@ -464,35 +467,35 @@ extension Window.Preparer {
 
 	open class Delegate: DynamicDelegate, NSWindowDelegate {
 		open func windowWillResize(_ window: NSWindow, to toSize: NSSize) -> NSSize {
-			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)!(window, toSize)
+			return singleHandler(window, toSize)
 		}
 		
 		open func windowWillUseStandardFrame(_ window: NSWindow, defaultFrame: NSRect) -> NSRect {
-			return handler(ofType: ((NSWindow, NSRect) -> NSRect).self)!(window, defaultFrame)
+			return singleHandler(window, defaultFrame)
 		}
 		
 		open func windowShouldZoom(_ window: NSWindow, toFrame: NSRect) -> Bool {
-			return handler(ofType: ((NSWindow, NSRect) -> Bool).self)!(window, toFrame)
+			return singleHandler(window, toFrame)
 		}
 		
 		open func window(_ window: NSWindow, willUseFullScreenContentSize param: NSSize) -> NSSize {
-			return handler(ofType: ((NSWindow, NSSize) -> NSSize).self)!(window, param)
+			return singleHandler(window, param)
 		}
 		
 		open func window(_ window: NSWindow, willUseFullScreenPresentationOptions param: NSApplication.PresentationOptions) -> NSApplication.PresentationOptions {
-			return handler(ofType: ((NSWindow, NSApplication.PresentationOptions) -> NSApplication.PresentationOptions).self)!(window, param)
+			return singleHandler(window, param)
 		}
 		
 		open func windowShouldClose(_ window: NSWindow) -> Bool {
-			return handler(ofType: ((NSWindow) -> Bool).self)!(window)
+			return singleHandler(window)
 		}
 		
 		open func window(_ window: NSWindow, shouldPopUpDocumentPathMenu param: NSMenu) -> Bool {
-			return handler(ofType: ((NSWindow, NSMenu) -> Bool).self)!(window, param)
+			return singleHandler(window, param)
 		}
 		
 		open func window(_ window: NSWindow, willResizeForVersionBrowserWithMaxPreferredSize: NSSize, maxAllowedSize: NSSize) -> NSSize {
-			return handler(ofType: ((NSWindow, NSSize, NSSize) -> NSSize).self)!(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
+			return singleHandler(window, willResizeForVersionBrowserWithMaxPreferredSize, maxAllowedSize)
 		}
 	}
 }
@@ -771,44 +774,49 @@ public struct WindowSize: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral
 		self.constant = constant
 	}
 	
-	public static func aspectRatio(ratio: CGFloat = 1, constant: CGFloat = 0) -> WindowSize {
+	public static func aspectRatio(_ ratio: CGFloat = 1, constant: CGFloat = 0) -> WindowSize {
 		return WindowSize(anchor: .aspect, ratio: ratio, constant: constant)
 	}
 	
 	public static func screenRatio(_ ratio: CGFloat = 0, constant: CGFloat = 0) -> WindowSize {
 		return WindowSize(anchor: .screen, ratio: ratio, constant: constant)
 	}
+
+	public static let fallbackWindowSize: CGFloat = 400
 	
-	public func applyWidthToContentSize<W: NSWindow>(_ contentSize: NSSize, onScreen: NSScreen?, windowClass: W.Type, styleMask: NSWindow.StyleMask) -> NSSize {
-		let resultSize: NSSize
-		switch self.anchor {
-		case .aspect:
-			resultSize = NSSize(width: ratio * contentSize.height + constant, height: contentSize.height)
-		case .screen:
-			if let s = onScreen {
-				let frame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
-				resultSize = NSSize(width: ratio * frame.width + constant, height: contentSize.height)
+	public static func contentSize<W: NSWindow>(width widthSize: WindowSize, height heightSize: WindowSize, onScreen: NSScreen?, windowClass: W.Type, styleMask: NSWindow.StyleMask) -> NSSize {
+		let width: CGFloat
+		let height: CGFloat
+		switch (widthSize.anchor, heightSize.anchor) {
+		case (.aspect, .aspect):
+			fatalError("You cannot define both window width and height as aspect ratios of the other.")
+		case (.aspect, .screen):
+			if heightSize.ratio != 0, let s = onScreen {
+				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
+				height = heightSize.ratio * screenFrame.height + heightSize.constant
 			} else {
-				resultSize = contentSize
+				height = heightSize.constant
+			}
+			width = widthSize.ratio * height + widthSize.constant
+		case (.screen, .aspect):
+			if widthSize.ratio != 0, let s = onScreen {
+				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
+				width = widthSize.ratio * screenFrame.height + widthSize.constant
+			} else {
+				width = widthSize.constant
+			}
+			height = heightSize.ratio * width + heightSize.constant
+		case (.screen, .screen):
+			if (widthSize.ratio != 0 || heightSize.ratio != 0), let s = onScreen {
+				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
+				width = widthSize.ratio * screenFrame.height + widthSize.constant
+				height = heightSize.ratio * screenFrame.height + heightSize.constant
+			} else {
+				width = widthSize.constant
+				height = heightSize.constant
 			}
 		}
-		return resultSize
-	}
-	
-	public func applyHeightToContentSize<W: NSWindow>(_ contentSize: NSSize, onScreen: NSScreen?, windowClass: W.Type, styleMask: NSWindow.StyleMask) -> NSSize {
-		let resultSize: NSSize
-		switch self.anchor {
-		case .aspect:
-			resultSize = NSSize(width: contentSize.width, height: ratio * contentSize.width + constant)
-		case .screen:
-			if let s = onScreen {
-				let frame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
-				resultSize = NSSize(width: contentSize.width, height: ratio * frame.height + constant)
-			} else {
-				resultSize = contentSize
-			}
-		}
-		return resultSize
+		return NSSize(width: width, height: height)
 	}
 }
 

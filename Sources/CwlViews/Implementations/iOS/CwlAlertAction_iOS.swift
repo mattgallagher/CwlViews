@@ -64,7 +64,7 @@ public extension AlertAction {
 
 		public var title: String? = nil
 		public var style: UIAlertAction.Style = .default
-		public var handler: SignalInput<Void>? = nil
+		public var handler: MultiOutput<Void>? = nil
 	}
 }
 
@@ -72,7 +72,7 @@ public extension AlertAction {
 public extension AlertAction.Preparer {
 	func constructInstance(type: Instance.Type, parameters: Void) -> Instance {
 		return type.init(title: title, style: style, handler: handler.map { h in
-			{ _ in h.send(value: ()) }
+			{ _ in h.input.send(value: ()) }
 		})
 	}
 	
@@ -83,7 +83,9 @@ public extension AlertAction.Preparer {
 		case .style(let x): style = x.value
 		case .title(let x): title = x.value
 		
-		case .handler(let x): handler = x
+		case .handler(let x):
+			handler = handler ?? Input<Void>().multicast()
+			handler?.signal.bind(to: x)
 		default: break
 		}
 	}
@@ -102,7 +104,7 @@ public extension AlertAction.Preparer {
 		//	2. Signal bindings are performed on the object after construction.
 
 		//	3. Action bindings are triggered by the object after construction.
-		case .handler: return handler
+		case .handler: return handler?.input
 
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		}

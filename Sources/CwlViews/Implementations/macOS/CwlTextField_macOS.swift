@@ -72,11 +72,11 @@ public extension TextField {
 		case selectText(Signal<Void>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		case didFailToValidatePartialString(SignalInput<(string: String, errorDescription: String?)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case completions((_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String])
 		case didFailToFormatString((_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool)
+		case didFailToValidatePartialString((_ control: NSTextField, _ partialString: String, _ errorDescription: String?) -> Void)
 		case doCommand((_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool)
 		case isValidObject((_ control: NSTextField, _ object: AnyObject) -> Bool)
 		case shouldBeginEditing((_ control: NSTextField, _ text: NSText) -> Bool)
@@ -110,13 +110,13 @@ public extension TextField.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .completions(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
-		case .didFailToFormatString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
-		case .didFailToValidatePartialString(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
-		case .doCommand(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
-		case .isValidObject(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
-		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
-		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
+		case .completions(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
+		case .didFailToFormatString(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
+		case .didFailToValidatePartialString(let x): delegate().addMultiHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
+		case .doCommand(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
+		case .isValidObject(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
 		default: break
 		}
 	}
@@ -172,31 +172,31 @@ extension TextField.Preparer {
 
 	open class Delegate: DynamicDelegate, NSTextFieldDelegate {
 		open func control(_ control: NSControl, isValidObject obj: Any?) -> Bool {
-			return handler(ofType: ((NSTextField, AnyObject) -> Bool).self)!(control as! NSTextField, obj as AnyObject)
+			return singleHandler(control as! NSTextField, obj as AnyObject)
 		}
 		
 		open func control(_ control: NSControl, didFailToValidatePartialString string: String, errorDescription error: String?) {
-			handler(ofType: SignalInput<(string: String, errorDescription: String?)>.self)!.send(value: (string: string, errorDescription: error))
+			multiHandler(control, string, error)
 		}
 		
 		open func control(_ control: NSControl, didFailToFormatString string: String, errorDescription error: String?) -> Bool {
-			return handler(ofType: ((NSTextField, String, String?) -> Bool).self)!(control as! NSTextField, string, error)
+			return singleHandler(control as! NSTextField, string, error)
 		}
 		
 		open func control(_ control: NSControl, textShouldBeginEditing fieldEditor: NSText) -> Bool {
-			return handler(ofType: ((NSTextField, NSText) -> Bool).self)!(control as! NSTextField, fieldEditor)
+			return singleHandler(control as! NSTextField, fieldEditor)
 		}
 		
 		open func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
-			return handler(ofType: ((NSTextField, NSText) -> Bool).self)!(control as! NSTextField, fieldEditor)
+			return singleHandler(control as! NSTextField, fieldEditor)
 		}
 		
 		open func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange charRange: NSRange, indexOfSelectedItem index: UnsafeMutablePointer<Int>) -> [String] {
-			return handler(ofType: ((NSTextField,  NSTextView, [String], NSRange, UnsafeMutablePointer<Int>) -> [String]).self)!(control as! NSTextField, textView, words, charRange, index)
+			return singleHandler(control as! NSTextField, textView, words, charRange, index)
 		}
 		
 		open func control(_ control: NSControl, textView: NSTextView, doCommandBy doCommandBySelector: Selector) -> Bool {
-			return handler(ofType: ((NSTextField,  NSTextView, Selector) -> Bool).self)!(control as! NSTextField, textView, doCommandBySelector)
+			return singleHandler(control as! NSTextField, textView, doCommandBySelector)
 		}
 	}
 }
@@ -242,11 +242,11 @@ public extension BindingName where Binding: TextFieldBinding {
 	static var selectText: TextFieldName<Signal<Void>> { return .name(B.selectText) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didFailToValidatePartialString: TextFieldName<SignalInput<(string: String, errorDescription: String?)>> { return .name(B.didFailToValidatePartialString) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var completions: TextFieldName<(_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String]> { return .name(B.completions) }
 	static var didFailToFormatString: TextFieldName<(_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool> { return .name(B.didFailToFormatString) }
+	static var didFailToValidatePartialString: TextFieldName<(_ control: NSTextField, _ partialString: String, _ errorDescription: String?) -> Void> { return .name(B.didFailToValidatePartialString) }
 	static var doCommand: TextFieldName<(_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool> { return .name(B.doCommand) }
 	static var isValidObject: TextFieldName<(_ control: NSTextField, _ object: AnyObject) -> Bool> { return .name(B.isValidObject) }
 	static var shouldBeginEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(B.shouldBeginEditing) }

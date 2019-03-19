@@ -54,15 +54,15 @@ public extension Menu {
 		
 		// 3. Action bindings are triggered by the object after construction.
 		case didBeginTracking(SignalInput<Void>)
-		case didClose(SignalInput<Void>)
 		case didEndTracking(SignalInput<Void>)
 		case didSendAction(SignalInput<Int>)
-		case willHighlight(SignalInput<Int?>)
-		case willOpen(SignalInput<Void>)
 		case willSendAction(SignalInput<Int>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case confinementRect((_ menu: NSMenu, _ screen: NSScreen?) -> NSRect)
+		case didClose((_ menu: NSMenu) -> Void)
+		case willHighlight((_ menu: NSMenu, _ item: NSMenuItem?, _ index: Int?) -> Void)
+		case willOpen((_ menu: NSMenu) -> Void)
 	}
 }
 
@@ -113,11 +113,11 @@ public extension Menu.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .confinementRect(let x): delegate().addHandler(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
-		case .didClose(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menuDidClose(_:)))
+		case .confinementRect(let x): delegate().addSingleHandler(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
+		case .didClose(let x): delegate().addMultiHandler(x, #selector(NSMenuDelegate.menuDidClose(_:)))
 		case .systemName(let x): systemName = x.value
-		case .willHighlight(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menu(_:willHighlight:)))
-		case .willOpen(let x): delegate().addHandler(x, #selector(NSMenuDelegate.menuWillOpen(_:)))
+		case .willHighlight(let x): delegate().addMultiHandler(x, #selector(NSMenuDelegate.menu(_:willHighlight:)))
+		case .willOpen(let x): delegate().addMultiHandler(x, #selector(NSMenuDelegate.menuWillOpen(_:)))
 		default: break
 		}
 	}
@@ -189,28 +189,20 @@ extension Menu.Preparer {
 
 	open class Delegate: DynamicDelegate, NSMenuDelegate {
 		open func menuWillOpen(_ menu: NSMenu) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(menu)
 		}
 		
 		open func menuDidClose(_ menu: NSMenu) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(menu)
 		}
 		
 		open func confinementRect(for menu: NSMenu, on screen: NSScreen?) -> NSRect {
-			return handler(ofType: ((NSMenu, NSScreen?) -> NSRect).self)!(menu, screen)
+			return singleHandler(menu, screen)
 		}
 		
-		open func menu(_ menu: NSMenu, willHighlight: NSMenuItem?) {
-			let input = handler(ofType: SignalInput<Int?>.self)
-			if let h = willHighlight {
-				for (index, item) in menu.items.enumerated() {
-					if h == item {
-						input?.send(value: index)
-						return
-					}
-				}
-			}
-			input?.send(value: nil)
+		open func menu(_ menu: NSMenu, willHighlight menuItem: NSMenuItem?) {
+			let match = menuItem.flatMap { item in menu.items.enumerated().first { offset, element in item == element } }
+			multiHandler(menu, menuItem, match?.offset)
 		}
 	}
 }
@@ -249,11 +241,11 @@ public extension BindingName where Binding: MenuBinding {
 	static var cancelTrackingWithoutAnimation: MenuName<Signal<Void>> { return .name(B.cancelTrackingWithoutAnimation) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var willOpen: MenuName<SignalInput<Void>> { return .name(B.willOpen) }
-	static var didClose: MenuName<SignalInput<Void>> { return .name(B.didClose) }
+	static var willOpen: MenuName<(NSMenu) -> Void> { return .name(B.willOpen) }
+	static var didClose: MenuName<(NSMenu) -> Void> { return .name(B.didClose) }
 	static var didBeginTracking: MenuName<SignalInput<Void>> { return .name(B.didBeginTracking) }
 	static var didEndTracking: MenuName<SignalInput<Void>> { return .name(B.didEndTracking) }
-	static var willHighlight: MenuName<SignalInput<Int?>> { return .name(B.willHighlight) }
+	static var willHighlight: MenuName<(NSMenu, NSMenuItem?, Int?) -> Void> { return .name(B.willHighlight) }
 	static var willSendAction: MenuName<SignalInput<Int>> { return .name(B.willSendAction) }
 	static var didSendAction: MenuName<SignalInput<Int>> { return .name(B.didSendAction) }
 	

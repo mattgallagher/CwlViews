@@ -38,15 +38,15 @@ public extension ExtendedViewController {
 		// 2. Signal bindings are performed on the object after construction.
 
 		// 3. Action bindings are triggered by the object after construction.
-		case didAppear(SignalInput<Bool>)
-		case didDisappear(SignalInput<Bool>)
-		case traitCollectionDidChange(SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>)
-		case willAppear(SignalInput<Bool>)
-		case willDisappear(SignalInput<Bool>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case didAppear((UIViewController, Bool) -> Void)
+		case didDisappear((UIViewController, Bool) -> Void)
 		case didReceiveMemoryWarning((UIViewController) -> Void)
 		case loadView(() -> ViewConvertible)
+		case traitCollectionDidChange((UIViewController, UITraitCollection?) -> Void)
+		case willAppear((UIViewController, Bool) -> Void)
+		case willDisappear((UIViewController, Bool) -> Void)
 	}
 }
 
@@ -85,12 +85,12 @@ public extension ExtendedViewController.Preparer {
 			inherited.prepareBinding(.view(x))
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didAppear(let x): delegate().addHandler(x, #selector(ViewControllerDelegate.viewDidAppear(controller:animated:)))
-		case .didDisappear(let x): delegate().addHandler(x, #selector(ViewControllerDelegate.viewDidDisappear(controller:animated:)))
-		case .traitCollectionDidChange(let x): delegate().addHandler(x, #selector(ViewControllerDelegate.traitCollectionDidChange(controller:previousTraitCollection:)))
-		case .willAppear(let x): delegate().addHandler(x, #selector(ViewControllerDelegate.viewWillAppear(controller:animated:)))
-		case .willDisappear(let x): delegate().addHandler(x, #selector(ViewControllerDelegate.viewWillDisappear(controller:animated:)))
-		case .didReceiveMemoryWarning(let x): delegate().addHandler(x, #selector(ViewControllerDelegate.didReceiveMemoryWarning(controller:)))
+		case .didAppear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewDidAppear(controller:animated:)))
+		case .didDisappear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewDidDisappear(controller:animated:)))
+		case .traitCollectionDidChange(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.traitCollectionDidChange(controller:previousTraitCollection:)))
+		case .willAppear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewWillAppear(controller:animated:)))
+		case .willDisappear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewWillDisappear(controller:animated:)))
+		case .didReceiveMemoryWarning(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.didReceiveMemoryWarning(controller:)))
 		case .loadView(let x):
 			precondition(inherited.view == nil, "Construct the view using either .loadView or .view, not both.")
 			loadView = x
@@ -161,27 +161,27 @@ extension ExtendedViewController.Preparer {
 		}
 		
 		public func didReceiveMemoryWarning(controller: UIViewController) {
-			handler(ofType: ((UIViewController) -> Void).self)!(controller)
+			multiHandler(controller)
 		}
 		
 		public func traitCollectionDidChange(controller: UIViewController, previousTraitCollection: UITraitCollection?) {
-			handler(ofType: ((UIViewController, UITraitCollection?) -> Void).self)!(controller, previousTraitCollection)
+			multiHandler(controller, previousTraitCollection)
 		}
 		
 		public func viewWillAppear(controller: UIViewController, animated: Bool) {
-			handler(ofType: ((UIViewController, Bool) -> Void).self)!(controller, animated)
+			multiHandler(controller, animated)
 		}
 		
 		public func viewDidAppear(controller: UIViewController, animated: Bool) {
-			handler(ofType: ((UIViewController, Bool) -> Void).self)!(controller, animated)
+			multiHandler(controller, animated)
 		}
 		
 		public func viewWillDisappear(controller: UIViewController, animated: Bool) {
-			handler(ofType: ((UIViewController, Bool) -> Void).self)!(controller, animated)
+			multiHandler(controller, animated)
 		}
 		
 		public func viewDidDisappear(controller: UIViewController, animated: Bool) {
-			handler(ofType: ((UIViewController, Bool) -> Void).self)!(controller, animated)
+			multiHandler(controller, animated)
 		}
 	}
 }
@@ -206,15 +206,15 @@ public extension BindingName where Binding: ExtendedViewControllerBinding {
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didAppear: ExtendedViewControllerName<SignalInput<Bool>> { return .name(B.didAppear) }
-	static var didDisappear: ExtendedViewControllerName<SignalInput<Bool>> { return .name(B.didDisappear) }
-	static var traitCollectionDidChange: ExtendedViewControllerName<SignalInput<(previous: UITraitCollection?, new: UITraitCollection)>> { return .name(B.traitCollectionDidChange) }
-	static var willAppear: ExtendedViewControllerName<SignalInput<Bool>> { return .name(B.willAppear) }
-	static var willDisappear: ExtendedViewControllerName<SignalInput<Bool>> { return .name(B.willDisappear) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var didAppear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.didAppear) }
+	static var didDisappear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.didDisappear) }
 	static var didReceiveMemoryWarning: ExtendedViewControllerName<(UIViewController) -> Void> { return .name(B.didReceiveMemoryWarning) }
 	static var loadView: ExtendedViewControllerName<() -> ViewConvertible> { return .name(B.loadView) }
+	static var traitCollectionDidChange: ExtendedViewControllerName<(UIViewController, UITraitCollection?) -> Void> { return .name(B.traitCollectionDidChange) }
+	static var willAppear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.willAppear) }
+	static var willDisappear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.willDisappear) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

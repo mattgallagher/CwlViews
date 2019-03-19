@@ -72,7 +72,7 @@ public extension PageViewController {
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public func constructStorage(instance: Instance) -> Storage { return Storage() }
+		public func constructStorage(instance: Instance) -> Storage { return Storage(pageChanged: pageChanged) }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
@@ -82,6 +82,7 @@ public extension PageViewController {
 		var spineLocation = UIPageViewController.SpineLocation.min
 		var pageSpacing = CGFloat(0)
 		var pageConstructor: ((PageData) -> ViewControllerConvertible)?
+		var pageChanged: MultiOutput<(index: Int, data: PageData)>?
 	}
 }
 
@@ -102,11 +103,14 @@ public extension PageViewController.Preparer {
 		case .navigationOrientation(let x): navigationOrientation = x.value
 		case .spineLocation(let x): spineLocation = x.value
 		case .pageSpacing(let x): pageSpacing = x.value
-		case .willTransitionTo(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
-		case .didFinishAnimating(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
-		case .spineLocationFor(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
-		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
-		case .interfaceOrientationForPresentation(let x): delegate().addHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .pageChanged(let x):
+			pageChanged = pageChanged ?? Input().multicast()
+			pageChanged?.signal.bind(to: x)
+		case .willTransitionTo(let x): delegate().addMultiHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
+		case .didFinishAnimating(let x): delegate().addMultiHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
+		case .spineLocationFor(let x): delegate().addSingleHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
+		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
+		case .interfaceOrientationForPresentation(let x): delegate().addSingleHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
 		default: break
 		}
 	}
@@ -143,9 +147,7 @@ public extension PageViewController.Preparer {
 			}
 
 		// 3. Action bindings are triggered by the object after construction.
-		case .pageChanged(let x):
-			storage.pageChanged = x
-			return x
+		case .pageChanged: return nil
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .constructPage: return nil
@@ -164,7 +166,11 @@ extension PageViewController.Preparer {
 		open var activeViewControllers: [(Int, Weak<UIViewController>)] = []
 		open var pageConstructor: ((PageData) -> ViewControllerConvertible)?
 		open var pageData: [PageData] = []
-		open var pageChanged: SignalInput<(index: Int, data: PageData)>?
+		public let pageChanged: MultiOutput<(index: Int, data: PageData)>?
+		
+		public init(pageChanged: MultiOutput<(index: Int, data: PageData)>?) {
+			self.pageChanged = pageChanged
+		}
 		
 		public func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
 			if let i = index(of: viewController) {
@@ -247,7 +253,7 @@ extension PageViewController.Preparer {
 		}
 
 		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-			if completed, let input = pageChanged, let vc = pageViewController.children.first, let index = index(of: vc), let data = pageData.at(index) {
+			if completed, let input = pageChanged?.input, let vc = pageViewController.children.first, let index = index(of: vc), let data = pageData.at(index) {
 				input.send(value: (index, data))
 			}
 			
@@ -259,23 +265,23 @@ extension PageViewController.Preparer {
 
 	open class Delegate: DynamicDelegate, UIPageViewControllerDelegate {
 		open func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
-			handler(ofType: ((UIPageViewController, [UIViewController]) -> Void).self)!(pageViewController, pendingViewControllers)
+			multiHandler(pageViewController, pendingViewControllers)
 		}
 		
 		open func pageViewController(_ pageViewController: UIPageViewController, spineLocationFor orientation: UIInterfaceOrientation) -> UIPageViewController.SpineLocation {
-			return handler(ofType: ((UIPageViewController, UIInterfaceOrientation) -> UIPageViewController.SpineLocation).self)!(pageViewController, orientation)
+			return singleHandler(pageViewController, orientation)
 		}
 		
 		open func pageViewControllerSupportedInterfaceOrientations(_ pageViewController: UIPageViewController) -> UIInterfaceOrientationMask {
-			return handler(ofType: ((UIPageViewController) -> UIInterfaceOrientationMask).self)!(pageViewController)
+			return singleHandler(pageViewController)
 		}
 		
 		open func pageViewControllerPreferredInterfaceOrientationForPresentation(_ pageViewController: UIPageViewController) -> UIInterfaceOrientation {
-			return handler(ofType: ((UIPageViewController) -> UIInterfaceOrientation).self)!(pageViewController)
+			return singleHandler(pageViewController)
 		}
 		
 		open func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-			handler(ofType: ((UIPageViewController, Bool, [UIViewController], Bool) -> Void).self)!(pageViewController, finished, previousViewControllers, completed)
+			multiHandler(pageViewController, finished, previousViewControllers, completed)
 		}
 	}
 }

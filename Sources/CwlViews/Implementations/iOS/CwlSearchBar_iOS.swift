@@ -63,17 +63,17 @@ public extension SearchBar {
 		// 2. Signal bindings are performed on the object after construction.
 
 		//	3. Action bindings are triggered by the object after construction.
-		case bookmarkButtonClicked(SignalInput<Void>)
-		case cancelButtonClicked(SignalInput<Void>)
-		case didBeginEditing(SignalInput<Void>)
-		case didChange(SignalInput<String>)
-		case didEndEditing(SignalInput<Void>)
-		case resultsListButtonClicked(SignalInput<Void>)
-		case searchButtonClicked(SignalInput<String>)
-		case selectedScopeButtonIndexDidChange(SignalInput<Int>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case bookmarkButtonClicked((UISearchBar) -> Void)
+		case cancelButtonClicked((UISearchBar) -> Void)
+		case didBeginEditing((UISearchBar) -> Void)
+		case didChange((UISearchBar) -> Void)
+		case didEndEditing((UISearchBar) -> Void)
 		case position((UIBarPositioning) -> UIBarPosition)
+		case resultsListButtonClicked((UISearchBar) -> Void)
+		case searchButtonClicked((UISearchBar) -> Void)
+		case selectedScopeButtonIndexDidChange((UISearchBar, Int) -> Void)
 		case shouldBeginEditing((UISearchBar) -> Bool)
 		case shouldChangeText((UISearchBar, NSRange, String) -> Bool)
 		case shouldEndEditing((UISearchBar) -> Bool)
@@ -106,18 +106,18 @@ public extension SearchBar.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .bookmarkButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarBookmarkButtonClicked(_:)))
-		case .cancelButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarCancelButtonClicked(_:)))
-		case .didBeginEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarTextDidBeginEditing(_:)))
-		case .didChange(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBar(_:textDidChange:)))
-		case .didEndEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarTextDidEndEditing(_:)))
-		case .position(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.position(for:)))
-		case .resultsListButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarResultsListButtonClicked(_:)))
-		case .searchButtonClicked(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarSearchButtonClicked(_:)))
-		case .selectedScopeButtonIndexDidChange(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBar(_:selectedScopeButtonIndexDidChange:)))
-		case .shouldBeginEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarShouldBeginEditing(_:)))
-		case .shouldChangeText(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBar(_:shouldChangeTextIn:replacementText:)))
-		case .shouldEndEditing(let x): delegate().addHandler(x, #selector(UISearchBarDelegate.searchBarShouldEndEditing(_:)))
+		case .bookmarkButtonClicked(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBarBookmarkButtonClicked(_:)))
+		case .cancelButtonClicked(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBarCancelButtonClicked(_:)))
+		case .didBeginEditing(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBarTextDidBeginEditing(_:)))
+		case .didChange(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBar(_:textDidChange:)))
+		case .didEndEditing(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBarTextDidEndEditing(_:)))
+		case .position(let x): delegate().addSingleHandler(x, #selector(UISearchBarDelegate.position(for:)))
+		case .resultsListButtonClicked(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBarResultsListButtonClicked(_:)))
+		case .searchButtonClicked(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBarSearchButtonClicked(_:)))
+		case .selectedScopeButtonIndexDidChange(let x): delegate().addMultiHandler(x, #selector(UISearchBarDelegate.searchBar(_:selectedScopeButtonIndexDidChange:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(UISearchBarDelegate.searchBarShouldBeginEditing(_:)))
+		case .shouldChangeText(let x): delegate().addSingleHandler(x, #selector(UISearchBarDelegate.searchBar(_:shouldChangeTextIn:replacementText:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(UISearchBarDelegate.searchBarShouldEndEditing(_:)))
 		default: break
 		}
 	}
@@ -215,51 +215,51 @@ extension SearchBar.Preparer {
 	
 	open class Delegate: DynamicDelegate, UISearchBarDelegate {
 		open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-			handler(ofType: SignalInput<String>.self)!.send(value: searchText)
+			multiHandler(searchBar, searchText)
 		}
 		
 		open func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(searchBar)
 		}
 		
 		open func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(searchBar)
 		}
 		
 		open func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(searchBar)
 		}
 		
 		open func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(searchBar)
 		}
 		
 		open func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<String>.self)!.send(value: searchBar.text ?? "")
+			multiHandler(searchBar)
 		}
 		
 		open func searchBarResultsListButtonClicked(_ searchBar: UISearchBar) {
-			handler(ofType: SignalInput<Void>.self)!.send(value: ())
+			multiHandler(searchBar)
 		}
 		
 		open func searchBarSelectedScopeButtonIndexDidChange(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-			handler(ofType: SignalInput<Int>.self)!.send(value: selectedScope)
+			multiHandler(searchBar, selectedScope)
 		}
 		
 		open func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-			return handler(ofType: ((UISearchBar) -> Bool).self)!(searchBar)
+			return singleHandler(searchBar)
 		}
 		
 		open func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
-			return handler(ofType: ((UISearchBar) -> Bool).self)!(searchBar)
+			return singleHandler(searchBar)
 		}
 		
 		open func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-			return handler(ofType: ((UISearchBar, NSRange, String) -> Bool).self)!(searchBar, range, text)
+			return singleHandler(searchBar, range, text)
 		}
 		
 		open func position(for bar: UIBarPositioning) -> UIBarPosition {
-			return handler(ofType: ((UIBarPositioning) -> UIBarPosition).self)!(bar)
+			return singleHandler(bar)
 		}
 	}
 }
@@ -307,17 +307,17 @@ public extension BindingName where Binding: SearchBarBinding {
 	// 2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var bookmarkButtonClicked: SearchBarName<SignalInput<Void>> { return .name(B.bookmarkButtonClicked) }
-	static var cancelButtonClicked: SearchBarName<SignalInput<Void>> { return .name(B.cancelButtonClicked) }
-	static var didBeginEditing: SearchBarName<SignalInput<Void>> { return .name(B.didBeginEditing) }
-	static var didChange: SearchBarName<SignalInput<String>> { return .name(B.didChange) }
-	static var didEndEditing: SearchBarName<SignalInput<Void>> { return .name(B.didEndEditing) }
-	static var resultsListButtonClicked: SearchBarName<SignalInput<Void>> { return .name(B.resultsListButtonClicked) }
-	static var searchButtonClicked: SearchBarName<SignalInput<String>> { return .name(B.searchButtonClicked) }
-	static var selectedScopeButtonIndexDidChange: SearchBarName<SignalInput<Int>> { return .name(B.selectedScopeButtonIndexDidChange) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	static var bookmarkButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.bookmarkButtonClicked) }
+	static var cancelButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.cancelButtonClicked) }
+	static var didBeginEditing: SearchBarName<(UISearchBar) -> Void> { return .name(B.didBeginEditing) }
+	static var didChange: SearchBarName<(UISearchBar) -> Void> { return .name(B.didChange) }
+	static var didEndEditing: SearchBarName<(UISearchBar) -> Void> { return .name(B.didEndEditing) }
 	static var position: SearchBarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
+	static var resultsListButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.resultsListButtonClicked) }
+	static var searchButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.searchButtonClicked) }
+	static var selectedScopeButtonIndexDidChange: SearchBarName<(UISearchBar, Int) -> Void> { return .name(B.selectedScopeButtonIndexDidChange) }
 	static var shouldBeginEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(B.shouldBeginEditing) }
 	static var shouldChangeText: SearchBarName<(UISearchBar, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
 	static var shouldEndEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(B.shouldEndEditing) }

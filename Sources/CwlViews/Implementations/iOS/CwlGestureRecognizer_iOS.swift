@@ -83,12 +83,12 @@ public extension GestureRecognizer.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .shouldBegin(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
-		case .shouldBeRequiredToFail(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
-		case .shouldReceivePress(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UIPress) -> Bool)?))
-		case .shouldReceiveTouch(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UITouch) -> Bool)?))
-		case .shouldRecognizeSimultanously(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
-		case .shouldRequireFailure(let x): delegate().addHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
+		case .shouldBegin(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
+		case .shouldBeRequiredToFail(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
+		case .shouldReceivePress(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UIPress) -> Bool)?))
+		case .shouldReceiveTouch(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UITouch) -> Bool)?))
+		case .shouldRecognizeSimultanously(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
+		case .shouldRequireFailure(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
 		default: break
 		}
 	}
@@ -133,27 +133,27 @@ extension GestureRecognizer.Preparer {
 
 	open class Delegate: DynamicDelegate, UIGestureRecognizerDelegate {
 		open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer) -> Bool).self)!(gestureRecognizer)
+			return singleHandler(gestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UITouch) -> Bool).self)!(gestureRecognizer, touch)
+			return singleHandler(gestureRecognizer, touch)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
+			return singleHandler(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
+			return singleHandler(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UIGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
+			return singleHandler(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive press: UIPress) -> Bool {
-			return handler(ofType: ((UIGestureRecognizer, UIPress) -> Bool).self)!(gestureRecognizer, press)
+			return singleHandler(gestureRecognizer, press)
 		}
 	}
 }

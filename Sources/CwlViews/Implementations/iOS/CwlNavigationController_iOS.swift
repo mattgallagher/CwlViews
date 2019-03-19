@@ -72,12 +72,13 @@ public extension NavigationController {
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public func constructStorage(instance: Instance) -> Storage { return Storage(popSignal: popSignal) }
+		public func constructStorage(instance: Instance) -> Storage { return Storage(didShow: didShow, popSignal: popSignal) }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
-		var popSignal: SignalInput<Int>? = nil
+		var popSignal: MultiOutput<Int>? = nil
+		var didShow: MultiOutput<(viewController: UIViewController, animated: Bool)>? = nil
 	}
 }
 
@@ -91,12 +92,17 @@ public extension NavigationController.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .animationController(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:animationControllerFor:from:to:)))
-		case .interactionController(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:interactionControllerFor:)))
-		case .poppedToCount(let x): popSignal = x
-		case .preferredInterfaceOrientation(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
-		case .supportedInterfaceOrientations(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
-		case .willShow(let x): delegate().addHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
+		case .animationController(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:animationControllerFor:from:to:)))
+		case .interactionController(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:interactionControllerFor:)))
+		case .didShow(let x):
+			didShow = didShow ?? Input().multicast()
+			didShow?.signal.bind(to: x)
+		case .poppedToCount(let x):
+			popSignal = popSignal ?? Input().multicast()
+			popSignal?.signal.bind(to: x)
+		case .preferredInterfaceOrientation(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
+		case .willShow(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
 		default: break
 		}
 	}
@@ -140,9 +146,7 @@ public extension NavigationController.Preparer {
 		// 2. Signal bindings are performed on the object after construction.
 			
 		// 3. Action bindings are triggered by the object after construction.
-		case .didShow(let x):
-			storage.didShow = x
-			return nil
+		case .didShow: return nil
 		case .poppedToCount: return nil
 		case .willShow: return nil
 			
@@ -159,23 +163,24 @@ extension NavigationController.Preparer {
 		open var supportedInterfaceOrientations: UIInterfaceOrientationMask = .all
 		open var preferredInterfaceOrientation: UIInterfaceOrientation = .portrait
 		open var expectedStackCount: Int = 0
-		public let popSignal: SignalInput<Int>?
+		public let popSignal: MultiOutput<Int>?
+		public let didShow: MultiOutput<(viewController: UIViewController, animated: Bool)>?
 		weak var collapsedController: UINavigationController?
 		
 		open override var isInUse: Bool {
 			return true
 		}
 		
-		public init(popSignal: SignalInput<Int>?) {
+		public init(didShow: MultiOutput<(viewController: UIViewController, animated: Bool)>?, popSignal: MultiOutput<Int>?) {
 			self.popSignal = popSignal
+			self.didShow = didShow
 			super.init()
 		}
 		
-		open var didShow: SignalInput<(viewController: UIViewController, animated: Bool)>?
 		open func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
 			// Handle pop operations triggered by the back button
 			if animated, navigationController.viewControllers.count < expectedStackCount, let ps = popSignal {
-				ps.send(value: navigationController.viewControllers.count)
+				ps.input.send(value: navigationController.viewControllers.count)
 			}
 			
 			// Handle removal of collapsed split view details
@@ -189,30 +194,30 @@ extension NavigationController.Preparer {
 				collapsedController = collapsed
 			}
 			
-			didShow?.send(value: (viewController: viewController, animated: animated))
+			didShow?.input.send(value: (viewController: viewController, animated: animated))
 		}
 	}
 
 	open class Delegate: DynamicDelegate, UINavigationControllerDelegate {
 		open func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-			return handler(ofType: ((UIViewController, Bool) -> Void).self)!(viewController, animated)
+			return singleHandler(navigationController, viewController, animated)
 		}
 		
 		open func navigationControllerSupportedInterfaceOrientations(_ navigationController: UINavigationController) -> UIInterfaceOrientationMask {
-			return handler(ofType:  (() -> UIInterfaceOrientationMask).self)!()
+			return singleHandler(navigationController)
 		}
 		
 		open func navigationControllerPreferredInterfaceOrientationForPresentation(_ navigationController: UINavigationController) -> UIInterfaceOrientation {
-			return handler(ofType: (() -> UIInterfaceOrientation).self)!()
+			return singleHandler(navigationController)
 		}
 		
 		open func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-			return handler(ofType: ((UINavigationController, UINavigationController.Operation, UIViewController, UIViewController) -> UIViewControllerAnimatedTransitioning?).self)!(navigationController, operation, fromVC, toVC)
+			return singleHandler(navigationController, operation, fromVC, toVC)
 		}
 		
 		open func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?
 		{
-			return handler(ofType: ((UINavigationController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?).self)!(navigationController, animationController)
+			return singleHandler(navigationController, animationController)
 		}
 	}
 }

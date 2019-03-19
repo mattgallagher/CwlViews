@@ -78,12 +78,12 @@ public extension GestureRecognizer.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-		case .shouldBegin(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
-		case .shouldRecognizeSimultaneously(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
-		case .shouldRequireFailure(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
-		case .shouldRequireToFail(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
-		case .shouldAttemptToRecognize(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
-		case .shouldReceiveTouch(let x): delegate().addHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
+		case .shouldBegin(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
+		case .shouldRecognizeSimultaneously(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
+		case .shouldRequireFailure(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
+		case .shouldRequireToFail(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
+		case .shouldAttemptToRecognize(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
+		case .shouldReceiveTouch(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
 		default: break
 		}
 	}
@@ -121,27 +121,27 @@ extension GestureRecognizer.Preparer {
 	
 	open class Delegate: DynamicDelegate, NSGestureRecognizerDelegate {
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldAttemptToRecognizeWith event: NSEvent) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSEvent) -> Bool).self)!(gestureRecognizer, event)
+			return singleHandler(gestureRecognizer, event)
 		}
 		
 		open func gestureRecognizerShouldBegin(_ gestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer) -> Bool).self)!(gestureRecognizer)
+			return singleHandler(gestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
+			return singleHandler(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
+			return singleHandler(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		@objc(gestureRecognizer: shouldBeRequiredToFailByGestureRecognizer:) open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: NSGestureRecognizer) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSGestureRecognizer) -> Bool).self)!(gestureRecognizer, otherGestureRecognizer)
+			return singleHandler(gestureRecognizer, otherGestureRecognizer)
 		}
 		
 		open func gestureRecognizer(_ gestureRecognizer: NSGestureRecognizer, shouldReceive touch: NSTouch) -> Bool {
-			return handler(ofType: ((NSGestureRecognizer, NSTouch) -> Bool).self)!(gestureRecognizer, touch)
+			return singleHandler(gestureRecognizer, touch)
 		}
 	}
 }

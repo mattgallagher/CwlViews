@@ -720,6 +720,7 @@ public extension Layout.Dimension.Priority {
 		static let userLow = NSLayoutConstraint.Priority(rawValue: 156.25)
 		static let userMid = NSLayoutConstraint.Priority(rawValue: 437.5)
 		static let userHigh = NSLayoutConstraint.Priority(rawValue: 843.75)
+		static let fittingSizeLevel = NSLayoutConstraint.Priority.fittingSizeCompression
 	#else
 		static let userLow = UILayoutPriority(rawValue: 156.25)
 		static let userMid = UILayoutPriority(rawValue: 437.5)

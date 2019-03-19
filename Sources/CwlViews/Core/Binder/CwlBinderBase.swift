@@ -37,7 +37,8 @@ public struct BinderBase: BinderPreparer {
 		switch binding {
 		case .lifetimes(let x):
 			switch x {
-			case .constant(let value): return AggregateLifetime(lifetimes: value)
+			case .constant(let value):
+				return AggregateLifetime(lifetimes: value)
 			case .dynamic(let signal): return signal.continuous().subscribe(context: .main) { _ in }
 			}
 		case .adHoc(let x):

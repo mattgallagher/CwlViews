@@ -81,20 +81,20 @@ public extension WebView {
 		
 		//	4. Delegate bindings require synchronous evaluation within the object's context.
 		case createWebView((_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?)
-		case didClose((WKWebView, Void) -> Void)
+		case didClose((WKWebView) -> Void)
 		case didCommit((WKWebView, WKNavigation) -> Void)
 		case didStartProvisionalNavigation((WKWebView, WKNavigation) -> Void)
 		case didReceiveServerRedirectForProvisionalNavigation((WKWebView, WKNavigation) -> Void)
-		case didFail((WKWebView, (WKNavigation, Error)) -> Void)
-		case didFailProvisionalNavigation((WKWebView, (WKNavigation, Error)) -> Void)
+		case didFail((WKWebView, WKNavigation, Error) -> Void)
+		case didFailProvisionalNavigation((WKWebView, WKNavigation, Error) -> Void)
 		case didFinish((WKWebView, WKNavigation) -> Void)
-		case contentProcessDidTerminate((WKWebView, Void) -> Void)
-		case decideActionPolicy((WKWebView, Callback<WKNavigationAction, WKNavigationActionPolicy>) -> Void)
-		case decideResponsePolicy((WKWebView, WKNavigationResponse, WKNavigationResponsePolicy) -> Void)
-		case didReceiveAuthenticationChallenge((WKWebView, Callback<URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?)>) -> Void)
-		case runJavaScriptAlertPanel((WKWebView, Callback<(message: String, frame: WKFrameInfo), ()>) -> Void)
-		case runJavaScriptConfirmPanel((WKWebView, Callback<(message: String, frame: WKFrameInfo), Bool>) -> Void)
-		case runJavaScriptTextInputPanel((WKWebView, Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>) -> Void)
+		case contentProcessDidTerminate((WKWebView) -> Void)
+		case decideActionPolicy((WKWebView, WKNavigationAction, (WKNavigationActionPolicy) -> Void) -> Void)
+		case decideResponsePolicy((WKWebView, WKNavigationResponse, (WKNavigationActionPolicy) -> Void) -> Void)
+		case didReceiveAuthenticationChallenge((WKWebView, URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) -> Void)
+		case runJavaScriptAlertPanel((WKWebView, String, WKFrameInfo, () -> Void) -> Void)
+		case runJavaScriptConfirmPanel((WKWebView, String, WKFrameInfo, (Bool) -> Void) -> Void)
+		case runJavaScriptTextInputPanel((WKWebView, String, String?, WKFrameInfo, (String?) -> Void) -> Void)
 		
 		@available(macOS, unavailable) @available(iOS 10.0, *) case commitPreviewingViewController((_ webView: WKWebView, _ previewingViewController: UIViewController) -> Void)
 		@available(macOS, unavailable) @available(iOS 10.0, *) case previewingViewController((_ webView: WKWebView, _ elementInfo: WKPreviewElementInfo, _ previewActions: [WKPreviewActionItem]) -> UIViewController?)
@@ -207,36 +207,36 @@ public extension WebView.Preparer {
 			}
 		case .userContentController(let x): webConfiguration().userContentController = x.value
 
-		case .didClose(let x): delegate().addMultiHandler(x, #selector(WKUIDelegate.webViewDidClose(_:)))
-		case .didCommit(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didCommit:)))
-		case .didStartProvisionalNavigation(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didStartProvisionalNavigation:)))
-		case .didReceiveServerRedirectForProvisionalNavigation(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didReceiveServerRedirectForProvisionalNavigation:)))
-		case .didFail(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didFail:withError:)))
-		case .didFailProvisionalNavigation(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didFailProvisionalNavigation:withError:)))
-		case .didFinish(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didFinish:)))
-		case .contentProcessDidTerminate(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webViewWebContentProcessDidTerminate(_:)))
-		case .decideActionPolicy(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView,WKNavigationAction, @escaping (WKNavigationActionPolicy) -> Void) -> Void)?))
-		case .decideResponsePolicy(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView, WKNavigationResponse, @escaping (WKNavigationResponsePolicy) -> Void) -> Void)?))
-		case .didReceiveAuthenticationChallenge(let x): delegate().addMultiHandler(x, #selector(WKNavigationDelegate.webView(_:didReceive:completionHandler:)))
-		case .runJavaScriptAlertPanel(let x): delegate().addMultiHandler(x, #selector(WKUIDelegate.webView(_:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:)))
-		case .runJavaScriptConfirmPanel(let x): delegate().addMultiHandler(x, #selector(WKUIDelegate.webView(_:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:)))
-		case .runJavaScriptTextInputPanel(let x): delegate().addMultiHandler(x, #selector(WKUIDelegate.webView(_:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:)))
-		case .createWebView(let x): delegate().addSingleHandler(x, #selector(WKUIDelegate.webView(_:createWebViewWith:for:windowFeatures:)))
+		case .didClose(let x): delegate().addMultiHandler1(x, #selector(WKUIDelegate.webViewDidClose(_:)))
+		case .didCommit(let x): delegate().addMultiHandler2(x, #selector(WKNavigationDelegate.webView(_:didCommit:)))
+		case .didStartProvisionalNavigation(let x): delegate().addMultiHandler2(x, #selector(WKNavigationDelegate.webView(_:didStartProvisionalNavigation:)))
+		case .didReceiveServerRedirectForProvisionalNavigation(let x): delegate().addMultiHandler2(x, #selector(WKNavigationDelegate.webView(_:didReceiveServerRedirectForProvisionalNavigation:)))
+		case .didFail(let x): delegate().addMultiHandler3(x, #selector(WKNavigationDelegate.webView(_:didFail:withError:)))
+		case .didFailProvisionalNavigation(let x): delegate().addMultiHandler3(x, #selector(WKNavigationDelegate.webView(_:didFailProvisionalNavigation:withError:)))
+		case .didFinish(let x): delegate().addMultiHandler2(x, #selector(WKNavigationDelegate.webView(_:didFinish:)))
+		case .contentProcessDidTerminate(let x): delegate().addMultiHandler1(x, #selector(WKNavigationDelegate.webViewWebContentProcessDidTerminate(_:)))
+		case .decideActionPolicy(let x): delegate().addMultiHandler3(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView,WKNavigationAction, @escaping (WKNavigationActionPolicy) -> Void) -> Void)?))
+		case .decideResponsePolicy(let x): delegate().addMultiHandler3(x, #selector(WKNavigationDelegate.webView(_:decidePolicyFor:decisionHandler:) as ((WKNavigationDelegate) -> (WKWebView, WKNavigationResponse, @escaping (WKNavigationResponsePolicy) -> Void) -> Void)?))
+		case .didReceiveAuthenticationChallenge(let x): delegate().addMultiHandler3(x, #selector(WKNavigationDelegate.webView(_:didReceive:completionHandler:)))
+		case .runJavaScriptAlertPanel(let x): delegate().addMultiHandler4(x, #selector(WKUIDelegate.webView(_:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:)))
+		case .runJavaScriptConfirmPanel(let x): delegate().addMultiHandler4(x, #selector(WKUIDelegate.webView(_:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:)))
+		case .runJavaScriptTextInputPanel(let x): delegate().addMultiHandler5(x, #selector(WKUIDelegate.webView(_:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:)))
+		case .createWebView(let x): delegate().addSingleHandler4(x, #selector(WKUIDelegate.webView(_:createWebViewWith:for:windowFeatures:)))
 		case .runOpenPanel(let x):
 			#if os(macOS)
-				delegate().addMultiHandler(x, #selector(WKUIDelegate.webView(_:runOpenPanelWith:initiatedByFrame:completionHandler:)))
+				delegate().addMultiHandler4(x, #selector(WKUIDelegate.webView(_:runOpenPanelWith:initiatedByFrame:completionHandler:)))
 			#endif
 		case .shouldPreviewElement(let x):
 			#if os(iOS)
-				delegate().addSingleHandler(x, #selector(WKUIDelegate.webView(_:shouldPreviewElement:)))
+				delegate().addSingleHandler2(x, #selector(WKUIDelegate.webView(_:shouldPreviewElement:)))
 			#endif
 		case .previewingViewController(let x):
 			#if os(iOS)
-				delegate().addSingleHandler(x, #selector(WKUIDelegate.webView(_:previewingViewControllerForElement:defaultActions:)))
+				delegate().addSingleHandler3(x, #selector(WKUIDelegate.webView(_:previewingViewControllerForElement:defaultActions:)))
 			#endif
 		case .commitPreviewingViewController(let x):
 			#if os(iOS)
-				delegate().addMultiHandler(x, #selector(WKUIDelegate.webView(_:commitPreviewingViewController:)))
+				delegate().addMultiHandler2(x, #selector(WKUIDelegate.webView(_:commitPreviewingViewController:)))
 			#endif
 		default: break
 		}
@@ -507,20 +507,20 @@ public extension BindingName where Binding: WebViewBinding {
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 	static var createWebView: WebViewName<(_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?> { return .name(B.createWebView) }
-	static var didClose: WebViewName<(WKWebView, Void) -> Void> { return .name(B.didClose) }
+	static var didClose: WebViewName<(WKWebView) -> Void> { return .name(B.didClose) }
 	static var didCommit: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didCommit) }
 	static var didStartProvisionalNavigation: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didStartProvisionalNavigation) }
 	static var didReceiveServerRedirectForProvisionalNavigation: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didReceiveServerRedirectForProvisionalNavigation) }
-	static var didFail: WebViewName<(WKWebView, (WKNavigation, Error)) -> Void> { return .name(B.didFail) }
-	static var didFailProvisionalNavigation: WebViewName<(WKWebView, (WKNavigation, Error)) -> Void> { return .name(B.didFailProvisionalNavigation) }
+	static var didFail: WebViewName<(WKWebView, WKNavigation, Error) -> Void> { return .name(B.didFail) }
+	static var didFailProvisionalNavigation: WebViewName<(WKWebView, WKNavigation, Error) -> Void> { return .name(B.didFailProvisionalNavigation) }
 	static var didFinish: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didFinish) }
-	static var contentProcessDidTerminate: WebViewName<(WKWebView, Void) -> Void> { return .name(B.contentProcessDidTerminate) }
-	static var decideActionPolicy: WebViewName<(WKWebView, Callback<WKNavigationAction, WKNavigationActionPolicy>) -> Void> { return .name(B.decideActionPolicy) }
-	static var decideResponsePolicy: WebViewName<(WKWebView, WKNavigationResponse, WKNavigationResponsePolicy) -> Void> { return .name(B.decideResponsePolicy) }
-	static var didReceiveAuthenticationChallenge: WebViewName<(WKWebView, Callback<URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?)>) -> Void> { return .name(B.didReceiveAuthenticationChallenge) }
-	static var runJavaScriptAlertPanel: WebViewName<(WKWebView, Callback<(message: String, frame: WKFrameInfo), ()>) -> Void> { return .name(B.runJavaScriptAlertPanel) }
-	static var runJavaScriptConfirmPanel: WebViewName<(WKWebView, Callback<(message: String, frame: WKFrameInfo), Bool>) -> Void> { return .name(B.runJavaScriptConfirmPanel) }
-	static var runJavaScriptTextInputPanel: WebViewName<(WKWebView, Callback<(prompt: String, defaultText: String?, frame: WKFrameInfo), String?>) -> Void> { return .name(B.runJavaScriptTextInputPanel) }
+	static var contentProcessDidTerminate: WebViewName<(WKWebView) -> Void> { return .name(B.contentProcessDidTerminate) }
+	static var decideActionPolicy: WebViewName<(WKWebView, WKNavigationAction, (WKNavigationActionPolicy) -> Void) -> Void> { return .name(B.decideActionPolicy) }
+	static var decideResponsePolicy: WebViewName<(WKWebView, WKNavigationResponse, (WKNavigationActionPolicy) -> Void) -> Void> { return .name(B.decideResponsePolicy) }
+	static var didReceiveAuthenticationChallenge: WebViewName<(WKWebView, URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) -> Void> { return .name(B.didReceiveAuthenticationChallenge) }
+	static var runJavaScriptAlertPanel: WebViewName<(WKWebView, String, WKFrameInfo, () -> Void) -> Void> { return .name(B.runJavaScriptAlertPanel) }
+	static var runJavaScriptConfirmPanel: WebViewName<(WKWebView, String, WKFrameInfo, (Bool) -> Void) -> Void> { return .name(B.runJavaScriptConfirmPanel) }
+	static var runJavaScriptTextInputPanel: WebViewName<(WKWebView, String, String?, WKFrameInfo, (String?) -> Void) -> Void> { return .name(B.runJavaScriptTextInputPanel) }
 	
 	@available(macOS, unavailable) @available(iOS 10.0, *) static var commitPreviewingViewController: WebViewName<(_ webView: WKWebView, _ previewingViewController: WebView.UIViewController) -> Void> { return .name(B.commitPreviewingViewController) }
 	@available(macOS, unavailable) @available(iOS 10.0, *) static var previewingViewController: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo, _ previewActions: [WebView.WKPreviewActionItem]) -> WebView.UIViewController?> { return .name(B.previewingViewController) }

@@ -110,7 +110,7 @@ func fileMenu() -> Menu {
 			NSMenuItem.separator(),
 			MenuItem(
 				.title -- NSLocalizedString("Close", tableName: "MainMenu", comment: ""),
-				.action --> #selector(NSDocumentController.openDocument(_:)),
+				.action --> #selector(NSWindow.performClose(_:)),
 				.keyEquivalent -- "w"
 			),
 			MenuItem(

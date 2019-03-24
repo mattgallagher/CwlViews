@@ -154,11 +154,11 @@ public extension ScrollView.Preparer {
 		case .scrollWheel(let x): return x.apply(instance) { i, v in i.scrollWheel(with: v) }
 
 		// 3. Action bindings are triggered by the object after construction.
-		case .didEndLiveMagnify(let x): return Signal.notifications(name: NSScrollView.didEndLiveMagnifyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didEndLiveScroll(let x): return Signal.notifications(name: NSScrollView.didEndLiveScrollNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didLiveScroll(let x): return Signal.notifications(name: NSScrollView.didLiveScrollNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willStartLiveMagnify(let x): return Signal.notifications(name: NSScrollView.willStartLiveMagnifyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willStartLiveScroll(let x): return Signal.notifications(name: NSScrollView.willStartLiveScrollNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didEndLiveMagnify(let x): return Signal.notifications(name: NSScrollView.didEndLiveMagnifyNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didEndLiveScroll(let x): return Signal.notifications(name: NSScrollView.didEndLiveScrollNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didLiveScroll(let x): return Signal.notifications(name: NSScrollView.didLiveScrollNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willStartLiveMagnify(let x): return Signal.notifications(name: NSScrollView.willStartLiveMagnifyNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willStartLiveScroll(let x): return Signal.notifications(name: NSScrollView.willStartLiveScrollNotification, object: instance).map { n in () }.cancellableBind(to: x)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		}

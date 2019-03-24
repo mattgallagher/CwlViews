@@ -104,18 +104,18 @@ public extension TextView.Preparer {
 		// 2. Signal bindings are performed on the object after construction.
 			
 		//	3. Action bindings are triggered by the object after construction.
-		case .didBeginEditing(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
-		case .didChange(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
-		case .didChangeSelection(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
-		case .didEndEditing(let x): delegate().addMultiHandler(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
+		case .didBeginEditing(let x): delegate().addMultiHandler1(x, #selector(UITextViewDelegate.textViewDidBeginEditing(_:)))
+		case .didChange(let x): delegate().addMultiHandler1(x, #selector(UITextViewDelegate.textViewDidChange(_:)))
+		case .didChangeSelection(let x): delegate().addMultiHandler1(x, #selector(UITextViewDelegate.textViewDidChangeSelection(_:)))
+		case .didEndEditing(let x): delegate().addMultiHandler1(x, #selector(UITextViewDelegate.textViewDidEndEditing(_:)))
 			
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
-		case .shouldChangeText(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
-		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler1(x, #selector(UITextViewDelegate.textViewShouldBeginEditing(_:)))
+		case .shouldChangeText(let x): delegate().addSingleHandler3(x, #selector(UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler1(x, #selector(UITextViewDelegate.textViewShouldEndEditing(_:)))
 		
-		case .shouldInteractWithAttachment(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
-		case .shouldInteractWithURL(let x): delegate().addSingleHandler(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithAttachment(let x): delegate().addSingleHandler4(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool)?))
+		case .shouldInteractWithURL(let x): delegate().addSingleHandler4(x, #selector(UITextViewDelegate.textView(_:shouldInteractWith:in:interaction:) as ((UITextViewDelegate) -> (UITextView, URL, NSRange, UITextItemInteraction) -> Bool)?))
 		default: break
 		}
 	}
@@ -259,14 +259,14 @@ public extension BindingName where Binding: TextViewBinding {
 	static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithURL) }
 	
 	// Composite binding names
-	static var textChanged: TextViewName<SignalInput<String>> {
+	static func textChanged(_ void: Void = ()) -> TextViewName<SignalInput<String>> {
 		return Binding.compositeName(
 			value: { input in { textView in _ = input.send(value: textView.text) } },
 			binding: TextView.Binding.didChange,
 			downcast: Binding.textViewBinding
 		)
 	}
-	static var attributedTextChanged: TextViewName<SignalInput<NSAttributedString>> {
+	static func attributedTextChanged(_ void: Void = ()) -> TextViewName<SignalInput<NSAttributedString>> {
 		return Binding.compositeName(
 			value: { input in { textView in _ = input.send(value: textView.attributedText) } },
 			binding: TextView.Binding.didChange,

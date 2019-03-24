@@ -105,12 +105,12 @@ public extension TextField.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didEndEditingWithReason(let x): delegate().addMultiHandler(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
-		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
-		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
-		case .shouldChangeCharacters(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
-		case .shouldClear(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
-		case .shouldReturn(let x): delegate().addSingleHandler(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
+		case .didEndEditingWithReason(let x): delegate().addMultiHandler2(x, #selector(UITextFieldDelegate.textFieldDidEndEditing(_:reason:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler1(x, #selector(UITextFieldDelegate.textFieldShouldBeginEditing(_:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler1(x, #selector(UITextFieldDelegate.textFieldShouldEndEditing(_:)))
+		case .shouldChangeCharacters(let x): delegate().addSingleHandler3(x, #selector(UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)))
+		case .shouldClear(let x): delegate().addSingleHandler1(x, #selector(UITextFieldDelegate.textFieldShouldClear(_:)))
+		case .shouldReturn(let x): delegate().addSingleHandler1(x, #selector(UITextFieldDelegate.textFieldShouldReturn(_:)))
 		default: break
 		}
 	}
@@ -258,14 +258,14 @@ public extension BindingName where Binding: TextFieldBinding {
 	static var shouldReturn: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldReturn) }
 	
 	// Composite binding names
-	static var textChanged: TextFieldName<SignalInput<String>> {
+	static func textChanged(_ void: Void = ()) -> TextFieldName<SignalInput<String>> {
 		return Binding.compositeName(
 			value: { input in { textField in textField.text.map { _ = input.send(value: $0) } } },
 			binding: TextField.Binding.didChange,
 			downcast: Binding.textFieldBinding
 		)
 	}
-	static var attributedTextChanged: TextFieldName<SignalInput<NSAttributedString>> {
+	static func attributedTextChanged(_ void: Void = ()) -> TextFieldName<SignalInput<NSAttributedString>> {
 		return Binding.compositeName(
 			value: { input in { textField in textField.attributedText.map { _ = input.send(value: $0) } } },
 			binding: TextField.Binding.didChange,

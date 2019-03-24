@@ -297,7 +297,7 @@ func secondWindow(model: DocumentAdapter) -> Window {
 							.cellConstructor -- { identifier, rowSignal in
 								TableCellView(
 									.layout -- .horizontal(
-										.view(TextField(labelStyled:
+										.view(TextField.labelStyled(
 											.stringValue <-- rowSignal.compactMap { $0 }
 										))
 									)

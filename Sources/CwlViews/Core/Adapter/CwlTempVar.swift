@@ -26,7 +26,7 @@ public struct TempValue<Value>: NonPersistentAdapterState {
 		temporaryValue = nil
 	}
 	
-	private init(temporaryValue: Value) {
+	fileprivate init(temporaryValue: Value) {
 		self.temporaryValue = temporaryValue
 	}
 	

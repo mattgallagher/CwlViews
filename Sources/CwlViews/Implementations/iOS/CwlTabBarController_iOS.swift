@@ -89,16 +89,16 @@ public extension TabBarController.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .animationControllerForTransition(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:animationControllerForTransitionFrom:to:)))
-		case .didEndCustomizing(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didEndCustomizing:changed:)))
-		case .didSelect(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:didSelect:)))
-		case .interactionControllerForAnimation(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:interactionControllerFor:)))
-		case .preferredInterfaceOrientationForPresentation(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerPreferredInterfaceOrientationForPresentation(_:)))
-		case .shouldSelect(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:shouldSelect:)))
-		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarControllerSupportedInterfaceOrientations(_:)))
+		case .animationControllerForTransition(let x): delegate().addSingleHandler5(x, #selector(UITabBarControllerDelegate.tabBarController(_:animationControllerForTransitionFrom:to:)))
+		case .didEndCustomizing(let x): delegate().addMultiHandler4(x, #selector(UITabBarControllerDelegate.tabBarController(_:didEndCustomizing:changed:)))
+		case .didSelect(let x): delegate().addMultiHandler3(x, #selector(UITabBarControllerDelegate.tabBarController(_:didSelect:)))
+		case .interactionControllerForAnimation(let x): delegate().addSingleHandler2(x, #selector(UITabBarControllerDelegate.tabBarController(_:interactionControllerFor:)))
+		case .preferredInterfaceOrientationForPresentation(let x): delegate().addSingleHandler1(x, #selector(UITabBarControllerDelegate.tabBarControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .shouldSelect(let x): delegate().addSingleHandler3(x, #selector(UITabBarControllerDelegate.tabBarController(_:shouldSelect:)))
+		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler1(x, #selector(UITabBarControllerDelegate.tabBarControllerSupportedInterfaceOrientations(_:)))
 		case .tabConstructor(let x): tabConstructor = x
-		case .willBeginCustomizing(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willBeginCustomizing:)))
-		case .willEndCustomizing(let x): delegate().addSingleHandler(x, #selector(UITabBarControllerDelegate.tabBarController(_:willEndCustomizing:changed:)))
+		case .willBeginCustomizing(let x): delegate().addMultiHandler3(x, #selector(UITabBarControllerDelegate.tabBarController(_:willBeginCustomizing:)))
+		case .willEndCustomizing(let x): delegate().addMultiHandler4(x, #selector(UITabBarControllerDelegate.tabBarController(_:willEndCustomizing:changed:)))
 		default: break
 		}
 	}
@@ -272,6 +272,15 @@ public extension BindingName where Binding: TabBarControllerBinding {
 	static var tabConstructor: TabBarControllerName<(Binding.ItemIdentifierType) -> ViewControllerConvertible> { return .name(B.tabConstructor) }
 	static var willBeginCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType]) -> Void> { return .name(B.willBeginCustomizing) }
 	static var willEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.willEndCustomizing) }
+	
+	// Composite binding names
+	static func tabSelected(_ void: Void = ()) -> TabBarControllerName<SignalInput<Binding.ItemIdentifierType>> {
+		return Binding.compositeName(
+			value: { input in { tabBarcontroller, vc, i -> Void in input.send(value: i) } },
+			binding: TabBarController.Binding.didSelect,
+			downcast: Binding.tabBarControllerBinding
+		)
+	}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

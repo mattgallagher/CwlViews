@@ -85,12 +85,12 @@ public extension ExtendedViewController.Preparer {
 			inherited.prepareBinding(.view(x))
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didAppear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewDidAppear(controller:animated:)))
-		case .didDisappear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewDidDisappear(controller:animated:)))
-		case .traitCollectionDidChange(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.traitCollectionDidChange(controller:previousTraitCollection:)))
-		case .willAppear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewWillAppear(controller:animated:)))
-		case .willDisappear(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.viewWillDisappear(controller:animated:)))
-		case .didReceiveMemoryWarning(let x): delegate().addMultiHandler(x, #selector(ViewControllerDelegate.didReceiveMemoryWarning(controller:)))
+		case .didAppear(let x): delegate().addMultiHandler2(x, #selector(ViewControllerDelegate.viewDidAppear(controller:animated:)))
+		case .didDisappear(let x): delegate().addMultiHandler2(x, #selector(ViewControllerDelegate.viewDidDisappear(controller:animated:)))
+		case .traitCollectionDidChange(let x): delegate().addMultiHandler2(x, #selector(ViewControllerDelegate.traitCollectionDidChange(controller:previousTraitCollection:)))
+		case .willAppear(let x): delegate().addMultiHandler2(x, #selector(ViewControllerDelegate.viewWillAppear(controller:animated:)))
+		case .willDisappear(let x): delegate().addMultiHandler2(x, #selector(ViewControllerDelegate.viewWillDisappear(controller:animated:)))
+		case .didReceiveMemoryWarning(let x): delegate().addMultiHandler1(x, #selector(ViewControllerDelegate.didReceiveMemoryWarning(controller:)))
 		case .loadView(let x):
 			precondition(inherited.view == nil, "Construct the view using either .loadView or .view, not both.")
 			loadView = x

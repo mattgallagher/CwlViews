@@ -113,11 +113,11 @@ public extension Menu.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .confinementRect(let x): delegate().addSingleHandler(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
-		case .didClose(let x): delegate().addMultiHandler(x, #selector(NSMenuDelegate.menuDidClose(_:)))
+		case .confinementRect(let x): delegate().addSingleHandler2(x, #selector(NSMenuDelegate.confinementRect(for:on:)))
+		case .didClose(let x): delegate().addMultiHandler1(x, #selector(NSMenuDelegate.menuDidClose(_:)))
 		case .systemName(let x): systemName = x.value
-		case .willHighlight(let x): delegate().addMultiHandler(x, #selector(NSMenuDelegate.menu(_:willHighlight:)))
-		case .willOpen(let x): delegate().addMultiHandler(x, #selector(NSMenuDelegate.menuWillOpen(_:)))
+		case .willHighlight(let x): delegate().addMultiHandler3(x, #selector(NSMenuDelegate.menu(_:willHighlight:)))
+		case .willOpen(let x): delegate().addMultiHandler1(x, #selector(NSMenuDelegate.menuWillOpen(_:)))
 		default: break
 		}
 	}
@@ -156,10 +156,10 @@ public extension Menu.Preparer {
 			
 		// 3. Action bindings are triggered by the object after construction.
 		case .didBeginTracking(let x):
-			return Signal.notifications(name: NSMenu.didBeginTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+			return Signal.notifications(name: NSMenu.didBeginTrackingNotification, object: instance).map { n in () }.cancellableBind(to: x)
 		case .didClose: return nil
 		case .didEndTracking(let x):
-			return Signal.notifications(name: NSMenu.didEndTrackingNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+			return Signal.notifications(name: NSMenu.didEndTrackingNotification, object: instance).map { n in () }.cancellableBind(to: x)
 		case .didSendAction(let x):
 			return Signal.notifications(name: NSMenu.didSendActionNotification, object: instance).compactMap { n -> Int? in
 				if let menuItem = n.userInfo?["MenuItem"] as? NSMenuItem, let menu = menuItem.menu, let index = menu.items.firstIndex(where: { i in i == menuItem }) {

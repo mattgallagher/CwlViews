@@ -83,12 +83,12 @@ public extension GestureRecognizer.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .shouldBegin(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
-		case .shouldBeRequiredToFail(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
-		case .shouldReceivePress(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UIPress) -> Bool)?))
-		case .shouldReceiveTouch(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UITouch) -> Bool)?))
-		case .shouldRecognizeSimultanously(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
-		case .shouldRequireFailure(let x): delegate().addSingleHandler(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
+		case .shouldBegin(let x): delegate().addSingleHandler1(x, #selector(UIGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
+		case .shouldBeRequiredToFail(let x): delegate().addSingleHandler2(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
+		case .shouldReceivePress(let x): delegate().addSingleHandler2(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UIPress) -> Bool)?))
+		case .shouldReceiveTouch(let x): delegate().addSingleHandler2(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:) as((UIGestureRecognizerDelegate) -> (UIGestureRecognizer, UITouch) -> Bool)?))
+		case .shouldRecognizeSimultanously(let x): delegate().addSingleHandler2(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
+		case .shouldRequireFailure(let x): delegate().addSingleHandler2(x, #selector(UIGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
 		default: break
 		}
 	}

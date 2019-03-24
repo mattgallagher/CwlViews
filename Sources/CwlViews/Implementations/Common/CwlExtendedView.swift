@@ -6,10 +6,8 @@
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
 
-#if os(iOS)
-
 // MARK: - Binder Part 1: Binder
-public class ExtendedView<Subclass: UIView & ViewWithDelegate & HasDelegate>: Binder, ViewConvertible {
+public class ExtendedView<Subclass: Layout.View & ViewWithDelegate & HasDelegate>: Binder, ViewConvertible {
 	public var state: BinderState<Preparer>
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
@@ -34,6 +32,9 @@ public extension ExtendedView {
 		// 0. Static bindings are applied at construction and are subsequently immutable.
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
+		#if os(macOS)
+			case backgroundColor(Dynamic<NSColor?>)
+		#endif
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -71,13 +72,19 @@ public extension ExtendedView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .sizeDidChange(let x): delegate().addMultiHandler({ s in x.send(value: s) }, #selector(ViewDelegate.layoutSubviews(view:)))
+		case .sizeDidChange(let x): delegate().addMultiHandler1({ s in x.send(value: s) }, #selector(ViewDelegate.layoutSubviews(view:)))
+		
+		default: break
 		}
 	}
 
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+
+		#if os(macOS)
+			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v } 
+		#endif
 
 		case .sizeDidChange: return nil
 		}
@@ -89,7 +96,7 @@ extension ExtendedView.Preparer {
 	open class Storage: View.Preparer.Storage, ViewDelegate {}
 	
 	open class Delegate: DynamicDelegate, ViewDelegate {
-		open func layoutSubviews(view: UIView) {
+		open func layoutSubviews(view: Layout.View) {
 			multiHandler(view.bounds.size)
 		}
 	}
@@ -111,6 +118,9 @@ public extension BindingName where Binding: ExtendedViewBinding {
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
+	#if os(macOS)
+		static var backgroundColor: ExtendedViewName<Dynamic<NSColor?>> { return .name(B.backgroundColor) }
+	#endif
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
@@ -122,12 +132,16 @@ public extension BindingName where Binding: ExtendedViewBinding {
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
 public extension ExtendedView {
-	func uiView() -> View.Instance { return instance() }
+	#if os(iOS)
+		func uiView() -> View.Instance { return instance() }
+	#elseif os(macOS)
+		func nsView() -> View.Instance { return instance() }
+	#endif
 }
 
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ExtendedViewBinding: ViewBinding {
-	associatedtype SubclassType: UIView & ViewWithDelegate & HasDelegate
+	associatedtype SubclassType: Layout.View & ViewWithDelegate & HasDelegate
 	static func extendedViewBinding(_ binding: ExtendedView<SubclassType>.Binding) -> Self
 }
 public extension ExtendedViewBinding {
@@ -144,22 +158,60 @@ public extension ExtendedView.Binding {
 
 // MARK: - Binder Part 9: Other supporting types
 @objc public protocol ViewDelegate: class {
-	@objc optional func layoutSubviews(view: UIView)
+	@objc optional func layoutSubviews(view: Layout.View)
 }
 
-public protocol ViewWithDelegate {
+public protocol ViewWithDelegate: class {
 	var delegate: ViewDelegate? { get set }
+
+	#if os(macOS)
+		var backgroundColor: NSColor? { get set }
+	#endif
 }
+
+#if os(macOS)
+	extension ViewWithDelegate {
+		// This default implementation is so that you're not required to implement `backgroundColor` to implement an ExtendedView
+		var backgroundColor: NSColor? {
+			get {
+				return ((self as? NSView)?.layer?.backgroundColor).flatMap { NSColor(cgColor: $0) }
+			}
+			set {
+				if let layer = (self as? NSView)?.layer {
+					layer.backgroundColor = newValue?.cgColor 
+				}
+			}
+		}
+	}
+#endif
 
 /// Implementation of ViewWithDelegate on top of the base UIView.
 /// You can use this view directly, subclass it or implement `ViewWithDelegate` and `HasDelegate` on top of another `UIView` to use that view with the `ExtendedView` binder.
-open class CwlExtendedView: UIView, ViewWithDelegate, HasDelegate {
+open class CwlExtendedView: Layout.View, ViewWithDelegate, HasDelegate {
 	public unowned var delegate: ViewDelegate?
 	
-	open override func layoutSubviews() {
-		delegate?.layoutSubviews?(view: self)
-		super.layoutSubviews()
-	}
+	#if os(macOS)
+		open var backgroundColor: NSColor?
+	
+		open override func draw(_ dirtyRect: NSRect) {
+			super.draw(dirtyRect)
+			
+			if let backgroundColor = backgroundColor {
+				backgroundColor.setFill()
+				dirtyRect.fill()
+			}
+		}
+	#endif
+	
+	#if os(iOS)
+		open override func layoutSubviews() {
+			delegate?.layoutSubviews?(view: self)
+			super.layoutSubviews()
+		}
+	#elseif os(macOS)
+		open override func layoutSubtreeIfNeeded() {
+			delegate?.layoutSubviews?(view: self)
+			super.layoutSubtreeIfNeeded()
+		}
+	#endif
 }
-
-#endif

@@ -100,7 +100,7 @@ public extension PopUpButton.Preparer {
 		// 2. Signal bindings are performed on the object after construction.
 
 		// 3. Action bindings are triggered by the object after construction.
-		case .willPopUp(let x): return Signal.notifications(name: NSPopUpButton.willPopUpNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .willPopUp(let x): return Signal.notifications(name: NSPopUpButton.willPopUpNotification, object: instance).map { n in () }.cancellableBind(to: x)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		}

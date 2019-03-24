@@ -39,9 +39,7 @@ func alertView(_ alertState: AlertViewState, _ navigationItem: NavigationItem) -
 					.tag -- ViewTags.alertButton.rawValue,
 					.title -- .normal(.trigger),
 					.titleColor -- .normal(.orange),
-					.action(.primaryActionTriggered) --> Input()
-						.map { _ in () }
-						.bind(to: alertState.toggleAlert)
+					.action(.primaryActionTriggered) --> alertState.toggleAlert
 				))
 			)
 		)

@@ -21,7 +21,7 @@ func barButtonView(_ barButtonViewState: BarButtonViewState, _ navigationItem: N
 		.view -- View(
 			.backgroundColor -- .white,
 			.layout -- .center(
-				breadth: .equalTo(ratio: 0.75, priority: .userMid),
+				breadth: .equalTo(ratio: 0.75, priority: .layoutMid),
 				.view(Label(.text <-- barButtonViewState.lastSelectedValue)),
 				.space(),
 				.view(

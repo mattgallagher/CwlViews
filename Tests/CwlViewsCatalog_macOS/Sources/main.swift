@@ -23,11 +23,8 @@ applicationMain {
 	Application(
 		.mainMenu -- mainMenu(),
 		.lifetimes -- [
-			Window(
-				.contentWidth -- .aspectRatio(1.1),
-				.contentHeight -- .screenRatio(1.0),
-				.title -- "CwlViewsCatalog"
-			).nsWindow()
-		]
+			window(WindowState()).nsWindow()
+		],
+		.shouldTerminateAfterLastWindowClosed() -- true
 	)
 }

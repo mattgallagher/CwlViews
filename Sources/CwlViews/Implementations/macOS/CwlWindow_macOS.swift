@@ -42,6 +42,7 @@ public extension Window {
 		case allowsToolTipsWhenApplicationIsInactive(Dynamic<Bool>)
 		case alphaValue(Dynamic<CGFloat>)
 		case animationBehavior(Dynamic<NSWindow.AnimationBehavior>)
+		case appearance(Dynamic<NSAppearance?>)
 		case autorecalculatesKeyViewLoop(Dynamic<Bool>)
 		case backingType(Dynamic<NSWindow.BackingStoreType>)
 		case canBecomeVisibleWithoutLogin(Dynamic<Bool>)
@@ -49,16 +50,17 @@ public extension Window {
 		case collectionBehavior(Dynamic<NSWindow.CollectionBehavior>)
 		case colorSpace(Dynamic<NSColorSpace>)
 		case contentAspectRatio(Dynamic<NSSize>)
-		case contentHeight(Dynamic<WindowSize>)
+		case contentHeight(Dynamic<WindowDimension>)
 		case contentMaxSize(Dynamic<NSSize>)
 		case contentMinSize(Dynamic<NSSize>)
 		case contentResizeIncrements(Dynamic<NSSize>)
-		case contentWidth(Dynamic<WindowSize>)
+		case contentRelativity(Dynamic<WindowDimension.Relativity>)
+		case contentWidth(Dynamic<WindowDimension>)
 		case depthLimit(Dynamic<NSWindow.Depth?>)
 		case displaysWhenScreenProfileChanges(Dynamic<Bool>)
 		case frameAutosaveName(Dynamic<NSWindow.FrameAutosaveName>)
-		case frameHorizontal(Dynamic<WindowPlacement>)
-		case frameVertical(Dynamic<WindowPlacement>)
+		case frameHorizontal(Dynamic<WindowDimension>)
+		case frameVertical(Dynamic<WindowDimension>)
 		case hasShadow(Dynamic<Bool>)
 		case hidesOnDeactivate(Dynamic<Bool>)
 		case ignoresMouseEvents(Dynamic<Bool>)
@@ -88,6 +90,7 @@ public extension Window {
 		case sharingType(Dynamic<NSWindow.SharingType>)
 		case styleMask(Dynamic<NSWindow.StyleMask>)
 		case title(Dynamic<String>)
+		case titlebarAppearsTransparent(Dynamic<Bool>)
 		case toolbar(Dynamic<ToolbarConvertible>)
 
 		// 2. Signal bindings are performed on the object after construction.
@@ -171,15 +174,16 @@ public extension Window {
 
 		var deferCreation: Bool? = nil
 		
-		var contentWidth = InitialSubsequent<WindowSize>()
-		var contentHeight = InitialSubsequent<WindowSize>()
+		var contentWidth = InitialSubsequent<WindowDimension>()
+		var contentHeight = InitialSubsequent<WindowDimension>()
+		var windowSizeRelativity = InitialSubsequent<WindowDimension.Relativity>()
 		var screen = InitialSubsequent<NSScreen?>()
 		var styleMask = InitialSubsequent<NSWindow.StyleMask>()
 		var backingType = InitialSubsequent<NSWindow.BackingStoreType>()
 		
 		var frameAutosaveName: Dynamic<String>? = nil
-		var frameHorizontal: Dynamic<WindowPlacement>? = nil
-		var frameVertical: Dynamic<WindowPlacement>? = nil
+		var frameHorizontal: Dynamic<WindowDimension>? = nil
+		var frameVertical: Dynamic<WindowDimension>? = nil
 		var key: Dynamic<Bool>? = nil
 		var main: Dynamic<Bool>? = nil
 		var order: Dynamic<WindowOrder>? = nil
@@ -189,14 +193,15 @@ public extension Window {
 // MARK: - Binder Part 4: Preparer overrides
 public extension Window.Preparer {
 	func constructInstance(type: NSWindow.Type, parameters: Void) -> NSWindow {
-		let width = contentWidth.initial ?? WindowSize(constant: WindowSize.fallbackWindowSize)
-		let height = contentHeight.initial ?? WindowSize(constant: WindowSize.fallbackWindowSize)
+		let width = contentWidth.initial ?? WindowDimension(constant: WindowDimension.fallbackWindowSize)
+		let height = contentHeight.initial ?? WindowDimension(constant: WindowDimension.fallbackWindowSize)
+		let relativity = windowSizeRelativity.initial ?? .independent
 		let screen = self.screen.initial ?? NSScreen.screens.first
 		let styleMask = self.styleMask.initial ?? [.titled, .resizable, .closable, .miniaturizable]
 		let backingType = self.backingType.initial ?? .buffered
 		
 		// Apply the ContentSize binding
-		let contentSize = WindowSize.contentSize(width: width, height: height, onScreen: screen, windowClass: type, styleMask: styleMask)
+		let contentSize = WindowDimension.contentSize(width: width, height: height, relativity: relativity, onScreen: screen, windowClass: type, styleMask: styleMask)
 		
 		var frameRect = type.frameRect(forContentRect: NSRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height), styleMask: styleMask)
 		frameRect.origin.y = screen.map { $0.visibleFrame.origin.y + $0.visibleFrame.size.height - frameRect.size.height } ?? 0
@@ -230,16 +235,23 @@ public extension Window.Preparer {
 		case .main(let x): main = x
 		case .order(let x): order = x
 		case .screen(let x): screen = x.initialSubsequent()
-		case .shouldClose(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
-		case .shouldPopUpDocumentPathMenu(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
-		case .shouldZoom(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
+		case .shouldClose(let x): delegate().addSingleHandler1(x, #selector(NSWindowDelegate.windowShouldClose(_:)))
+		case .shouldPopUpDocumentPathMenu(let x): delegate().addSingleHandler2(x, #selector(NSWindowDelegate.window(_:shouldPopUpDocumentPathMenu:)))
+		case .shouldZoom(let x): delegate().addSingleHandler2(x, #selector(NSWindowDelegate.windowShouldZoom(_:toFrame:)))
 		case .styleMask(let x): styleMask = x.initialSubsequent()
-		case .willResize(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
-		case .willResizeForVersionBrowser(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
-		case .willUseFullScreenContentSize(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
-		case .willUseFullScreenPresentationOptions(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
-		case .willUseStandardFrame(let x): delegate().addSingleHandler(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
+		case .willResize(let x): delegate().addSingleHandler2(x, #selector(NSWindowDelegate.windowWillResize(_:to:)))
+		case .willResizeForVersionBrowser(let x): delegate().addSingleHandler3(x, #selector(NSWindowDelegate.window(_:willResizeForVersionBrowserWithMaxPreferredSize:maxAllowedSize:)))
+		case .willUseFullScreenContentSize(let x): delegate().addSingleHandler2(x, #selector(NSWindowDelegate.window(_:willUseFullScreenContentSize:)))
+		case .willUseFullScreenPresentationOptions(let x): delegate().addSingleHandler2(x, #selector(NSWindowDelegate.window(_:willUseFullScreenPresentationOptions:)))
+		case .willUseStandardFrame(let x): delegate().addSingleHandler2(x, #selector(NSWindowDelegate.windowWillUseStandardFrame(_:defaultFrame:)))
 		default: break
+		}
+	}
+	
+	func prepareInstance(_ instance: NSWindow, storage: Window.Preparer.Storage) {
+		inheritedPrepareInstance(instance, storage: storage)
+		if let relativity = windowSizeRelativity.initial {
+			storage.windowSizeRelativity = relativity
 		}
 	}
 
@@ -261,6 +273,7 @@ public extension Window.Preparer {
 		case .allowsToolTipsWhenApplicationIsInactive(let x): return x.apply(instance) { i, v in i.allowsToolTipsWhenApplicationIsInactive = v }
 		case .alphaValue(let x): return x.apply(instance) { i, v in i.alphaValue = v }
 		case .animationBehavior(let x): return x.apply(instance) { i, v in i.animationBehavior = v }
+		case .appearance(let x): return x.apply(instance) { i, v in i.appearance = v }
 		case .autorecalculatesKeyViewLoop(let x): return x.apply(instance) { i, v in i.autorecalculatesKeyViewLoop = v }
 		case .backingType: return backingType.resume()?.apply(instance) { i, v in i.backingType = v }
 		case .canBecomeVisibleWithoutLogin(let x): return x.apply(instance) { i, v in i.canBecomeVisibleWithoutLogin = v }
@@ -268,16 +281,22 @@ public extension Window.Preparer {
 		case .collectionBehavior(let x): return x.apply(instance) { i, v in i.collectionBehavior = v }
 		case .colorSpace(let x): return x.apply(instance) { i, v in i.colorSpace = v }
 		case .contentAspectRatio(let x): return x.apply(instance) { i, v in i.contentAspectRatio = v }
-		case .contentHeight: return contentHeight.resume()?.apply(instance) { i, v in
-			let widthSize = WindowSize(anchor: .screen, ratio: 0, constant: i.contentView!.frame.size.width)
-			i.setContentSize(WindowSize.contentSize(width: widthSize, height: v, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
+		case .contentHeight: return contentHeight.resume()?.apply(instance, storage) { i, s, v in
+			let widthSize = WindowDimension(ratio: 0, constant: i.contentView!.frame.size.width)
+			i.setContentSize(WindowDimension.contentSize(width: widthSize, height: v, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
 		}
 		case .contentMaxSize(let x): return x.apply(instance) { i, v in i.contentMaxSize = v }
 		case .contentMinSize(let x): return x.apply(instance) { i, v in i.contentMinSize = v }
+		case .contentRelativity(let x): return x.apply(instance, storage) { i, s, v in
+			let widthSize = WindowDimension(ratio: 0, constant: i.contentView!.frame.size.width)
+			let heightSize = WindowDimension(ratio: 0, constant: i.contentView!.frame.size.height)
+			s.windowSizeRelativity = v
+			i.setContentSize(WindowDimension.contentSize(width: widthSize, height: heightSize, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
+		}
 		case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
-		case .contentWidth: return contentWidth.resume()?.apply(instance) { i, v in
-			let heightSize = WindowSize(anchor: .screen, ratio: 0, constant: i.contentView!.frame.size.height)
-			i.setContentSize(WindowSize.contentSize(width: v, height: heightSize, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
+		case .contentWidth: return contentWidth.resume()?.apply(instance, storage) { i, s, v in
+			let heightSize = WindowDimension(ratio: 0, constant: i.contentView!.frame.size.height)
+			i.setContentSize(WindowDimension.contentSize(width: v, height: heightSize, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
 		}
 		case .depthLimit(let x): return x.apply(instance) { i, v in v.map { i.depthLimit = $0 } ?? i.setDynamicDepthLimit(true) }
 		case .displaysWhenScreenProfileChanges(let x): return x.apply(instance) { i, v in i.displaysWhenScreenProfileChanges = v }
@@ -325,6 +344,7 @@ public extension Window.Preparer {
 		case .sharingType(let x): return x.apply(instance) { i, v in i.sharingType = v }
 		case .styleMask: return styleMask.apply(instance) { i, v in i.styleMask = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
+		case .titlebarAppearsTransparent(let x): return x.apply(instance) { i, v in i.titlebarAppearsTransparent = v }
 		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
 		
 		// 2. Signal bindings are performed on the object after construction.
@@ -367,40 +387,40 @@ public extension Window.Preparer {
 		case .zoom(let x): return x.apply(instance) { i, v in v ? i.performZoom(nil) : i.zoom(nil) }
 			
 		// 3. Action bindings are triggered by the object after construction.
-		case .didBecomeKey(let x): return Signal.notifications(name: NSWindow.didBecomeKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didBecomeMain(let x): return Signal.notifications(name: NSWindow.didBecomeMainNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didBecomeKey(let x): return Signal.notifications(name: NSWindow.didBecomeKeyNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didBecomeMain(let x): return Signal.notifications(name: NSWindow.didBecomeMainNotification, object: instance).map { n in () }.cancellableBind(to: x)
 		case .didChangeBackingProperties(let x):
 			return Signal.notifications(name: NSWindow.didChangeBackingPropertiesNotification, object: instance).map { n in
 				let cs = n.userInfo.flatMap { $0[NSWindow.oldColorSpaceUserInfoKey] as? NSColorSpace }
 				let sf = n.userInfo.flatMap { ($0[NSWindow.oldScaleFactorUserInfoKey] as? NSNumber).map { CGFloat($0.doubleValue) } }
 				return (oldColorSpace: cs, oldScaleFactor: sf )
 			}.cancellableBind(to: x)
-		case .didChangeOcclusionState(let x): return Signal.notifications(name: NSWindow.didChangeOcclusionStateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didChangeScreen(let x): return Signal.notifications(name: NSWindow.didChangeScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didChangeScreenProfile(let x): return Signal.notifications(name: NSWindow.didChangeScreenProfileNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didDeminiaturize(let x): return Signal.notifications(name: NSWindow.didDeminiaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didEndLiveResize(let x): return Signal.notifications(name: NSWindow.didEndLiveResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didEndSheet(let x): return Signal.notifications(name: NSWindow.didEndSheetNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didEnterFullScreen(let x): return Signal.notifications(name: NSWindow.didEnterFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didEnterVersionBrowser(let x): return Signal.notifications(name: NSWindow.didEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didExitFullScreen(let x): return Signal.notifications(name: NSWindow.didExitFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didExitVersionBrowser(let x): return Signal.notifications(name: NSWindow.didExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didChangeOcclusionState(let x): return Signal.notifications(name: NSWindow.didChangeOcclusionStateNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didChangeScreen(let x): return Signal.notifications(name: NSWindow.didChangeScreenNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didChangeScreenProfile(let x): return Signal.notifications(name: NSWindow.didChangeScreenProfileNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didDeminiaturize(let x): return Signal.notifications(name: NSWindow.didDeminiaturizeNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didEndLiveResize(let x): return Signal.notifications(name: NSWindow.didEndLiveResizeNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didEndSheet(let x): return Signal.notifications(name: NSWindow.didEndSheetNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didEnterFullScreen(let x): return Signal.notifications(name: NSWindow.didEnterFullScreenNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didEnterVersionBrowser(let x): return Signal.notifications(name: NSWindow.didEnterVersionBrowserNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didExitFullScreen(let x): return Signal.notifications(name: NSWindow.didExitFullScreenNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didExitVersionBrowser(let x): return Signal.notifications(name: NSWindow.didExitVersionBrowserNotification, object: instance).map { n in () }.cancellableBind(to: x)
 		case .didExpose(let x): return Signal.notifications(name: NSWindow.didExposeNotification, object: instance).compactMap { (n: Notification) -> NSRect? in return (n.userInfo?["NSExposedRect"] as? NSValue)?.rectValue ?? nil }.cancellableBind(to: x)
-		case .didMiniaturize(let x): return Signal.notifications(name: NSWindow.didMiniaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didMove(let x): return Signal.notifications(name: NSWindow.didMoveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didResignKey(let x): return Signal.notifications(name: NSWindow.didResignKeyNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didResignMain(let x): return Signal.notifications(name: NSWindow.didResignMainNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didResize(let x): return Signal.notifications(name: NSWindow.didResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .didUpdate(let x): return Signal.notifications(name: NSWindow.didUpdateNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willBeginSheet(let x): return Signal.notifications(name: NSWindow.willBeginSheetNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willClose(let x): return Signal.notifications(name: NSWindow.willCloseNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willEnterFullScreen(let x): return Signal.notifications(name: NSWindow.willEnterFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willEnterVersionBrowser(let x): return Signal.notifications(name: NSWindow.willEnterVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willExitFullScreen(let x): return Signal.notifications(name: NSWindow.willExitFullScreenNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willExitVersionBrowser(let x): return Signal.notifications(name: NSWindow.willExitVersionBrowserNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willMiniaturize(let x): return Signal.notifications(name: NSWindow.willMiniaturizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willMove(let x): return Signal.notifications(name: NSWindow.willMoveNotification, object: instance).map { n in return () }.cancellableBind(to: x)
-		case .willStartLiveResize(let x): return Signal.notifications(name: NSWindow.willStartLiveResizeNotification, object: instance).map { n in return () }.cancellableBind(to: x)
+		case .didMiniaturize(let x): return Signal.notifications(name: NSWindow.didMiniaturizeNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didMove(let x): return Signal.notifications(name: NSWindow.didMoveNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didResignKey(let x): return Signal.notifications(name: NSWindow.didResignKeyNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didResignMain(let x): return Signal.notifications(name: NSWindow.didResignMainNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didResize(let x): return Signal.notifications(name: NSWindow.didResizeNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .didUpdate(let x): return Signal.notifications(name: NSWindow.didUpdateNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willBeginSheet(let x): return Signal.notifications(name: NSWindow.willBeginSheetNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willClose(let x): return Signal.notifications(name: NSWindow.willCloseNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willEnterFullScreen(let x): return Signal.notifications(name: NSWindow.willEnterFullScreenNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willEnterVersionBrowser(let x): return Signal.notifications(name: NSWindow.willEnterVersionBrowserNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willExitFullScreen(let x): return Signal.notifications(name: NSWindow.willExitFullScreenNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willExitVersionBrowser(let x): return Signal.notifications(name: NSWindow.willExitVersionBrowserNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willMiniaturize(let x): return Signal.notifications(name: NSWindow.willMiniaturizeNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willMove(let x): return Signal.notifications(name: NSWindow.willMoveNotification, object: instance).map { n in () }.cancellableBind(to: x)
+		case .willStartLiveResize(let x): return Signal.notifications(name: NSWindow.willStartLiveResizeNotification, object: instance).map { n in () }.cancellableBind(to: x)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .shouldClose: return nil
@@ -458,6 +478,7 @@ public extension Window.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension Window.Preparer {
 	open class Storage: View.Preparer.Storage, NSWindowDelegate {
+		var windowSizeRelativity: WindowDimension.Relativity = .independent
 		@objc func didPresentError(recovered: Bool, contextInfo: UnsafeMutableRawPointer?) {
 			if let ptr = contextInfo {
 				Unmanaged<SignalInput<Bool>>.fromOpaque(ptr).takeRetainedValue().send(value: recovered)
@@ -525,6 +546,7 @@ public extension BindingName where Binding: WindowBinding {
 	static var allowsToolTipsWhenApplicationIsInactive: WindowName<Dynamic<Bool>> { return .name(B.allowsToolTipsWhenApplicationIsInactive) }
 	static var alphaValue: WindowName<Dynamic<CGFloat>> { return .name(B.alphaValue) }
 	static var animationBehavior: WindowName<Dynamic<NSWindow.AnimationBehavior>> { return .name(B.animationBehavior) }
+	static var appearance: WindowName<Dynamic<NSAppearance?>> { return .name(B.appearance) }
 	static var autorecalculatesKeyViewLoop: WindowName<Dynamic<Bool>> { return .name(B.autorecalculatesKeyViewLoop) }
 	static var backingType: WindowName<Dynamic<NSWindow.BackingStoreType>> { return .name(B.backingType) }
 	static var canBecomeVisibleWithoutLogin: WindowName<Dynamic<Bool>> { return .name(B.canBecomeVisibleWithoutLogin) }
@@ -532,16 +554,17 @@ public extension BindingName where Binding: WindowBinding {
 	static var collectionBehavior: WindowName<Dynamic<NSWindow.CollectionBehavior>> { return .name(B.collectionBehavior) }
 	static var colorSpace: WindowName<Dynamic<NSColorSpace>> { return .name(B.colorSpace) }
 	static var contentAspectRatio: WindowName<Dynamic<NSSize>> { return .name(B.contentAspectRatio) }
-	static var contentHeight: WindowName<Dynamic<WindowSize>> { return .name(B.contentHeight) }
+	static var contentHeight: WindowName<Dynamic<WindowDimension>> { return .name(B.contentHeight) }
 	static var contentMaxSize: WindowName<Dynamic<NSSize>> { return .name(B.contentMaxSize) }
 	static var contentMinSize: WindowName<Dynamic<NSSize>> { return .name(B.contentMinSize) }
 	static var contentResizeIncrements: WindowName<Dynamic<NSSize>> { return .name(B.contentResizeIncrements) }
-	static var contentWidth: WindowName<Dynamic<WindowSize>> { return .name(B.contentWidth) }
+	static var contentRelativity: WindowName<Dynamic<WindowDimension.Relativity>> { return .name(B.contentRelativity) }
+	static var contentWidth: WindowName<Dynamic<WindowDimension>> { return .name(B.contentWidth) }
 	static var depthLimit: WindowName<Dynamic<NSWindow.Depth?>> { return .name(B.depthLimit) }
 	static var displaysWhenScreenProfileChanges: WindowName<Dynamic<Bool>> { return .name(B.displaysWhenScreenProfileChanges) }
 	static var frameAutosaveName: WindowName<Dynamic<NSWindow.FrameAutosaveName>> { return .name(B.frameAutosaveName) }
-	static var frameHorizontal: WindowName<Dynamic<WindowPlacement>> { return .name(B.frameHorizontal) }
-	static var frameVertical: WindowName<Dynamic<WindowPlacement>> { return .name(B.frameVertical) }
+	static var frameHorizontal: WindowName<Dynamic<WindowDimension>> { return .name(B.frameHorizontal) }
+	static var frameVertical: WindowName<Dynamic<WindowDimension>> { return .name(B.frameVertical) }
 	static var hasShadow: WindowName<Dynamic<Bool>> { return .name(B.hasShadow) }
 	static var hidesOnDeactivate: WindowName<Dynamic<Bool>> { return .name(B.hidesOnDeactivate) }
 	static var ignoresMouseEvents: WindowName<Dynamic<Bool>> { return .name(B.ignoresMouseEvents) }
@@ -571,6 +594,7 @@ public extension BindingName where Binding: WindowBinding {
 	static var sharingType: WindowName<Dynamic<NSWindow.SharingType>> { return .name(B.sharingType) }
 	static var styleMask: WindowName<Dynamic<NSWindow.StyleMask>> { return .name(B.styleMask) }
 	static var title: WindowName<Dynamic<String>> { return .name(B.title) }
+	static var titlebarAppearsTransparent: WindowName<Dynamic<Bool>> { return .name(B.titlebarAppearsTransparent) }
 	static var toolbar: WindowName<Dynamic<ToolbarConvertible>> { return .name(B.toolbar) }
 	
 	// 2. Signal bindings are performed on the object after construction.
@@ -690,20 +714,26 @@ public enum WindowResizeStyle {
 	}
 }
 
-public struct WindowPlacement: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+public struct WindowDimension: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+	public typealias FloatLiteralType = Double
+	public typealias IntegerLiteralType = Int
+
+	public enum Relativity {
+		case independent
+		case widthRelativeToHeight
+		case heightRelativeToWidth
+	}
+	
 	public let ratio: CGFloat
 	public let constant: CGFloat
 	
 	public init(integerLiteral value: Int) {
-		self.init(floatLiteral: Double(value))
+		self.init(constant: CGFloat(value))
 	}
 
 	public init(floatLiteral value: Double) {
-		if value < 0 {
-			self.init(ratio: 1, constant: CGFloat(value))
-		} else {
-			self.init(ratio: 0, constant: CGFloat(value))
-		}
+		self.ratio = 0
+		self.constant = CGFloat(value)
 	}
 	
 	public init(ratio: CGFloat = 0, constant: CGFloat = 0) {
@@ -711,8 +741,43 @@ public struct WindowPlacement: ExpressibleByIntegerLiteral, ExpressibleByFloatLi
 		self.constant = constant
 	}
 	
-	public static func screenRatio(_ ratio: CGFloat, constant: CGFloat = 0) -> WindowPlacement {
-		return WindowPlacement(ratio: ratio, constant: constant)
+	public static func ratio(_ ratio: CGFloat = 0, constant: CGFloat = 0) -> WindowDimension {
+		return WindowDimension(ratio: ratio, constant: constant)
+	}
+	
+	public static let fallbackWindowSize: CGFloat = 400
+	
+	public static func contentSize<W: NSWindow>(width widthSize: WindowDimension, height heightSize: WindowDimension, relativity: Relativity, onScreen: NSScreen?, windowClass: W.Type, styleMask: NSWindow.StyleMask) -> NSSize {
+		let width: CGFloat
+		let height: CGFloat
+		switch relativity {
+		case .widthRelativeToHeight:
+			if heightSize.ratio != 0, let s = onScreen {
+				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
+				height = heightSize.ratio * screenFrame.height + heightSize.constant
+			} else {
+				height = heightSize.constant
+			}
+			width = widthSize.ratio * height + widthSize.constant
+		case .heightRelativeToWidth:
+			if widthSize.ratio != 0, let s = onScreen {
+				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
+				width = widthSize.ratio * screenFrame.height + widthSize.constant
+			} else {
+				width = widthSize.constant
+			}
+			height = heightSize.ratio * width + heightSize.constant
+		case .independent:
+			if (widthSize.ratio != 0 || heightSize.ratio != 0), let s = onScreen {
+				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
+				width = widthSize.ratio * screenFrame.height + widthSize.constant
+				height = heightSize.ratio * screenFrame.height + heightSize.constant
+			} else {
+				width = widthSize.constant
+				height = heightSize.constant
+			}
+		}
+		return NSSize(width: width, height: height)
 	}
 
 	fileprivate func applyFrameValue(frameLength: CGFloat, screenAvailable: CGFloat) -> CGFloat {
@@ -745,82 +810,11 @@ public struct WindowPlacement: ExpressibleByIntegerLiteral, ExpressibleByFloatLi
 	}
 }
 
-public enum WindowSizeAnchor {
-	case aspect
-	case screen
-}
-
-public struct WindowSize: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
-	public typealias FloatLiteralType = Double
-	public typealias IntegerLiteralType = Int
-	
-	public let anchor: WindowSizeAnchor
-	public let ratio: CGFloat
-	public let constant: CGFloat
-	
-	public init(integerLiteral value: Int) {
-		self.init(floatLiteral: Double(value))
-	}
-
-	public init(floatLiteral value: Double) {
-		self.anchor = .screen
-		self.ratio = 0
-		self.constant = CGFloat(value)
-	}
-	
-	public init(anchor: WindowSizeAnchor = .screen, ratio: CGFloat = 0, constant: CGFloat = 0) {
-		self.anchor = anchor
-		self.ratio = ratio
-		self.constant = constant
-	}
-	
-	public static func aspectRatio(_ ratio: CGFloat = 1, constant: CGFloat = 0) -> WindowSize {
-		return WindowSize(anchor: .aspect, ratio: ratio, constant: constant)
-	}
-	
-	public static func screenRatio(_ ratio: CGFloat = 0, constant: CGFloat = 0) -> WindowSize {
-		return WindowSize(anchor: .screen, ratio: ratio, constant: constant)
-	}
-
-	public static let fallbackWindowSize: CGFloat = 400
-	
-	public static func contentSize<W: NSWindow>(width widthSize: WindowSize, height heightSize: WindowSize, onScreen: NSScreen?, windowClass: W.Type, styleMask: NSWindow.StyleMask) -> NSSize {
-		let width: CGFloat
-		let height: CGFloat
-		switch (widthSize.anchor, heightSize.anchor) {
-		case (.aspect, .aspect):
-			fatalError("You cannot define both window width and height as aspect ratios of the other.")
-		case (.aspect, .screen):
-			if heightSize.ratio != 0, let s = onScreen {
-				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
-				height = heightSize.ratio * screenFrame.height + heightSize.constant
-			} else {
-				height = heightSize.constant
-			}
-			width = widthSize.ratio * height + widthSize.constant
-		case (.screen, .aspect):
-			if widthSize.ratio != 0, let s = onScreen {
-				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
-				width = widthSize.ratio * screenFrame.height + widthSize.constant
-			} else {
-				width = widthSize.constant
-			}
-			height = heightSize.ratio * width + heightSize.constant
-		case (.screen, .screen):
-			if (widthSize.ratio != 0 || heightSize.ratio != 0), let s = onScreen {
-				let screenFrame = windowClass.contentRect(forFrameRect: s.visibleFrame, styleMask: styleMask)
-				width = widthSize.ratio * screenFrame.height + widthSize.constant
-				height = heightSize.ratio * screenFrame.height + heightSize.constant
-			} else {
-				width = widthSize.constant
-				height = heightSize.constant
-			}
-		}
-		return NSSize(width: width, height: height)
-	}
-}
-
 extension NSWindow: Lifetime {
+	public static var defaultTitleBarHeight: CGFloat {
+		return NSWindow.frameRect(forContentRect: .zero, styleMask: [.titled]).height
+	}
+	
 	public func cancel() {
 		return nsWindow().close()
 	}

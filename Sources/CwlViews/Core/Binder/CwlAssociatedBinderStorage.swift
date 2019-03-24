@@ -154,17 +154,73 @@ open class DynamicDelegate: NSObject, DefaultConstructable {
 		return (associatedHandler as! ((T, U, V, W, X) -> R))(t, u, v, w, x)
 	}
 	
-	public func addSingleHandler(_ value: Any, _ selector: Selector) {
+	public func addSingleHandler1<T, R>(_ value: @escaping (T) -> R, _ selector: Selector) {
 		precondition(implementedSelectors[selector] == nil, "It is not possible to add multiple handlers to a delegate that returns a value.")
 		implementedSelectors[selector] = value
 	}
 	
-	public func addMultiHandler<T>(_ value: @escaping (T) -> Void, _ selector: Selector) {
+	public func addSingleHandler2<T, U, R>(_ value: @escaping (T, U) -> R, _ selector: Selector) {
+		precondition(implementedSelectors[selector] == nil, "It is not possible to add multiple handlers to a delegate that returns a value.")
+		implementedSelectors[selector] = value
+	}
+	
+	public func addSingleHandler3<T, U, V, R>(_ value: @escaping (T, U, V) -> R, _ selector: Selector) {
+		precondition(implementedSelectors[selector] == nil, "It is not possible to add multiple handlers to a delegate that returns a value.")
+		implementedSelectors[selector] = value
+	}
+	
+	public func addSingleHandler4<T, U, V, W, R>(_ value: @escaping (T, U, V, W) -> R, _ selector: Selector) {
+		precondition(implementedSelectors[selector] == nil, "It is not possible to add multiple handlers to a delegate that returns a value.")
+		implementedSelectors[selector] = value
+	}
+	
+	public func addSingleHandler5<T, U, V, W, X, R>(_ value: @escaping (T, U, V, W, X) -> R, _ selector: Selector) {
+		precondition(implementedSelectors[selector] == nil, "It is not possible to add multiple handlers to a delegate that returns a value.")
+		implementedSelectors[selector] = value
+	}
+	
+	public func addMultiHandler1<T>(_ value: @escaping (T) -> Void, _ selector: Selector) {
 		if let existing = implementedSelectors[selector] {
 			var existingArray = existing as! [(T) -> Void]
 			existingArray.append(value)
 		} else {
 			implementedSelectors[selector] = [value] as [(T) -> Void]
+		}
+	}
+	
+	public func addMultiHandler2<T, U>(_ value: @escaping (T, U) -> Void, _ selector: Selector) {
+		if let existing = implementedSelectors[selector] {
+			var existingArray = existing as! [(T, U) -> Void]
+			existingArray.append(value)
+		} else {
+			implementedSelectors[selector] = [value] as [(T, U) -> Void]
+		}
+	}
+	
+	public func addMultiHandler3<T, U, V>(_ value: @escaping (T, U, V) -> Void, _ selector: Selector) {
+		if let existing = implementedSelectors[selector] {
+			var existingArray = existing as! [(T, U, V) -> Void]
+			existingArray.append(value)
+		} else {
+			implementedSelectors[selector] = [value] as [(T, U, V) -> Void]
+		}
+	}
+	
+	public func addMultiHandler4<T, U, V, W>(_ value: @escaping (T, U, V, W) -> Void, _ selector: Selector) {
+		if let existing = implementedSelectors[selector] {
+			var existingArray = existing as! [(T, U, V, W) -> Void]
+			existingArray.append(value)
+		} else {
+			implementedSelectors[selector] = [value] as [(T, U, V, W) -> Void]
+		}
+	}
+	
+	public func addMultiHandler5<T, U, V, W, X>(_ value: @escaping (T, U, V, W, X) -> Void, _ selector: Selector) {
+		if let existing = implementedSelectors[selector] {
+			var existingArray = existing as! [(T, U, V, W, X) -> Void]
+			existingArray.append(value)
+		} else {
+			implementedSelectors[selector] = [value] as [(T, U, V, W, X) -> Void]
 		}
 	}
 }

@@ -42,20 +42,20 @@ public extension NavigationController {
 		case hidesBarsWhenVerticallyCompact(Dynamic<Bool>)
 		case isNavigationBarHidden(Dynamic<SetOrAnimate<Bool>>)
 		case isToolbarHidden(Dynamic<SetOrAnimate<Bool>>)
-		case preferredInterfaceOrientation(Dynamic<UIInterfaceOrientation>)
 		case stack(Dynamic<StackMutation<ViewControllerConvertible>>)
-		case supportedInterfaceOrientations(Dynamic<UIInterfaceOrientationMask>)
 		
 		// 2. Signal bindings are performed on the object after construction.
 		
 		// 3. Action bindings are triggered by the object after construction.
-		case didShow(SignalInput<(viewController: UIViewController, animated: Bool)>)
 		case poppedToCount(SignalInput<Int>)
-		case willShow(SignalInput<(viewController: UIViewController, animated: Bool)>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case animationController((_ navigationController: UINavigationController, _ operation: UINavigationController.Operation, _ from: UIViewController, _ to: UIViewController) -> UIViewControllerAnimatedTransitioning?)
 		case interactionController((_ navigationController: UINavigationController, _ animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?)
+		case preferredInterfaceOrientation((_ navigationController: UINavigationController) -> UIInterfaceOrientation)
+		case supportedInterfaceOrientations((_ navigationController: UINavigationController) -> UIInterfaceOrientationMask)
+		case didShow((_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void)
+		case willShow((_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void)
 	}
 }
 
@@ -72,13 +72,12 @@ public extension NavigationController {
 		public init(delegateClass: Delegate.Type) {
 			self.delegateClass = delegateClass
 		}
-		public func constructStorage(instance: Instance) -> Storage { return Storage(didShow: didShow, popSignal: popSignal) }
+		public func constructStorage(instance: Instance) -> Storage { return Storage(popSignal: popSignal) }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
 		var popSignal: MultiOutput<Int>? = nil
-		var didShow: MultiOutput<(viewController: UIViewController, animated: Bool)>? = nil
 	}
 }
 
@@ -92,17 +91,15 @@ public extension NavigationController.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .animationController(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:animationControllerFor:from:to:)))
-		case .interactionController(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:interactionControllerFor:)))
-		case .didShow(let x):
-			didShow = didShow ?? Input().multicast()
-			didShow?.signal.bind(to: x)
+		case .animationController(let x): delegate().addSingleHandler4(x, #selector(UINavigationControllerDelegate.navigationController(_:animationControllerFor:from:to:)))
+		case .interactionController(let x): delegate().addSingleHandler2(x, #selector(UINavigationControllerDelegate.navigationController(_:interactionControllerFor:)))
+		case .didShow(let x): delegate().addMultiHandler3(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
 		case .poppedToCount(let x):
 			popSignal = popSignal ?? Input().multicast()
 			popSignal?.signal.bind(to: x)
-		case .preferredInterfaceOrientation(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
-		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
-		case .willShow(let x): delegate().addSingleHandler(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
+		case .preferredInterfaceOrientation(let x): delegate().addSingleHandler1(x, #selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler1(x, #selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
+		case .willShow(let x): delegate().addMultiHandler3(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
 		default: break
 		}
 	}
@@ -164,16 +161,14 @@ extension NavigationController.Preparer {
 		open var preferredInterfaceOrientation: UIInterfaceOrientation = .portrait
 		open var expectedStackCount: Int = 0
 		public let popSignal: MultiOutput<Int>?
-		public let didShow: MultiOutput<(viewController: UIViewController, animated: Bool)>?
 		weak var collapsedController: UINavigationController?
 		
 		open override var isInUse: Bool {
 			return true
 		}
 		
-		public init(didShow: MultiOutput<(viewController: UIViewController, animated: Bool)>?, popSignal: MultiOutput<Int>?) {
+		public init(popSignal: MultiOutput<Int>?) {
 			self.popSignal = popSignal
-			self.didShow = didShow
 			super.init()
 		}
 		
@@ -194,7 +189,9 @@ extension NavigationController.Preparer {
 				collapsedController = collapsed
 			}
 			
-			didShow?.input.send(value: (viewController: viewController, animated: animated))
+			if let dd = dynamicDelegate, dd.handlesSelector(#selector(UINavigationControllerDelegate.navigationController(_:didShow:animated:))), let d = dd as? UINavigationControllerDelegate {
+				d.navigationController?(navigationController, didShow: viewController, animated: animated)
+			}
 		}
 	}
 
@@ -245,20 +242,20 @@ public extension BindingName where Binding: NavigationControllerBinding {
 	static var hidesBarsWhenVerticallyCompact: NavigationControllerName<Dynamic<Bool>> { return .name(B.hidesBarsWhenVerticallyCompact) }
 	static var isNavigationBarHidden: NavigationControllerName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isNavigationBarHidden) }
 	static var isToolbarHidden: NavigationControllerName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isToolbarHidden) }
-	static var preferredInterfaceOrientation: NavigationControllerName<Dynamic<UIInterfaceOrientation>> { return .name(B.preferredInterfaceOrientation) }
 	static var stack: NavigationControllerName<Dynamic<StackMutation<ViewControllerConvertible>>> { return .name(B.stack) }
-	static var supportedInterfaceOrientations: NavigationControllerName<Dynamic<UIInterfaceOrientationMask>> { return .name(B.supportedInterfaceOrientations) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didShow: NavigationControllerName<SignalInput<(viewController: UIViewController, animated: Bool)>> { return .name(B.didShow) }
 	static var poppedToCount: NavigationControllerName<SignalInput<Int>> { return .name(B.poppedToCount) }
-	static var willShow: NavigationControllerName<SignalInput<(viewController: UIViewController, animated: Bool)>> { return .name(B.willShow) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var animationController: NavigationControllerName<(_ navigationController: UINavigationController, _ operation: UINavigationController.Operation, _ from: UIViewController, _ to: UIViewController) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationController) }
 	static var interactionController: NavigationControllerName<(_ navigationController: UINavigationController, _ animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(B.interactionController) }
+	static var preferredInterfaceOrientation: NavigationControllerName<(_ navigationController: UINavigationController) -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientation) }
+	static var supportedInterfaceOrientations: NavigationControllerName<(_ navigationController: UINavigationController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
+	static var didShow: NavigationControllerName<(_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void> { return .name(B.didShow) }
+	static var willShow: NavigationControllerName<(_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void> { return .name(B.willShow) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

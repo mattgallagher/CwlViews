@@ -95,12 +95,12 @@ public extension TabBar.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 
-		case .didBeginCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:didBeginCustomizing:)))
-		case .didEndCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:didEndCustomizing:changed:)))
-		case .didSelectItem(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:didSelect:)))
+		case .didBeginCustomizing(let x): delegate().addMultiHandler3(x, #selector(UITabBarDelegate.tabBar(_:didBeginCustomizing:)))
+		case .didEndCustomizing(let x): delegate().addMultiHandler4(x, #selector(UITabBarDelegate.tabBar(_:didEndCustomizing:changed:)))
+		case .didSelectItem(let x): delegate().addMultiHandler3(x, #selector(UITabBarDelegate.tabBar(_:didSelect:)))
 		case .itemConstructor(let x): tabBarItemConstructor = x
-		case .willBeginCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:willBeginCustomizing:)))
-		case .willEndCustomizing(let x): delegate().addMultiHandler(x, #selector(UITabBarDelegate.tabBar(_:willEndCustomizing:changed:)))
+		case .willBeginCustomizing(let x): delegate().addMultiHandler3(x, #selector(UITabBarDelegate.tabBar(_:willBeginCustomizing:)))
+		case .willEndCustomizing(let x): delegate().addMultiHandler4(x, #selector(UITabBarDelegate.tabBar(_:willEndCustomizing:changed:)))
 		default: break
 		}
 	}

@@ -106,11 +106,11 @@ public extension PageViewController.Preparer {
 		case .pageChanged(let x):
 			pageChanged = pageChanged ?? Input().multicast()
 			pageChanged?.signal.bind(to: x)
-		case .willTransitionTo(let x): delegate().addMultiHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
-		case .didFinishAnimating(let x): delegate().addMultiHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
-		case .spineLocationFor(let x): delegate().addSingleHandler(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
-		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
-		case .interfaceOrientationForPresentation(let x): delegate().addSingleHandler(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
+		case .willTransitionTo(let x): delegate().addMultiHandler2(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
+		case .didFinishAnimating(let x): delegate().addMultiHandler4(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
+		case .spineLocationFor(let x): delegate().addSingleHandler2(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
+		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler1(x, #selector(UIPageViewControllerDelegate.pageViewControllerSupportedInterfaceOrientations(_:)))
+		case .interfaceOrientationForPresentation(let x): delegate().addSingleHandler1(x, #selector(UIPageViewControllerDelegate.pageViewControllerPreferredInterfaceOrientationForPresentation(_:)))
 		default: break
 		}
 	}

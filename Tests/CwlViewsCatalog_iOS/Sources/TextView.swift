@@ -43,7 +43,7 @@ func textView(_ textViewState: TextViewState, _ navigationItem: NavigationItem) 
 					TextView(
 						.text <-- textViewState.text,
 						.font -- .preferredFont(forTextStyle: .body),
-						.textChanged --> textViewState.text.update(),
+						.textChanged() --> textViewState.text.update(),
 						.becomeFirstResponder <-- Signal.just(()),
 						.backgroundColor -- .lightGray
 					)

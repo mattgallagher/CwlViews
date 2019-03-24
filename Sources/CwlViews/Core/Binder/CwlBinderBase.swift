@@ -27,11 +27,17 @@ public struct BinderBase: BinderPreparer {
 	}
 
 	public var inherited: BinderBase { get { return self } set { } }
+	public var adHocClosures: [(Any) -> Lifetime?]?
 
 	public init() {}
 	
 	public func inheritedBinding(from: BinderBase.Binding) -> BinderBase.Binding? { return nil }
-	public mutating func prepareBinding(_ binding: Binding) {}
+	public mutating func prepareBinding(_ binding: Binding) {
+		switch binding {
+		case .adHoc(let x): adHocClosures = adHocClosures?.appending(x) ?? [x]
+		default: break
+		}
+	}
 	public func prepareInstance(_ instance: Instance, storage: Storage) {}
 	public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
@@ -41,11 +47,12 @@ public struct BinderBase: BinderPreparer {
 				return AggregateLifetime(lifetimes: value)
 			case .dynamic(let signal): return signal.continuous().subscribe(context: .main) { _ in }
 			}
-		case .adHoc(let x):
-			return x(instance)
+		case .adHoc: return nil
 		}
 	}
-	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? { return nil }
+	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		return adHocClosures.map { array in AggregateLifetime(lifetimes: array.compactMap { c in c(instance) }) }
+	}
 	public func combine(lifetimes: [Lifetime], instance: Any, storage: Any) -> Any { return () }
 }
 
@@ -69,5 +76,12 @@ public extension BindingName where Binding: BinderBaseBinding {
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: BinderBaseName<$2> { return .name(BinderBase.Binding.$1) }
 	static var lifetimes: BinderBaseName<Dynamic<[Lifetime]>> { return .name(B.lifetimes) }
-	static var adHocBinding: BinderBaseName<(Any) -> Lifetime?> { return .name(B.adHoc) }
+
+	static var adHoc: BinderBaseName<(Binding.Preparer.Instance) -> Lifetime?> {
+		return Binding.compositeName(
+			value: { f in { (any: Any) -> Lifetime? in return f(any as! Binding.Preparer.Instance) } },
+			binding: BinderBase.Binding.adHoc,
+			downcast: Binding.binderBaseBinding
+		)
+	}
 }

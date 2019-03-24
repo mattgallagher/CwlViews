@@ -78,12 +78,12 @@ public extension GestureRecognizer.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
-		case .shouldBegin(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
-		case .shouldRecognizeSimultaneously(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
-		case .shouldRequireFailure(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
-		case .shouldRequireToFail(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
-		case .shouldAttemptToRecognize(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
-		case .shouldReceiveTouch(let x): delegate().addSingleHandler(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
+		case .shouldBegin(let x): delegate().addSingleHandler1(x, #selector(NSGestureRecognizerDelegate.gestureRecognizerShouldBegin(_:)))
+		case .shouldRecognizeSimultaneously(let x): delegate().addSingleHandler2(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)))
+		case .shouldRequireFailure(let x): delegate().addSingleHandler2(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldRequireFailureOf:)))
+		case .shouldRequireToFail(let x): delegate().addSingleHandler2(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldBeRequiredToFailBy:)))
+		case .shouldAttemptToRecognize(let x): delegate().addSingleHandler2(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldAttemptToRecognizeWith:)))
+		case .shouldReceiveTouch(let x): delegate().addSingleHandler2(x, #selector(NSGestureRecognizerDelegate.gestureRecognizer(_:shouldReceive:)))
 		default: break
 		}
 	}

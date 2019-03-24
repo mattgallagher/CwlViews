@@ -33,7 +33,7 @@ extension TestableBinder {
 }
 
 extension TestableBinder where Preparer.Parameters == Void {
-	static var parameters: Preparer.Parameters { return () }
+	static var parameters: Preparer.Parameters { () }
 }
 
 extension TestableBinder where Preparer: BinderConstructor, Preparer.Instance == Preparer.Output {

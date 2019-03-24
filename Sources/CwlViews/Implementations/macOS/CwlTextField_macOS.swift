@@ -21,7 +21,12 @@
 
 // MARK: - Binder Part 1: Binder
 public class TextField: Binder, TextFieldConvertible {
-	public static var defaultLabelBindings: [Binding] {
+	public var state: BinderState<Preparer>
+	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
+		state = .pending(type: type, parameters: parameters, bindings: bindings)
+	}
+
+	public static var labelBindings: [Binding] {
 		return [
 			.isEditable -- false,
 			.isBordered -- false,
@@ -29,13 +34,8 @@ public class TextField: Binder, TextFieldConvertible {
 		]
 	}
 	
-	public var state: BinderState<Preparer>
-	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
-		state = .pending(type: type, parameters: parameters, bindings: bindings)
-	}
-
-	public convenience init(type: Instance.Type = Instance.self, labelStyled bindings: Binding...) {
-		self.init(type: type, parameters: (), bindings: TextField.defaultLabelBindings + bindings)
+	public static func label(type: Instance.Type = Instance.self, _ bindings: Binding...) -> TextField {
+		return TextField(type: type, parameters: (), bindings: TextField.labelBindings + bindings)
 	}
 }
 
@@ -110,13 +110,13 @@ public extension TextField.Preparer {
 		switch binding {
 		case .inheritedBinding(let preceeding): inherited.prepareBinding(preceeding)
 		
-		case .completions(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
-		case .didFailToFormatString(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
-		case .didFailToValidatePartialString(let x): delegate().addMultiHandler(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
-		case .doCommand(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
-		case .isValidObject(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
-		case .shouldBeginEditing(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
-		case .shouldEndEditing(let x): delegate().addSingleHandler(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
+		case .completions(let x): delegate().addSingleHandler5(x, #selector(NSTextFieldDelegate.control(_:textView:completions:forPartialWordRange:indexOfSelectedItem:)))
+		case .didFailToFormatString(let x): delegate().addSingleHandler3(x, #selector(NSTextFieldDelegate.control(_:didFailToFormatString:errorDescription:)))
+		case .didFailToValidatePartialString(let x): delegate().addMultiHandler3(x, #selector(NSTextFieldDelegate.control(_:didFailToValidatePartialString:errorDescription:)))
+		case .doCommand(let x): delegate().addSingleHandler3(x, #selector(NSTextFieldDelegate.control(_:textView:doCommandBy:)))
+		case .isValidObject(let x): delegate().addSingleHandler2(x, #selector(NSTextFieldDelegate.control(_:isValidObject:)))
+		case .shouldBeginEditing(let x): delegate().addSingleHandler2(x, #selector(NSTextFieldDelegate.control(_:textShouldBeginEditing:)))
+		case .shouldEndEditing(let x): delegate().addSingleHandler2(x, #selector(NSTextFieldDelegate.control(_:textShouldEndEditing:)))
 		default: break
 		}
 	}

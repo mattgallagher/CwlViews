@@ -210,7 +210,7 @@ public extension BindingName where Binding: ControlBinding {
 	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, Control.Binding.action, Binding.controlBinding)
 	}
-	static var stringChanged: ControlName<SignalInput<String>> {
+	static func stringChanged(_ void: Void = ()) -> ControlName<SignalInput<String>> {
 		return Binding.compositeName(
 			value: { input in { text in _ = input.send(value: text.string) } },
 			binding: Control.Binding.textDidChange,

@@ -37,7 +37,7 @@ func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
 			.cellConstructor -- { reuseIdentifier, cellData in
 				TableViewCell(.textLabel -- Label(.text <-- cellData.map { data in data.localizedString }))
 			},
-			.didSelectRow --> Input().keyPath(\.data?.viewState).bind(to: viewState.rowSelection),
+			.rowSelected(\.data?.viewState) --> viewState.rowSelection,
 			.selectRow <-- viewState.rowSelection.compactMap { $0 == nil ? .animate(nil) : nil }
 		)
 	)

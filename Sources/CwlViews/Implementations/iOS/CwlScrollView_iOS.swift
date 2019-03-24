@@ -113,32 +113,32 @@ public extension ScrollView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .didEndDecelerating(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:)))
-		case .didEndDragging(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
-		case .didEndScrollingAnimation(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndScrollingAnimation(_:)))
-		case .didEndZooming(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidEndZooming(_:with:atScale:)))
-		case .didScroll(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)))
-		case .didScrollToTop(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:)))
-		case .didZoom(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewDidZoom(_:)))
-		case .shouldScrollToTop(let x): delegate().addSingleHandler(x, #selector(UIScrollViewDelegate.scrollViewShouldScrollToTop(_:)))
+		case .didEndDecelerating(let x): delegate().addMultiHandler1(x, #selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:)))
+		case .didEndDragging(let x): delegate().addMultiHandler2(x, #selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
+		case .didEndScrollingAnimation(let x): delegate().addMultiHandler1(x, #selector(UIScrollViewDelegate.scrollViewDidEndScrollingAnimation(_:)))
+		case .didEndZooming(let x): delegate().addMultiHandler3(x, #selector(UIScrollViewDelegate.scrollViewDidEndZooming(_:with:atScale:)))
+		case .didScroll(let x): delegate().addMultiHandler2(x, #selector(UIScrollViewDelegate.scrollViewDidScroll(_:)))
+		case .didScrollToTop(let x): delegate().addMultiHandler1(x, #selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:)))
+		case .didZoom(let x): delegate().addMultiHandler1(x, #selector(UIScrollViewDelegate.scrollViewDidZoom(_:)))
+		case .shouldScrollToTop(let x): delegate().addSingleHandler1(x, #selector(UIScrollViewDelegate.scrollViewShouldScrollToTop(_:)))
 		case .userDidScroll(let x):
-			delegate().addMultiHandler(
+			delegate().addMultiHandler1(
 				{ (sv: UIScrollView) -> Void in x.send(value: sv.contentOffset) },
 				#selector(UIScrollViewDelegate.scrollViewDidScrollToTop(_:))
 			)
-			delegate().addMultiHandler(
+			delegate().addMultiHandler2(
 				{ (sv: UIScrollView, d: Bool) -> Void in if !d { x.send(value: sv.contentOffset) } },
 				#selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:))
 			)
-			delegate().addMultiHandler(
+			delegate().addMultiHandler1(
 				{ (sv: UIScrollView) -> Void in x.send(value: sv.contentOffset) },
 				#selector(UIScrollViewDelegate.scrollViewDidEndDecelerating(_:))
 			)
-		case .viewForZooming(let x): delegate().addSingleHandler(x, #selector(UIScrollViewDelegate.viewForZooming(in:)))
-		case .willBeginDecelerating(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDecelerating(_:)))
-		case .willBeginDragging(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDragging(_:)))
-		case .willBeginZooming(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillBeginZooming(_:with:)))
-		case .willEndDragging(let x): delegate().addMultiHandler(x, #selector(UIScrollViewDelegate.scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)))
+		case .viewForZooming(let x): delegate().addSingleHandler1(x, #selector(UIScrollViewDelegate.viewForZooming(in:)))
+		case .willBeginDecelerating(let x): delegate().addMultiHandler1(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDecelerating(_:)))
+		case .willBeginDragging(let x): delegate().addMultiHandler1(x, #selector(UIScrollViewDelegate.scrollViewWillBeginDragging(_:)))
+		case .willBeginZooming(let x): delegate().addMultiHandler2(x, #selector(UIScrollViewDelegate.scrollViewWillBeginZooming(_:with:)))
+		case .willEndDragging(let x): delegate().addMultiHandler3(x, #selector(UIScrollViewDelegate.scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)))
 		default: break
 		}
 	}

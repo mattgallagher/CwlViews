@@ -136,19 +136,21 @@ public extension BindingName where Binding: ControlBinding {
 	static var actions: ControlName<ControlActions> { return .name(B.actions) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	
+
 	// Composite binding names
-	static func action(_ scope: UIControl.Event) -> ControlName<SignalInput<UIControl>> {
+	static func action<Value>(_ scope: UIControl.Event, _ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
 		return Binding.mappedWrappedInputName(
-			map: { tuple in tuple.0 },
+			map: { tuple in
+				(tuple.0 as! Binding.Preparer.Instance)[keyPath: keyPath]
+			},
 			wrap: { input in ControlActions(scope: scope, value: ControlAction.singleTarget(input)) },
 			binding: Control.Binding.actions,
 			downcast: Binding.controlBinding
 		)
 	}
-	static func action<Value>(_ scope: UIControl.Event, _ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
+	static func action(_ scope: UIControl.Event) -> ControlName<SignalInput<Void>> {
 		return Binding.mappedWrappedInputName(
-			map: { tuple in (tuple.0 as! Binding.Preparer.Instance)[keyPath: keyPath] },
+			map: { tuple in () },
 			wrap: { input in ControlActions(scope: scope, value: ControlAction.singleTarget(input)) },
 			binding: Control.Binding.actions,
 			downcast: Binding.controlBinding
@@ -189,7 +191,7 @@ public extension Control.Binding {
 // MARK: - Binder Part 9: Other supporting types
 public enum ControlAction {
 	case firstResponder(Selector)
-	case singleTarget(SignalInput<(UIControl, UIEvent)>)
+	case singleTarget(SignalInput<(control: UIControl, event: UIEvent)>)
 }
 
 public typealias ControlActions = ScopedValues<UIControl.Event, ControlAction>
@@ -219,19 +221,19 @@ extension ScopedValues where Scope == UIControl.State {
 }
 
 open class SignalControlEventActionTarget: NSObject {
-	private var signalInput: SignalInput<(UIControl, UIEvent)>? = nil
+	private var signalInput: SignalInput<(control: UIControl, event: UIEvent)>? = nil
 	
 	// Ownership note: we are owned by the output signal so we only weakly retain it.
-	private weak var signalOutput: SignalMulti<(UIControl, UIEvent)>? = nil
+	private weak var signalOutput: SignalMulti<(control: UIControl, event: UIEvent)>? = nil
 	
 	/// The `signal` emits the actions received
-	public var signal: SignalMulti<(UIControl, UIEvent)> {
+	public var signal: SignalMulti<(control: UIControl, event: UIEvent)> {
 		// If there's a current signal output, return it
 		if let so = signalOutput {
 			return so
 		}
 		
-		let s = Signal<(UIControl, UIEvent)>.generate { i in self.signalInput = i }.continuous()
+		let s = Signal<(control: UIControl, event: UIEvent)>.generate { i in self.signalInput = i }.continuous()
 		self.signalOutput = s
 		return s
 	}
@@ -239,12 +241,12 @@ open class SignalControlEventActionTarget: NSObject {
 	/// Receiver function for the target-action events
 	///
 	/// - Parameter sender: typical target-action "sender" parameter
-	@IBAction public func cwlSignalAction(_ sender: UIControl, forEvent event: UIEvent) {
+	@IBAction public func cwlSendAction(_ sender: UIControl, forEvent event: UIEvent) {
 		_ = signalInput?.send(value: (sender, event))
 	}
 	
 	/// Convenience accessor for `#selector(SignalActionTarget<Value>.action(_:))`
-	public var selector: Selector { return #selector(SignalControlEventActionTarget.cwlSignalAction(_:forEvent:)) }
+	public var selector: Selector { return #selector(SignalControlEventActionTarget.cwlSendAction(_:forEvent:)) }
 }
 
 #endif

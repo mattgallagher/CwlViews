@@ -43,7 +43,7 @@ func textFieldView(_ textFieldViewState: TextFieldViewState, _ navigationItem: N
 					breadth: .equalTo(ratio: 1.0),
 					TextField(
 						.text <-- textFieldViewState.text,
-						.textChanged --> textFieldViewState.text.update(),
+						.textChanged() --> textFieldViewState.text.update(),
 						.borderStyle -- .roundedRect,
 						.becomeFirstResponder <-- Signal.just(())
 					)

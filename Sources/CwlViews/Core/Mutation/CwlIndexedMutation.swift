@@ -188,6 +188,36 @@ public extension IndexedMutation {
 		}
 		return false
 	}
+	
+	func insertionsAndRemovals(length: Int, insert: (Int, Element) -> Void, remove: (Int) -> Void) {
+		switch kind {
+		case .delete:
+			indexSet.reversed().forEach { remove($0) }
+		case .scroll(let offset):
+			if offset > 0 {
+				(0..<offset).forEach { remove($0) }
+				values.enumerated().forEach { insert(length - offset + $0.offset, $0.element) }
+			} else {
+				((length + offset)..<length).forEach { remove($0) }
+				values.enumerated().forEach { insert($0.offset, $0.element) }
+			}
+		case .move(let index):
+			indexSet.forEach { remove($0) }
+			values.enumerated().forEach { insert(index + $0.offset, $0.element) }
+		case .insert:
+			for (i, v) in zip(indexSet, values) {
+				insert(i, v)
+			}
+		case .update:
+			indexSet.forEach { remove($0) }
+			for (i, v) in zip(indexSet, values) {
+				insert(i, v)
+			}
+		case .reload:
+			(0..<length).reversed().forEach { remove($0) }
+			values.enumerated().forEach { insert($0.offset, $0.element) }
+		}
+	}
 }
 
 public typealias ArrayMutation<Element> = IndexedMutation<Element, Void>

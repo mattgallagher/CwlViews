@@ -29,7 +29,7 @@ func layoutWithAnimation(_ buttonViewState: ButtonViewState) -> Signal<Layout> {
 		.title <-- buttonViewState.showChild
 			.map { show in show ? .normal(.collapse) : .normal(.expand) },
 		.titleColor -- .normal(.blue),
-		.action(.primaryActionTriggered) --> Input().map { _ in () }.bind(to: buttonViewState.showChild)
+		.action(.primaryActionTriggered) --> buttonViewState.showChild
 	)
 	let childView = View(
 		.backgroundColor <-- buttonViewState.showChild.map { show in show ? .orange : .red },

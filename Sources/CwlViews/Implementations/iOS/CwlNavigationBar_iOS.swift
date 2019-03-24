@@ -86,11 +86,11 @@ public extension NavigationBar.Preparer {
 		switch binding { 
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
-		case .didPop(let x): delegate().addMultiHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
-		case .didPush(let x): delegate().addMultiHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
-		case .position(let x): delegate().addSingleHandler(x, #selector(UINavigationBarDelegate.position(for:)))
-		case .shouldPop(let x): delegate().addSingleHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
-		case .shouldPush(let x): delegate().addSingleHandler(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
+		case .didPop(let x): delegate().addMultiHandler2(x, #selector(UINavigationBarDelegate.navigationBar(_:didPop:)))
+		case .didPush(let x): delegate().addMultiHandler2(x, #selector(UINavigationBarDelegate.navigationBar(_:didPush:)))
+		case .position(let x): delegate().addSingleHandler1(x, #selector(UINavigationBarDelegate.position(for:)))
+		case .shouldPop(let x): delegate().addSingleHandler2(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPop:)))
+		case .shouldPush(let x): delegate().addSingleHandler2(x, #selector(UINavigationBarDelegate.navigationBar(_:shouldPush:)))
 		default: break
 		}
 	}

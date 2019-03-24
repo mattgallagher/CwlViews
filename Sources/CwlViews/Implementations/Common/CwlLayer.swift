@@ -135,10 +135,10 @@ public extension Layer.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
-		case .display(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.display(_:)))
-		case .draw(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.draw(_:in:)))
-		case .willDraw(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.layerWillDraw(_:)))
-		case .layoutSublayers(let x): delegate().addMultiHandler(x, #selector(CALayerDelegate.layoutSublayers(of:)))
+		case .display(let x): delegate().addMultiHandler1(x, #selector(CALayerDelegate.display(_:)))
+		case .draw(let x): delegate().addMultiHandler2(x, #selector(CALayerDelegate.draw(_:in:)))
+		case .willDraw(let x): delegate().addMultiHandler1(x, #selector(CALayerDelegate.layerWillDraw(_:)))
+		case .layoutSublayers(let x): delegate().addMultiHandler1(x, #selector(CALayerDelegate.layoutSublayers(of:)))
 		default: break
 		}
 	}

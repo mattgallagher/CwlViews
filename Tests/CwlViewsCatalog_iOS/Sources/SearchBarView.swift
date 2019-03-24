@@ -28,7 +28,7 @@ func searchBarView(_ searchBarViewState: SearchBarViewState, _ navigationItem: N
 				.view(SearchBar(
 					.placeholder -- .searchTimezones,
 					.text <-- searchBarViewState.search,
-					.didChange --> searchBarViewState.search
+					.textChanged() --> searchBarViewState.search
 				)),
 				.view(length: .fillRemaining,
 					tableView(searchBarViewState)
@@ -53,7 +53,7 @@ fileprivate func tableView(_ searchBarViewState: SearchBarViewState) -> TableVie
 		},
 		.scrollToRow <-- searchBarViewState.firstRow.restoreFirstRow(),
 		.userDidScrollToRow --> Input().keyPath(\.indexPath).optional().bind(to: searchBarViewState.firstRow.update()),
-		.didSelectRow --> Input().keyPath(\.indexPath).bind(to: searchBarViewState.selectedRow),
+		.rowSelected(\.indexPath) --> searchBarViewState.selectedRow,
 		.deselectRow <-- searchBarViewState.selectedRow.animate(.always)
 	)
 }

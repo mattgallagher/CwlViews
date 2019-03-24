@@ -19,7 +19,7 @@ func tabbedView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 			TabBarController<Tabs>(
 				.navigationItem -- NavigationItem(.title <-- viewState.selectedTab.map { $0.title }),
 				.items -- [.left, .right],
-				.didSelect --> viewState.selectedTab,
+				.tabSelected() --> viewState.selectedTab,
 				.tabConstructor -- { identifier in
 					switch identifier {
 					case .left:
@@ -43,7 +43,7 @@ func tabbedView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 						)
 					}
 				},
-				.animationControllerForTransition -- { _, source, destination -> UIViewControllerAnimatedTransitioning? in
+				.animationControllerForTransition -- { _, source, _, destination, _ -> UIViewControllerAnimatedTransitioning? in
 					guard let navControllerView = source.navigationController?.view else { return nil }
 					UIView.transition(from: navControllerView, to: navControllerView, duration: 0.3, options: [.transitionCrossDissolve, .showHideTransitionViews])
 					return nil

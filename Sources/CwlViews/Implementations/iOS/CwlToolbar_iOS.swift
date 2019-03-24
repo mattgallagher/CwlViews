@@ -67,7 +67,7 @@ public extension Toolbar.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 			
-		case .position(let x): delegate().addSingleHandler(x, #selector(UIToolbarDelegate.position(for:)))
+		case .position(let x): delegate().addSingleHandler1(x, #selector(UIToolbarDelegate.position(for:)))
 		default: break
 		}
 	}

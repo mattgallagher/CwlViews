@@ -116,38 +116,38 @@ public extension Application.Preparer {
 		switch binding {
 		case .inheritedBinding(let s): inherited.prepareBinding(s)
 
-		case .continueUserActivity(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:continue:restorationHandler:)))
-		case .didBecomeActive(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationDidBecomeActive(_:)))
+		case .continueUserActivity(let x): delegate().addSingleHandler3(x, #selector(UIApplicationDelegate.application(_:continue:restorationHandler:)))
+		case .didBecomeActive(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationDidBecomeActive(_:)))
 		case .didDecodeRestorableState(let x):
-			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didDecodeRestorableStateWith:)))
-			delegate().addSingleHandler({ (a: UIApplication, c: NSCoder) in true }, #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:)))
-		case .didEnterBackground(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
-		case .didFailToContinueUserActivity(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
-		case .didFinishLaunching(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)))
-		case .didReceiveMemoryWarning(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:)))
-		case .didReceiveRemoteNotification(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)))
+			delegate().addMultiHandler2(x, #selector(UIApplicationDelegate.application(_:didDecodeRestorableStateWith:)))
+			delegate().addSingleHandler2({ (a: UIApplication, c: NSCoder) in true }, #selector(UIApplicationDelegate.application(_:shouldRestoreApplicationState:)))
+		case .didEnterBackground(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationDidEnterBackground(_:)))
+		case .didFailToContinueUserActivity(let x): delegate().addMultiHandler3(x, #selector(UIApplicationDelegate.application(_:didFailToContinueUserActivityWithType:error:)))
+		case .didFinishLaunching(let x): delegate().addSingleHandler2(x, #selector(UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)))
+		case .didReceiveMemoryWarning(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationDidReceiveMemoryWarning(_:)))
+		case .didReceiveRemoteNotification(let x): delegate().addMultiHandler3(x, #selector(UIApplicationDelegate.application(_:didReceiveRemoteNotification:fetchCompletionHandler:)))
 		case .didRegisterRemoteNotifications(let x):
-			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
-			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
-		case .didUpdate(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:didUpdate:)))
-		case .handleEventsForBackgroundURLSession(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:)))
-		case .handleWatchKitExtensionRequest(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:)))
-		case .open(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:open:options:)))
-		case .performAction(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:)))
-		case .performFetch(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:)))
-		case .protectedDataWillBecomeUnavailable(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:)))
-		case .protectedDataDidBecomeAvailable(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationProtectedDataDidBecomeAvailable(_:)))
-		case .shouldAllowExtensionPointIdentifier(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:shouldAllowExtensionPointIdentifier:)))
-		case .shouldRequestHealthAuthorization(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationShouldRequestHealthAuthorization(_:)))
-		case .significantTimeChange(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationSignificantTimeChange(_:)))
-		case .viewControllerWithRestorationPath(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:viewControllerWithRestorationIdentifierPath:coder:)))
-		case .willContinueUserActivity(let x): delegate().addSingleHandler(x, #selector(UIApplicationDelegate.application(_:willContinueUserActivityWithType:)))
+			delegate().addMultiHandler2(x, #selector(UIApplicationDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)))
+			delegate().addMultiHandler2(x, #selector(UIApplicationDelegate.application(_:didFailToRegisterForRemoteNotificationsWithError:)))
+		case .didUpdate(let x): delegate().addMultiHandler2(x, #selector(UIApplicationDelegate.application(_:didUpdate:)))
+		case .handleEventsForBackgroundURLSession(let x): delegate().addMultiHandler3(x, #selector(UIApplicationDelegate.application(_:handleEventsForBackgroundURLSession:completionHandler:)))
+		case .handleWatchKitExtensionRequest(let x): delegate().addMultiHandler3(x, #selector(UIApplicationDelegate.application(_:handleWatchKitExtensionRequest:reply:)))
+		case .open(let x): delegate().addSingleHandler3(x, #selector(UIApplicationDelegate.application(_:open:options:)))
+		case .performAction(let x): delegate().addMultiHandler3(x, #selector(UIApplicationDelegate.application(_:performActionFor:completionHandler:)))
+		case .performFetch(let x): delegate().addMultiHandler2(x, #selector(UIApplicationDelegate.application(_:performFetchWithCompletionHandler:)))
+		case .protectedDataWillBecomeUnavailable(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationProtectedDataWillBecomeUnavailable(_:)))
+		case .protectedDataDidBecomeAvailable(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationProtectedDataDidBecomeAvailable(_:)))
+		case .shouldAllowExtensionPointIdentifier(let x): delegate().addSingleHandler2(x, #selector(UIApplicationDelegate.application(_:shouldAllowExtensionPointIdentifier:)))
+		case .shouldRequestHealthAuthorization(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationShouldRequestHealthAuthorization(_:)))
+		case .significantTimeChange(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationSignificantTimeChange(_:)))
+		case .viewControllerWithRestorationPath(let x): delegate().addSingleHandler3(x, #selector(UIApplicationDelegate.application(_:viewControllerWithRestorationIdentifierPath:coder:)))
+		case .willContinueUserActivity(let x): delegate().addSingleHandler2(x, #selector(UIApplicationDelegate.application(_:willContinueUserActivityWithType:)))
 		case .willEncodeRestorableState(let x):
-			delegate().addMultiHandler(x, #selector(UIApplicationDelegate.application(_:willEncodeRestorableStateWith:)))
-			delegate().addSingleHandler({ (a: UIApplication, c: NSCoder) in true }, #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:)))
-		case .willEnterForeground(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationWillEnterForeground(_:)))
-		case .willResignActive(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationWillResignActive(_:)))
-		case .willTerminate(let x): delegate().addMultiHandler(x, #selector(UIApplicationDelegate.applicationWillTerminate(_:)))
+			delegate().addMultiHandler2(x, #selector(UIApplicationDelegate.application(_:willEncodeRestorableStateWith:)))
+			delegate().addSingleHandler2({ (a: UIApplication, c: NSCoder) in true }, #selector(UIApplicationDelegate.application(_:shouldSaveApplicationState:)))
+		case .willEnterForeground(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationWillEnterForeground(_:)))
+		case .willResignActive(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationWillResignActive(_:)))
+		case .willTerminate(let x): delegate().addMultiHandler1(x, #selector(UIApplicationDelegate.applicationWillTerminate(_:)))
 		default: break
 		}
 	}
@@ -301,11 +301,11 @@ extension Application.Preparer {
 		}
 		
 		public func application(_ application: UIApplication, willEncodeRestorableStateWith coder: NSCoder) {
-			return singleHandler(application, coder as! NSKeyedArchiver)
+			return multiHandler(application, coder as! NSKeyedArchiver)
 		}
 		
 		public func application(_ application: UIApplication, didDecodeRestorableStateWith coder: NSCoder) {
-			return singleHandler(application, coder as! NSKeyedUnarchiver)
+			return multiHandler(application, coder as! NSKeyedUnarchiver)
 		}
 		
 		public func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {

@@ -17,7 +17,7 @@ func aboutTabScrollContainer() -> ViewConvertible {
 				.contentInsetAdjustmentBehavior -- .never,
 				.layout -- .fill(
 					marginEdges: .none,
-					length: .equalTo(ratio: 1, priority: .userMid),
+					length: .equalTo(ratio: 1, priority: .layoutMid),
 					breadth: .equalTo(ratio: 1),
 					aboutTabContent()
 				)

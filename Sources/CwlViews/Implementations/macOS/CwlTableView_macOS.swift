@@ -44,7 +44,7 @@ public extension TableView {
 	enum Binding: TableViewBinding {
 		public typealias RowDataType = RowData
 		
-		case inheritedBinding(TableView<RowData>.Preparer.Inherited.Binding)
+		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		
@@ -741,7 +741,7 @@ public protocol TableViewBinding: ControlBinding {
 }
 public extension TableViewBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
-		return tableViewBinding(TableView<RowDataType>.Binding.inheritedBinding(binding))
+		return tableViewBinding(.inheritedBinding(binding))
 	}
 }
 public extension TableView.Binding {

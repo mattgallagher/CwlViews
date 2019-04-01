@@ -46,8 +46,10 @@
 			case controlRegular
 			case controlSmall
 			case label
-			case other(CGFloat)
+			case points(CGFloat)
 			case system
+			case title1
+			case title2
 		}
 
 		static func preferredFont(forTextStyle style: TextStyle, size: TextSize = .system, weight: NSFont.Weight = .regular, slant: CGFloat = 0) -> NSFont {
@@ -57,8 +59,10 @@
 			case .controlRegular: pointSize = NSFont.systemFontSize(for: .regular)
 			case .controlSmall: pointSize = NSFont.systemFontSize(for: .small)
 			case .label: pointSize = NSFont.labelFontSize
-			case .other(let other): pointSize = other
+			case .points(let other): pointSize = other
 			case .system: pointSize = NSFont.systemFontSize
+			case .title1: pointSize = NSFont.systemFontSize + 6
+			case .title2: pointSize = NSFont.systemFontSize + 3
 			}
 			
 			let base: NSFont

@@ -35,6 +35,7 @@ public extension Window {
 		//	0. Static bindings are applied at construction and are subsequently immutable.
 		case contentView(Constant<View>)
 		case deferCreation(Constant<Bool>)
+		case initialFirstResponderTag(Constant<Int>)
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case acceptsMouseMovedEvents(Dynamic<Bool>)
@@ -112,6 +113,7 @@ public extension Window {
 		case zoom(Signal<Bool>)
 		
 		// 3. Action bindings are triggered by the object after construction.
+		case effectiveAppearanceName(SignalInput<NSAppearance.Name>)
 		case didBecomeKey(SignalInput<Void>)
 		case didBecomeMain(SignalInput<Void>)
 		case didChangeBackingProperties(SignalInput<(oldColorSpace: NSColorSpace?, oldScaleFactor: CGFloat?)>)
@@ -173,6 +175,7 @@ public extension Window {
 		}
 
 		var deferCreation: Bool? = nil
+		var initialFirstResponder: Int? = nil
 		
 		var contentWidth = InitialSubsequent<WindowDimension>()
 		var contentHeight = InitialSubsequent<WindowDimension>()
@@ -232,6 +235,7 @@ public extension Window.Preparer {
 		case .frameHorizontal(let x): frameHorizontal = x
 		case .frameVertical(let x): frameVertical = x
 		case .key(let x): key = x
+		case .initialFirstResponderTag(let x): initialFirstResponder = x.value
 		case .main(let x): main = x
 		case .order(let x): order = x
 		case .screen(let x): screen = x.initialSubsequent()
@@ -314,6 +318,7 @@ public extension Window.Preparer {
 		case .isOneShot(let x): return x.apply(instance) { i, v in i.isOneShot = v }
 		case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
 		case .isRestorable(let x): return x.apply(instance) { i, v in i.isRestorable = v }
+		case .initialFirstResponderTag: return nil
 		case .key: return nil
 		case .level(let x): return x.apply(instance) { i, v in i.level = v }
 		case .main: return nil
@@ -387,6 +392,12 @@ public extension Window.Preparer {
 		case .zoom(let x): return x.apply(instance) { i, v in v ? i.performZoom(nil) : i.zoom(nil) }
 			
 		// 3. Action bindings are triggered by the object after construction.
+		case .effectiveAppearanceName(let x):
+			return instance.observe(\.effectiveAppearance, options: [.initial, .new]) { instance, change in
+				if let value = change.newValue {
+					x.send(value: value.name)
+				}
+			}
 		case .didBecomeKey(let x): return Signal.notifications(name: NSWindow.didBecomeKeyNotification, object: instance).map { n in () }.cancellableBind(to: x)
 		case .didBecomeMain(let x): return Signal.notifications(name: NSWindow.didBecomeMainNotification, object: instance).map { n in () }.cancellableBind(to: x)
 		case .didChangeBackingProperties(let x):
@@ -440,6 +451,9 @@ public extension Window.Preparer {
 		
 		// Layout the content
 		instance.layoutIfNeeded()
+		if let initialFirstResponder = initialFirstResponder {
+			instance.initialFirstResponder = instance.contentView?.viewWithTag(initialFirstResponder)
+		}
 		
 		// Following content layout, attempt to place the window on screen
 		lifetimes += frameHorizontal?.apply(instance) { i, v in
@@ -616,6 +630,7 @@ public extension BindingName where Binding: WindowBinding {
 	static var zoom: WindowName<Signal<Bool>> { return .name(B.zoom) }
 	
 	// 3. Action bindings are triggered by the object after construction.
+	static var effectiveAppearanceName: WindowName<SignalInput<NSAppearance.Name>> { return .name(B.effectiveAppearanceName) }
 	static var didBecomeKey: WindowName<SignalInput<Void>> { return .name(B.didBecomeKey) }
 	static var didBecomeMain: WindowName<SignalInput<Void>> { return .name(B.didBecomeMain) }
 	static var didChangeBackingProperties: WindowName<SignalInput<(oldColorSpace: NSColorSpace?, oldScaleFactor: CGFloat?)>> { return .name(B.didChangeBackingProperties) }

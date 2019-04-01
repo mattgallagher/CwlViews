@@ -64,6 +64,7 @@ private extension Tabs {
 
 private extension String {
 	static let aboutTab = NSLocalizedString("About", comment: "")
+	static let aboutTitle = NSLocalizedString("CwlViews Catalog", comment: "")
 	static let bodyText = NSLocalizedString("""
 		This catalog should contain one instance of every type of view constructible by CwlViews.
 		
@@ -73,6 +74,5 @@ private extension String {
 		The usage of views in this catalog should not be considered idiomatic as the program has \
 		no model.
 		""", comment: "")
-	static let aboutTitle = NSLocalizedString("CwlViews Catalog", comment: "")
 	static let listTab = NSLocalizedString("List", comment: "")
 }

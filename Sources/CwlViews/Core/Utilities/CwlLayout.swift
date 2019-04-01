@@ -379,9 +379,18 @@ public struct Layout {
 		public static func matched(_ first: Entity, _ subsequent: Matched.Element...) -> Entity {
 			return Entity(.matched(.init(first: first, subsequent: subsequent)))
 		}
-
+		
 		public static func matched(_ first: Entity, subsequent: [Matched.Element]) -> Entity {
 			return Entity(.matched(.init(first: first, subsequent: subsequent)))
+		}
+		
+		public static func matched(priority: Dimension.Priority = .required, _ entities: Entity...) -> Entity {
+			return matched(entities: entities)
+		}
+		
+		public static func matched(priority: Dimension.Priority = .required, entities: [Entity]) -> Entity {
+			guard let first = entities.first else { return .space(0) }
+			return Entity(.matched(.init(first: first, subsequent: entities.dropFirst().map { .same(priority: priority, $0) })))
 		}
 	}
 	
@@ -394,13 +403,14 @@ public struct Layout {
 				self.entity = entity
 				self.dimension = dimension
 			}
-			public static func same(_ entity: Entity) -> Dependent {
-				return .init(dimension: Dimension.equalTo(ratio: 1), entity)
-			}
 		}
 		public enum Element {
 			case dependent(Dependent)
 			case free(Entity)
+
+			public static func same(priority: Dimension.Priority = .required, _ entity: Entity) -> Element {
+				return .dependent(.init(dimension: Dimension.equalTo(ratio: 1, priority: priority), entity))
+			}
 		}
 		public let first: Entity
 		public let subsequent: [Element]

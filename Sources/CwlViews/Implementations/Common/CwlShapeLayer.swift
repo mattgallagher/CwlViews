@@ -30,7 +30,7 @@ public extension ShapeLayer {
 		case lineJoin(Dynamic<CAShapeLayerLineJoin>)
 		case lineWidth(Dynamic<CGFloat>)
 		case miterLimit(Dynamic<CGFloat>)
-		case path(Dynamic<CGPath?>)
+		case path(Dynamic<CGPath>)
 		case strokeColor(Dynamic<CGColor?>)
 		case strokeEnd(Dynamic<CGFloat>)
 		case strokeStart(Dynamic<CGFloat>)
@@ -110,7 +110,7 @@ public extension BindingName where Binding: ShapeLayerBinding {
 	static var lineJoin: ShapeLayerName<Dynamic<CAShapeLayerLineJoin>> { return .name(B.lineJoin) }
 	static var lineWidth: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.lineWidth) }
 	static var miterLimit: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.miterLimit) }
-	static var path: ShapeLayerName<Dynamic<CGPath?>> { return .name(B.path) }
+	static var path: ShapeLayerName<Dynamic<CGPath>> { return .name(B.path) }
 	static var strokeColor: ShapeLayerName<Dynamic<CGColor?>> { return .name(B.strokeColor) }
 	static var strokeEnd: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.strokeEnd) }
 	static var strokeStart: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.strokeStart) }

@@ -61,6 +61,8 @@ public extension Button {
 		case state(Dynamic<NSControl.StateValue>)
 		case title(Dynamic<String>)
 
+		@available(macOS 10.14, *) case contentTintColor(Dynamic<NSColor?>)
+
 		//	2. Signal bindings are performed on the object after construction.
 		case setNextState(Signal<Void>)
 
@@ -103,6 +105,12 @@ public extension Button.Preparer {
 		case .bezelColor(let x): return x.apply(instance) { i, v in i.bezelColor = v }
 		case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
 		case .buttonType(let x): return x.apply(instance) { i, v in i.setButtonType(v) }
+		case .contentTintColor(let x):
+			return x.apply(instance) { i, v in
+				if #available(macOS 10.14, *) {
+					i.contentTintColor = v
+				}
+			}
 		case .highlight(let x): return x.apply(instance) { i, v in i.highlight(v) }
 		case .image(let x): return x.apply(instance) { i, v in i.image = v }
 		case .imageHugsTitle(let x): return x.apply(instance) { i, v in i.imageHugsTitle = v }
@@ -177,6 +185,8 @@ public extension BindingName where Binding: ButtonBinding {
 	static var sound: ButtonName<Dynamic<NSSound?>> { return .name(B.sound) }
 	static var state: ButtonName<Dynamic<NSControl.StateValue>> { return .name(B.state) }
 	static var title: ButtonName<Dynamic<String>> { return .name(B.title) }
+
+	@available(macOS 10.14, *) static var contentTintColor: ButtonName<Dynamic<NSColor?>> { return .name(B.contentTintColor) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	static var setNextState: ButtonName<Signal<Void>> { return .name(B.setNextState) }

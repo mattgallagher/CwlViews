@@ -62,7 +62,7 @@ func layersView(_ layersViewState: LayersViewState, _ navigationItem: Navigation
 									}
 									.bind(to: layersViewState.path),
 								.shapeLayer -- ShapeLayer(
-									.path <-- layersViewState.path.optional(),
+									.path <-- layersViewState.path,
 									.fillColor -- UIColor.purple.cgColor,
 									.strokeColor -- UIColor.white.cgColor,
 									.lineWidth -- 12

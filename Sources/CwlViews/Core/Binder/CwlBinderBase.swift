@@ -23,22 +23,27 @@ public struct BinderBase: BinderPreparer {
 
 	public enum Binding: BinderBaseBinding {
 		case lifetimes(Dynamic<[Lifetime]>)
-		case adHoc((Any) -> Lifetime?)
+		case adHocPrepare((Any) -> Void)
+		case adHocFinalize((Any) -> Lifetime?)
 	}
 
 	public var inherited: BinderBase { get { return self } set { } }
-	public var adHocClosures: [(Any) -> Lifetime?]?
+	public var adHocPrepareClosures: [(Any) -> Void]?
+	public var adHocFinalizeClosures: [(Any) -> Lifetime?]?
 
 	public init() {}
 	
 	public func inheritedBinding(from: BinderBase.Binding) -> BinderBase.Binding? { return nil }
 	public mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
-		case .adHoc(let x): adHocClosures = adHocClosures?.appending(x) ?? [x]
+		case .adHocPrepare(let x): adHocPrepareClosures = adHocPrepareClosures?.appending(x) ?? [x]
+		case .adHocFinalize(let x): adHocFinalizeClosures = adHocFinalizeClosures?.appending(x) ?? [x]
 		default: break
 		}
 	}
-	public func prepareInstance(_ instance: Instance, storage: Storage) {}
+	public func prepareInstance(_ instance: Instance, storage: Storage) {
+		adHocPrepareClosures.map { array in array.forEach { c in c(instance) } }
+	}
 	public func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
 		case .lifetimes(let x):
@@ -47,11 +52,12 @@ public struct BinderBase: BinderPreparer {
 				return AggregateLifetime(lifetimes: value)
 			case .dynamic(let signal): return signal.continuous().subscribe(context: .main) { _ in }
 			}
-		case .adHoc: return nil
+		case .adHocPrepare: return nil
+		case .adHocFinalize: return nil
 		}
 	}
 	public func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-		return adHocClosures.map { array in AggregateLifetime(lifetimes: array.compactMap { c in c(instance) }) }
+		return adHocFinalizeClosures.map { array in AggregateLifetime(lifetimes: array.compactMap { c in c(instance) }) }
 	}
 	public func combine(lifetimes: [Lifetime], instance: Any, storage: Any) -> Any { return () }
 }
@@ -77,10 +83,18 @@ public extension BindingName where Binding: BinderBaseBinding {
 	// With:    static var $1: BinderBaseName<$2> { return .name(BinderBase.Binding.$1) }
 	static var lifetimes: BinderBaseName<Dynamic<[Lifetime]>> { return .name(B.lifetimes) }
 
-	static var adHoc: BinderBaseName<(Binding.Preparer.Instance) -> Lifetime?> {
+	static var adHocPrepare: BinderBaseName<(Binding.Preparer.Instance) -> Void> {
+		return Binding.compositeName(
+			value: { f in { (any: Any) -> Void in f(any as! Binding.Preparer.Instance) } },
+			binding: BinderBase.Binding.adHocPrepare,
+			downcast: Binding.binderBaseBinding
+		)
+	}
+
+	static var adHocFinalize: BinderBaseName<(Binding.Preparer.Instance) -> Lifetime?> {
 		return Binding.compositeName(
 			value: { f in { (any: Any) -> Lifetime? in return f(any as! Binding.Preparer.Instance) } },
-			binding: BinderBase.Binding.adHoc,
+			binding: BinderBase.Binding.adHocFinalize,
 			downcast: Binding.binderBaseBinding
 		)
 	}

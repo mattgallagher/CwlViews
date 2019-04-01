@@ -37,26 +37,26 @@ public extension Control {
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case alignment(Dynamic<NSTextAlignment>)
 		case allowsExpansionToolTips(Dynamic<Bool>)
+		case attributedStringValue(Dynamic<NSAttributedString>)
 		case baseWritingDirection(Dynamic<NSWritingDirection>)
-		case isContinuous(Dynamic<Bool>)
-		case isEnabled(Dynamic<Bool>)
-		case font(Dynamic<NSFont>)
-		case formatter(Dynamic<Foundation.Formatter?>)
-		case isHighlighted(Dynamic<Bool>)
-		case ignoresMultiClick(Dynamic<Bool>)
-		case lineBreakMode(Dynamic<NSLineBreakMode>)
-		case refusesFirstResponder(Dynamic<Bool>)
-		case size(Dynamic<NSControl.ControlSize>)
-		case tag(Dynamic<Int>)
-		case usesSingleLineMode(Dynamic<Bool>)
 		case doubleValue(Dynamic<Double>)
 		case floatValue(Dynamic<Float>)
-		case intValue(Dynamic<Int32>)
+		case font(Dynamic<NSFont>)
+		case formatter(Dynamic<Foundation.Formatter?>)
+		case ignoresMultiClick(Dynamic<Bool>)
 		case integerValue(Dynamic<Int>)
+		case intValue(Dynamic<Int32>)
+		case isContinuous(Dynamic<Bool>)
+		case isEnabled(Dynamic<Bool>)
+		case isHighlighted(Dynamic<Bool>)
+		case lineBreakMode(Dynamic<NSLineBreakMode>)
 		case objectValue(Dynamic<Any>)
-		case stringValue(Dynamic<String>)
-		case attributedStringValue(Dynamic<NSAttributedString>)
+		case refusesFirstResponder(Dynamic<Bool>)
 		case sendActionOn(Dynamic<NSEvent.EventTypeMask>)
+		case size(Dynamic<NSControl.ControlSize>)
+		case stringValue(Dynamic<String>)
+		case tag(Dynamic<Int>)
+		case usesSingleLineMode(Dynamic<Bool>)
 		
 		//	2. Signal bindings are performed on the object after construction.
 		case abortEditing(Signal<Void>)
@@ -171,26 +171,26 @@ public extension BindingName where Binding: ControlBinding {
 	//	1. Value bindings may be applied at construction and may subsequently change.
 	static var alignment: ControlName<Dynamic<NSTextAlignment>> { return .name(B.alignment) }
 	static var allowsExpansionToolTips: ControlName<Dynamic<Bool>> { return .name(B.allowsExpansionToolTips) }
+	static var attributedStringValue: ControlName<Dynamic<NSAttributedString>> { return .name(B.attributedStringValue) }
 	static var baseWritingDirection: ControlName<Dynamic<NSWritingDirection>> { return .name(B.baseWritingDirection) }
-	static var isContinuous: ControlName<Dynamic<Bool>> { return .name(B.isContinuous) }
-	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(B.isEnabled) }
-	static var font: ControlName<Dynamic<NSFont>> { return .name(B.font) }
-	static var formatter: ControlName<Dynamic<Foundation.Formatter?>> { return .name(B.formatter) }
-	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(B.isHighlighted) }
-	static var ignoresMultiClick: ControlName<Dynamic<Bool>> { return .name(B.ignoresMultiClick) }
-	static var lineBreakMode: ControlName<Dynamic<NSLineBreakMode>> { return .name(B.lineBreakMode) }
-	static var refusesFirstResponder: ControlName<Dynamic<Bool>> { return .name(B.refusesFirstResponder) }
-	static var size: ControlName<Dynamic<NSControl.ControlSize>> { return .name(B.size) }
-	static var tag: ControlName<Dynamic<Int>> { return .name(B.tag) }
-	static var usesSingleLineMode: ControlName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
 	static var doubleValue: ControlName<Dynamic<Double>> { return .name(B.doubleValue) }
 	static var floatValue: ControlName<Dynamic<Float>> { return .name(B.floatValue) }
-	static var intValue: ControlName<Dynamic<Int32>> { return .name(B.intValue) }
+	static var font: ControlName<Dynamic<NSFont>> { return .name(B.font) }
+	static var formatter: ControlName<Dynamic<Foundation.Formatter?>> { return .name(B.formatter) }
+	static var ignoresMultiClick: ControlName<Dynamic<Bool>> { return .name(B.ignoresMultiClick) }
 	static var integerValue: ControlName<Dynamic<Int>> { return .name(B.integerValue) }
+	static var intValue: ControlName<Dynamic<Int32>> { return .name(B.intValue) }
+	static var isContinuous: ControlName<Dynamic<Bool>> { return .name(B.isContinuous) }
+	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(B.isHighlighted) }
+	static var lineBreakMode: ControlName<Dynamic<NSLineBreakMode>> { return .name(B.lineBreakMode) }
 	static var objectValue: ControlName<Dynamic<Any>> { return .name(B.objectValue) }
-	static var stringValue: ControlName<Dynamic<String>> { return .name(B.stringValue) }
-	static var attributedStringValue: ControlName<Dynamic<NSAttributedString>> { return .name(B.attributedStringValue) }
+	static var refusesFirstResponder: ControlName<Dynamic<Bool>> { return .name(B.refusesFirstResponder) }
 	static var sendActionOn: ControlName<Dynamic<NSEvent.EventTypeMask>> { return .name(B.sendActionOn) }
+	static var size: ControlName<Dynamic<NSControl.ControlSize>> { return .name(B.size) }
+	static var stringValue: ControlName<Dynamic<String>> { return .name(B.stringValue) }
+	static var tag: ControlName<Dynamic<Int>> { return .name(B.tag) }
+	static var usesSingleLineMode: ControlName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	static var abortEditing: ControlName<Signal<Void>> { return .name(B.abortEditing) }

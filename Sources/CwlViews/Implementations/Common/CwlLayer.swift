@@ -37,8 +37,8 @@ public extension Layer {
 		case affineTransform(Dynamic<CGAffineTransform>)
 		case anchorPoint(Dynamic<CGPoint>)
 		case anchorPointZ(Dynamic<CGFloat>)
-		case backgroundColor(Dynamic<CGColor?>)
-		case borderColor(Dynamic<CGColor?>)
+		case backgroundColor(Dynamic<CGColor>)
+		case borderColor(Dynamic<CGColor>)
 		case borderWidth(Dynamic<CGFloat>)
 		case bounds(Dynamic<CGRect>)
 		case contents(Dynamic<Any?>)
@@ -238,9 +238,7 @@ public extension Layer.Preparer {
 			#endif
 
 		//	2. Signal bindings are performed on the object after construction.
-		case .addAnimation(let x): return x.apply(instance) { i, v in
-			i.add(v.animation, forKey: v.key)
-		}
+		case .addAnimation(let x): return x.apply(instance) { i, v in i.addAnimationForKey(v) }
 		case .needsDisplay(let x): return x.apply(instance) { i, v in i.setNeedsDisplay() }
 		case .needsDisplayInRect(let x): return x.apply(instance) { i, v in i.setNeedsDisplay(v) }
 		case .removeAllAnimations(let x): return x.apply(instance) { i, v in i.removeAllAnimations() }
@@ -311,8 +309,8 @@ public extension BindingName where Binding: LayerBinding {
 	static var affineTransform: LayerName<Dynamic<CGAffineTransform>> { return .name(B.affineTransform) }
 	static var anchorPoint: LayerName<Dynamic<CGPoint>> { return .name(B.anchorPoint) }
 	static var anchorPointZ: LayerName<Dynamic<CGFloat>> { return .name(B.anchorPointZ) }
-	static var backgroundColor: LayerName<Dynamic<CGColor?>> { return .name(B.backgroundColor) }
-	static var borderColor: LayerName<Dynamic<CGColor?>> { return .name(B.borderColor) }
+	static var backgroundColor: LayerName<Dynamic<CGColor>> { return .name(B.backgroundColor) }
+	static var borderColor: LayerName<Dynamic<CGColor>> { return .name(B.borderColor) }
 	static var borderWidth: LayerName<Dynamic<CGFloat>> { return .name(B.borderWidth) }
 	static var bounds: LayerName<Dynamic<CGRect>> { return .name(B.bounds) }
 	static var contents: LayerName<Dynamic<Any?>> { return .name(B.contents) }
@@ -414,7 +412,7 @@ public struct AnimationForKey {
 		let t = CATransition()
 		t.type = CATransitionType.fade
 		
-		// NOTE: fade animations are always applied under key kCATransition so it's pointeless trying to set a key
+		// NOTE: fade animations are always applied under key kCATransition so it's pointless trying to set a key
 		return AnimationForKey(animation: t, forKey: nil)
 	}
 	
@@ -443,5 +441,11 @@ public struct AnimationForKey {
 	
 	public static func reveal(from: Direction, forKey: String? = nil) -> AnimationForKey {
 		return from.transition(ofType: CATransitionType.reveal, forKey: forKey)
+	}
+}
+
+public extension CALayer {
+	func addAnimationForKey(_ animationForKey: AnimationForKey) {
+		add(animationForKey.animation, forKey: animationForKey.key)
 	}
 }

@@ -29,13 +29,29 @@ public class TextField: Binder, TextFieldConvertible {
 	public static var labelBindings: [Binding] {
 		return [
 			.isEditable -- false,
+			.isSelectable -- true,
 			.isBordered -- false,
 			.drawsBackground -- false
 		]
 	}
 	
+	public static var wrappingLabelBindings: [Binding] {
+		return [
+			.isEditable -- false,
+			.isSelectable -- true,
+			.isBordered -- false,
+			.drawsBackground -- false,
+			.lineBreakMode -- .byWordWrapping,
+			.horizontalContentCompressionResistancePriority -- .defaultLow
+		]
+	}
+	
 	public static func label(type: Instance.Type = Instance.self, _ bindings: Binding...) -> TextField {
 		return TextField(type: type, parameters: (), bindings: TextField.labelBindings + bindings)
+	}
+	
+	public static func wrappingLabel(type: Instance.Type = Instance.self, _ bindings: Binding...) -> TextField {
+		return TextField(type: type, parameters: (), bindings: TextField.wrappingLabelBindings + bindings)
 	}
 }
 
@@ -52,11 +68,11 @@ public extension TextField {
 		case allowsEditingTextAttributes(Dynamic<Bool>)
 		case allowsUndo(Dynamic<Bool>)
 		case backgroundColor(Dynamic<NSColor?>)
-		case bezeled(Dynamic<Bool>)
 		case bezelStyle(Dynamic<NSTextField.BezelStyle>)
 		case drawsBackground(Dynamic<Bool>)
 		case importsGraphics(Dynamic<Bool>)
 		case isAutomaticTextCompletionEnabled(Dynamic<Bool>)
+		case isBezeled(Dynamic<Bool>)
 		case isBordered(Dynamic<Bool>)
 		case isEditable(Dynamic<Bool>)
 		case isSelectable(Dynamic<Bool>)
@@ -133,7 +149,7 @@ public extension TextField.Preparer {
 		case .allowsEditingTextAttributes(let x): return x.apply(instance) { i, v in i.allowsEditingTextAttributes = v }
 		case .allowsUndo(let x): return x.apply(instance) { i, v in i.cell?.allowsUndo = v }
 		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
-		case .bezeled(let x): return x.apply(instance) { i, v in i.isBezeled = v }
+		case .isBezeled(let x): return x.apply(instance) { i, v in i.isBezeled = v }
 		case .bezelStyle(let x): return x.apply(instance) { i, v in i.bezelStyle = v }
 		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
 		case .importsGraphics(let x): return x.apply(instance) { i, v in i.importsGraphics = v }
@@ -222,7 +238,7 @@ public extension BindingName where Binding: TextFieldBinding {
 	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
 	static var allowsUndo: TextFieldName<Dynamic<Bool>> { return .name(B.allowsUndo) }
 	static var backgroundColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.backgroundColor) }
-	static var bezeled: TextFieldName<Dynamic<Bool>> { return .name(B.bezeled) }
+	static var isBezeled: TextFieldName<Dynamic<Bool>> { return .name(B.isBezeled) }
 	static var bezelStyle: TextFieldName<Dynamic<NSTextField.BezelStyle>> { return .name(B.bezelStyle) }
 	static var drawsBackground: TextFieldName<Dynamic<Bool>> { return .name(B.drawsBackground) }
 	static var importsGraphics: TextFieldName<Dynamic<Bool>> { return .name(B.importsGraphics) }

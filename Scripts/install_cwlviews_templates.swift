@@ -281,6 +281,7 @@ func binderContent() -> String {
 				case .inheritedBinding(let x): inherited.prepareBinding(x)
 				case .someDelegate(let x): delegate().addMultiHandler(x, #selector(someDelegateFunction))
 				default: break
+				}
 			}
 			*/
 		

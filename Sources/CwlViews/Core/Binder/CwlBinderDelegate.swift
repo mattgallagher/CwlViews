@@ -63,8 +63,9 @@ public extension BinderDelegateEmbedder where Delegate: DynamicDelegate {
 	}
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
-		prepareDelegate(instance: instance, storage: storage)
 		inheritedPrepareInstance(instance, storage: storage)
+		
+		prepareDelegate(instance: instance, storage: storage)
 	}
 }
 

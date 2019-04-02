@@ -103,6 +103,7 @@ public extension View.Preparer {
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+		
 		if let layer = backingLayer {
 			instance.wantsLayer = true
 			layer.apply(to: instance.layer!)

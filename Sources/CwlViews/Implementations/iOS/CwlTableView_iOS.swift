@@ -251,8 +251,8 @@ public extension TableView.Preparer {
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+
 		prepareDelegate(instance: instance, storage: storage)
-		
 		instance.dataSource = storage
 	}
 	

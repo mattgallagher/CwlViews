@@ -138,6 +138,19 @@
 		C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */; };
 		C99E96392237C4E8003FD574 /* CwlExtendedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E96382237C4E8003FD574 /* CwlExtendedView.swift */; };
 		C99E963C2237CCA8003FD574 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E963A2237CCA0003FD574 /* TextView.swift */; };
+		C9A016A02252DD6A00A7A0B3 /* TabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A0169F2252DD6A00A7A0B3 /* TabButton.swift */; };
+		C9A016A62252E99800A7A0B3 /* AboutTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016A52252E99800A7A0B3 /* AboutTab.swift */; };
+		C9A016A82252F4C800A7A0B3 /* CwlTextView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016A72252F4C800A7A0B3 /* CwlTextView_macOS.swift */; };
+		C9A016AC22536E4500A7A0B3 /* CatalogTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016AB22536E4500A7A0B3 /* CatalogTable.swift */; };
+		C9A016AE2253703400A7A0B3 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016AD2253703400A7A0B3 /* ButtonView.swift */; };
+		C9A016B02253706B00A7A0B3 /* ControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016AF2253706B00A7A0B3 /* ControlView.swift */; };
+		C9A016B8225370E300A7A0B3 /* GestureRecognizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B1225370E200A7A0B3 /* GestureRecognizerView.swift */; };
+		C9A016B9225370E300A7A0B3 /* SliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B2225370E200A7A0B3 /* SliderView.swift */; };
+		C9A016BA225370E300A7A0B3 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B3225370E200A7A0B3 /* TextView.swift */; };
+		C9A016BB225370E300A7A0B3 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B4225370E200A7A0B3 /* ImageView.swift */; };
+		C9A016BC225370E300A7A0B3 /* TextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B5225370E200A7A0B3 /* TextFieldView.swift */; };
+		C9A016BD225370E300A7A0B3 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B6225370E300A7A0B3 /* WebView.swift */; };
+		C9A016BE225370E300A7A0B3 /* LayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A016B7225370E300A7A0B3 /* LayersView.swift */; };
 		C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B371E83E4A600ADDCD4 /* CwlBinderPreparer.swift */; };
 		C9A18B3C1E83E52800ADDCD4 /* CwlDynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3A1E83E52800ADDCD4 /* CwlDynamic.swift */; };
 		C9A18B3F1E83E58200ADDCD4 /* CwlTargetAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A18B3D1E83E58200ADDCD4 /* CwlTargetAction.swift */; };
@@ -417,6 +430,19 @@
 		C99946581F9CAC48001F38A8 /* CwlStackMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStackMutation.swift; sourceTree = "<group>"; };
 		C99E96382237C4E8003FD574 /* CwlExtendedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlExtendedView.swift; sourceTree = "<group>"; };
 		C99E963A2237CCA0003FD574 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		C9A0169F2252DD6A00A7A0B3 /* TabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabButton.swift; sourceTree = "<group>"; };
+		C9A016A52252E99800A7A0B3 /* AboutTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutTab.swift; sourceTree = "<group>"; };
+		C9A016A72252F4C800A7A0B3 /* CwlTextView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTextView_macOS.swift; sourceTree = "<group>"; };
+		C9A016AB22536E4500A7A0B3 /* CatalogTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTable.swift; sourceTree = "<group>"; };
+		C9A016AD2253703400A7A0B3 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
+		C9A016AF2253706B00A7A0B3 /* ControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlView.swift; sourceTree = "<group>"; };
+		C9A016B1225370E200A7A0B3 /* GestureRecognizerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GestureRecognizerView.swift; sourceTree = "<group>"; };
+		C9A016B2225370E200A7A0B3 /* SliderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderView.swift; sourceTree = "<group>"; };
+		C9A016B3225370E200A7A0B3 /* TextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		C9A016B4225370E200A7A0B3 /* ImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		C9A016B5225370E200A7A0B3 /* TextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldView.swift; sourceTree = "<group>"; };
+		C9A016B6225370E300A7A0B3 /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		C9A016B7225370E300A7A0B3 /* LayersView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LayersView.swift; sourceTree = "<group>"; };
 		C9A18B311E827F9D00ADDCD4 /* CwlControl_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlControl_iOS.swift; sourceTree = "<group>"; };
 		C9A18B331E82BCCD00ADDCD4 /* CwlButton_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlButton_iOS.swift; sourceTree = "<group>"; };
 		C9A18B351E838B5900ADDCD4 /* CwlLabel_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLabel_iOS.swift; sourceTree = "<group>"; };
@@ -736,6 +762,7 @@
 				C92360052248A75D004711E4 /* CwlTabView_macOS.swift */,
 				C9E50BA7224EDF6E004E3D4E /* CwlTabViewItem_macOS.swift */,
 				C9B38DBC1DD0160A00913019 /* CwlTextField_macOS.swift */,
+				C9A016A72252F4C800A7A0B3 /* CwlTextView_macOS.swift */,
 				C9351F1E1DCAD2BC001D484B /* CwlToolbar_macOS.swift */,
 				C9351F231DCAD2CA001D484B /* CwlToolbarItem_macOS.swift */,
 				C94854151DC59DFC009CC145 /* CwlView_macOS.swift */,
@@ -759,10 +786,22 @@
 		C97E64BF22472C97004F1251 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				C9A016A52252E99800A7A0B3 /* AboutTab.swift */,
+				C96D9D082250C7F5001D3A4C /* ButtonRowControl.swift */,
+				C9A016AD2253703400A7A0B3 /* ButtonView.swift */,
+				C9A016AB22536E4500A7A0B3 /* CatalogTable.swift */,
+				C9A016AF2253706B00A7A0B3 /* ControlView.swift */,
+				C9A016B1225370E200A7A0B3 /* GestureRecognizerView.swift */,
+				C9A016B4225370E200A7A0B3 /* ImageView.swift */,
+				C9A016B7225370E300A7A0B3 /* LayersView.swift */,
 				C9F9A32321DEF5A400026DC1 /* main.swift */,
 				C9F9A32F21DEF68F00026DC1 /* MainMenu.swift */,
+				C9A016B2225370E200A7A0B3 /* SliderView.swift */,
+				C9A0169F2252DD6A00A7A0B3 /* TabButton.swift */,
+				C9A016B5225370E200A7A0B3 /* TextFieldView.swift */,
+				C9A016B3225370E200A7A0B3 /* TextView.swift */,
+				C9A016B6225370E300A7A0B3 /* WebView.swift */,
 				C97E64BD22472C7F004F1251 /* Window.swift */,
-				C96D9D082250C7F5001D3A4C /* ButtonRowControl.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -1583,6 +1622,7 @@
 				C9ADA3A81EE3BFEC00C29925 /* CwlAssociatedBinderStorage.swift in Sources */,
 				C9C302142224DA17005B0FCD /* CwlPageControl.swift in Sources */,
 				C9235FFE224897FA004711E4 /* CwlKeyValueObservationLifetime.swift in Sources */,
+				C9A016A82252F4C800A7A0B3 /* CwlTextView_macOS.swift in Sources */,
 				C9B0D12422225A7B00D2FB42 /* CwlTableRowView_macOS.swift in Sources */,
 				C985C9B921DC879100E8FF8B /* CwlImageView_iOS.swift in Sources */,
 				C97B16D021D8E13800F72DB9 /* CwlPanGestureRecognizer_macOS.swift in Sources */,
@@ -1699,8 +1739,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9F9A32421DEF5A400026DC1 /* main.swift in Sources */,
+				C9A016A62252E99800A7A0B3 /* AboutTab.swift in Sources */,
+				C9A016AE2253703400A7A0B3 /* ButtonView.swift in Sources */,
 				C9F9A33121DEF6A200026DC1 /* MainMenu.swift in Sources */,
+				C9A016BB225370E300A7A0B3 /* ImageView.swift in Sources */,
+				C9A016B9225370E300A7A0B3 /* SliderView.swift in Sources */,
+				C9A016BE225370E300A7A0B3 /* LayersView.swift in Sources */,
+				C9A016BD225370E300A7A0B3 /* WebView.swift in Sources */,
+				C9A016B8225370E300A7A0B3 /* GestureRecognizerView.swift in Sources */,
+				C9A016AC22536E4500A7A0B3 /* CatalogTable.swift in Sources */,
+				C9A016BC225370E300A7A0B3 /* TextFieldView.swift in Sources */,
+				C9A016B02253706B00A7A0B3 /* ControlView.swift in Sources */,
 				C96D9D0E2250C826001D3A4C /* ButtonRowControl.swift in Sources */,
+				C9A016BA225370E300A7A0B3 /* TextView.swift in Sources */,
+				C9A016A02252DD6A00A7A0B3 /* TabButton.swift in Sources */,
 				C97E64C022472CE6004F1251 /* Window.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

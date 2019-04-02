@@ -33,7 +33,6 @@ public extension Window {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case contentView(Constant<View>)
 		case deferCreation(Constant<Bool>)
 		case initialFirstResponderTag(Constant<Int>)
 
@@ -56,6 +55,7 @@ public extension Window {
 		case contentMinSize(Dynamic<NSSize>)
 		case contentResizeIncrements(Dynamic<NSSize>)
 		case contentRelativity(Dynamic<WindowDimension.Relativity>)
+		case contentView(Dynamic<ViewConvertible>)
 		case contentWidth(Dynamic<WindowDimension>)
 		case depthLimit(Dynamic<NSWindow.Depth?>)
 		case displaysWhenScreenProfileChanges(Dynamic<Bool>)
@@ -92,6 +92,7 @@ public extension Window {
 		case styleMask(Dynamic<NSWindow.StyleMask>)
 		case title(Dynamic<String>)
 		case titlebarAppearsTransparent(Dynamic<Bool>)
+		case titleVisibility(Dynamic<NSWindow.TitleVisibility>)
 		case toolbar(Dynamic<ToolbarConvertible>)
 
 		// 2. Signal bindings are performed on the object after construction.
@@ -254,6 +255,7 @@ public extension Window.Preparer {
 	
 	func prepareInstance(_ instance: NSWindow, storage: Window.Preparer.Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+		
 		if let relativity = windowSizeRelativity.initial {
 			storage.windowSizeRelativity = relativity
 		}
@@ -264,11 +266,6 @@ public extension Window.Preparer {
 		case .inheritedBinding(let s): return inherited.applyBinding(s, instance: instance, storage: storage)
 			
 		//	0. Static bindings are applied at construction and are subsequently immutable.
-		case .contentView(let x):
-			if let cv = instance.contentView {
-				x.value.apply(to: cv)
-			}
-			return nil
 		case .deferCreation: return nil
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
@@ -298,6 +295,7 @@ public extension Window.Preparer {
 			i.setContentSize(WindowDimension.contentSize(width: widthSize, height: heightSize, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
 		}
 		case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
+		case .contentView(let x):return x.apply(instance) { i, v in i.contentView = v.nsView() }
 		case .contentWidth: return contentWidth.resume()?.apply(instance, storage) { i, s, v in
 			let heightSize = WindowDimension(ratio: 0, constant: i.contentView!.frame.size.height)
 			i.setContentSize(WindowDimension.contentSize(width: v, height: heightSize, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
@@ -350,6 +348,7 @@ public extension Window.Preparer {
 		case .styleMask: return styleMask.apply(instance) { i, v in i.styleMask = v }
 		case .title(let x): return x.apply(instance) { i, v in i.title = v }
 		case .titlebarAppearsTransparent(let x): return x.apply(instance) { i, v in i.titlebarAppearsTransparent = v }
+		case .titleVisibility(let x): return x.apply(instance) { i, v in i.titleVisibility = v }
 		case .toolbar(let x): return x.apply(instance) { i, v in i.toolbar = v.nsToolbar() }
 		
 		// 2. Signal bindings are performed on the object after construction.
@@ -447,7 +446,6 @@ public extension Window.Preparer {
 
 	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 		var lifetimes = [Lifetime]()
-		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
 		
 		// Layout the content
 		instance.layoutIfNeeded()
@@ -484,6 +482,8 @@ public extension Window.Preparer {
 		lifetimes += captureOrder?.resume()?.apply(instance) { i, v in v.applyToWindow(i) }
 		lifetimes += captureKey?.resume()?.apply(instance) { i, v in v ? i.makeKey() : i.resignKey() }
 		lifetimes += captureMain?.resume()?.apply(instance) { i, v in v ? i.makeMain() : i.resignMain() }
+		
+		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
 		
 		return AggregateLifetime(lifetimes: lifetimes)
 	}
@@ -551,7 +551,6 @@ public extension BindingName where Binding: WindowBinding {
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Static styles are applied at construction and are subsequently immutable.
-	static var contentView: WindowName<Constant<View>> { return .name(B.contentView) }
 	static var deferCreation: WindowName<Constant<Bool>> { return .name(B.deferCreation) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
@@ -573,6 +572,7 @@ public extension BindingName where Binding: WindowBinding {
 	static var contentMinSize: WindowName<Dynamic<NSSize>> { return .name(B.contentMinSize) }
 	static var contentResizeIncrements: WindowName<Dynamic<NSSize>> { return .name(B.contentResizeIncrements) }
 	static var contentRelativity: WindowName<Dynamic<WindowDimension.Relativity>> { return .name(B.contentRelativity) }
+	static var contentView: WindowName<Dynamic<ViewConvertible>> { return .name(B.contentView) }
 	static var contentWidth: WindowName<Dynamic<WindowDimension>> { return .name(B.contentWidth) }
 	static var depthLimit: WindowName<Dynamic<NSWindow.Depth?>> { return .name(B.depthLimit) }
 	static var displaysWhenScreenProfileChanges: WindowName<Dynamic<Bool>> { return .name(B.displaysWhenScreenProfileChanges) }
@@ -609,6 +609,7 @@ public extension BindingName where Binding: WindowBinding {
 	static var styleMask: WindowName<Dynamic<NSWindow.StyleMask>> { return .name(B.styleMask) }
 	static var title: WindowName<Dynamic<String>> { return .name(B.title) }
 	static var titlebarAppearsTransparent: WindowName<Dynamic<Bool>> { return .name(B.titlebarAppearsTransparent) }
+	static var titleVisibility: WindowName<Dynamic<NSWindow.TitleVisibility>> { return .name(B.titleVisibility) }
 	static var toolbar: WindowName<Dynamic<ToolbarConvertible>> { return .name(B.toolbar) }
 	
 	// 2. Signal bindings are performed on the object after construction.

@@ -124,8 +124,8 @@ public extension SplitViewController.Preparer {
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+		
 		prepareDelegate(instance: instance, storage: storage)
-
 		storage.secondaryViewController = secondary.initial?.uiViewController()
 		instance.viewControllers = [primary.initial?.uiViewController() ?? UIViewController()]
 	}
@@ -187,6 +187,7 @@ public extension SplitViewController.Preparer {
 		if let secondary = storage.secondaryViewController {
 			instance.viewControllers.append(secondary)
 		}
+		
 		return inheritedFinalizedInstance(instance, storage: storage)
 	}
 }

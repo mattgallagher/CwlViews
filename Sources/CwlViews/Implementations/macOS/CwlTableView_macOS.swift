@@ -28,7 +28,7 @@ public class TableView<RowData>: Binder, TableViewConvertible {
 
 	public static func scrollEmbedded(type: NSTableView.Type = NSTableView.self, _ bindings: Binding...) -> ScrollView {
 		return ScrollView(
-			.borderType -- .bezelBorder,
+			.borderType -- .noBorder,
 			.hasVerticalScroller -- true,
 			.hasHorizontalScroller -- true,
 			.autohidesScrollers -- true,
@@ -96,7 +96,6 @@ public extension TableView {
 		case columnMoved(SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>)
 		case columnResized(SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>)
 		case doubleAction(TargetAction)
-		case selectionChanged(SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedRows: IndexSet)>)
 		case visibleRowsChanged(SignalInput<CountableRange<Int>>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
@@ -113,6 +112,7 @@ public extension TableView {
 		case pasteboardWriter((_ tableView: NSTableView, _ row: Int, _ data: RowData?) -> NSPasteboardWriting)
 		case rowActionsForRow((_ tableView: NSTableView, _ row: Int, _ data: RowData?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction])
 		case rowView((_ tableView: NSTableView, _ row: Int, _ rowData: RowData?) -> TableRowViewConvertible?)
+		case selectionDidChange((Notification) -> Void)
 		case selectionIndexesForProposedSelection((_ tableView: NSTableView, IndexSet) -> IndexSet)
 		case selectionShouldChange((_ tableView: NSTableView) -> Bool)
 		case shouldReorderColumn((_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier, _ newIndex: Int) -> Bool)
@@ -173,6 +173,7 @@ public extension TableView.Preparer {
 		case .pasteboardWriter(let x): delegate().addSingleHandler3(x, #selector(NSTableViewDataSource.tableView(_:pasteboardWriterForRow:)))
 		case .rowActionsForRow(let x): delegate().addSingleHandler4(x, #selector(NSTableViewDelegate.tableView(_:rowActionsForRow:edge:)))
 		case .rowView(let x): delegate().addSingleHandler3(x, #selector(NSTableViewDelegate.tableView(_:rowViewForRow:)))
+		case .selectionDidChange(let x): delegate().addMultiHandler1(x, #selector(NSTableViewDelegate.tableViewSelectionDidChange(_:)))
 		case .selectionIndexesForProposedSelection(let x): delegate().addSingleHandler2(x, #selector(NSTableViewDelegate.tableView(_:selectionIndexesForProposedSelection:)))
 		case .selectionShouldChange(let x): delegate().addSingleHandler1(x, #selector(NSTableViewDelegate.selectionShouldChange(in:)))
 		case .shouldReorderColumn(let x): delegate().addSingleHandler3(x, #selector(NSTableViewDelegate.tableView(_:shouldReorderColumn:toColumn:)))
@@ -193,6 +194,7 @@ public extension TableView.Preparer {
 
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+		
 		prepareDelegate(instance: instance, storage: storage)
 		instance.dataSource = storage
 	}
@@ -281,7 +283,7 @@ public extension TableView.Preparer {
 					return nil
 				}
 				return (column: column.identifier, oldIndex: oldIndex, newIndex: index)
-				}.cancellableBind(to: x)
+			}.cancellableBind(to: x)
 		case .columnResized(let x):
 			return Signal.notifications(name: NSTableView.columnDidResizeNotification, object: instance).compactMap { notification -> (column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)? in
 				guard let column = (notification.userInfo?["NSTableColumn"] as? NSTableColumn) else {
@@ -291,25 +293,14 @@ public extension TableView.Preparer {
 					return nil
 				}
 				return (column: column.identifier, oldWidth: CGFloat(oldWidth), newWidth: column.width)
-				}.cancellableBind(to: x)
-		case .didClickTableColumn: return nil
-		case .didDragTableColumn: return nil
-		case .doubleAction: return nil
-		case .mouseDownInHeaderOfTableColumn: return nil
-		case .selectionChanged(let x):
-			return Signal.notifications(name: NSTableView.selectionDidChangeNotification, object: instance).compactMap { [weak instance] n -> (selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedRows: IndexSet)? in
-				guard let i = instance else {
-					return nil
-				}
-				let selectedColumns = Set<NSUserInterfaceItemIdentifier>(i.selectedColumnIndexes.compactMap { i.tableColumns.at($0)?.identifier })
-				let selectedRowIndexes = IndexSet(i.selectedRowIndexes.map { $0 })
-				return (selectedColumns: selectedColumns, selectedRows: selectedRowIndexes as IndexSet)
 			}.cancellableBind(to: x)
-		case .sortDescriptorsDidChange: return nil
+		case .doubleAction: return nil
 		case .visibleRowsChanged: return nil
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .acceptDrop: return nil
+		case .didClickTableColumn: return nil
+		case .didDragTableColumn: return nil
 		case .draggingSessionEnded: return nil
 		case .draggingSessionWillBegin: return nil
 		case .groupRowCellConstructor(let x):
@@ -318,11 +309,13 @@ public extension TableView.Preparer {
 		case .headerView(let x): return x.apply(instance) { i, v in i.headerView = v?.nsTableHeaderView() }
 		case .heightOfRow: return nil
 		case .isGroupRow: return nil
+		case .mouseDownInHeaderOfTableColumn: return nil
 		case .nextTypeSelectMatch: return nil
 		case .pasteboardWriter: return nil
 		case .rowActionsForRow: return nil
 		case .rows(let x): return x.apply(instance, storage) { i, s, v in s.applyRowAnimation(v, in: i) }
 		case .rowView: return nil
+		case .selectionDidChange: return nil
 		case .selectionIndexesForProposedSelection: return nil
 		case .selectionShouldChange: return nil
 		case .shouldReorderColumn: return nil
@@ -330,6 +323,7 @@ public extension TableView.Preparer {
 		case .shouldSelectTableColumn: return nil
 		case .shouldTypeSelectForEvent: return nil
 		case .sizeToFitWidthOfColumn: return nil
+		case .sortDescriptorsDidChange: return nil
 		case .typeSelectString: return nil
 		case .updateDraggingItems: return nil
 		case .validateDrop: return nil
@@ -595,7 +589,11 @@ extension TableView.Preparer {
 		open func tableView(_ tableView: NSTableView, pasteboardWriterForRow rowIndex: Int) -> NSPasteboardWriting? {
 			return singleHandler(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
-
+		
+		open func tableViewSelectionDidChange(_ notification: Notification) {
+			multiHandler(notification)
+		}
+		
 		open func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row rowIndex: Int, dropOperation: NSTableView.DropOperation) -> Bool {
 			return singleHandler(tableView, rowIndex, storage(for: tableView)?.rowData(at: rowIndex))
 		}
@@ -685,7 +683,6 @@ public extension BindingName where Binding: TableViewBinding {
 	static var columnMoved: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }
 	static var columnResized: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(B.columnResized) }
 	static var doubleAction: TableViewName<TargetAction> { return .name(B.doubleAction) }
-	static var selectionChanged: TableViewName<SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedRows: IndexSet)>> { return .name(B.selectionChanged) }
 	static var visibleRowsChanged: TableViewName<SignalInput<CountableRange<Int>>> { return .name(B.visibleRowsChanged) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
@@ -702,6 +699,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var pasteboardWriter: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> NSPasteboardWriting> { return .name(B.pasteboardWriter) }
 	static var rowActionsForRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(B.rowActionsForRow) }
 	static var rowView: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> TableRowViewConvertible?> { return .name(B.rowView) }
+	static var selectionDidChange: TableViewName<(Notification) -> Void> { return .name(B.selectionDidChange) }
 	static var selectionIndexesForProposedSelection: TableViewName<(_ tableView: NSTableView, IndexSet) -> IndexSet> { return .name(B.selectionIndexesForProposedSelection) }
 	static var selectionShouldChange: TableViewName<(_ tableView: NSTableView) -> Bool> { return .name(B.selectionShouldChange) }
 	static var shouldReorderColumn: TableViewName<(_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier, _ newIndex: Int) -> Bool> { return .name(B.shouldReorderColumn) }
@@ -717,6 +715,35 @@ public extension BindingName where Binding: TableViewBinding {
 	// Composite binding names
 	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, TableView.Binding.doubleAction, Binding.tableViewBinding)
+	}
+	static func rowSelected<Value>(_ keyPath: KeyPath<Binding.RowDataType, Value>) -> TableViewName<SignalInput<Value>> {
+		return Binding.compositeName(
+			value: { (input: SignalInput<Value>) in
+				{ (notification: Notification) -> Void in
+					guard let view = (notification.object as? NSTableView) else { return }
+					let storageType = TableView<Binding.RowDataType>.Preparer.Storage.self
+					guard let storage = view.associatedBinderStorage(subclass: storageType) else { return }
+					let row = storage.rowState.values?.at(view.selectedRow)?[keyPath: keyPath]
+					if let row = row {
+						_ = input.send(value: row)
+					}
+				}
+			},
+			binding: TableView.Binding.selectionDidChange,
+			downcast: Binding.tableViewBinding
+		)
+	}
+	static func selectionChanged<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
+		return Binding.compositeName(
+			value: { (input: SignalInput<Value>) in
+				{ (notification: Notification) -> Void in
+					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
+					_ = input.send(value: view[keyPath: keyPath])
+				}
+			},
+			binding: TableView.Binding.selectionDidChange,
+			downcast: Binding.tableViewBinding
+		)
 	}
 }
 

@@ -128,13 +128,13 @@ public extension Window.Preparer {
 	
 	func finalizeInstance(_ instance: Instance, storage: View.Preparer.Storage) -> Lifetime? {
 		var lifetimes = [Lifetime]()
-		lifetimes += inherited.inheritedFinalizedInstance(instance, storage: storage)
 		
 		// `isHidden` needs to be applied after everything else
 		lifetimes += (isHidden?.resume()).flatMap {
 			inherited.applyBinding(.isHidden(.dynamic($0)), instance: instance, storage: storage)
 		}
 		
+		lifetimes += inherited.inheritedFinalizedInstance(instance, storage: storage)
 		return AggregateLifetime(lifetimes: lifetimes)
 	}
 }

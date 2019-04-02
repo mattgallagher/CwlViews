@@ -116,11 +116,11 @@ public extension PageViewController.Preparer {
 	}
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
+		inheritedPrepareInstance(instance, storage: storage)
+		
 		storage.pageConstructor = pageConstructor
 		prepareDelegate(instance: instance, storage: storage)
 		instance.dataSource = storage
-
-		inheritedPrepareInstance(instance, storage: storage)
 	}
 	
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {

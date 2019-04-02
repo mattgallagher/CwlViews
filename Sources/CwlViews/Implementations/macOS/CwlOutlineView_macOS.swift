@@ -23,7 +23,7 @@
 public class OutlineView<NodeData>: Binder, OutlineViewConvertible {
 	public static func scrollEmbedded(type: NSOutlineView.Type = NSOutlineView.self, _ bindings: Binding...) -> ScrollView {
 		return ScrollView(
-			.borderType -- .bezelBorder,
+			.borderType -- .noBorder,
 			.hasVerticalScroller -- true,
 			.hasHorizontalScroller -- true,
 			.autohidesScrollers -- true,
@@ -219,6 +219,7 @@ public extension OutlineView.Preparer {
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+		
 		prepareDelegate(instance: instance, storage: storage)
 		instance.dataSource = storage
 	}

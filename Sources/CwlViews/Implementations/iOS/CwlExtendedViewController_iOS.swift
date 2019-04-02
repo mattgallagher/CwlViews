@@ -99,6 +99,7 @@ public extension ExtendedViewController.Preparer {
 	
 	func prepareInstance(_ instance: Subclass, storage: ExtendedViewController<Subclass>.Preparer.Storage) {
 		inheritedPrepareInstance(instance, storage: storage)
+		
 		prepareDelegate(instance: instance, storage: storage)
 		if let lv = loadView {
 			storage.viewConstructor = lv
@@ -121,14 +122,12 @@ public extension ExtendedViewController.Preparer {
 	}
 	
 	func finalizeInstance(_ instance: Subclass, storage: ExtendedViewController<Subclass>.Preparer.Storage) -> Lifetime? {
-		let lifetime = inheritedFinalizedInstance(instance, storage: storage)
-
 		// Send the initial "traitsCollection" once construction is complete.
 		if let dd = dynamicDelegate, dd.handlesSelector(#selector(ViewControllerDelegate.traitCollectionDidChange(controller:previousTraitCollection:))) {
 			dd.traitCollectionDidChange(controller: instance, previousTraitCollection: nil)
 		}
 		
-		return lifetime
+		return inheritedFinalizedInstance(instance, storage: storage)
 	}
 }
 

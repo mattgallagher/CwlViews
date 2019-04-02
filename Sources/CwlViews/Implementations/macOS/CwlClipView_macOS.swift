@@ -78,7 +78,27 @@ public extension ClipView.Preparer {
 		case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v }
 		case .copiesOnScroll(let x): return x.apply(instance) { i, v in i.copiesOnScroll = v }
 		case .documentCursor(let x): return x.apply(instance) { i, v in i.documentCursor = v }
-		case .documentView(let x): return x.apply(instance) { i, v in i.documentView = v?.nsView() }
+		case .documentView(let x): return x.apply(instance, storage) { i, s, v in
+			if let existingConstraints = s.constraints {
+				NSLayoutConstraint.deactivate(existingConstraints)
+				s.constraints = nil
+			}
+			if let view = v?.nsView() {
+				let constraints = [
+					view.topAnchor.constraint(equalTo: i.topAnchor),
+					view.bottomAnchor.constraint(equalTo: i.bottomAnchor),
+					view.leftAnchor.constraint(equalTo: i.leftAnchor),
+					view.rightAnchor.constraint(equalTo: i.rightAnchor)
+				]
+				s.constraints = constraints
+				view.translatesAutoresizingMaskIntoConstraints = false
+				i.addSubview(view)
+				NSLayoutConstraint.activate(constraints)
+				i.documentView = view
+			} else {
+				i.documentView = nil
+			}
+		}
 		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
 		
 		// 2. Signal bindings are performed on the object after construction.
@@ -93,7 +113,9 @@ public extension ClipView.Preparer {
 
 // MARK: - Binder Part 5: Storage and Delegate
 extension ClipView.Preparer {
-	public typealias Storage = View.Preparer.Storage
+	open class Storage: View.Preparer.Storage {
+		open var constraints: [NSLayoutConstraint]? 
+	}
 }
 
 // MARK: - Binder Part 6: BindingNames

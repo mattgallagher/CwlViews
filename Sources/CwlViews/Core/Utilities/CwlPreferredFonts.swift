@@ -61,8 +61,8 @@
 			case .label: pointSize = NSFont.labelFontSize
 			case .points(let other): pointSize = other
 			case .system: pointSize = NSFont.systemFontSize
-			case .title1: pointSize = NSFont.systemFontSize + 6
-			case .title2: pointSize = NSFont.systemFontSize + 3
+			case .title1: pointSize = NSFont.systemFontSize + 5
+			case .title2: pointSize = NSFont.systemFontSize + 2
 			}
 			
 			let base: NSFont

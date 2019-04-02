@@ -157,10 +157,11 @@ public extension SplitView.Preparer {
 
 	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 		var lifetimes = [Lifetime]()
-		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
 		lifetimes += autosaveName?.apply(instance) { i, v in
 			i.autosaveName = v
 		}
+
+		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
 		return AggregateLifetime(lifetimes: lifetimes)
 	}
 }

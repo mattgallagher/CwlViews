@@ -36,10 +36,15 @@ public protocol BinderPreparer: DefaultConstructable {
 	
 	/// A first scan of the bindings. Information about bindings present may be recorded during this time.
 	///
+	/// NOTE: you don't need to process all bindings at your own level but you should pass inherited bindings through
+	/// to the inherited preparer (unless you're handling it at your own level)
+	///
 	/// - Parameter binding: the binding to apply
 	mutating func prepareBinding(_ binding: Binding)
 	
 	/// Bindings which need to be applied before others can be applied at this special early stage
+	///
+	/// NOTE: the first step should be to call `inheritedPrepareInstance`. `BinderDelegate` should call `prepareDelegate`
 	///
 	/// - Parameters:
 	///   - instance: the instance
@@ -47,6 +52,8 @@ public protocol BinderPreparer: DefaultConstructable {
 	func prepareInstance(_ instance: Instance, storage: Storage)
 	
 	/// Apply typical bindings.
+	///
+	/// NOTE: you should process all bindings and pass inherited bindings through to the inherited preparer
 	///
 	/// - Parameters:
 	///   - binding: the binding to apply
@@ -56,6 +63,8 @@ public protocol BinderPreparer: DefaultConstructable {
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime?
 	
 	/// Bindings which need to be applied after others can be applied at this last stage.
+	///
+	/// NOTE: the last step should be to call `inheritedFinalizedInstance`
 	///
 	/// - Parameters:
 	///   - instance: the instance

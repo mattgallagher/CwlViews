@@ -8,17 +8,20 @@
 
 import CwlViews
 
-enum Tabs: Int, Codable, CaseIterable {
-	case left
-	case right
-}
-
 struct WindowState: CodableContainer {
 	let appearance: TempVar<NSAppearance.Name>
 	let selectedTab: Var<Tabs>
+	let rowSelection: Var<CatalogViewState?>
 	init() {
 		appearance = TempVar()
 		selectedTab = Var(.left)
+		rowSelection = Var(nil)
+	}
+	
+	var windowContentColor: Signal<CGColor> {
+		return appearance.map { name in
+			name == .darkAqua ? NSColor(white: 0.2, alpha: 1).cgColor : NSColor.white.cgColor
+		}
 	}
 }
 
@@ -33,125 +36,114 @@ func window(_ windowState: WindowState) -> WindowConvertible {
 		.frameVertical -- 15,
 		.styleMask -- [.titled, .resizable, .closable, .miniaturizable, .fullSizeContentView],
 		.title -- .title,
+		.titleVisibility -- .hidden,
 		.titlebarAppearsTransparent -- true,
-		.contentView -- View(
-			.layout -- .fill(
-				SplitView.verticalThin(
-					.autosaveName -- Bundle.main.bundleIdentifier! + ".split",
-					.arrangedSubviews -- [
-						.subview(
-							View(
-								.layer -- Layer(
-									.backgroundColor <-- windowState.appearance.map { name in
-										name == .darkAqua ? .cwlBrownDark : .cwlBrownLight
-									}
-								),
-								.layout -- .vertical(
-									align: .center,
-									.space(.equalTo(constant: NSWindow.defaultTitleBarHeight)),
-									.space(),
-									.view(
-										breadth: .equalTo(ratio: 1.0, constant: -24),
-										SegmentedControl(
-											type: ButtonRowControl.self,
-											.segments -- Tabs.allCases.map { SegmentDescription(label: $0.label) },
-											.font -- .preferredFont(forTextStyle: .controlContent, size: .title2),
-											.selectedSegment <-- Signal.timer(interval: .interval(0.01), value: 0),
-											.adHocPrepare -- { control in
-												(control as! ButtonRowControl).segmentConstructor = { index, count in
-													Button(type: TabButton.self, .bezelStyle -- .regularSquare)
-												}
-											},
-											.action(\.selectedSegment) --> Input()
-												.compactMap(Tabs.init)
-												.debug()
-												.bind(to: windowState.selectedTab)
-										)
-									),
-									.space(),
-									.view(
-										TabView<Tabs>(
-											.tabs -- .reload(Tabs.allCases),
-											.position -- .none,
-											.borderType -- .none,
-											.selectedItem <-- windowState.selectedTab.debug(),
-											.willSelect -- { tabView, _, identifier in
-												tabView.layer?.addAnimationForKey(.push(from: identifier == .left ? .left : .right))
-											},
-											.tabConstructor -- { identifier in
-												switch identifier {
-												case .left:
-													return TabViewItem(
-														.label -- "Yellow",
-														.view -- View(.layer -- Layer(.backgroundColor -- .white))
-													)
-												case .right:
-													return TabViewItem(
-														.label -- "Banana",
-														.view -- View(.layer -- Layer(.backgroundColor -- .black))
-													)
-												}
-											}
-										)
-									)
-								)
-							),
-							constraints: .equalTo(ratio: 0.3, priority: .layoutLow)
-						),
-						.subview(
-							View(
-								.layer -- Layer(
-									.backgroundColor <-- windowState.appearance.map { name in
-										name == .darkAqua ? NSColor(white: 0.2, alpha: 1).cgColor : NSColor.white.cgColor
-									}
-								),
-								.layout -- .vertical(
-									.space(.equalTo(constant: NSWindow.defaultTitleBarHeight)),
-									.view(
-										TextField.label(
-											.stringValue -- "Right",
-											.verticalContentHuggingPriority -- .layoutLow
-										)
-									)
-								)
-							)
-						)
-					]
+		.contentView -- SplitView.verticalThin(
+			.autosaveName -- Bundle.main.bundleIdentifier! + ".split",
+			.arrangedSubviews -- [
+				.subview(
+					masterView(windowState),
+					holdingPriority: .layoutMid,
+					constraints: .equalTo(ratio: 0.3, priority: .layoutLow)
+				),
+				.subview(
+					detailView(windowState)
+				)
+			]
+		)
+	)
+}
+
+private func masterView(_ windowState: WindowState) -> ViewConvertible {
+	return View(
+		.layer -- Layer(
+			.backgroundColor <-- windowState.appearance.map { name in
+				name == .darkAqua ? .cwlBrownDark : .cwlBrownLight
+			}
+		),
+		.layout -- .vertical(
+			align: .fill,
+			.space(.equalTo(constant: NSWindow.defaultTitleBarHeight)),
+			.horizontal(
+				.space(12),
+				.view(segmentedControl(windowState)),
+				.space(12)
+			),
+			.space(),
+			.view(
+				tabView(windowState)
+			)
+		)
+	)
+}
+
+private func segmentedControl(_ windowState: WindowState) -> SegmentedControlConvertible {
+	return SegmentedControl(
+		type: ButtonRowControl.self,
+		.segments -- Tabs.allCases.map { SegmentDescription(label: $0.label) },
+		.font -- .preferredFont(forTextStyle: .controlContent, size: .controlRegular),
+		.selectedSegment -- 0,
+		.adHocPrepare -- { control in
+			(control as! ButtonRowControl).segmentConstructor = { index, count in
+				Button(
+					type: TabButton.self,
+					.bezelStyle -- .regularSquare,
+					.adHocPrepare -- { b in
+						(b as! TabButton).isFirst = index == 0
+						(b as! TabButton).isLast = index == count - 1
+					}
+				)
+			}
+		},
+		.action(\.selectedSegment) --> Input()
+			.compactMap(Tabs.init)
+			.bind(to: windowState.selectedTab)
+	)
+}
+
+private func tabView(_ windowState: WindowState) -> TabViewConvertible {
+	return TabView<Tabs>(
+		.tabs -- .reload(Tabs.allCases),
+		.position -- .none,
+		.borderType -- .none,
+		.selectedItem <-- windowState.selectedTab,
+		.willSelect -- { tabView, _, identifier in
+			tabView.layer?.addAnimationForKey(.push(from: identifier == .left ? .left : .right))
+		},
+		.tabConstructor -- { identifier in
+			switch identifier {
+			case .left: return TabViewItem(.view -- catalogTable(windowState))
+			case .right: return TabViewItem(.view -- aboutTab(windowState))
+			}
+		}
+	)
+}
+
+private func detailView(_ windowState: WindowState) -> ViewConvertible {
+	return View(
+		.layer -- Layer(.backgroundColor <-- windowState.windowContentColor),
+		.layout -- .vertical(
+			.center(
+				length: .equalTo(constant: NSWindow.defaultTitleBarHeight),
+				.view(TextField.label(
+					.stringValue -- "CwlViewCatalog",
+					.isSelectable -- false,
+					.font -- .preferredFont(forTextStyle: .titleBar, size: .system)
+				))
+			),
+			.view(
+				TextField.label(
+					.stringValue -- "Right",
+					.verticalContentHuggingPriority -- .layoutLow
 				)
 			)
 		)
 	)
 }
 
-class TabButton: NSButton {
-	class TabButtonCell: NSButtonCell {
-		override func drawBezel(withFrame frame: NSRect, in controlView: NSView) {
-			let path = NSBezierPath(roundedRect: frame.insetBy(dx: 3.5, dy: 3.5).offsetBy(dx: 0, dy: -1), xRadius: 8, yRadius: 8)
-			if state == .on || isHighlighted {
-				NSColor.controlAccentColor.setStroke()
-			} else {
-				NSColor.controlShadowColor.setStroke()
-			}
-			path.lineWidth = 1
-			path.stroke()
-			
-			if state == .on || isHighlighted {
-				NSColor.selectedContentBackgroundColor.blended(withFraction: 0.8, of: .clear)?.setFill()
-			} else {
-				NSColor.controlBackgroundColor.blended(withFraction: 0.95, of: .clear)?.setFill()
-			}
-			path.fill()
-		}
-		
-		override var cellSize: NSSize {
-			var result = super.cellSize
-			result.width += 8
-			result.height += 8
-			return result
-		}
-	}
-
-	override class var cellClass: AnyClass? { get { return TabButtonCell.self } set { super.cellClass = newValue } }
+enum Tabs: Int, Codable, CaseIterable {
+	case left
+	case right
 }
 
 private extension Tabs {

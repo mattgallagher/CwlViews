@@ -251,12 +251,13 @@ public extension WebView.Preparer {
 	}
 	
 	func prepareInstance(_ instance: Instance, storage: Storage) {
+		inheritedPrepareInstance(instance, storage: storage)
+		
 		prepareDelegate(instance: instance, storage: storage)
 		if delegateIsRequired {
 			precondition(instance.uiDelegate == nil, "Conflicting delegate applied to instance")
 			instance.uiDelegate = storage
 		}
-		inheritedPrepareInstance(instance, storage: storage)
 	}
 
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {

@@ -191,12 +191,10 @@ public extension ViewController.Preparer {
 	}
 	
 	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
-		let lifetime = inheritedFinalizedInstance(instance, storage: storage)
-		
 		// We previously set the embedded storage so that any delegate methods triggered during setup would be able to resolve the storage. Now that we're done setting up, we need to *clear* the storage so the embed function doesn't complain that the storage is already set.
 		instance.setAssociatedBinderStorage(nil)
 		
-		return lifetime
+		return inheritedFinalizedInstance(instance, storage: storage)
 	}
 }
 

@@ -365,6 +365,24 @@ public struct Layout {
 				return Entity(.layout(Layout(axis: .vertical, align: align, entities: entities), size: size))
 			#endif
 		}
+
+		public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = .equalTo(ratio: 1.0), relativity: Size.Relativity = .independent, _ entities: Entity...) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
+			#if os(iOS)
+				return Entity(.layout(.center(axis: axis, alignment: alignment, animate: animate, entities: entities), size: size))
+			#else
+				return Entity(.layout(.center(axis: axis, alignment: alignment, animate: animate, entities: entities), size: size))
+			#endif
+		}
+
+		public static func center(axis: Layout.Axis = .vertical, alignment: Alignment = .center, animate: AnimationChoice = .subsequent, length: Dimension? = nil, breadth: Dimension? = .equalTo(ratio: 1.0), relativity: Size.Relativity = .independent, entities: [Entity]) -> Entity {
+			let size = Size(length: length, breadth: breadth, relativity: relativity)
+			#if os(iOS)
+				return Entity(.layout(.center(axis: axis, alignment: alignment, animate: animate, entities: entities), size: size))
+			#else
+				return Entity(.layout(.center(axis: axis, alignment: alignment, animate: animate, entities: entities), size: size))
+			#endif
+		}
 		
 		public static func matchedPair(_ left: Entity, _ right: Entity, separator: Entity = .space(), priority: Dimension.Priority = .required) -> Entity {
 			return Entity(.matched(Matched(

@@ -71,6 +71,10 @@ public typealias Input<Value> = SignalChannel<SignalInput<Value>, Signal<Value>>
 public typealias MultiInput<Value> = SignalChannel<SignalMultiInput<Value>, Signal<Value>>
 public typealias MergedInput<Value> = SignalChannel<SignalMergedInput<Value>, Signal<Value>>
 
+public typealias MultiOutput<Value> = SignalChannel<SignalInput<Value>, SignalMulti<Value>>
+public typealias MultiInputMultiOutput<Value> = SignalChannel<SignalMultiInput<Value>, SignalMulti<Value>>
+public typealias MergedInputMultiOutput<Value> = SignalChannel<SignalMergedInput<Value>, SignalMulti<Value>>
+
 extension SignalChannel { 
 	public init<Value>() where SignalInput<Value> == InputInterface, Signal<Value> == Interface {
 		self = Signal<Value>.channel()
@@ -261,6 +265,10 @@ extension SignalChannel {
 	
 	public func toggle(initialState: Bool = false) -> SignalChannel<InputInterface, Signal<Bool>> {
 		return next { $0.toggle(initialState: initialState) }
+	}
+	
+	public func optional() -> SignalChannel<InputInterface, Signal<Interface.OutputValue?>> {
+		return next { $0.optional() }
 	}
 	
 	public func optionalToArray<U>() -> SignalChannel<InputInterface, Signal<[U]>> where Interface.OutputValue == Optional<U> {
@@ -600,6 +608,10 @@ extension SignalChannel {
 	
 	public func onError(context: Exec = .direct, _ handler: @escaping (SignalEnd) -> ()) -> SignalChannel<InputInterface, Signal<Interface.OutputValue>> {
 		return next { $0.onError(context: context, handler) }
+	}
+
+	public func debug(logPrefix: String = "", file: String = #file, line: Int = #line) -> SignalChannel<InputInterface, Signal<Interface.OutputValue>> {
+		return next { $0.debug(logPrefix: logPrefix, file: file, line: line) }
 	}
 	
 	public func materialize() -> SignalChannel<InputInterface, Signal<Result<Interface.OutputValue, SignalEnd>>> {

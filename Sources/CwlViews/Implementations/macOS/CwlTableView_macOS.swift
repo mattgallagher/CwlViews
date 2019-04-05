@@ -73,6 +73,7 @@ public extension TableView {
 		case selectionHighlightStyle(Dynamic<NSTableView.SelectionHighlightStyle>)
 		case userInterfaceLayoutDirection(Dynamic<NSUserInterfaceLayoutDirection>)
 		case usesAlternatingRowBackgroundColors(Dynamic<Bool>)
+		case usesAutomaticRowHeights(Dynamic<Bool>)
 		case verticalMotionCanBeginDrag(Dynamic<Bool>)
 
 		// 2. Signal bindings are performed on the object after construction.
@@ -229,6 +230,7 @@ public extension TableView.Preparer {
 		case .selectionHighlightStyle(let x): return x.apply(instance) { i, v in i.selectionHighlightStyle = v }
 		case .userInterfaceLayoutDirection(let x): return x.apply(instance) { i, v in i.userInterfaceLayoutDirection = v }
 		case .usesAlternatingRowBackgroundColors(let x): return x.apply(instance) { i, v in i.usesAlternatingRowBackgroundColors = v }
+		case .usesAutomaticRowHeights(let x): return x.apply(instance) { i, v in i.usesAutomaticRowHeights = v }
 		case .verticalMotionCanBeginDrag(let x): return x.apply(instance) { i, v in i.verticalMotionCanBeginDrag = v }
 
 		// 2. Signal bindings are performed on the object after construction.
@@ -660,6 +662,7 @@ public extension BindingName where Binding: TableViewBinding {
 	static var selectionHighlightStyle: TableViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
 	static var userInterfaceLayoutDirection: TableViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
 	static var usesAlternatingRowBackgroundColors: TableViewName<Dynamic<Bool>> { return .name(B.usesAlternatingRowBackgroundColors) }
+	static var usesAutomaticRowHeights: TableViewName<Dynamic<Bool>> { return .name(B.usesAutomaticRowHeights) }
 	static var verticalMotionCanBeginDrag: TableViewName<Dynamic<Bool>> { return .name(B.verticalMotionCanBeginDrag) }
 	
 	// 2. Signal bindings are performed on the object after construction.
@@ -740,7 +743,19 @@ public extension BindingName where Binding: TableViewBinding {
 					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
 					_ = input.send(value: view[keyPath: keyPath])
 				}
-			},
+		},
+			binding: TableView.Binding.selectionDidChange,
+			downcast: Binding.tableViewBinding
+		)
+	}
+	static func selectRow<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
+		return Binding.compositeName(
+			value: { (input: SignalInput<Value>) in
+				{ (notification: Notification) -> Void in
+					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
+					_ = input.send(value: view[keyPath: keyPath])
+				}
+		},
 			binding: TableView.Binding.selectionDidChange,
 			downcast: Binding.tableViewBinding
 		)

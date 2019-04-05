@@ -19,12 +19,18 @@
 
 import CwlViews
 
+private let windowVar = Var(WindowState())
+
+#if DEBUG
+	let viewLog = windowVar.logJson(prefix: "View-state changed: ")
+#endif
+
 applicationMain {
 	Application(
 		.mainMenu -- mainMenu(),
-		.lifetimes -- [
-			window(WindowState()).nsWindow()
-		],
+		.lifetimes <-- windowVar.map {[
+			window($0).nsWindow()
+		]},
 		.shouldTerminateAfterLastWindowClosed() -- true
 	)
 }

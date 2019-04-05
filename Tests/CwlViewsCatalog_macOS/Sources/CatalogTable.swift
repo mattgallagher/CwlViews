@@ -22,14 +22,28 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 
 func catalogTable(_ windowState: WindowState) -> ViewConvertible {
 	return TableView<CatalogViewState.CaseName>(
-		.rows -- [],
+		.rows -- CatalogViewState.CaseName.allCases.tableData(),
+		.focusRingType -- .none,
+		.usesAutomaticRowHeights -- true,
 		.columns -- [
 			TableColumn<CatalogViewState.CaseName>(
-				identifier: NSUserInterfaceItemIdentifier("int")
+				.cellConstructor { identifier, cellData -> TableCellViewConvertible in
+					TableCellView(
+						.layout -- .inset(
+							margins: NSEdgeInsets(top: 8, left: 16, bottom: 8, right: 16),
+							.view(
+								TextField.label(
+									.stringValue <-- cellData.map { data in data.localizedString },
+									.font -- .preferredFont(forTextStyle: .label, size: .title2),
+									.textColor -- .white
+								)
+							)
+						)
+					)
+				}
 			)
 		],
 		.rowSelected(\.viewState) --> windowState.rowSelection
-//		.selectRow <-- viewState.rowSelection.compactMap { $0 == nil ? .animate(nil) : nil }
 	)
 }
 

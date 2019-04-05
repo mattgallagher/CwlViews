@@ -50,7 +50,18 @@ public struct BinderBase: BinderPreparer {
 			switch x {
 			case .constant(let value):
 				return AggregateLifetime(lifetimes: value)
-			case .dynamic(let signal): return signal.continuous().subscribe(context: .main) { _ in }
+			case .dynamic(let signal):
+				var previous: [Lifetime]?
+				return signal.subscribe(context: .main) { next in
+					if var previous = previous {
+						for i in previous.indices {
+							previous[i].cancel()
+						}
+					}
+					if case .success(let next) = next {
+						previous = next
+					}
+				}
 			}
 		case .adHocPrepare: return nil
 		case .adHocFinalize: return nil

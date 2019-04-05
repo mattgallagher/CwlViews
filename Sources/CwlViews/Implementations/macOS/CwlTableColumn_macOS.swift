@@ -25,10 +25,6 @@ public class TableColumn<RowData>: Binder {
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
-
-	public convenience init(type: Instance.Type = Instance.self, identifier: NSUserInterfaceItemIdentifier, _ bindings: Binding...) {
-		self.init(type: type, parameters: identifier, bindings: bindings)
-	}
 }
 
 // MARK: - Binder Part 2: Binding
@@ -38,6 +34,7 @@ public extension TableColumn {
 		case inheritedBinding(Preparer.Inherited.Binding)
 		
 		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case identifier(Constant<NSUserInterfaceItemIdentifier>)
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case headerCell(Dynamic<NSTableHeaderCell>)
@@ -70,7 +67,6 @@ public extension TableColumn {
 		public typealias Binding = TableColumn.Binding
 		public typealias Inherited = BinderBase
 		public typealias Instance = NSTableColumn
-		public typealias Parameters = NSUserInterfaceItemIdentifier
 		public typealias Output = Storage
 		
 		public var inherited = Inherited()
@@ -80,6 +76,7 @@ public extension TableColumn {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
 
+		var columnIdentifier: NSUserInterfaceItemIdentifier?
 		var cellConstructor: ((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: SignalMulti<RowData>) -> TableCellViewConvertible)?
 		var cellIdentifier: ((RowData?) -> NSUserInterfaceItemIdentifier)?
 		var dataMissingCell: (() -> TableCellViewConvertible?)?
@@ -89,7 +86,7 @@ public extension TableColumn {
 // MARK: - Binder Part 4: Preparer overrides
 public extension TableColumn.Preparer {
 	func constructInstance(type: Instance.Type, parameters: Parameters) -> Instance {
-		return type.init(identifier: parameters)
+		return type.init(identifier: columnIdentifier ?? NSUserInterfaceItemIdentifier(UUID().uuidString))
 	}
 	
 	func combine(lifetimes: [Lifetime], instance: Instance, storage: Storage) -> Storage {
@@ -100,6 +97,7 @@ public extension TableColumn.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		
+		case .identifier(let x): columnIdentifier = x.value
 		case .cellConstructor(let x): cellConstructor = x
 		case .cellIdentifierForRow(let x): cellIdentifier = x
 		case .dataMissingCell(let x): dataMissingCell = x
@@ -112,6 +110,7 @@ public extension TableColumn.Preparer {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 			
 		//	0. Static bindings are applied at construction and are subsequently immutable.
+		case .identifier: return nil
 			
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .headerCell(let x): return x.apply(instance) { i, v in i.headerCell = v }
@@ -172,6 +171,7 @@ public extension BindingName where Binding: TableColumnBinding {
 	// With:    static var $1: TableColumnName<$2> { return .name(B.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
+	static var identifier: TableColumnName<Constant<NSUserInterfaceItemIdentifier>> { return .name(B.identifier) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	static var headerCell: TableColumnName<Dynamic<NSTableHeaderCell>> { return .name(B.headerCell) }

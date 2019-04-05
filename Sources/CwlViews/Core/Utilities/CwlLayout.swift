@@ -252,6 +252,11 @@ public struct Layout {
 			@unknown default: fatalError()
 			}
 		}
+		
+		/// A convenience constructor for a vertical layout 
+		public static func inset(margins: NSEdgeInsets, animate: AnimationChoice = .subsequent, _ entity: Entity) -> Layout {
+			return .horizontal(.space(.equalTo(constant: margins.left)), .vertical(.space(.equalTo(constant: margins.top)), entity, .space(.equalTo(constant: margins.bottom))), .space(.equalTo(constant: margins.right)))
+		}
 	#endif
 	
 	// Used for removing all views from their superviews
@@ -496,6 +501,14 @@ public struct Layout {
 		
 		public init(integerLiteral value: Int) {
 			self.init(constant: CGFloat(value))
+		}
+		
+		public static func constant(_ value: CGFloat) -> Dimension {
+			return Dimension(constant: value)
+		}
+		
+		public static func ratio(_ value: CGFloat, constant: CGFloat = 0) -> Dimension {
+			return Dimension(ratio: value, constant: constant)
 		}
 		
 		public static var standardSpace = Dimension(ratio: 0, constant: 8, relationship: .equal, priority: .layoutHigh) 

@@ -27,9 +27,9 @@ struct WindowState: CodableContainer {
 
 func window(_ windowState: WindowState) -> WindowConvertible {
 	return Window(
-		.contentHeight -- .ratio(1.0, constant: -30),
+		.contentHeight -- 311,
 		.contentRelativity -- .widthRelativeToHeight,
-		.contentWidth -- .ratio(1.0, constant: 200),
+		.contentWidth -- 650,
 		.effectiveAppearanceName --> windowState.appearance,
 		.frameAutosaveName -- Bundle.main.bundleIdentifier! + ".window",
 		.frameHorizontal -- 15,

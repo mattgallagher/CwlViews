@@ -20,8 +20,9 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case webView(WebViewState)
 }
 
-func catalogTable(_ windowState: WindowState) -> ViewConvertible {
+func catalogTable(_ windowState: WindowState, tag: Int) -> ViewConvertible {
 	return TableView<CatalogViewState.CaseName>(
+		.tag -- tag,
 		.rows -- CatalogViewState.CaseName.allCases.tableData(),
 		.focusRingType -- .none,
 		.usesAutomaticRowHeights -- true,
@@ -76,8 +77,8 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		}
 	}
 	
-	var viewState: CatalogViewState? {
-		return try? decode(from: KeyedDecodingContainer<CatalogViewState.CaseName>.empty())
+	var viewState: CatalogViewState {
+		return try! decode(from: KeyedDecodingContainer<CatalogViewState.CaseName>.empty())
 	}
 	
 	func decode(from container: KeyedDecodingContainer<CatalogViewState.CaseName>) throws -> CatalogViewState {

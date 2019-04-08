@@ -357,7 +357,7 @@ public extension TableView.Preparer {
 		case (.some, .some): fatalError("Action and double action may not use mix of single target and first responder")
 		}
 		
-		return AggregateLifetime(lifetimes: lifetimes)
+		return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 	}
 }
 
@@ -719,17 +719,15 @@ public extension BindingName where Binding: TableViewBinding {
 	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, TableView.Binding.doubleAction, Binding.tableViewBinding)
 	}
-	static func rowSelected<Value>(_ keyPath: KeyPath<Binding.RowDataType, Value>) -> TableViewName<SignalInput<Value>> {
+	static func rowSelected<Value>(_ keyPath: KeyPath<Binding.RowDataType, Value>) -> TableViewName<SignalInput<Value?>> {
 		return Binding.compositeName(
-			value: { (input: SignalInput<Value>) in
+			value: { (input: SignalInput<Value?>) in
 				{ (notification: Notification) -> Void in
 					guard let view = (notification.object as? NSTableView) else { return }
 					let storageType = TableView<Binding.RowDataType>.Preparer.Storage.self
 					guard let storage = view.associatedBinderStorage(subclass: storageType) else { return }
 					let row = storage.rowState.values?.at(view.selectedRow)?[keyPath: keyPath]
-					if let row = row {
-						_ = input.send(value: row)
-					}
+					_ = input.send(value: row)
 				}
 			},
 			binding: TableView.Binding.selectionDidChange,
@@ -743,7 +741,7 @@ public extension BindingName where Binding: TableViewBinding {
 					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
 					_ = input.send(value: view[keyPath: keyPath])
 				}
-		},
+			},
 			binding: TableView.Binding.selectionDidChange,
 			downcast: Binding.tableViewBinding
 		)
@@ -755,7 +753,7 @@ public extension BindingName where Binding: TableViewBinding {
 					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
 					_ = input.send(value: view[keyPath: keyPath])
 				}
-		},
+			},
 			binding: TableView.Binding.selectionDidChange,
 			downcast: Binding.tableViewBinding
 		)

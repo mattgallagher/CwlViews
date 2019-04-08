@@ -56,6 +56,8 @@ public extension TabViewItem {
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
 			if case .inheritedBinding(let b) = from { return b } else { return nil }
 		}
+		
+		var initialFirstResponderTag: Dynamic<Int>? = nil
 	}
 }
 
@@ -64,6 +66,14 @@ public extension TabViewItem.Preparer {
 	func constructInstance(type: Instance.Type, parameters: Void) -> Instance {
 		return type.init(identifier: nil)
 	}
+	
+	mutating func prepareBinding(_ binding: TabViewItem.Binding) {
+		switch binding {
+		case .inheritedBinding(let x): inherited.prepareBinding(x)
+		case .initialFirstResponderTag(let x): initialFirstResponderTag = x
+		default: break
+		}
+	}
 
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
@@ -71,11 +81,21 @@ public extension TabViewItem.Preparer {
 
 		case .color(let x): return x.apply(instance) { i, v in i.color = v }
 		case .image(let x): return x.apply(instance) { i, v in i.image = v }
-		case .initialFirstResponderTag(let x): return x.apply(instance) { i, v in i.initialFirstResponder = i.view?.viewWithTag(v) }
+		case .initialFirstResponderTag: return nil
 		case .label(let x): return x.apply(instance) { i, v in i.label = v }
 		case .toolTip(let x): return x.apply(instance) { i, v in i.toolTip = v }
 		case .view(let x): return x.apply(instance) { i, v in i.view = v.nsView() }
 		}
+	}
+	
+	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
+		var lifetimes = [Lifetime]()
+		lifetimes += initialFirstResponderTag?.apply(instance) { i, v in
+			let view = i.view?.viewWithTag(v)
+			i.initialFirstResponder = view
+		}
+		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
+		return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 	}
 }
 

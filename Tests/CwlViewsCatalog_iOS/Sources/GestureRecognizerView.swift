@@ -55,9 +55,9 @@ func gestureLayout(_ gestureRecognizerViewState: GestureRecognizerViewState, _ l
 			.matched(
 				.space(.fillRemaining),
 				.free(pinchRotateSwipe),
-				.dependent(.same(.space(.fillRemaining))),
+				.same(.space(.fillRemaining)),
 				.free(screenEdge),
-				.dependent(.same(.space(.fillRemaining)))
+				.same(.space(.fillRemaining))
 			)
 		)
 	)

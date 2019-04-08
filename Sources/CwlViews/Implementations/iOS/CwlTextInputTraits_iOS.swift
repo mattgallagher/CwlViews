@@ -46,9 +46,9 @@ public struct TextInputTraits {
 	}
 	
 	// No, you're not seeing things, this is one method, copy and pasted three times with a different instance parameter type.
-	// Unfortunately, optional Objective-C vars – as used in the UITextInputTraits protocol – don't work in Swift, so everything must be done manually, instead.
+	// Unfortunately, Objective-C protocols with optional, settable vars – as used in the UITextInputTraits protocol – don't work in Swift 5, so everything must be done manually, instead.
 	public func apply(to instance: UISearchBar) -> Lifetime? {
-		return AggregateLifetime(lifetimes: bindings.lazy.compactMap { trait in
+		return bindings.isEmpty ? nil : AggregateLifetime(lifetimes: bindings.compactMap { trait in
 			switch trait {
 			case .autocapitalizationType(let x): return x.apply(instance) { i, v in i.autocapitalizationType = v }
 			case .autocorrectionType(let x): return x.apply(instance) { i, v in i.autocorrectionType = v }
@@ -67,9 +67,9 @@ public struct TextInputTraits {
 	}
 	
 	// No, you're not seeing things, this is one method, copy and pasted three times with a different instance parameter type.
-	// Unfortunately, optional Objective-C vars – as used in the UITextInputTraits protocol – don't work in Swift 4.2, so everything must be done manually, instead.
+	// Unfortunately, Objective-C protocols with optional, settable vars – as used in the UITextInputTraits protocol – don't work in Swift 5, so everything must be done manually, instead.
 	public func apply(to instance: UITextField) -> Lifetime? {
-		return AggregateLifetime(lifetimes: bindings.lazy.compactMap { trait in
+		return bindings.isEmpty ? nil : AggregateLifetime(lifetimes: bindings.compactMap { trait in
 			switch trait {
 			case .autocapitalizationType(let x): return x.apply(instance) { i, v in i.autocapitalizationType = v }
 			case .autocorrectionType(let x): return x.apply(instance) { i, v in i.autocorrectionType = v }
@@ -88,9 +88,9 @@ public struct TextInputTraits {
 	}
 	
 	// No, you're not seeing things, this is one method, copy and pasted three times with a different instance parameter type.
-	// Unfortunately, Objective-C protocols with optional, settable vars – as used in the UITextInputTraits protocol – don't work in Swift 4.2, so everything must be done manually, instead.
+	// Unfortunately, Objective-C protocols with optional, settable vars – as used in the UITextInputTraits protocol – don't work in Swift 5, so everything must be done manually, instead.
 	public func apply(to instance: UITextView) -> Lifetime? {
-		return AggregateLifetime(lifetimes: bindings.lazy.compactMap { trait in
+		return bindings.isEmpty ? nil : AggregateLifetime(lifetimes: bindings.compactMap { trait in
 			switch trait {
 			case .autocapitalizationType(let x): return x.apply(instance) { i, v in i.autocapitalizationType = v }
 			case .autocorrectionType(let x): return x.apply(instance) { i, v in i.autocorrectionType = v }

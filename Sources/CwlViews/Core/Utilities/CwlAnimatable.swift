@@ -49,6 +49,12 @@ public extension BindingName {
 	
 }
 
+public enum AnimationChoice {
+	case never
+	case subsequent
+	case always
+}
+
 extension SignalInterface {
 	public func animate(_ choice: AnimationChoice = .subsequent) -> Signal<Animatable<OutputValue, ()>> {
 		return map(initialState: false) { (alreadyReceived: inout Bool, value: OutputValue) in

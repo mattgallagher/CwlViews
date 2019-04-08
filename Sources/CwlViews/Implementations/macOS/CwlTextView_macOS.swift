@@ -14,6 +14,18 @@ public class TextView: Binder, TextViewConvertible {
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
+
+	public static func scrollEmbedded(type: NSTextView.Type = NSTextView.self, _ bindings: Binding...) -> ScrollView {
+		return ScrollView(
+			.borderType -- .noBorder,
+			.hasVerticalScroller -- true,
+			.hasHorizontalScroller -- true,
+			.autohidesScrollers -- true,
+			.contentView -- ClipView(
+				.documentView -- TextView(type: type, bindings: bindings)
+			)
+		)
+	}
 }
 
 // MARK: - Binder Part 2: Binding
@@ -136,9 +148,9 @@ public extension TextView {
 		case updateTouchBarItemIdentifiers(Signal<Void>)
 
 		// 3. Action bindings are triggered by the object after construction.
-		case didBeginEditing(SignalInput<Void>)
-		case didChange(SignalInput<Void>)
-		case didEndEditing(SignalInput<NSTextMovement>)
+		case didBeginEditing(SignalInput<NSTextView>)
+		case didChange(SignalInput<NSTextView>)
+		case didEndEditing(SignalInput<(NSTextView, NSTextMovement?)>)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case shouldBeginEditing((NSTextView) -> Bool)
@@ -297,9 +309,9 @@ public extension TextView.Preparer {
 		case .updateTouchBarItemIdentifiers(let x): return x.apply(instance) { i, v in i.updateTouchBarItemIdentifiers() }
 			
 		// 3. Action bindings are triggered by the object after construction.
-		case .didBeginEditing(let x): return Signal.notifications(name: NSTextView.didBeginEditingNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-		case .didChange(let x): return Signal.notifications(name: NSTextView.didChangeSelectionNotification, object: instance).map { notification -> Void in }.cancellableBind(to: x)
-		case .didEndEditing(let x): return Signal.notifications(name: NSTextView.didEndEditingNotification, object: instance).compactMap { notification -> NSTextMovement? in notification.userInfo?[NSText.movementUserInfoKey] as? NSTextMovement }.cancellableBind(to: x)
+		case .didBeginEditing(let x): return Signal.notifications(name: NSTextView.didBeginEditingNotification, object: instance).compactMap { notification -> NSTextView? in notification.object as? NSTextView }.cancellableBind(to: x)
+		case .didChange(let x): return Signal.notifications(name: NSTextView.didChangeSelectionNotification, object: instance).compactMap { notification -> NSTextView? in notification.object as? NSTextView }.cancellableBind(to: x)
+		case .didEndEditing(let x): return Signal.notifications(name: NSTextView.didEndEditingNotification, object: instance).compactMap { notification -> (NSTextView, NSTextMovement?)? in (notification.object as? NSTextView).map { ($0, notification.userInfo?[NSText.movementUserInfoKey] as? NSTextMovement) } }.cancellableBind(to: x)
 			
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .shouldBeginEditing: return nil
@@ -450,13 +462,42 @@ public extension BindingName where Binding: TextViewBinding {
 	static var updateTouchBarItemIdentifiers: TextViewName<Signal<Void>> { return .name(B.updateTouchBarItemIdentifiers) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didBeginEditing: TextViewName<SignalInput<Void>> { return .name(B.didBeginEditing) }
-	static var didChange: TextViewName<SignalInput<Void>> { return .name(B.didChange) }
-	static var didEndEditing: TextViewName<SignalInput<NSTextMovement>> { return .name(B.didEndEditing) }
+	static var didBeginEditing: TextViewName<SignalInput<NSTextView>> { return .name(B.didBeginEditing) }
+	static var didChange: TextViewName<SignalInput<NSTextView>> { return .name(B.didChange) }
+	static var didEndEditing: TextViewName<SignalInput<(NSTextView, NSTextMovement?)>> { return .name(B.didEndEditing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var shouldBeginEditing: TextViewName<(NSTextView) -> Bool> { return .name(B.shouldBeginEditing) }
 	static var shouldEndEditing: TextViewName<(NSTextView) -> Bool> { return .name(B.shouldEndEditing) }
+	
+	// Composite binding names
+	static func font(_ void: Void = ()) -> BindingName<Dynamic<NSFont>, BinderBase.Binding, Binding> {
+		return Binding.compositeName(
+			value: { (x: Dynamic<NSFont>) -> (Any) -> Lifetime? in
+				{ (instance: Any) -> Lifetime? in
+					return x.apply(instance as! NSTextView) { (i: NSTextView, v: NSFont) -> Void in
+						if (i.textStorage?.length ?? 0) == 0 {
+							var attributes = i.typingAttributes
+							attributes[NSAttributedString.Key.font] = v
+							i.typingAttributes = attributes
+						} else {
+							i.textStorage?.addAttribute(NSAttributedString.Key.font, value: v, range: NSRange(location: 0, length: i.textStorage?.length ?? 0))
+						}
+					}
+				}
+			},
+			binding: BinderBase.Binding.adHocFinalize,
+			downcast: Binding.binderBaseBinding
+		)
+	}
+	
+	static func stringChanged(_ void: Void = ()) -> TextViewName<SignalInput<String>> {
+		return Binding.compositeName(
+			value: { (input: SignalInput<String>) in Input<NSTextView>().compactMap { $0.string }.bind(to: input) },
+			binding: TextView.Binding.didChange,
+			downcast: Binding.textViewBinding
+		)
+	}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

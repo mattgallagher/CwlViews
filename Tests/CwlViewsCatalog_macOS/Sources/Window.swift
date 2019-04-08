@@ -10,10 +10,12 @@ import CwlViews
 
 struct WindowState: CodableContainer {
 	let appearance: TempVar<NSAppearance.Name>
+	let error: TempVar<Error>
 	let selectedTab: Var<Tabs>
 	let rowSelection: Var<CatalogViewState?>
 	init() {
 		appearance = TempVar()
+		error = TempVar()
 		selectedTab = Var(.left)
 		rowSelection = Var(nil)
 	}
@@ -38,6 +40,8 @@ func window(_ windowState: WindowState) -> WindowConvertible {
 		.title -- .title,
 		.titleVisibility -- .hidden,
 		.titlebarAppearsTransparent -- true,
+		.toolbar -- toolbar(windowState),
+		.presentError <-- windowState.error.ignoreCallback(),
 		.contentView -- SplitView.verticalThin(
 			.autosaveName -- Bundle.main.bundleIdentifier! + ".split",
 			.arrangedSubviews -- [
@@ -47,7 +51,7 @@ func window(_ windowState: WindowState) -> WindowConvertible {
 					constraints: .equalTo(ratio: 0.3, priority: .layoutLow)
 				),
 				.subview(
-					detailView(windowState)
+					detailContainer(windowState)
 				)
 			]
 		)
@@ -63,7 +67,8 @@ private func masterView(_ windowState: WindowState) -> ViewConvertible {
 		),
 		.layout -- .vertical(
 			align: .fill,
-			.space(.equalTo(constant: NSWindow.defaultTitleBarHeight)),
+			.space(.equalTo(constant: NSWindow.integratedToolbarHeight)),
+			.space(),
 			.horizontal(
 				.space(12),
 				.view(segmentedControl(windowState)),
@@ -112,33 +117,83 @@ private func tabView(_ windowState: WindowState) -> TabViewConvertible {
 		},
 		.tabConstructor -- { identifier in
 			switch identifier {
-			case .left: return TabViewItem(.view -- catalogTable(windowState))
-			case .right: return TabViewItem(.view -- aboutTab(windowState))
+			case .left:
+				return TabViewItem(
+					.view -- catalogTable(windowState, tag: identifier.rawValue + 1),
+					.initialFirstResponderTag -- identifier.rawValue + 1
+				)
+			case .right:
+				return TabViewItem(
+					.view -- aboutTab(windowState, tag: identifier.rawValue + 1),
+					.initialFirstResponderTag -- identifier.rawValue + 1
+				)
 			}
 		}
 	)
 }
 
-private func detailView(_ windowState: WindowState) -> ViewConvertible {
+private func detailContainer(_ windowState: WindowState) -> ViewConvertible {
 	return View(
 		.layer -- Layer(.backgroundColor <-- windowState.windowContentColor),
-		.layout -- .vertical(
-			.center(
-				length: .equalTo(constant: NSWindow.defaultTitleBarHeight),
-				.view(TextField.label(
-					.stringValue -- "CwlViewCatalog",
-					.isSelectable -- false,
-					.font -- .preferredFont(forTextStyle: .titleBar, size: .system)
-				))
-			),
-			.view(
-				TextField.label(
-					.stringValue -- "Right",
-					.verticalContentHuggingPriority -- .layoutLow
+		.layout <-- windowState.rowSelection.map { selection in
+			.vertical(
+				animation: Layout.Animation(style: .fade, duration: 0.1),
+				.center(
+					length: .equalTo(constant: NSWindow.integratedToolbarHeight),
+					.view(TextField.label(
+						.stringValue -- "CwlViewsCatalog",
+						.isSelectable -- false,
+						.font -- .preferredFont(forTextStyle: .titleBar, size: .system)
+					))
+				),
+				.inset(
+					margins: NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8),
+					.view(detailView(selection))
 				)
 			)
-		)
+		}
 	)
+}
+
+private func toolbar(_ windowState: WindowState) -> ToolbarConvertible {
+	return Toolbar(
+		identifier: NSToolbar.Identifier("toolbar"),
+		.displayMode -- .iconAndLabel,
+		.sizeMode -- .small,
+		.showsBaselineSeparator -- true,
+		.itemDescriptions -- [
+			ToolbarItemDescription(identifier: NSToolbarItem.Identifier.flexibleSpace) { identifier, willBeInserted -> ToolbarItemConvertible? in
+				ToolbarItem(itemIdentifier: identifier)
+			},
+			ToolbarItemDescription(identifier: NSToolbarItem.Identifier(rawValue: "error")) { identifier, willBeInserted -> ToolbarItemConvertible? in
+				ToolbarItem(
+					itemIdentifier: identifier,
+					.image -- NSImage(named: NSImage.cautionName),
+					.toolTip -- NSLocalizedString("Deliberately trigger an error", comment: ""),
+					.action --> Input().map { _ in undeclaredError() }.bind(to: windowState.error)
+				)
+			}
+		]
+	)
+}
+
+private func detailView(_ viewState: CatalogViewState?) -> ViewConvertible {
+	switch viewState {
+	case .button(let state)?: return buttonView(state)
+	case .control(let state)?: return controlView(state)
+	case .gestureRecognizer(let state)?: return gestureRecognizerView(state)
+	case .imageView(let state)?: return imageView(state)
+	case .layers(let state)?: return layersView(state)
+	case .slider(let state)?: return sliderView(state)
+	case .textField(let state)?: return textFieldView(state)
+	case .textView(let state)?: return textView(state)
+	case .webView(let state)?: return webView(state)
+	case nil:
+		return TextField.label(
+			.stringValue -- "No item selected",
+			.verticalContentHuggingPriority -- .layoutLow
+		)
+	}
 }
 
 enum Tabs: Int, Codable, CaseIterable {

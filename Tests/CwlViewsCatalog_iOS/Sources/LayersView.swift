@@ -103,7 +103,7 @@ private extension BindingName where Binding: ViewBinding {
 					return nil
 				}
 			},
-			binding: BinderBase.Binding.adHoc,
+			binding: BinderBase.Binding.adHocFinalize,
 			downcast: Binding.binderBaseBinding
 		)
 	}
@@ -123,7 +123,7 @@ private extension BindingName where Binding: ViewBinding {
 					return nil
 				}
 			},
-			binding: BinderBase.Binding.adHoc,
+			binding: BinderBase.Binding.adHocFinalize,
 			downcast: Binding.binderBaseBinding
 		)
 	}

@@ -111,6 +111,9 @@ public extension TabView.Preparer {
 				for tabItem in i.tabViewItems {
 					if let identifier = tabItem.identifier as? Identifier, identifier == v {
 						i.selectTabViewItem(tabItem)
+						if let window = i.window, let responder = tabItem.initialFirstResponder {
+							window.makeFirstResponder(responder)
+						}
 						break
 					}
 				}

@@ -25,6 +25,18 @@ public class WebView: Binder, WebViewConvertible {
 	public required init(type: Preparer.Instance.Type, parameters: Preparer.Parameters, bindings: [Preparer.Binding]) {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
+
+	public static func scrollEmbedded(type: WKWebView.Type = WKWebView.self, _ bindings: Binding...) -> ScrollView {
+		return ScrollView(
+			.borderType -- .noBorder,
+			.hasVerticalScroller -- true,
+			.hasHorizontalScroller -- true,
+			.autohidesScrollers -- true,
+			.contentView -- ClipView(
+				.documentView -- WebView(type: type, bindings: bindings)
+			)
+		)
+	}
 }
 
 // MARK: - Binder Part 2: Binding

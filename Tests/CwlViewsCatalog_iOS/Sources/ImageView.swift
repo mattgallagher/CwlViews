@@ -40,7 +40,11 @@ func drawIcon(context: CGContext, canvas: CGRect) {
 	let colorSpace = CGColorSpaceCreateDeviceRGB()
 	
 	// Background shadow
-	context.setShadow(offset: CGSize(width: 0, height: unit * 0.015625), blur: unit * 0.0234375, color: CGColor(colorSpace: graySpace, components: [0.0, 0.75]))
+	#if os(macOS)
+		context.setShadow(offset: CGSize(width: 0, height: -unit * 0.015625), blur: unit * 0.0234375, color: CGColor(colorSpace: graySpace, components: [0.0, 0.75]))
+	#else
+		context.setShadow(offset: CGSize(width: 0, height: unit * 0.015625), blur: unit * 0.0234375, color: CGColor(colorSpace: graySpace, components: [0.0, 0.75]))
+	#endif
 	context.setFillColor(gray: 0.9, alpha: 1.0)
 	context.fillEllipse(in: bounds)
 	context.setShadow(offset: .zero, blur: 0)
@@ -56,7 +60,7 @@ func drawIcon(context: CGContext, canvas: CGRect) {
 	let ellipseCenter = bounds.insetBy(dx: unit * 0.03125, dy: unit * 0.03125)
 	context.setFillColor(gray: 0, alpha: 1)
 	context.fillEllipse(in: ellipseCenter)
-
+	
 	// Three glows drawn over top of each other to create the amorphous blue glowing backdrop
 	context.saveGState()
 	context.addEllipse(in: ellipseCenter)
@@ -71,7 +75,7 @@ func drawIcon(context: CGContext, canvas: CGRect) {
 		],
 		locations: [0.0, 0.35, 0.60, 0.7],
 		count: 4
-	)!
+		)!
 	let bottomCenter = CGPoint(x: ellipseCenter.midX, y: ellipseCenter.midY + ellipseCenter.height * 0.1)
 	context.drawRadialGradient(bottomGlow, startCenter: bottomCenter, startRadius: 0, endCenter: bottomCenter, endRadius: ellipseCenter.height * 0.8, options: [])
 	let topGlow = CGGradient(
@@ -83,25 +87,35 @@ func drawIcon(context: CGContext, canvas: CGRect) {
 		],
 		locations: [0.0, 0.25, 0.40],
 		count: 3
-	)!
+		)!
 	let topCenter = CGPoint(x: ellipseCenter.midX, y: ellipseCenter.midY - ellipseCenter.height * 0.2)
 	context.drawRadialGradient(topGlow, startCenter: topCenter, startRadius: 0, endCenter: topCenter, endRadius: ellipseCenter.height * 0.8, options: [])
 	let centerGlow = CGGradient(colorSpace: colorSpace, colorComponents: [
 		0.0, 0.90, 0.90, 0.90,
 		0.0, 0.49, 1.00, 0.00
-	], locations: [0.0, 0.85], count: 2)!
+		], locations: [0.0, 0.85], count: 2)!
 	let center = CGPoint(x: ellipseCenter.midX, y: ellipseCenter.midY)
 	context.drawRadialGradient(centerGlow, startCenter: center, startRadius: 0, endCenter: center, endRadius: ellipseCenter.height * 0.8, options: [])
 	context.restoreGState()
 	
 	// Draw the floral heart glyph
 	context.setShadow(offset: .zero, blur: unit * 0.0234375, color: CGColor(colorSpace: graySpace, components: [0, 1]))
-	let floralHeart = CTLineCreateWithAttributedString(NSAttributedString(string: "\u{2766}", attributes: [.foregroundColor: UIColor(white: 0.9, alpha: 1)]))
-	let floralHeartBounds = CTLineGetBoundsWithOptions(floralHeart, [])
-	let scale = unit / floralHeartBounds.height
+	#if os(macOS)
+		let floralHeart = CTLineCreateWithAttributedString(NSAttributedString(string: "\u{2766}", attributes: [.foregroundColor: NSColor(white: 0.9, alpha: 1)]))
+		let floralHeartBounds = CTLineGetBoundsWithOptions(floralHeart, [])
+		let scale = 0.75 * unit / floralHeartBounds.height
+	#else
+		let floralHeart = CTLineCreateWithAttributedString(NSAttributedString(string: "\u{2766}", attributes: [.foregroundColor: UIColor(white: 0.9, alpha: 1)]))
+		let floralHeartBounds = CTLineGetBoundsWithOptions(floralHeart, [])
+		let scale = unit / floralHeartBounds.height
+	#endif
 	context.saveGState()
 	context.scaleBy(x: scale, y: -scale)
-	let offset = CGPoint(x: ellipseCenter.midX / scale - floralHeartBounds.midX, y: -ellipseCenter.midY / scale - floralHeartBounds.midY)
+	#if os(macOS)
+		let offset = CGPoint(x: ellipseCenter.midX / scale - floralHeartBounds.midX, y: -1.07 * ellipseCenter.midY / scale - floralHeartBounds.midY)
+	#else
+		let offset = CGPoint(x: ellipseCenter.midX / scale - floralHeartBounds.midX, y: -ellipseCenter.midY / scale - floralHeartBounds.midY)
+	#endif
 	context.textPosition = offset
 	CTLineDraw(floralHeart, context)
 	context.restoreGState()

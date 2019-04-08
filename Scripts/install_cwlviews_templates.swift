@@ -1158,7 +1158,7 @@ func macMainWindowContents() -> String {
 					), size: nil),
 					.view(TextField.construct(
 						Control.value <-- viewModel.text.signal.map { .stringValue($0) },
-						Control.textDidChange -- { text in _ = viewModel.text.input.send(value: text.string) }
+						Control.textChanged -- { text in _ = viewModel.text.input.send(value: text.string) }
 					), size: nil)
 				),
 				Window.shouldClose -- { _ in viewModel.save(); return true },

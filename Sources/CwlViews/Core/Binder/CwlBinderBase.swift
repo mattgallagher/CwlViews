@@ -48,8 +48,8 @@ public struct BinderBase: BinderPreparer {
 		switch binding {
 		case .lifetimes(let x):
 			switch x {
-			case .constant(let value):
-				return AggregateLifetime(lifetimes: value)
+			case .constant(let lifetimes):
+				return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 			case .dynamic(let signal):
 				var previous: [Lifetime]?
 				return signal.subscribe(context: .main) { next in

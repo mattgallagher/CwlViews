@@ -185,6 +185,7 @@ public extension Window {
 		var styleMask = InitialSubsequent<NSWindow.StyleMask>()
 		var backingType = InitialSubsequent<NSWindow.BackingStoreType>()
 		
+		var contentView: Dynamic<ViewConvertible>? = nil
 		var frameAutosaveName: Dynamic<String>? = nil
 		var frameHorizontal: Dynamic<WindowDimension>? = nil
 		var frameVertical: Dynamic<WindowDimension>? = nil
@@ -231,6 +232,7 @@ public extension Window.Preparer {
 		case .backingType(let x): backingType = x.initialSubsequent()
 		case .contentHeight(let x): contentHeight = x.initialSubsequent()
 		case .contentWidth(let x): contentWidth = x.initialSubsequent()
+		case .contentView(let x): contentView = x
 		case .deferCreation(let x): deferCreation = x.value
 		case .frameAutosaveName(let x): frameAutosaveName = x
 		case .frameHorizontal(let x): frameHorizontal = x
@@ -295,7 +297,7 @@ public extension Window.Preparer {
 			i.setContentSize(WindowDimension.contentSize(width: widthSize, height: heightSize, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
 		}
 		case .contentResizeIncrements(let x): return x.apply(instance) { i, v in i.contentResizeIncrements = v }
-		case .contentView(let x):return x.apply(instance) { i, v in i.contentView = v.nsView() }
+		case .contentView: return nil
 		case .contentWidth: return contentWidth.resume()?.apply(instance, storage) { i, s, v in
 			let heightSize = WindowDimension(ratio: 0, constant: i.contentView!.frame.size.height)
 			i.setContentSize(WindowDimension.contentSize(width: v, height: heightSize, relativity: s.windowSizeRelativity, onScreen: i.screen, windowClass: type(of: i), styleMask: i.styleMask))
@@ -447,22 +449,35 @@ public extension Window.Preparer {
 	func finalizeInstance(_ instance: Instance, storage: Storage) -> Lifetime? {
 		var lifetimes = [Lifetime]()
 		
-		// Layout the content
+		// Apply the autosave size
+		let originalFrame = instance.frame
+		lifetimes += frameAutosaveName?.apply(instance) { i, v in
+			i.setFrameAutosaveName(v)
+		}
+		
+		// The window's content size is now correct, so we can add and layout content.
+		// NOTE: this must be done *after* the content size is established, otherwise some container-dependent layout will be done incorrectly.
+		lifetimes += contentView?.apply(instance) { i, v in
+			i.contentView = v.nsView()
+		}
 		instance.layoutIfNeeded()
 		if let initialFirstResponder = initialFirstResponder {
 			instance.initialFirstResponder = instance.contentView?.viewWithTag(initialFirstResponder)
 		}
 		
-		// Following content layout, attempt to place the window on screen
+		// With content laid out, we can place the frame. NOTE: if autolayout has already placed the frame, respect that placement.
+		var skipInitialPlacementIfAutosavePlacementOccurred = instance.frame != originalFrame
 		lifetimes += frameHorizontal?.apply(instance) { i, v in
-			i.setFrameOrigin(v.applyFrameHorizontal(i.screen, frameRect: i.frame))
+			if !skipInitialPlacementIfAutosavePlacementOccurred {
+				i.setFrameOrigin(v.applyFrameHorizontal(i.screen, frameRect: i.frame))
+			}
 		}
 		lifetimes += frameVertical?.apply(instance) { i, v in
-			i.setFrameOrigin(v.applyFrameVertical(i.screen, frameRect: i.frame))
+			if !skipInitialPlacementIfAutosavePlacementOccurred {
+				i.setFrameOrigin(v.applyFrameVertical(i.screen, frameRect: i.frame))
+			}
 		}
-		lifetimes += frameAutosaveName?.apply(instance) { i, v in
-			i.setFrameAutosaveName(v)
-		}
+		skipInitialPlacementIfAutosavePlacementOccurred = false
 		
 		// Set intial order, key and main after everything else
 		let captureOrder = order?.initialSubsequent()
@@ -485,7 +500,7 @@ public extension Window.Preparer {
 		
 		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
 		
-		return AggregateLifetime(lifetimes: lifetimes)
+		return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 	}
 }
 
@@ -827,8 +842,12 @@ public struct WindowDimension: ExpressibleByIntegerLiteral, ExpressibleByFloatLi
 }
 
 extension NSWindow: Lifetime {
-	public static var defaultTitleBarHeight: CGFloat {
+	public static var titleBarHeight: CGFloat {
 		return NSWindow.frameRect(forContentRect: .zero, styleMask: [.titled]).height
+	}
+	
+	public static var integratedToolbarHeight: CGFloat {
+		return 24 + 8 + 8 // is there a smarter way to calculate this?
 	}
 	
 	public func cancel() {

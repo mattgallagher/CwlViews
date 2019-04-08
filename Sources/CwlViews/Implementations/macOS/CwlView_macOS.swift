@@ -46,7 +46,7 @@ public extension View {
 		case identifier(Dynamic<NSUserInterfaceItemIdentifier?>)
 		case isHidden(Dynamic<Bool>)
 		case layerContentsRedrawPolicy(Dynamic<NSView.LayerContentsRedrawPolicy>)
-		case layout(Dynamic<Layout?>)
+		case layout(Dynamic<Layout>)
 		case pressureConfiguration(Dynamic<NSPressureConfiguration>)
 		case registeredDragTypes(Dynamic<[NSPasteboard.PasteboardType]>)
 		case tooltip(Dynamic<String>)
@@ -54,6 +54,7 @@ public extension View {
 		case verticalContentHuggingPriority(Dynamic<NSLayoutConstraint.Priority>)
 		
 		// 2. Signal bindings are performed on the object after construction.
+		case becomeFirstResponder(Signal<Void>)
 		case needsDisplay(Signal<Bool>)
 		case printView(Signal<Void>)
 		case scrollRectToVisible(Signal<NSRect>)
@@ -146,6 +147,7 @@ public extension View.Preparer {
 		case .verticalContentHuggingPriority(let x): return x.apply(instance) { i, v in i.setContentHuggingPriority(v, for: NSLayoutConstraint.Orientation.vertical) }
 			
 		// 2. Signal bindings are performed on the object after construction.
+		case .becomeFirstResponder(let x): return x.apply(instance) { i, _ in i.window?.makeFirstResponder(i) }
 		case .needsDisplay(let x): return x.apply(instance) { i, v in i.needsDisplay = v }
 		case .printView(let x): return x.apply(instance) { i, v in i.printView(nil) }
 		case .setNeedsDisplayInRect(let x): return x.apply(instance) { i, v in i.setNeedsDisplay(v) }
@@ -199,7 +201,7 @@ public extension BindingName where Binding: ViewBinding {
 	static var identifier: ViewName<Dynamic<NSUserInterfaceItemIdentifier?>> { return .name(B.identifier) }
 	static var isHidden: ViewName<Dynamic<Bool>> { return .name(B.isHidden) }
 	static var layerContentsRedrawPolicy: ViewName<Dynamic<NSView.LayerContentsRedrawPolicy>> { return .name(B.layerContentsRedrawPolicy) }
-	static var layout: ViewName<Dynamic<Layout?>> { return .name(B.layout) }
+	static var layout: ViewName<Dynamic<Layout>> { return .name(B.layout) }
 	static var pressureConfiguration: ViewName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
 	static var registeredDragTypes: ViewName<Dynamic<[NSPasteboard.PasteboardType]>> { return .name(B.registeredDragTypes) }
 	static var tooltip: ViewName<Dynamic<String>> { return .name(B.tooltip) }
@@ -207,6 +209,7 @@ public extension BindingName where Binding: ViewBinding {
 	static var verticalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentHuggingPriority) }
 	
 	// 2. Signal bindings are performed on the object after construction.
+	static var becomeFirstResponder: ViewName<Signal<Void>> { return .name(B.becomeFirstResponder) }
 	static var needsDisplay: ViewName<Signal<Bool>> { return .name(B.needsDisplay) }
 	static var printView: ViewName<Signal<Void>> { return .name(B.printView) }
 	static var scrollRectToVisible: ViewName<Signal<NSRect>> { return .name(B.scrollRectToVisible) }

@@ -8,7 +8,7 @@
 
 import CwlViews
 
-func aboutTab(_ windowState: WindowState) -> ViewConvertible {
+func aboutTab(_ windowState: WindowState, tag: Int) -> ViewConvertible {
 	return View(
 		.layer -- Layer(.backgroundColor <-- windowState.windowContentColor),
 		.layout -- .fill(
@@ -31,14 +31,14 @@ private func aboutTabContent() -> ViewConvertible {
 			.space(20),
 			.vertical(
 				align: .leading,
-				.space(34),
+				.space(20),
 				.view(
 					TextField.label(
 						.stringValue -- .aboutTitle,
 						.font -- .preferredFont(forTextStyle: .controlContent, size: .title1)
 					)
 				),
-				.space(24),
+				.space(20),
 				.view(
 					TextField.wrappingLabel(
 						.stringValue -- .bodyText,

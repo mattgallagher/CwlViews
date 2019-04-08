@@ -41,6 +41,7 @@ func layoutWithAnimation(_ buttonViewState: ButtonViewState) -> Signal<Layout> {
 		.vertical(
 			align: .center,
 			marginEdges: .allLayout,
+			animation: .both(0.5),
 			.space(24),
 			.view(button),
 			.space(),

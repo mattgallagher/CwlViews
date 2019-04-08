@@ -36,10 +36,12 @@ public extension ClipView {
 		
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		case backgroundColor(Dynamic<NSColor>)
+		case bottomConstraintPriority(Dynamic<Layout.Dimension.Priority>)
 		case copiesOnScroll(Dynamic<Bool>)
 		case documentCursor(Dynamic<NSCursor?>)
 		case documentView(Dynamic<ViewConvertible?>)
 		case drawsBackground(Dynamic<Bool>)
+		case trailingConstraintPriority(Dynamic<Layout.Dimension.Priority>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		case scrollTo(Signal<CGPoint>)
@@ -79,27 +81,31 @@ public extension ClipView.Preparer {
 		case .copiesOnScroll(let x): return x.apply(instance) { i, v in i.copiesOnScroll = v }
 		case .documentCursor(let x): return x.apply(instance) { i, v in i.documentCursor = v }
 		case .documentView(let x): return x.apply(instance, storage) { i, s, v in
-			if let existingConstraints = s.constraints {
-				NSLayoutConstraint.deactivate(existingConstraints)
-				s.constraints = nil
-			}
 			if let view = v?.nsView() {
-				let constraints = [
-					view.topAnchor.constraint(equalTo: i.topAnchor),
-					view.bottomAnchor.constraint(equalTo: i.bottomAnchor),
-					view.leftAnchor.constraint(equalTo: i.leftAnchor),
-					view.rightAnchor.constraint(equalTo: i.rightAnchor)
-				]
-				s.constraints = constraints
 				view.translatesAutoresizingMaskIntoConstraints = false
 				i.addSubview(view)
-				NSLayoutConstraint.activate(constraints)
+				s.updateConstraints(clipView: i, documentView: view)
 				i.documentView = view
 			} else {
+				s.clearConstraints()
 				i.documentView = nil
 			}
 		}
 		case .drawsBackground(let x): return x.apply(instance) { i, v in i.drawsBackground = v }
+		case .bottomConstraintPriority(let x):
+			return x.apply(instance, storage) { i, s, v in
+				s.bottomPriority = v
+				if let documentView = i.documentView {
+					s.updateConstraints(clipView: i, documentView: documentView)
+				}
+			}
+		case .trailingConstraintPriority(let x):
+			return x.apply(instance, storage) { i, s, v in
+				s.trailingPriority = v
+				if let documentView = i.documentView {
+					s.updateConstraints(clipView: i, documentView: documentView)
+				}
+			}
 		
 		// 2. Signal bindings are performed on the object after construction.
 		case .scrollTo(let x): return x.apply(instance) { i, v in i.scroll(to: v) }
@@ -114,7 +120,32 @@ public extension ClipView.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension ClipView.Preparer {
 	open class Storage: View.Preparer.Storage {
-		open var constraints: [NSLayoutConstraint]? 
+		open var trailingPriority: Layout.Dimension.Priority = .dragThatCannotResizeWindow
+		open var bottomPriority: Layout.Dimension.Priority = .dragThatCannotResizeWindow
+		open var constraints: [NSLayoutConstraint]?
+		
+		open func clearConstraints() {
+			guard let existingConstraints = constraints else { return }
+			NSLayoutConstraint.deactivate(existingConstraints)
+			constraints = nil
+		}
+		
+		open func updateConstraints(clipView: NSClipView, documentView: NSView) {
+			clearConstraints()
+			
+			let trailingConstraint = documentView.trailingAnchor.constraint(equalTo: clipView.trailingAnchor)
+			trailingConstraint.priority = trailingPriority
+			let bottomConstraint = documentView.bottomAnchor.constraint(equalTo: clipView.bottomAnchor)
+			bottomConstraint.priority = bottomPriority
+			let newConstraints = [
+				bottomConstraint,
+				trailingConstraint,
+				documentView.topAnchor.constraint(equalTo: clipView.topAnchor),
+				documentView.leadingAnchor.constraint(equalTo: clipView.leadingAnchor)
+			]
+			NSLayoutConstraint.activate(newConstraints)
+			constraints = newConstraints
+		}
 	}
 }
 

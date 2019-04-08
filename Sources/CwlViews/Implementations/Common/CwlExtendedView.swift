@@ -32,9 +32,7 @@ public extension ExtendedView {
 		// 0. Static bindings are applied at construction and are subsequently immutable.
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
-		#if os(macOS)
-			case backgroundColor(Dynamic<NSColor?>)
-		#endif
+		@available(macOS 10.10, *) @available(iOS, unavailable) case backgroundColor(Dynamic<NSColor?>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -43,6 +41,12 @@ public extension ExtendedView {
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
+
+	#if os(macOS)
+		typealias NSColor = AppKit.NSColor
+	#else
+		typealias NSColor = ()
+	#endif
 }
 
 // MARK: - Binder Part 3: Preparer
@@ -71,9 +75,7 @@ public extension ExtendedView.Preparer {
 	mutating func prepareBinding(_ binding: Binding) {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
-			
 		case .sizeDidChange(let x): delegate().addMultiHandler1({ s in x.send(value: s) }, #selector(ViewDelegate.layoutSubviews(view:)))
-		
 		default: break
 		}
 	}
@@ -82,10 +84,12 @@ public extension ExtendedView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 
-		#if os(macOS)
-			case .backgroundColor(let x): return x.apply(instance) { i, v in i.backgroundColor = v } 
-		#endif
-
+		case .backgroundColor(let x):
+			return x.apply(instance) { i, v in
+				#if os(macOS)
+					i.backgroundColor = v
+				#endif
+			}
 		case .sizeDidChange: return nil
 		}
 	}
@@ -209,9 +213,9 @@ open class CwlExtendedView: Layout.View, ViewWithDelegate, HasDelegate {
 			super.layoutSubviews()
 		}
 	#elseif os(macOS)
-		open override func layoutSubtreeIfNeeded() {
+		open override func layout() {
 			delegate?.layoutSubviews?(view: self)
-			super.layoutSubtreeIfNeeded()
+			super.layout()
 		}
 	#endif
 }

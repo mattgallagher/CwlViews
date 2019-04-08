@@ -96,7 +96,7 @@ public extension Control.Preparer {
 					lifetimes += target.signal.cancellableBind(to: s)
 				}
 			}
-			return AggregateLifetime(lifetimes: lifetimes)
+			return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		}

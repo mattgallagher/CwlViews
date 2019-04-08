@@ -207,6 +207,17 @@ public extension BindingName where Binding: ControlBinding {
 	static var textDidEndEditing: ControlName<(NSText) -> Void> { return .name(B.textDidEndEditing) }
 
 	// Composite binding names
+	static func action( _ void: Void = ()) -> ControlName<SignalInput<Void>> {
+		return Binding.compositeName(
+			value: { input in
+				TargetAction.singleTarget(
+					Input<Any?>().map { _ in () }.bind(to: input)
+				)
+			},
+			binding: Control.Binding.action,
+			downcast: Binding.controlBinding
+		)
+	}
 	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> ControlName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, Control.Binding.action, Binding.controlBinding)
 	}

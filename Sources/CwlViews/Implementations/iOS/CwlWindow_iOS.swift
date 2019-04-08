@@ -135,7 +135,7 @@ public extension Window.Preparer {
 		}
 		
 		lifetimes += inherited.inheritedFinalizedInstance(instance, storage: storage)
-		return AggregateLifetime(lifetimes: lifetimes)
+		return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 	}
 }
 

@@ -162,7 +162,7 @@ public extension SplitView.Preparer {
 		}
 
 		lifetimes += inheritedFinalizedInstance(instance, storage: storage)
-		return AggregateLifetime(lifetimes: lifetimes)
+		return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 	}
 }
 

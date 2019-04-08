@@ -38,7 +38,7 @@ class ButtonRowControl: NSSegmentedControl {
 				button.action = #selector(segmentButtonPressed(_:))
 				button.setButtonType(.onOff)
 			}
-			applyLayout(.horizontal(.matched(priority: .layoutMid, entities: segments.map { Layout.Entity.view($0) })))
+			applyLayout(.horizontal(.same(priority: .layoutMid, entities: segments.map { Layout.Entity.view($0) })))
 			DispatchQueue.main.async { [segments] in segments.forEach { $0.needsDisplay = true } }
 		}
 	}

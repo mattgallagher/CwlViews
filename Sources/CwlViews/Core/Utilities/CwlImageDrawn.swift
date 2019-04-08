@@ -10,14 +10,12 @@ import Foundation
 
 #if os(macOS)
 	extension NSImage {
-		public static func drawn(width: CGFloat, height: CGFloat, flipped: Bool = true, _ function: (CGContext, CGRect) -> Void) -> NSImage {
+		public static func drawn(width: CGFloat, height: CGFloat, flipped: Bool = true, _ function: @escaping (CGContext, CGRect) -> Void) -> NSImage {
 			let size = CGSize(width: width, height: height)
-			return withoutActuallyEscaping(function) { function in
-				NSImage(size: size, flipped: flipped) { rect -> Bool in
-					guard let context = NSGraphicsContext.current else { return false }
-					function(context.cgContext, rect)
-					return true
-				}
+			return NSImage(size: size, flipped: flipped) { rect -> Bool in
+				guard let context = NSGraphicsContext.current else { return false }
+				function(context.cgContext, rect)
+				return true
 			}
 		}
 	}

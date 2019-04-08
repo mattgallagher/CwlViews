@@ -24,6 +24,8 @@
 /* Begin PBXBuildFile section */
 		C9033CC221EB5C220077245D /* CwlAdapterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9033CC121EB5C220077245D /* CwlAdapterState.swift */; };
 		C9086A182196502A006DBD43 /* CwlBackingLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */; };
+		C909ACA6225CD036006F855D /* CwlImageView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */; };
+		C909ACAC225E0C51006F855D /* CwlSlider_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */; };
 		C90A04B1220989FB002ABE89 /* CwlImageDrawn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */; };
 		C90BAE96223917A90043948A /* CwlSplitView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90BAE95223917A90043948A /* CwlSplitView_macOS.swift */; };
 		C90CF7D12220E536001B4FAB /* CwlSubrangeMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90CF7D02220E536001B4FAB /* CwlSubrangeMutation.swift */; };
@@ -335,6 +337,8 @@
 
 /* Begin PBXFileReference section */
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
+		C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageView_macOS.swift; sourceTree = "<group>"; };
+		C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSlider_macOS.swift; sourceTree = "<group>"; };
 		C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageDrawn.swift; sourceTree = "<group>"; };
 		C90AAA4F1EBCA12400E2C0EE /* CwlAlertController_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertController_iOS.swift; sourceTree = "<group>"; };
 		C90AAA511EBCA83000E2C0EE /* CwlAlertAction_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertAction_iOS.swift; sourceTree = "<group>"; };
@@ -743,6 +747,7 @@
 				C95209311DCB1164005F478B /* CwlClipView_macOS.swift */,
 				C952092A1DCB0B5C005F478B /* CwlControl_macOS.swift */,
 				C9EB225B1DC9BB80009E0885 /* CwlGestureRecognizer_macOS.swift */,
+				C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */,
 				C95209351DCB14B7005F478B /* CwlMagnificationGestureRecognizer_macOS.swift */,
 				C947105D1E3364A300EC50D6 /* CwlMenu_macOS.swift */,
 				C9351F251DCAD3D0001D484B /* CwlMenuItem_macOS.swift */,
@@ -753,6 +758,7 @@
 				C952093B1DCB14E7005F478B /* CwlRotationGestureRecognizer_macOS.swift */,
 				C9B38DB11DD0087900913019 /* CwlScrollView_macOS.swift */,
 				C92360032248A718004711E4 /* CwlSegmentedControl_macOS.swift */,
+				C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */,
 				C90BAE95223917A90043948A /* CwlSplitView_macOS.swift */,
 				C9B38DB71DD0160A00913019 /* CwlTableCellView_macOS.swift */,
 				C9B38DB81DD0160A00913019 /* CwlTableColumn_macOS.swift */,
@@ -1378,6 +1384,11 @@
 					C9F9A32021DEF5A400026DC1 = {
 						CreatedOnToolsVersion = 10.1;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 					C9F9A33C21DF6FBE00026DC1 = {
 						CreatedOnToolsVersion = 10.1;
@@ -1634,8 +1645,10 @@
 				C97A5B6521D6DEBB001D98DD /* CwlToolbarItem_macOS.swift in Sources */,
 				C97B16E821DB6BE500F72DB9 /* CwlBarButtonItem_iOS.swift in Sources */,
 				C999465A1F9CAC48001F38A8 /* CwlStackMutation.swift in Sources */,
+				C909ACA6225CD036006F855D /* CwlImageView_macOS.swift in Sources */,
 				C97B16D921DB11D100F72DB9 /* CwlView_iOS.swift in Sources */,
 				C97B16E621DB30D400F72DB9 /* CwlTapGestureRecognizer_iOS.swift in Sources */,
+				C909ACAC225E0C51006F855D /* CwlSlider_macOS.swift in Sources */,
 				C97B16D721DAEB2800F72DB9 /* CwlApplication_iOS.swift in Sources */,
 				C985C9C121DCDC2E00E8FF8B /* CwlSwitch_iOS.swift in Sources */,
 				C97A5B6421D6DEBB001D98DD /* CwlToolbar_macOS.swift in Sources */,

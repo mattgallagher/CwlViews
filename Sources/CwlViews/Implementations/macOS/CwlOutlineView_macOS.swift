@@ -456,7 +456,7 @@ public extension OutlineView.Preparer {
 		case (.some, .some): fatalError("Action and double action may not use mix of single target and first responder")
 		}
 		
-		return AggregateLifetime(lifetimes: lifetimes)
+		return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
 	}
 }
 

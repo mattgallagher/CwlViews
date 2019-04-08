@@ -27,7 +27,7 @@ public struct Callback<Value, CallbackValue> {
 	}
 }
 
-extension Signal {
+extension SignalInterface {
 	public func callbackBind<CallbackInputInterface: SignalInputInterface>(to callback: CallbackInputInterface) -> Signal<Callback<OutputValue, CallbackInputInterface.InputValue>> {
 		return map { value in Callback(value, callback.input) }
 	}

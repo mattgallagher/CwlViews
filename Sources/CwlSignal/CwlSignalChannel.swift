@@ -247,6 +247,14 @@ extension SignalChannel {
 		return next { $0.stride(count: count, initialSkip: initialSkip) }
 	}
 	
+	public func transformValues<U>(context: Exec = .direct, _ processor: @escaping (Interface.OutputValue) -> Signal<U>.Next) -> SignalChannel<InputInterface, Signal<U>> {
+		return next { $0.transformValues(context: context, processor) }
+	}
+
+	public func transformValues<S, U>(initialState: S, context: Exec = .direct, _ processor: @escaping (inout S, Interface.OutputValue) -> Signal<U>.Next) -> SignalChannel<InputInterface, Signal<U>> {
+		return next { $0.transformValues(initialState: initialState, context: context, processor) }
+	}
+	
 	public func transformFlatten<U>(closePropagation: SignalEndPropagation = .none, context: Exec = .direct, _ processor: @escaping (Interface.OutputValue, SignalMergedInput<U>) -> ()) -> SignalChannel<InputInterface, Signal<U>> {
 		return next { $0.transformFlatten(closePropagation: closePropagation, context: context, processor) }
 	}
@@ -283,6 +291,11 @@ extension SignalChannel {
 		signal.signal.bind(to: to, closePropagation: closePropagation, removeOnDeactivate: removeOnDeactivate)
 		return input
 	}
+
+	public func flatMapBind<Output: SignalInterface, Input: SignalInputInterface>(to interface: Output, _ transform: @escaping (Output.OutputValue) -> Input) -> InputInterface where Input.InputValue == Interface.OutputValue {
+		return final { $0.flatMapBind(to: interface, transform) }.input
+	}
+	
 	
 	public func cacheLatest() -> (input: InputInterface, output: SignalLatest<Interface.OutputValue>) {
 		let tuple = final { SignalLatest(signal: $0) }
@@ -494,7 +507,7 @@ extension SignalChannel {
 		return next { $0.takeLast(count) }
 	}
 	
-	public func combineLatestWtith<U: SignalInterface, V>(_ second: U, context: Exec = .direct, _ processor: @escaping (Interface.OutputValue, U.OutputValue) throws -> V) -> SignalChannel<InputInterface, Signal<V>> {
+	public func combineLatestWith<U: SignalInterface, V>(_ second: U, context: Exec = .direct, _ processor: @escaping (Interface.OutputValue, U.OutputValue) throws -> V) -> SignalChannel<InputInterface, Signal<V>> {
 		return next { $0.combineLatestWith(second, context: context, processor) }
 	}
 	

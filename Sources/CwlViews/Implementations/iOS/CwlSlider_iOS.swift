@@ -116,7 +116,6 @@ extension Slider.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SliderBinding {
 	public typealias SliderName<V> = BindingName<V, Slider.Binding, Binding>
-	private typealias B = Slider.Binding
 	private static func name<V>(_ source: @escaping (V) -> Slider.Binding) -> SliderName<V> {
 		return SliderName<V>(source: source, downcast: Binding.sliderBinding)
 	}
@@ -124,23 +123,23 @@ extension BindingName where Binding: SliderBinding {
 public extension BindingName where Binding: SliderBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SliderName<$2> { return .name(B.$1) }
+	// With:    static var $1: SliderName<$2> { return .name(Slider.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var isContinuous: SliderName<Dynamic<Bool>> { return .name(B.isContinuous) }
-	static var maximumTrackImage: SliderName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.maximumTrackImage) }
-	static var maximumTrackTintColor: SliderName<Dynamic<UIColor?>> { return .name(B.maximumTrackTintColor) }
-	static var maximumValue: SliderName<Dynamic<Float>> { return .name(B.maximumValue) }
-	static var maximumValueImage: SliderName<Dynamic<UIImage?>> { return .name(B.maximumValueImage) }
-	static var minimumTrackImage: SliderName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.minimumTrackImage) }
-	static var minimumTrackTintColor: SliderName<Dynamic<UIColor?>> { return .name(B.minimumTrackTintColor) }
-	static var minimumValue: SliderName<Dynamic<Float>> { return .name(B.minimumValue) }
-	static var minimumValueImage: SliderName<Dynamic<UIImage?>> { return .name(B.minimumValueImage) }
-	static var thumbImage: SliderName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.thumbImage) }
-	static var thumbTintColor: SliderName<Dynamic<UIColor?>> { return .name(B.thumbTintColor) }
-	static var value: SliderName<Dynamic<SetOrAnimate<Float>>> { return .name(B.value) }
+	static var isContinuous: SliderName<Dynamic<Bool>> { return .name(Slider.Binding.isContinuous) }
+	static var maximumTrackImage: SliderName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(Slider.Binding.maximumTrackImage) }
+	static var maximumTrackTintColor: SliderName<Dynamic<UIColor?>> { return .name(Slider.Binding.maximumTrackTintColor) }
+	static var maximumValue: SliderName<Dynamic<Float>> { return .name(Slider.Binding.maximumValue) }
+	static var maximumValueImage: SliderName<Dynamic<UIImage?>> { return .name(Slider.Binding.maximumValueImage) }
+	static var minimumTrackImage: SliderName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(Slider.Binding.minimumTrackImage) }
+	static var minimumTrackTintColor: SliderName<Dynamic<UIColor?>> { return .name(Slider.Binding.minimumTrackTintColor) }
+	static var minimumValue: SliderName<Dynamic<Float>> { return .name(Slider.Binding.minimumValue) }
+	static var minimumValueImage: SliderName<Dynamic<UIImage?>> { return .name(Slider.Binding.minimumValueImage) }
+	static var thumbImage: SliderName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(Slider.Binding.thumbImage) }
+	static var thumbTintColor: SliderName<Dynamic<UIColor?>> { return .name(Slider.Binding.thumbTintColor) }
+	static var value: SliderName<Dynamic<SetOrAnimate<Float>>> { return .name(Slider.Binding.value) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

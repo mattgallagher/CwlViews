@@ -855,7 +855,6 @@ private extension NSOutlineView {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: OutlineViewBinding {
 	public typealias OutlineViewName<V> = BindingName<V, OutlineView<Binding.NodeDataType>.Binding, Binding>
-	private typealias B = OutlineView<Binding.NodeDataType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> OutlineView<Binding.NodeDataType>.Binding) -> OutlineViewName<V> {
 		return OutlineViewName<V>(source: source, downcast: Binding.outlineViewBinding)
 	}
@@ -863,101 +862,101 @@ extension BindingName where Binding: OutlineViewBinding {
 public extension BindingName where Binding: OutlineViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: OutlineViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: OutlineViewName<$2> { return .name(OutlineView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsColumnReordering: OutlineViewName<Dynamic<Bool>> { return .name(B.allowsColumnReordering) }
-	static var allowsColumnResizing: OutlineViewName<Dynamic<Bool>> { return .name(B.allowsColumnResizing) }
-	static var allowsColumnSelection: OutlineViewName<Dynamic<Bool>> { return .name(B.allowsColumnSelection) }
-	static var allowsEmptySelection: OutlineViewName<Dynamic<Bool>> { return .name(B.allowsEmptySelection) }
-	static var allowsMultipleSelection: OutlineViewName<Dynamic<Bool>> { return .name(B.allowsMultipleSelection) }
-	static var allowsTypeSelect: OutlineViewName<Dynamic<Bool>> { return .name(B.allowsTypeSelect) }
-	static var autoresizesOutlineColumn: OutlineViewName<Dynamic<Bool>> { return .name(B.autoresizesOutlineColumn) }
-	static var autosaveExpandedItems: OutlineViewName<Dynamic<Bool>> { return .name(B.autosaveExpandedItems) }
-	static var autosaveName: OutlineViewName<Dynamic<NSTableView.AutosaveName?>> { return .name(B.autosaveName) }
-	static var autosaveTableColumns: OutlineViewName<Dynamic<Bool>> { return .name(B.autosaveTableColumns) }
-	static var backgroundColor: OutlineViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
-	static var columnAutoresizingStyle: OutlineViewName<Dynamic<NSTableView.ColumnAutoresizingStyle>> { return .name(B.columnAutoresizingStyle) }
-	static var columns: OutlineViewName<Dynamic<[TableColumn<Binding.NodeDataType>]>> { return .name(B.columns) }
-	static var cornerView: OutlineViewName<Dynamic<ViewConvertible?>> { return .name(B.cornerView) }
-	static var draggingDestinationFeedbackStyle: OutlineViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(B.draggingDestinationFeedbackStyle) }
-	static var floatsGroupRows: OutlineViewName<Dynamic<Bool>> { return .name(B.floatsGroupRows) }
-	static var gridColor: OutlineViewName<Dynamic<NSColor>> { return .name(B.gridColor) }
-	static var gridStyleMask: OutlineViewName<Dynamic<NSTableView.GridLineStyle>> { return .name(B.gridStyleMask) }
-	static var headerView: OutlineViewName<Dynamic<TableHeaderViewConvertible?>> { return .name(B.headerView) }
-	static var indentationMarkerFollowsCell: OutlineViewName<Dynamic<Bool>> { return .name(B.indentationMarkerFollowsCell) }
-	static var indentationPerLevel: OutlineViewName<Dynamic<CGFloat>> { return .name(B.indentationPerLevel) }
-	static var intercellSpacing: OutlineViewName<Dynamic<NSSize>> { return .name(B.intercellSpacing) }
-	static var outlineTableColumnIdentifier: OutlineViewName<Dynamic<NSUserInterfaceItemIdentifier>> { return .name(B.outlineTableColumnIdentifier) }
-	static var rowHeight: OutlineViewName<Dynamic<CGFloat>> { return .name(B.rowHeight) }
-	static var rowSizeStyle: OutlineViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(B.rowSizeStyle) }
-	static var selectionHighlightStyle: OutlineViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
-	static var stronglyReferencesItems: OutlineViewName<Dynamic<Bool>> { return .name(B.stronglyReferencesItems) }
-	static var treeData: OutlineViewName<Dynamic<TreeAnimation<Binding.NodeDataType>>> { return .name(B.treeData) }
-	static var userInterfaceLayoutDirection: OutlineViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
-	static var usesAlternatingRowBackgroundColors: OutlineViewName<Dynamic<Bool>> { return .name(B.usesAlternatingRowBackgroundColors) }
-	static var verticalMotionCanBeginDrag: OutlineViewName<Dynamic<Bool>> { return .name(B.verticalMotionCanBeginDrag) }
+	static var allowsColumnReordering: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.allowsColumnReordering) }
+	static var allowsColumnResizing: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.allowsColumnResizing) }
+	static var allowsColumnSelection: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.allowsColumnSelection) }
+	static var allowsEmptySelection: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.allowsEmptySelection) }
+	static var allowsMultipleSelection: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.allowsMultipleSelection) }
+	static var allowsTypeSelect: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.allowsTypeSelect) }
+	static var autoresizesOutlineColumn: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.autoresizesOutlineColumn) }
+	static var autosaveExpandedItems: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.autosaveExpandedItems) }
+	static var autosaveName: OutlineViewName<Dynamic<NSTableView.AutosaveName?>> { return .name(OutlineView.Binding.autosaveName) }
+	static var autosaveTableColumns: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.autosaveTableColumns) }
+	static var backgroundColor: OutlineViewName<Dynamic<NSColor>> { return .name(OutlineView.Binding.backgroundColor) }
+	static var columnAutoresizingStyle: OutlineViewName<Dynamic<NSTableView.ColumnAutoresizingStyle>> { return .name(OutlineView.Binding.columnAutoresizingStyle) }
+	static var columns: OutlineViewName<Dynamic<[TableColumn<Binding.NodeDataType>]>> { return .name(OutlineView.Binding.columns) }
+	static var cornerView: OutlineViewName<Dynamic<ViewConvertible?>> { return .name(OutlineView.Binding.cornerView) }
+	static var draggingDestinationFeedbackStyle: OutlineViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(OutlineView.Binding.draggingDestinationFeedbackStyle) }
+	static var floatsGroupRows: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.floatsGroupRows) }
+	static var gridColor: OutlineViewName<Dynamic<NSColor>> { return .name(OutlineView.Binding.gridColor) }
+	static var gridStyleMask: OutlineViewName<Dynamic<NSTableView.GridLineStyle>> { return .name(OutlineView.Binding.gridStyleMask) }
+	static var headerView: OutlineViewName<Dynamic<TableHeaderViewConvertible?>> { return .name(OutlineView.Binding.headerView) }
+	static var indentationMarkerFollowsCell: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.indentationMarkerFollowsCell) }
+	static var indentationPerLevel: OutlineViewName<Dynamic<CGFloat>> { return .name(OutlineView.Binding.indentationPerLevel) }
+	static var intercellSpacing: OutlineViewName<Dynamic<NSSize>> { return .name(OutlineView.Binding.intercellSpacing) }
+	static var outlineTableColumnIdentifier: OutlineViewName<Dynamic<NSUserInterfaceItemIdentifier>> { return .name(OutlineView.Binding.outlineTableColumnIdentifier) }
+	static var rowHeight: OutlineViewName<Dynamic<CGFloat>> { return .name(OutlineView.Binding.rowHeight) }
+	static var rowSizeStyle: OutlineViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(OutlineView.Binding.rowSizeStyle) }
+	static var selectionHighlightStyle: OutlineViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(OutlineView.Binding.selectionHighlightStyle) }
+	static var stronglyReferencesItems: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.stronglyReferencesItems) }
+	static var treeData: OutlineViewName<Dynamic<TreeAnimation<Binding.NodeDataType>>> { return .name(OutlineView.Binding.treeData) }
+	static var userInterfaceLayoutDirection: OutlineViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(OutlineView.Binding.userInterfaceLayoutDirection) }
+	static var usesAlternatingRowBackgroundColors: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.usesAlternatingRowBackgroundColors) }
+	static var verticalMotionCanBeginDrag: OutlineViewName<Dynamic<Bool>> { return .name(OutlineView.Binding.verticalMotionCanBeginDrag) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var collapseIndexPath: OutlineViewName<Signal<(indexPath: IndexPath?, collapseChildren: Bool)>> { return .name(B.collapseIndexPath) }
-	static var deselectAll: OutlineViewName<Signal<Void>> { return .name(B.deselectAll) }
-	static var deselectColumn: OutlineViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.deselectColumn) }
-	static var deselectIndexPath: OutlineViewName<Signal<IndexPath>> { return .name(B.deselectIndexPath) }
-	static var expandIndexPath: OutlineViewName<Signal<(indexPath: IndexPath?, expandChildren: Bool)>> { return .name(B.expandIndexPath) }
-	static var hideRowActions: OutlineViewName<Signal<Void>> { return .name(B.hideRowActions) }
-	static var hideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.hideRows) }
-	static var highlightColumn: OutlineViewName<Signal<NSUserInterfaceItemIdentifier?>> { return .name(B.highlightColumn) }
-	static var moveColumn: OutlineViewName<Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>> { return .name(B.moveColumn) }
-	static var scrollColumnToVisible: OutlineViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.scrollColumnToVisible) }
-	static var scrollIndexPathToVisible: OutlineViewName<Signal<IndexPath>> { return .name(B.scrollIndexPathToVisible) }
-	static var selectAll: OutlineViewName<Signal<Void>> { return .name(B.selectAll) }
-	static var selectColumns: OutlineViewName<Signal<(identifiers: Set<NSUserInterfaceItemIdentifier>, byExtendingSelection: Bool)>> { return .name(B.selectColumns) }
-	static var selectIndexPaths: OutlineViewName<Signal<(indexPaths: Set<IndexPath>, byExtendingSelection: Bool)>> { return .name(B.selectIndexPaths) }
-	static var setDropIndexPath: OutlineViewName<Signal<(indexPath: IndexPath?, dropChildIndex: Int)>> { return .name(B.setDropIndexPath) }
-	static var sizeLastColumnToFit: OutlineViewName<Signal<Void>> { return .name(B.sizeLastColumnToFit) }
-	static var sizeToFit: OutlineViewName<Signal<Void>> { return .name(B.sizeToFit) }
-	static var unhideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.unhideRows) }
+	static var collapseIndexPath: OutlineViewName<Signal<(indexPath: IndexPath?, collapseChildren: Bool)>> { return .name(OutlineView.Binding.collapseIndexPath) }
+	static var deselectAll: OutlineViewName<Signal<Void>> { return .name(OutlineView.Binding.deselectAll) }
+	static var deselectColumn: OutlineViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(OutlineView.Binding.deselectColumn) }
+	static var deselectIndexPath: OutlineViewName<Signal<IndexPath>> { return .name(OutlineView.Binding.deselectIndexPath) }
+	static var expandIndexPath: OutlineViewName<Signal<(indexPath: IndexPath?, expandChildren: Bool)>> { return .name(OutlineView.Binding.expandIndexPath) }
+	static var hideRowActions: OutlineViewName<Signal<Void>> { return .name(OutlineView.Binding.hideRowActions) }
+	static var hideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(OutlineView.Binding.hideRows) }
+	static var highlightColumn: OutlineViewName<Signal<NSUserInterfaceItemIdentifier?>> { return .name(OutlineView.Binding.highlightColumn) }
+	static var moveColumn: OutlineViewName<Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>> { return .name(OutlineView.Binding.moveColumn) }
+	static var scrollColumnToVisible: OutlineViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(OutlineView.Binding.scrollColumnToVisible) }
+	static var scrollIndexPathToVisible: OutlineViewName<Signal<IndexPath>> { return .name(OutlineView.Binding.scrollIndexPathToVisible) }
+	static var selectAll: OutlineViewName<Signal<Void>> { return .name(OutlineView.Binding.selectAll) }
+	static var selectColumns: OutlineViewName<Signal<(identifiers: Set<NSUserInterfaceItemIdentifier>, byExtendingSelection: Bool)>> { return .name(OutlineView.Binding.selectColumns) }
+	static var selectIndexPaths: OutlineViewName<Signal<(indexPaths: Set<IndexPath>, byExtendingSelection: Bool)>> { return .name(OutlineView.Binding.selectIndexPaths) }
+	static var setDropIndexPath: OutlineViewName<Signal<(indexPath: IndexPath?, dropChildIndex: Int)>> { return .name(OutlineView.Binding.setDropIndexPath) }
+	static var sizeLastColumnToFit: OutlineViewName<Signal<Void>> { return .name(OutlineView.Binding.sizeLastColumnToFit) }
+	static var sizeToFit: OutlineViewName<Signal<Void>> { return .name(OutlineView.Binding.sizeToFit) }
+	static var unhideRows: OutlineViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(OutlineView.Binding.unhideRows) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var columnMoved: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }
-	static var columnResized: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(B.columnResized) }
-	static var doubleAction: OutlineViewName<TargetAction> { return .name(B.doubleAction) }
-	static var selectionChanged: OutlineViewName<SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedIndexPaths: Set<IndexPath>)>> { return .name(B.selectionChanged) }
-	static var selectionIsChanging: OutlineViewName<SignalInput<Void>> { return .name(B.selectionIsChanging) }
-	static var indexPathDidCollapse: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathDidCollapse) }
-	static var indexPathDidExpand: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathDidExpand) }
-	static var indexPathWillCollapse: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathWillCollapse) }
-	static var indexPathWillExpand: OutlineViewName<SignalInput<IndexPath>> { return .name(B.indexPathWillExpand) }
-	static var visibleIndexPathsChanged: OutlineViewName<SignalInput<Set<IndexPath>>> { return .name(B.visibleIndexPathsChanged) }
+	static var columnMoved: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(OutlineView.Binding.columnMoved) }
+	static var columnResized: OutlineViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(OutlineView.Binding.columnResized) }
+	static var doubleAction: OutlineViewName<TargetAction> { return .name(OutlineView.Binding.doubleAction) }
+	static var selectionChanged: OutlineViewName<SignalInput<(selectedColumns: Set<NSUserInterfaceItemIdentifier>, selectedIndexPaths: Set<IndexPath>)>> { return .name(OutlineView.Binding.selectionChanged) }
+	static var selectionIsChanging: OutlineViewName<SignalInput<Void>> { return .name(OutlineView.Binding.selectionIsChanging) }
+	static var indexPathDidCollapse: OutlineViewName<SignalInput<IndexPath>> { return .name(OutlineView.Binding.indexPathDidCollapse) }
+	static var indexPathDidExpand: OutlineViewName<SignalInput<IndexPath>> { return .name(OutlineView.Binding.indexPathDidExpand) }
+	static var indexPathWillCollapse: OutlineViewName<SignalInput<IndexPath>> { return .name(OutlineView.Binding.indexPathWillCollapse) }
+	static var indexPathWillExpand: OutlineViewName<SignalInput<IndexPath>> { return .name(OutlineView.Binding.indexPathWillExpand) }
+	static var visibleIndexPathsChanged: OutlineViewName<SignalInput<Set<IndexPath>>> { return .name(OutlineView.Binding.visibleIndexPathsChanged) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var acceptDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ indexPath: IndexPath?, _ childIndex: Int) -> Bool> { return .name(B.acceptDrop) }
-	static var didClickTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(B.didClickTableColumn) }
-	static var didDragTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(B.didDragTableColumn) }
-	static var draggingSessionEnded: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void> { return .name(B.draggingSessionEnded) }
-	static var draggingSessionWillBegin: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void> { return .name(B.draggingSessionWillBegin) }
-	static var groupRowCellConstructor: OutlineViewName<(Int) -> TableCellViewConvertible> { return .name(B.groupRowCellConstructor) }
-	static var heightOfRow: OutlineViewName<(NSOutlineView, _ indexPath: IndexPath) -> CGFloat> { return .name(B.heightOfRow) }
-	static var isIndexPathExpandable: OutlineViewName<(_ outlineView: NSOutlineView, IndexPath) -> Bool> { return .name(B.isIndexPathExpandable) }
-	static var mouseDownInHeaderOfTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(B.mouseDownInHeaderOfTableColumn) }
-	static var nextTypeSelectMatch: OutlineViewName<(_ outlineView: NSOutlineView, _ from: IndexPath, _ to: IndexPath, _ for: String) -> IndexPath?> { return .name(B.nextTypeSelectMatch) }
-	static var pasteboardWriter: OutlineViewName<(_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?> { return .name(B.pasteboardWriter) }
-	static var rowView: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> TableRowViewConvertible?> { return .name(B.rowView) }
-	static var selectionIndexesForProposedSelection: OutlineViewName<(_ outlineView: NSOutlineView, _ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>> { return .name(B.selectionIndexesForProposedSelection) }
-	static var selectionShouldChange: OutlineViewName<(_ outlineView: NSOutlineView) -> Bool> { return .name(B.selectionShouldChange) }
-	static var shouldCollapse: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(B.shouldCollapse) }
-	static var shouldExpand: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(B.shouldExpand) }
-	static var shouldReorderColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn, _ newIndex: Int) -> Bool> { return .name(B.shouldReorderColumn) }
-	static var shouldSelectIndexPath: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(B.shouldSelectIndexPath) }
-	static var shouldSelectTableColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?) -> Bool> { return .name(B.shouldSelectTableColumn) }
-	static var shouldTypeSelectForEvent: OutlineViewName<(_ outlineView: NSOutlineView, _ event: NSEvent, _ searchString: String?) -> Bool> { return .name(B.shouldTypeSelectForEvent) }
-	static var sizeToFitWidthOfColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn) -> CGFloat> { return .name(B.sizeToFitWidthOfColumn) }
-	static var sortDescriptorsDidChange: OutlineViewName<(NSOutlineView, [NSSortDescriptor]) -> Void> { return .name(B.sortDescriptorsDidChange) }
-	static var typeSelectString: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?, _ indexPath: IndexPath) -> String?> { return .name(B.typeSelectString) }
-	static var updateDraggingItems: OutlineViewName<(_ outlineView: NSOutlineView, _ forDrag: NSDraggingInfo) -> Void> { return .name(B.updateDraggingItems) }
-	static var validateDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedIndexPath: IndexPath?, _ proposedChildIndex: Int) -> NSDragOperation> { return .name(B.validateDrop) }
+	static var acceptDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ indexPath: IndexPath?, _ childIndex: Int) -> Bool> { return .name(OutlineView.Binding.acceptDrop) }
+	static var didClickTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(OutlineView.Binding.didClickTableColumn) }
+	static var didDragTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(OutlineView.Binding.didDragTableColumn) }
+	static var draggingSessionEnded: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void> { return .name(OutlineView.Binding.draggingSessionEnded) }
+	static var draggingSessionWillBegin: OutlineViewName<(_ outlineView: NSOutlineView, _ draggingSession: NSDraggingSession, _ willBeginAt: NSPoint, _ forItems: [IndexPath]) -> Void> { return .name(OutlineView.Binding.draggingSessionWillBegin) }
+	static var groupRowCellConstructor: OutlineViewName<(Int) -> TableCellViewConvertible> { return .name(OutlineView.Binding.groupRowCellConstructor) }
+	static var heightOfRow: OutlineViewName<(NSOutlineView, _ indexPath: IndexPath) -> CGFloat> { return .name(OutlineView.Binding.heightOfRow) }
+	static var isIndexPathExpandable: OutlineViewName<(_ outlineView: NSOutlineView, IndexPath) -> Bool> { return .name(OutlineView.Binding.isIndexPathExpandable) }
+	static var mouseDownInHeaderOfTableColumn: OutlineViewName<(NSOutlineView, NSTableColumn) -> Void> { return .name(OutlineView.Binding.mouseDownInHeaderOfTableColumn) }
+	static var nextTypeSelectMatch: OutlineViewName<(_ outlineView: NSOutlineView, _ from: IndexPath, _ to: IndexPath, _ for: String) -> IndexPath?> { return .name(OutlineView.Binding.nextTypeSelectMatch) }
+	static var pasteboardWriter: OutlineViewName<(_ outlineView: NSOutlineView, _ forIndexPath: IndexPath) -> NSPasteboardWriting?> { return .name(OutlineView.Binding.pasteboardWriter) }
+	static var rowView: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> TableRowViewConvertible?> { return .name(OutlineView.Binding.rowView) }
+	static var selectionIndexesForProposedSelection: OutlineViewName<(_ outlineView: NSOutlineView, _ proposedSelectionIndexes: Set<IndexPath>) -> Set<IndexPath>> { return .name(OutlineView.Binding.selectionIndexesForProposedSelection) }
+	static var selectionShouldChange: OutlineViewName<(_ outlineView: NSOutlineView) -> Bool> { return .name(OutlineView.Binding.selectionShouldChange) }
+	static var shouldCollapse: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(OutlineView.Binding.shouldCollapse) }
+	static var shouldExpand: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(OutlineView.Binding.shouldExpand) }
+	static var shouldReorderColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn, _ newIndex: Int) -> Bool> { return .name(OutlineView.Binding.shouldReorderColumn) }
+	static var shouldSelectIndexPath: OutlineViewName<(_ outlineView: NSOutlineView, _ indexPath: IndexPath) -> Bool> { return .name(OutlineView.Binding.shouldSelectIndexPath) }
+	static var shouldSelectTableColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?) -> Bool> { return .name(OutlineView.Binding.shouldSelectTableColumn) }
+	static var shouldTypeSelectForEvent: OutlineViewName<(_ outlineView: NSOutlineView, _ event: NSEvent, _ searchString: String?) -> Bool> { return .name(OutlineView.Binding.shouldTypeSelectForEvent) }
+	static var sizeToFitWidthOfColumn: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn) -> CGFloat> { return .name(OutlineView.Binding.sizeToFitWidthOfColumn) }
+	static var sortDescriptorsDidChange: OutlineViewName<(NSOutlineView, [NSSortDescriptor]) -> Void> { return .name(OutlineView.Binding.sortDescriptorsDidChange) }
+	static var typeSelectString: OutlineViewName<(_ outlineView: NSOutlineView, _ column: NSTableColumn?, _ indexPath: IndexPath) -> String?> { return .name(OutlineView.Binding.typeSelectString) }
+	static var updateDraggingItems: OutlineViewName<(_ outlineView: NSOutlineView, _ forDrag: NSDraggingInfo) -> Void> { return .name(OutlineView.Binding.updateDraggingItems) }
+	static var validateDrop: OutlineViewName<(_ outlineView: NSOutlineView, _ info: NSDraggingInfo, _ proposedIndexPath: IndexPath?, _ proposedChildIndex: Int) -> NSDragOperation> { return .name(OutlineView.Binding.validateDrop) }
 
 	// Composite binding names
 	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> OutlineViewName<SignalInput<Value>> {

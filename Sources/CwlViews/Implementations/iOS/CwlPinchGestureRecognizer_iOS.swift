@@ -89,7 +89,6 @@ extension PinchGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PinchGestureRecognizerBinding {
 	public typealias PinchGestureRecognizerName<V> = BindingName<V, PinchGestureRecognizer.Binding, Binding>
-	private typealias B = PinchGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> PinchGestureRecognizer.Binding) -> PinchGestureRecognizerName<V> {
 		return PinchGestureRecognizerName<V>(source: source, downcast: Binding.pinchGestureRecognizerBinding)
 	}
@@ -97,12 +96,12 @@ extension BindingName where Binding: PinchGestureRecognizerBinding {
 public extension BindingName where Binding: PinchGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: PinchGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: PinchGestureRecognizerName<$2> { return .name(PinchGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var scale: PinchGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.scale) }
+	static var scale: PinchGestureRecognizerName<Dynamic<CGFloat>> { return .name(PinchGestureRecognizer.Binding.scale) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

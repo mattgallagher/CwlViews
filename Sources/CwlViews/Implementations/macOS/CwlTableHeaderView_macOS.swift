@@ -73,7 +73,6 @@ extension TableHeaderView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableHeaderViewBinding {
 	public typealias TableHeaderViewName<V> = BindingName<V, TableHeaderView.Binding, Binding>
-	private typealias B = TableHeaderView.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableHeaderView.Binding) -> TableHeaderViewName<V> {
 		return TableHeaderViewName<V>(source: source, downcast: Binding.tableHeaderViewBinding)
 	}
@@ -81,7 +80,7 @@ extension BindingName where Binding: TableHeaderViewBinding {
 public extension BindingName where Binding: TableHeaderViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableHeaderViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableHeaderViewName<$2> { return .name(TableHeaderView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	

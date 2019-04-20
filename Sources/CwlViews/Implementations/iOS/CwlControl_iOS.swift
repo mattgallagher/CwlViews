@@ -93,7 +93,7 @@ public extension Control.Preparer {
 				case .singleTarget(let s):
 					let target = SignalControlEventActionTarget()
 					instance.addTarget(target, action: target.selector, for: scope)
-					lifetimes += target.signal.cancellableBind(to: s)
+					lifetimes += target.source.cancellableBind(to: s)
 				}
 			}
 			return lifetimes.isEmpty ? nil : AggregateLifetime(lifetimes: lifetimes)
@@ -111,7 +111,6 @@ extension Control.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ControlBinding {
 	public typealias ControlName<V> = BindingName<V, Control.Binding, Binding>
-	private typealias B = Control.Binding
 	private static func name<V>(_ source: @escaping (V) -> Control.Binding) -> ControlName<V> {
 		return ControlName<V>(source: source, downcast: Binding.controlBinding)
 	}
@@ -119,21 +118,21 @@ extension BindingName where Binding: ControlBinding {
 public extension BindingName where Binding: ControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ControlName<$2> { return .name(B.$1) }
+	// With:    static var $1: ControlName<$2> { return .name(Control.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(B.isEnabled) }
-	static var isSelected: ControlName<Dynamic<Bool>> { return .name(B.isSelected) }
-	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(B.isHighlighted) }
-	static var contentVerticalAlignment: ControlName<Dynamic<UIControl.ContentVerticalAlignment>> { return .name(B.contentVerticalAlignment) }
-	static var contentHorizontalAlignment: ControlName<Dynamic<UIControl.ContentHorizontalAlignment>> { return .name(B.contentHorizontalAlignment) }
+	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(Control.Binding.isEnabled) }
+	static var isSelected: ControlName<Dynamic<Bool>> { return .name(Control.Binding.isSelected) }
+	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(Control.Binding.isHighlighted) }
+	static var contentVerticalAlignment: ControlName<Dynamic<UIControl.ContentVerticalAlignment>> { return .name(Control.Binding.contentVerticalAlignment) }
+	static var contentHorizontalAlignment: ControlName<Dynamic<UIControl.ContentHorizontalAlignment>> { return .name(Control.Binding.contentHorizontalAlignment) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var actions: ControlName<ControlActions> { return .name(B.actions) }
+	static var actions: ControlName<ControlActions> { return .name(Control.Binding.actions) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 
@@ -227,7 +226,7 @@ open class SignalControlEventActionTarget: NSObject {
 	private weak var signalOutput: SignalMulti<(control: UIControl, event: UIEvent)>? = nil
 	
 	/// The `signal` emits the actions received
-	public var signal: SignalMulti<(control: UIControl, event: UIEvent)> {
+	public var source: SignalMulti<(control: UIControl, event: UIEvent)> {
 		// If there's a current signal output, return it
 		if let so = signalOutput {
 			return so

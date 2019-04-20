@@ -86,7 +86,6 @@ extension Slider.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SliderBinding {
 	public typealias SliderName<V> = BindingName<V, Slider.Binding, Binding>
-	private typealias B = Slider.Binding
 	private static func name<V>(_ source: @escaping (V) -> Slider.Binding) -> SliderName<V> {
 		return SliderName<V>(source: source, downcast: Binding.sliderBinding)
 	}
@@ -94,17 +93,17 @@ extension BindingName where Binding: SliderBinding {
 public extension BindingName where Binding: SliderBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SliderName<$2> { return .name(B.$1) }
+	// With:    static var $1: SliderName<$2> { return .name(Slider.Binding.$1) }
 
-	static var allowsTickMarkValuesOnly: SliderName<Dynamic<Bool>> { return .name(B.allowsTickMarkValuesOnly) }
-	static var altIncrementValue: SliderName<Dynamic<Double>> { return .name(B.altIncrementValue) }
-	static var isVertical: SliderName<Dynamic<Bool>> { return .name(B.isVertical) }
-	static var maxValue: SliderName<Dynamic<Double>> { return .name(B.maxValue) }
-	static var minValue: SliderName<Dynamic<Double>> { return .name(B.minValue) }
-	static var numberOfTickMarks: SliderName<Dynamic<Int>> { return .name(B.numberOfTickMarks) }
-	static var sliderType: SliderName<Dynamic<NSSlider.SliderType>> { return .name(B.sliderType) }
-	static var tickMarkPosition: SliderName<Dynamic<NSSlider.TickMarkPosition>> { return .name(B.tickMarkPosition) }
-	static var trackFillColor: SliderName<Dynamic<NSColor?>> { return .name(B.trackFillColor) }
+	static var allowsTickMarkValuesOnly: SliderName<Dynamic<Bool>> { return .name(Slider.Binding.allowsTickMarkValuesOnly) }
+	static var altIncrementValue: SliderName<Dynamic<Double>> { return .name(Slider.Binding.altIncrementValue) }
+	static var isVertical: SliderName<Dynamic<Bool>> { return .name(Slider.Binding.isVertical) }
+	static var maxValue: SliderName<Dynamic<Double>> { return .name(Slider.Binding.maxValue) }
+	static var minValue: SliderName<Dynamic<Double>> { return .name(Slider.Binding.minValue) }
+	static var numberOfTickMarks: SliderName<Dynamic<Int>> { return .name(Slider.Binding.numberOfTickMarks) }
+	static var sliderType: SliderName<Dynamic<NSSlider.SliderType>> { return .name(Slider.Binding.sliderType) }
+	static var tickMarkPosition: SliderName<Dynamic<NSSlider.TickMarkPosition>> { return .name(Slider.Binding.tickMarkPosition) }
+	static var trackFillColor: SliderName<Dynamic<NSColor?>> { return .name(Slider.Binding.trackFillColor) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -131,7 +131,6 @@ extension TabBarItem.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TabBarItemBinding {
 	public typealias TabBarItemName<V> = BindingName<V, TabBarItem.Binding, Binding>
-	private typealias B = TabBarItem.Binding
 	private static func name<V>(_ source: @escaping (V) -> TabBarItem.Binding) -> TabBarItemName<V> {
 		return TabBarItemName<V>(source: source, downcast: Binding.tabBarItemBinding)
 	}
@@ -139,7 +138,7 @@ extension BindingName where Binding: TabBarItemBinding {
 public extension BindingName where Binding: TabBarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TabBarItemName<$2> { return .name(B.$1) }
+	// With:    static var $1: TabBarItemName<$2> { return .name(TabBarItem.Binding.$1) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

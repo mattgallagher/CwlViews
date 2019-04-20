@@ -222,7 +222,6 @@ extension TabBar.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TabBarBinding {
 	public typealias TabBarName<V> = BindingName<V, TabBar<Binding.ItemIdentifierType>.Binding, Binding>
-	private typealias B = TabBar<Binding.ItemIdentifierType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> TabBar<Binding.ItemIdentifierType>.Binding) -> TabBarName<V> {
 		return TabBarName<V>(source: source, downcast: Binding.tabBarBinding)
 	}
@@ -230,37 +229,37 @@ extension BindingName where Binding: TabBarBinding {
 public extension BindingName where Binding: TabBarBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TabBarName<$2> { return .name(B.$1) }
+	// With:    static var $1: TabBarName<$2> { return .name(TabBar.Binding.$1) }
 	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundImage: TabBarName<Dynamic<UIImage?>> { return .name(B.backgroundImage) }
-	static var barStyle: TabBarName<Dynamic<UIBarStyle>> { return .name(B.barStyle) }
-	static var barTintColor: TabBarName<Dynamic<UIColor>> { return .name(B.barTintColor) }
-	static var isTranslucent: TabBarName<Dynamic<Bool>> { return .name(B.isTranslucent) }
-	static var itemPositioning: TabBarName<Dynamic<UITabBar.ItemPositioning>> { return .name(B.itemPositioning) }
-	static var items: TabBarName<Dynamic<SetOrAnimate<[Binding.ItemIdentifierType]>>> { return .name(B.items) }
-	static var itemSpacing: TabBarName<Dynamic<CGFloat>> { return .name(B.itemSpacing) }
-	static var itemWidth: TabBarName<Dynamic<CGFloat>> { return .name(B.itemWidth) }
-	static var selectionIndicatorImage: TabBarName<Dynamic<UIImage?>> { return .name(B.selectionIndicatorImage) }
-	static var shadowImage: TabBarName<Dynamic<UIImage?>> { return .name(B.shadowImage) }
-	static var tintColor: TabBarName<Dynamic<UIColor>> { return .name(B.tintColor) }
-	static var unselectedItemTintColor: TabBarName<Dynamic<UIColor>> { return .name(B.unselectedItemTintColor) }
+	static var backgroundImage: TabBarName<Dynamic<UIImage?>> { return .name(TabBar.Binding.backgroundImage) }
+	static var barStyle: TabBarName<Dynamic<UIBarStyle>> { return .name(TabBar.Binding.barStyle) }
+	static var barTintColor: TabBarName<Dynamic<UIColor>> { return .name(TabBar.Binding.barTintColor) }
+	static var isTranslucent: TabBarName<Dynamic<Bool>> { return .name(TabBar.Binding.isTranslucent) }
+	static var itemPositioning: TabBarName<Dynamic<UITabBar.ItemPositioning>> { return .name(TabBar.Binding.itemPositioning) }
+	static var items: TabBarName<Dynamic<SetOrAnimate<[Binding.ItemIdentifierType]>>> { return .name(TabBar.Binding.items) }
+	static var itemSpacing: TabBarName<Dynamic<CGFloat>> { return .name(TabBar.Binding.itemSpacing) }
+	static var itemWidth: TabBarName<Dynamic<CGFloat>> { return .name(TabBar.Binding.itemWidth) }
+	static var selectionIndicatorImage: TabBarName<Dynamic<UIImage?>> { return .name(TabBar.Binding.selectionIndicatorImage) }
+	static var shadowImage: TabBarName<Dynamic<UIImage?>> { return .name(TabBar.Binding.shadowImage) }
+	static var tintColor: TabBarName<Dynamic<UIColor>> { return .name(TabBar.Binding.tintColor) }
+	static var unselectedItemTintColor: TabBarName<Dynamic<UIColor>> { return .name(TabBar.Binding.unselectedItemTintColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var customizingItems: TabBarName<Signal<SetOrAnimate<[Binding.ItemIdentifierType]?>>> { return .name(B.customizingItems) }
-	static var selectItem: TabBarName<Signal<Binding.ItemIdentifierType>> { return .name(B.selectItem) }
+	static var customizingItems: TabBarName<Signal<SetOrAnimate<[Binding.ItemIdentifierType]?>>> { return .name(TabBar.Binding.customizingItems) }
+	static var selectItem: TabBarName<Signal<Binding.ItemIdentifierType>> { return .name(TabBar.Binding.selectItem) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didBeginCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType]) -> Void> { return .name(B.didBeginCustomizing) }
-	static var didEndCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.didEndCustomizing) }
-	static var didSelectItem: TabBarName<(UITabBar, UITabBarItem, Binding.ItemIdentifierType) -> Void> { return .name(B.didSelectItem) }
-	static var itemConstructor: TabBarName<(Binding.ItemIdentifierType) -> TabBarItemConvertible> { return .name(B.itemConstructor) }
-	static var willBeginCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType]) -> Void> { return .name(B.willBeginCustomizing) }
-	static var willEndCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.willEndCustomizing) }
+	static var didBeginCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType]) -> Void> { return .name(TabBar.Binding.didBeginCustomizing) }
+	static var didEndCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(TabBar.Binding.didEndCustomizing) }
+	static var didSelectItem: TabBarName<(UITabBar, UITabBarItem, Binding.ItemIdentifierType) -> Void> { return .name(TabBar.Binding.didSelectItem) }
+	static var itemConstructor: TabBarName<(Binding.ItemIdentifierType) -> TabBarItemConvertible> { return .name(TabBar.Binding.itemConstructor) }
+	static var willBeginCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType]) -> Void> { return .name(TabBar.Binding.willBeginCustomizing) }
+	static var willEndCustomizing: TabBarName<(UITabBar, [UITabBarItem], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(TabBar.Binding.willEndCustomizing) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -239,7 +239,6 @@ extension TabBarController.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TabBarControllerBinding {
 	public typealias TabBarControllerName<V> = BindingName<V, TabBarController<Binding.ItemIdentifierType>.Binding, Binding>
-	private typealias B = TabBarController<Binding.ItemIdentifierType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> TabBarController<Binding.ItemIdentifierType>.Binding) -> TabBarControllerName<V> {
 		return TabBarControllerName<V>(source: source, downcast: Binding.tabBarControllerBinding)
 	}
@@ -247,31 +246,31 @@ extension BindingName where Binding: TabBarControllerBinding {
 public extension BindingName where Binding: TabBarControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TabBarControllerName<$2> { return .name(B.$1) }
+	// With:    static var $1: TabBarControllerName<$2> { return .name(TabBarController.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var tabBar: TabBarControllerName<Constant<TabBar<Binding.ItemIdentifierType>>> { return .name(B.tabBar) }
+	static var tabBar: TabBarControllerName<Constant<TabBar<Binding.ItemIdentifierType>>> { return .name(TabBarController.Binding.tabBar) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var customizableItems: TabBarControllerName<Dynamic<Set<Binding.ItemIdentifierType>>> { return .name(B.customizableItems) }
-	static var items: TabBarControllerName<Dynamic<SetOrAnimate<[Binding.ItemIdentifierType]>>> { return .name(B.items) }
+	static var customizableItems: TabBarControllerName<Dynamic<Set<Binding.ItemIdentifierType>>> { return .name(TabBarController.Binding.customizableItems) }
+	static var items: TabBarControllerName<Dynamic<SetOrAnimate<[Binding.ItemIdentifierType]>>> { return .name(TabBarController.Binding.items) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var selectItem: TabBarControllerName<Signal<Binding.ItemIdentifierType>> { return .name(B.selectItem) }
+	static var selectItem: TabBarControllerName<Signal<Binding.ItemIdentifierType>> { return .name(TabBarController.Binding.selectItem) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var animationControllerForTransition: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType, UIViewController, Binding.ItemIdentifierType) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationControllerForTransition) }
-	static var didEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.didEndCustomizing) }
-	static var didSelect: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType) -> Void> { return .name(B.didSelect) }
-	static var interactionControllerForAnimation: TabBarControllerName<(UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(B.interactionControllerForAnimation) }
-	static var preferredInterfaceOrientationForPresentation: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientationForPresentation) }
-	static var shouldSelect: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType) -> Bool> { return .name(B.shouldSelect) }
-	static var supportedInterfaceOrientations: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
-	static var tabConstructor: TabBarControllerName<(Binding.ItemIdentifierType) -> ViewControllerConvertible> { return .name(B.tabConstructor) }
-	static var willBeginCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType]) -> Void> { return .name(B.willBeginCustomizing) }
-	static var willEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(B.willEndCustomizing) }
+	static var animationControllerForTransition: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType, UIViewController, Binding.ItemIdentifierType) -> UIViewControllerAnimatedTransitioning?> { return .name(TabBarController.Binding.animationControllerForTransition) }
+	static var didEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(TabBarController.Binding.didEndCustomizing) }
+	static var didSelect: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType) -> Void> { return .name(TabBarController.Binding.didSelect) }
+	static var interactionControllerForAnimation: TabBarControllerName<(UITabBarController, UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(TabBarController.Binding.interactionControllerForAnimation) }
+	static var preferredInterfaceOrientationForPresentation: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientation> { return .name(TabBarController.Binding.preferredInterfaceOrientationForPresentation) }
+	static var shouldSelect: TabBarControllerName<(UITabBarController, UIViewController, Binding.ItemIdentifierType) -> Bool> { return .name(TabBarController.Binding.shouldSelect) }
+	static var supportedInterfaceOrientations: TabBarControllerName<(UITabBarController) -> UIInterfaceOrientationMask> { return .name(TabBarController.Binding.supportedInterfaceOrientations) }
+	static var tabConstructor: TabBarControllerName<(Binding.ItemIdentifierType) -> ViewControllerConvertible> { return .name(TabBarController.Binding.tabConstructor) }
+	static var willBeginCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType]) -> Void> { return .name(TabBarController.Binding.willBeginCustomizing) }
+	static var willEndCustomizing: TabBarControllerName<(UITabBarController, [UIViewController], [Binding.ItemIdentifierType], Bool) -> Void> { return .name(TabBarController.Binding.willEndCustomizing) }
 	
 	// Composite binding names
 	static func tabSelected(_ void: Void = ()) -> TabBarControllerName<SignalInput<Binding.ItemIdentifierType>> {

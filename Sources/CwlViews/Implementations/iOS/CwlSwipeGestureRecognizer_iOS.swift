@@ -91,7 +91,6 @@ extension SwipeGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SwipeGestureRecognizerBinding {
 	public typealias SwipeGestureRecognizerName<V> = BindingName<V, SwipeGestureRecognizer.Binding, Binding>
-	private typealias B = SwipeGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> SwipeGestureRecognizer.Binding) -> SwipeGestureRecognizerName<V> {
 		return SwipeGestureRecognizerName<V>(source: source, downcast: Binding.swipeGestureRecognizerBinding)
 	}
@@ -99,13 +98,13 @@ extension BindingName where Binding: SwipeGestureRecognizerBinding {
 public extension BindingName where Binding: SwipeGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SwipeGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: SwipeGestureRecognizerName<$2> { return .name(SwipeGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var direction: SwipeGestureRecognizerName<Dynamic<UISwipeGestureRecognizer.Direction>> { return .name(B.direction) }
-	static var numberOfTouchesRequired: SwipeGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTouchesRequired) }
+	static var direction: SwipeGestureRecognizerName<Dynamic<UISwipeGestureRecognizer.Direction>> { return .name(SwipeGestureRecognizer.Binding.direction) }
+	static var numberOfTouchesRequired: SwipeGestureRecognizerName<Dynamic<Int>> { return .name(SwipeGestureRecognizer.Binding.numberOfTouchesRequired) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

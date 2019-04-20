@@ -114,7 +114,7 @@ public extension GestureRecognizer.Preparer {
 		case .action(let x):
 			let target = SignalActionTarget()
 			instance.addTarget(target, action: SignalActionTarget.selector)
-			return target.signal.cancellableBind(to: x)
+			return target.source.cancellableBind(to: x)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .shouldBegin: return nil
@@ -161,7 +161,6 @@ extension GestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: GestureRecognizerBinding {
 	public typealias GestureRecognizerName<V> = BindingName<V, GestureRecognizer.Binding, Binding>
-	private typealias B = GestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> GestureRecognizer.Binding) -> GestureRecognizerName<V> {
 		return GestureRecognizerName<V>(source: source, downcast: Binding.gestureRecognizerBinding)
 	}
@@ -169,30 +168,30 @@ extension BindingName where Binding: GestureRecognizerBinding {
 public extension BindingName where Binding: GestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: GestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: GestureRecognizerName<$2> { return .name(GestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowedPressTypes: GestureRecognizerName<Dynamic<[NSNumber]>> { return .name(B.allowedPressTypes) }
-	static var allowedTouchTypes: GestureRecognizerName<Dynamic<[NSNumber]>> { return .name(B.allowedTouchTypes) }
-	static var cancelsTouchesInView: GestureRecognizerName<Dynamic<Bool>> { return .name(B.cancelsTouchesInView) }
-	static var delaysTouchesBegan: GestureRecognizerName<Dynamic<Bool>> { return .name(B.delaysTouchesBegan) }
-	static var delaysTouchesEnded: GestureRecognizerName<Dynamic<Bool>> { return .name(B.delaysTouchesEnded) }
-	static var requiresExclusiveTouchType: GestureRecognizerName<Dynamic<Bool>> { return .name(B.requiresExclusiveTouchType) }
+	static var allowedPressTypes: GestureRecognizerName<Dynamic<[NSNumber]>> { return .name(GestureRecognizer.Binding.allowedPressTypes) }
+	static var allowedTouchTypes: GestureRecognizerName<Dynamic<[NSNumber]>> { return .name(GestureRecognizer.Binding.allowedTouchTypes) }
+	static var cancelsTouchesInView: GestureRecognizerName<Dynamic<Bool>> { return .name(GestureRecognizer.Binding.cancelsTouchesInView) }
+	static var delaysTouchesBegan: GestureRecognizerName<Dynamic<Bool>> { return .name(GestureRecognizer.Binding.delaysTouchesBegan) }
+	static var delaysTouchesEnded: GestureRecognizerName<Dynamic<Bool>> { return .name(GestureRecognizer.Binding.delaysTouchesEnded) }
+	static var requiresExclusiveTouchType: GestureRecognizerName<Dynamic<Bool>> { return .name(GestureRecognizer.Binding.requiresExclusiveTouchType) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var action: GestureRecognizerName<SignalInput<Any?>> { return .name(B.action) }
+	static var action: GestureRecognizerName<SignalInput<Any?>> { return .name(GestureRecognizer.Binding.action) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var shouldBegin: GestureRecognizerName<(UIGestureRecognizer) -> Bool> { return .name(B.shouldBegin) }
-	static var shouldBeRequiredToFail: GestureRecognizerName<(UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool> { return .name(B.shouldBeRequiredToFail) }
-	static var shouldReceivePress: GestureRecognizerName<(UIGestureRecognizer, UIPress) -> Bool> { return .name(B.shouldReceivePress) }
-	static var shouldReceiveTouch: GestureRecognizerName<(UIGestureRecognizer, UITouch) -> Bool> { return .name(B.shouldReceiveTouch) }
-	static var shouldRecognizeSimultanously: GestureRecognizerName<(UIGestureRecognizer, UIGestureRecognizer) -> Bool> { return .name(B.shouldRecognizeSimultanously) }
-	static var shouldRequireFailure: GestureRecognizerName<(UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool> { return .name(B.shouldRequireFailure) }
+	static var shouldBegin: GestureRecognizerName<(UIGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldBegin) }
+	static var shouldBeRequiredToFail: GestureRecognizerName<(UIGestureRecognizer, _ by: UIGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldBeRequiredToFail) }
+	static var shouldReceivePress: GestureRecognizerName<(UIGestureRecognizer, UIPress) -> Bool> { return .name(GestureRecognizer.Binding.shouldReceivePress) }
+	static var shouldReceiveTouch: GestureRecognizerName<(UIGestureRecognizer, UITouch) -> Bool> { return .name(GestureRecognizer.Binding.shouldReceiveTouch) }
+	static var shouldRecognizeSimultanously: GestureRecognizerName<(UIGestureRecognizer, UIGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldRecognizeSimultanously) }
+	static var shouldRequireFailure: GestureRecognizerName<(UIGestureRecognizer, _ of: UIGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldRequireFailure) }
 
 	// Composite binding names
 	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {

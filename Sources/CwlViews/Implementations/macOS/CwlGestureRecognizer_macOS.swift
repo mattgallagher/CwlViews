@@ -149,7 +149,6 @@ extension GestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: GestureRecognizerBinding {
 	public typealias GestureRecognizerName<V> = BindingName<V, GestureRecognizer.Binding, Binding>
-	private typealias B = GestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> GestureRecognizer.Binding) -> GestureRecognizerName<V> {
 		return GestureRecognizerName<V>(source: source, downcast: Binding.gestureRecognizerBinding)
 	}
@@ -157,26 +156,26 @@ extension BindingName where Binding: GestureRecognizerBinding {
 public extension BindingName where Binding: GestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: GestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: GestureRecognizerName<$2> { return .name(GestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowedTouchTypes: GestureRecognizerName<Dynamic<NSTouch.TouchTypeMask>> { return .name(B.allowedTouchTypes) }
-	static var pressureConfiguration: GestureRecognizerName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
+	static var allowedTouchTypes: GestureRecognizerName<Dynamic<NSTouch.TouchTypeMask>> { return .name(GestureRecognizer.Binding.allowedTouchTypes) }
+	static var pressureConfiguration: GestureRecognizerName<Dynamic<NSPressureConfiguration>> { return .name(GestureRecognizer.Binding.pressureConfiguration) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var action: GestureRecognizerName<TargetAction> { return .name(B.action) }
+	static var action: GestureRecognizerName<TargetAction> { return .name(GestureRecognizer.Binding.action) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var shouldAttemptToRecognize: GestureRecognizerName<(NSGestureRecognizer, NSEvent) -> Bool> { return .name(B.shouldAttemptToRecognize) }
-	static var shouldBegin: GestureRecognizerName<(NSGestureRecognizer) -> Bool> { return .name(B.shouldBegin) }
-	static var shouldRecognizeSimultaneously: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(B.shouldRecognizeSimultaneously) }
-	static var shouldRequireFailure: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(B.shouldRequireFailure) }
-	static var shouldRequireToFail: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(B.shouldRequireToFail) }
-	static var shouldReceiveTouch: GestureRecognizerName<(NSGestureRecognizer, NSTouch) -> Bool> { return .name(B.shouldReceiveTouch) }
+	static var shouldAttemptToRecognize: GestureRecognizerName<(NSGestureRecognizer, NSEvent) -> Bool> { return .name(GestureRecognizer.Binding.shouldAttemptToRecognize) }
+	static var shouldBegin: GestureRecognizerName<(NSGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldBegin) }
+	static var shouldRecognizeSimultaneously: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldRecognizeSimultaneously) }
+	static var shouldRequireFailure: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldRequireFailure) }
+	static var shouldRequireToFail: GestureRecognizerName<(NSGestureRecognizer, NSGestureRecognizer) -> Bool> { return .name(GestureRecognizer.Binding.shouldRequireToFail) }
+	static var shouldReceiveTouch: GestureRecognizerName<(NSGestureRecognizer, NSTouch) -> Bool> { return .name(GestureRecognizer.Binding.shouldReceiveTouch) }
 
 	// Composite binding names
 	static func action<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> GestureRecognizerName<SignalInput<Value>> {

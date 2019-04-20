@@ -109,7 +109,6 @@ extension ExtendedView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ExtendedViewBinding {
 	public typealias ExtendedViewName<V> = BindingName<V, ExtendedView<Binding.SubclassType>.Binding, Binding>
-	private typealias B = ExtendedView<Binding.SubclassType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> ExtendedView<Binding.SubclassType>.Binding) -> ExtendedViewName<V> {
 		return ExtendedViewName<V>(source: source, downcast: Binding.extendedViewBinding)
 	}
@@ -117,19 +116,19 @@ extension BindingName where Binding: ExtendedViewBinding {
 public extension BindingName where Binding: ExtendedViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ExtendedViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ExtendedViewName<$2> { return .name(ExtendedView.Binding.$1) }
 	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	#if os(macOS)
-		static var backgroundColor: ExtendedViewName<Dynamic<NSColor?>> { return .name(B.backgroundColor) }
+		static var backgroundColor: ExtendedViewName<Dynamic<NSColor?>> { return .name(ExtendedView.Binding.backgroundColor) }
 	#endif
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var sizeDidChange: ExtendedViewName<SignalInput<CGSize>> { return .name(B.sizeDidChange) }
+	static var sizeDidChange: ExtendedViewName<SignalInput<CGSize>> { return .name(ExtendedView.Binding.sizeDidChange) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

@@ -95,7 +95,6 @@ extension LongPressGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: LongPressGestureRecognizerBinding {
 	public typealias LongPressGestureRecognizerName<V> = BindingName<V, LongPressGestureRecognizer.Binding, Binding>
-	private typealias B = LongPressGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> LongPressGestureRecognizer.Binding) -> LongPressGestureRecognizerName<V> {
 		return LongPressGestureRecognizerName<V>(source: source, downcast: Binding.longPressGestureRecognizerBinding)
 	}
@@ -103,15 +102,15 @@ extension BindingName where Binding: LongPressGestureRecognizerBinding {
 public extension BindingName where Binding: LongPressGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: LongPressGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: LongPressGestureRecognizerName<$2> { return .name(LongPressGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowableMovement: LongPressGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.allowableMovement) }
-	static var minimumPressDuration: LongPressGestureRecognizerName<Dynamic<CFTimeInterval>> { return .name(B.minimumPressDuration) }
-	static var numberOfTapsRequired: LongPressGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTapsRequired) }
-	static var numberOfTouchesRequired: LongPressGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTouchesRequired) }
+	static var allowableMovement: LongPressGestureRecognizerName<Dynamic<CGFloat>> { return .name(LongPressGestureRecognizer.Binding.allowableMovement) }
+	static var minimumPressDuration: LongPressGestureRecognizerName<Dynamic<CFTimeInterval>> { return .name(LongPressGestureRecognizer.Binding.minimumPressDuration) }
+	static var numberOfTapsRequired: LongPressGestureRecognizerName<Dynamic<Int>> { return .name(LongPressGestureRecognizer.Binding.numberOfTapsRequired) }
+	static var numberOfTouchesRequired: LongPressGestureRecognizerName<Dynamic<Int>> { return .name(LongPressGestureRecognizer.Binding.numberOfTouchesRequired) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

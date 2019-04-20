@@ -195,7 +195,7 @@ public extension TableView.Preparer {
 			)
 		case .visibleRowsChanged(let x):
 			rowsChanged = rowsChanged ?? Input().multicast()
-			rowsChanged?.signal.bind(to: x)
+			rowsChanged?.source.bind(to: x)
 			delegate().addMultiHandler3(
 				{ (tv: UITableView, _: IndexPath, _: UITableViewCell) -> Void in
 					_ = (tv.delegate as? Storage)?.notifyVisibleRowsChanged(in: tv)
@@ -305,7 +305,7 @@ public extension TableView.Preparer {
 			}
 			
 			// Use the output of the pair to apply the effects as normal
-			return pair.signal.apply(instance) { i, v in
+			return pair.source.apply(instance) { i, v in
 				// Remove the key value observing after the first value is received.
 				if let k = kvo {
 					k.invalidate()
@@ -449,7 +449,7 @@ extension TableView.Preparer {
 				cellInput = reusedView.associatedRowInput(valueType: RowData.self)
 			} else if let cc = cellConstructor {
 				let dataTuple = Input<RowData>().multicast()
-				let constructed = cc(identifier, dataTuple.signal).uiTableViewCell(reuseIdentifier: identifier)
+				let constructed = cc(identifier, dataTuple.source).uiTableViewCell(reuseIdentifier: identifier)
 				cellView = constructed
 				cellInput = dataTuple.input
 				constructed.setAssociatedRowInput(to: dataTuple.input)
@@ -737,7 +737,6 @@ extension TableView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableViewBinding {
 	public typealias TableViewName<V> = BindingName<V, TableView<Binding.RowDataType>.Binding, Binding>
-	private typealias B = TableView<Binding.RowDataType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableView<Binding.RowDataType>.Binding) -> TableViewName<V> {
 		return TableViewName<V>(source: source, downcast: Binding.tableViewBinding)
 	}
@@ -745,95 +744,95 @@ extension BindingName where Binding: TableViewBinding {
 public extension BindingName where Binding: TableViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableViewName<$2> { return .name(TableView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var tableViewStyle: TableViewName<Constant<UITableView.Style>> { return .name(B.tableViewStyle) }
+	static var tableViewStyle: TableViewName<Constant<UITableView.Style>> { return .name(TableView.Binding.tableViewStyle) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsMultipleSelection: TableViewName<Dynamic<Bool>> { return .name(B.allowsMultipleSelection) }
-	static var allowsMultipleSelectionDuringEditing: TableViewName<Dynamic<Bool>> { return .name(B.allowsMultipleSelectionDuringEditing) }
-	static var allowsSelection: TableViewName<Dynamic<Bool>> { return .name(B.allowsSelection) }
-	static var allowsSelectionDuringEditing: TableViewName<Dynamic<Bool>> { return .name(B.allowsSelectionDuringEditing) }
-	static var backgroundView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.backgroundView) }
-	static var cellLayoutMarginsFollowReadableWidth: TableViewName<Dynamic<Bool>> { return .name(B.cellLayoutMarginsFollowReadableWidth) }
-	static var estimatedRowHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.estimatedRowHeight) }
-	static var estimatedSectionFooterHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.estimatedSectionFooterHeight) }
-	static var estimatedSectionHeaderHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.estimatedSectionHeaderHeight) }
-	static var isEditing: TableViewName<Signal<SetOrAnimate<Bool>>> { return .name(B.isEditing) }
-	static var remembersLastFocusedIndexPath: TableViewName<Dynamic<Bool>> { return .name(B.remembersLastFocusedIndexPath) }
-	static var rowHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.rowHeight) }
-	static var sectionFooterHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.sectionFooterHeight) }
-	static var sectionHeaderHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.sectionHeaderHeight) }
-	static var sectionIndexBackgroundColor: TableViewName<Dynamic<UIColor?>> { return .name(B.sectionIndexBackgroundColor) }
-	static var sectionIndexColor: TableViewName<Dynamic<UIColor?>> { return .name(B.sectionIndexColor) }
-	static var sectionIndexMinimumDisplayRowCount: TableViewName<Dynamic<Int>> { return .name(B.sectionIndexMinimumDisplayRowCount) }
-	static var sectionIndexTitles: TableViewName<Dynamic<[String]?>> { return .name(B.sectionIndexTitles) }
-	static var sectionIndexTrackingBackgroundColor: TableViewName<Dynamic<UIColor?>> { return .name(B.sectionIndexTrackingBackgroundColor) }
-	static var separatorColor: TableViewName<Dynamic<UIColor?>> { return .name(B.separatorColor) }
-	static var separatorEffect: TableViewName<Dynamic<UIVisualEffect?>> { return .name(B.separatorEffect) }
-	static var separatorInset: TableViewName<Dynamic<UIEdgeInsets>> { return .name(B.separatorInset) }
-	static var separatorInsetReference: TableViewName<Dynamic<UITableView.SeparatorInsetReference>> { return .name(B.separatorInsetReference) }
-	static var separatorStyle: TableViewName<Dynamic<UITableViewCell.SeparatorStyle>> { return .name(B.separatorStyle) }
-	static var tableData: TableViewName<Dynamic<TableSectionAnimatable<Binding.RowDataType>>> { return .name(B.tableData) }
-	static var tableFooterView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableFooterView) }
-	static var tableHeaderView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.tableHeaderView) }
+	static var allowsMultipleSelection: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsMultipleSelection) }
+	static var allowsMultipleSelectionDuringEditing: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsMultipleSelectionDuringEditing) }
+	static var allowsSelection: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsSelection) }
+	static var allowsSelectionDuringEditing: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsSelectionDuringEditing) }
+	static var backgroundView: TableViewName<Dynamic<ViewConvertible?>> { return .name(TableView.Binding.backgroundView) }
+	static var cellLayoutMarginsFollowReadableWidth: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.cellLayoutMarginsFollowReadableWidth) }
+	static var estimatedRowHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.estimatedRowHeight) }
+	static var estimatedSectionFooterHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.estimatedSectionFooterHeight) }
+	static var estimatedSectionHeaderHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.estimatedSectionHeaderHeight) }
+	static var isEditing: TableViewName<Signal<SetOrAnimate<Bool>>> { return .name(TableView.Binding.isEditing) }
+	static var remembersLastFocusedIndexPath: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.remembersLastFocusedIndexPath) }
+	static var rowHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.rowHeight) }
+	static var sectionFooterHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.sectionFooterHeight) }
+	static var sectionHeaderHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.sectionHeaderHeight) }
+	static var sectionIndexBackgroundColor: TableViewName<Dynamic<UIColor?>> { return .name(TableView.Binding.sectionIndexBackgroundColor) }
+	static var sectionIndexColor: TableViewName<Dynamic<UIColor?>> { return .name(TableView.Binding.sectionIndexColor) }
+	static var sectionIndexMinimumDisplayRowCount: TableViewName<Dynamic<Int>> { return .name(TableView.Binding.sectionIndexMinimumDisplayRowCount) }
+	static var sectionIndexTitles: TableViewName<Dynamic<[String]?>> { return .name(TableView.Binding.sectionIndexTitles) }
+	static var sectionIndexTrackingBackgroundColor: TableViewName<Dynamic<UIColor?>> { return .name(TableView.Binding.sectionIndexTrackingBackgroundColor) }
+	static var separatorColor: TableViewName<Dynamic<UIColor?>> { return .name(TableView.Binding.separatorColor) }
+	static var separatorEffect: TableViewName<Dynamic<UIVisualEffect?>> { return .name(TableView.Binding.separatorEffect) }
+	static var separatorInset: TableViewName<Dynamic<UIEdgeInsets>> { return .name(TableView.Binding.separatorInset) }
+	static var separatorInsetReference: TableViewName<Dynamic<UITableView.SeparatorInsetReference>> { return .name(TableView.Binding.separatorInsetReference) }
+	static var separatorStyle: TableViewName<Dynamic<UITableViewCell.SeparatorStyle>> { return .name(TableView.Binding.separatorStyle) }
+	static var tableData: TableViewName<Dynamic<TableSectionAnimatable<Binding.RowDataType>>> { return .name(TableView.Binding.tableData) }
+	static var tableFooterView: TableViewName<Dynamic<ViewConvertible?>> { return .name(TableView.Binding.tableFooterView) }
+	static var tableHeaderView: TableViewName<Dynamic<ViewConvertible?>> { return .name(TableView.Binding.tableHeaderView) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var deselectRow: TableViewName<Signal<SetOrAnimate<IndexPath>>> { return .name(B.deselectRow) }
-	static var scrollToNearestSelectedRow: TableViewName<Signal<SetOrAnimate<UITableView.ScrollPosition>>> { return .name(B.scrollToNearestSelectedRow) }
-	static var scrollToRow: TableViewName<Signal<SetOrAnimate<TableScrollPosition>>> { return .name(B.scrollToRow) }
-	static var selectRow: TableViewName<Signal<SetOrAnimate<TableScrollPosition?>>> { return .name(B.selectRow) }
+	static var deselectRow: TableViewName<Signal<SetOrAnimate<IndexPath>>> { return .name(TableView.Binding.deselectRow) }
+	static var scrollToNearestSelectedRow: TableViewName<Signal<SetOrAnimate<UITableView.ScrollPosition>>> { return .name(TableView.Binding.scrollToNearestSelectedRow) }
+	static var scrollToRow: TableViewName<Signal<SetOrAnimate<TableScrollPosition>>> { return .name(TableView.Binding.scrollToRow) }
+	static var selectRow: TableViewName<Signal<SetOrAnimate<TableScrollPosition?>>> { return .name(TableView.Binding.selectRow) }
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var selectionDidChange: TableViewName<SignalInput<[TableRow<Binding.RowDataType>]?>> { return .name(B.selectionDidChange) }
-	static var userDidScrollToRow: TableViewName<SignalInput<TableRow<Binding.RowDataType>>> { return .name(B.userDidScrollToRow) }
-	static var visibleRowsChanged: TableViewName<SignalInput<[TableRow<Binding.RowDataType>]>> { return .name(B.visibleRowsChanged) }
+	static var selectionDidChange: TableViewName<SignalInput<[TableRow<Binding.RowDataType>]?>> { return .name(TableView.Binding.selectionDidChange) }
+	static var userDidScrollToRow: TableViewName<SignalInput<TableRow<Binding.RowDataType>>> { return .name(TableView.Binding.userDidScrollToRow) }
+	static var visibleRowsChanged: TableViewName<SignalInput<[TableRow<Binding.RowDataType>]>> { return .name(TableView.Binding.visibleRowsChanged) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var accessoryButtonTapped: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(B.accessoryButtonTapped) }
-	static var canEditRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canEditRow) }
-	static var canFocusRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canFocusRow) }
-	static var canMoveRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.canMoveRow) }
-	static var canPerformAction: TableViewName<(_ tableView: UITableView, _ action: Selector, _ tableRowData: TableRow<Binding.RowDataType>, _ sender: Any?) -> Bool> { return .name(B.canPerformAction) }
-	static var cellConstructor: TableViewName<(_ identifier: String?, _ rowSignal: SignalMulti<Binding.RowDataType>) -> TableViewCellConvertible> { return .name(B.cellConstructor) }
-	static var cellIdentifier: TableViewName<(TableRow<Binding.RowDataType>) -> String?> { return .name(B.cellIdentifier) }
-	static var commit: TableViewName<(UITableView, UITableViewCell.EditingStyle, TableRow<Binding.RowDataType>) -> Void> { return .name(B.commit) }
-	static var dataMissingCell: TableViewName<(IndexPath) -> TableViewCellConvertible> { return .name(B.dataMissingCell) }
-	static var didDeselectRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(B.didDeselectRow) }
-	static var didEndDisplayingCell: TableViewName<(UITableView, UITableViewCell, TableRow<Binding.RowDataType>) -> Void> { return .name(B.didEndDisplayingCell) }
-	static var didEndDisplayingFooter: TableViewName<(UITableView, UIView, Int) -> Void> { return .name(B.didEndDisplayingFooter) }
-	static var didEndDisplayingHeader: TableViewName<(UITableView, UIView, Int) -> Void> { return .name(B.didEndDisplayingHeader) }
-	static var didEndEditingRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>?) -> Void> { return .name(B.didEndEditingRow) }
-	static var didHightlightRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(B.didHightlightRow) }
-	static var didSelectRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(B.didSelectRow) }
-	static var didUnhighlightRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(B.didUnhighlightRow) }
-	static var didUpdateFocus: TableViewName<(UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void> { return .name(B.didUpdateFocus) }
-	static var editActionsForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> [UITableViewRowAction]?> { return .name(B.editActionsForRow) }
-	static var editingStyleForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> UITableViewCell.EditingStyle> { return .name(B.editingStyleForRow) }
-	static var estimatedHeightForFooter: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.estimatedHeightForFooter) }
-	static var estimatedHeightForHeader: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.estimatedHeightForHeader) }
-	static var estimatedHeightForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(B.estimatedHeightForRow) }
-	static var footerHeight: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.footerHeight) }
-	static var footerView: TableViewName<(_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?> { return .name(B.footerView) }
-	static var headerHeight: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(B.headerHeight) }
-	static var headerView: TableViewName<(_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?> { return .name(B.headerView) }
-	static var heightForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(B.heightForRow) }
-	static var indentationLevelForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Int> { return .name(B.indentationLevelForRow) }
-	static var indexPathForPreferredFocusedView: TableViewName<(UITableView) -> IndexPath> { return .name(B.indexPathForPreferredFocusedView) }
-	static var moveRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>, IndexPath) -> Void> { return .name(B.moveRow) }
-	static var shouldHighlightRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldHighlightRow) }
-	static var shouldIndentWhileEditingRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldIndentWhileEditingRow) }
-	static var shouldShowMenuForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(B.shouldShowMenuForRow) }
-	static var shouldUpdateFocus: TableViewName<(UITableView, UITableViewFocusUpdateContext) -> Bool> { return .name(B.shouldUpdateFocus) }
-	static var targetIndexPathForMoveFromRow: TableViewName<(_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath> { return .name(B.targetIndexPathForMoveFromRow) }
-	static var titleForDeleteConfirmationButtonForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> String?> { return .name(B.titleForDeleteConfirmationButtonForRow) }
-	static var willBeginEditingRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Void> { return .name(B.willBeginEditingRow) }
-	static var willDeselectRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> IndexPath?> { return .name(B.willDeselectRow) }
-	static var willDisplayFooter: TableViewName<(_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void> { return .name(B.willDisplayFooter) }
-	static var willDisplayHeader: TableViewName<(_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void> { return .name(B.willDisplayHeader) }
-	static var willDisplayRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>, _ cell: UITableViewCell) -> Void> { return .name(B.willDisplayRow) }
-	static var willSelectRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> IndexPath?> { return .name(B.willSelectRow) }
+	static var accessoryButtonTapped: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.accessoryButtonTapped) }
+	static var canEditRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(TableView.Binding.canEditRow) }
+	static var canFocusRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(TableView.Binding.canFocusRow) }
+	static var canMoveRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(TableView.Binding.canMoveRow) }
+	static var canPerformAction: TableViewName<(_ tableView: UITableView, _ action: Selector, _ tableRowData: TableRow<Binding.RowDataType>, _ sender: Any?) -> Bool> { return .name(TableView.Binding.canPerformAction) }
+	static var cellConstructor: TableViewName<(_ identifier: String?, _ rowSignal: SignalMulti<Binding.RowDataType>) -> TableViewCellConvertible> { return .name(TableView.Binding.cellConstructor) }
+	static var cellIdentifier: TableViewName<(TableRow<Binding.RowDataType>) -> String?> { return .name(TableView.Binding.cellIdentifier) }
+	static var commit: TableViewName<(UITableView, UITableViewCell.EditingStyle, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.commit) }
+	static var dataMissingCell: TableViewName<(IndexPath) -> TableViewCellConvertible> { return .name(TableView.Binding.dataMissingCell) }
+	static var didDeselectRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.didDeselectRow) }
+	static var didEndDisplayingCell: TableViewName<(UITableView, UITableViewCell, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.didEndDisplayingCell) }
+	static var didEndDisplayingFooter: TableViewName<(UITableView, UIView, Int) -> Void> { return .name(TableView.Binding.didEndDisplayingFooter) }
+	static var didEndDisplayingHeader: TableViewName<(UITableView, UIView, Int) -> Void> { return .name(TableView.Binding.didEndDisplayingHeader) }
+	static var didEndEditingRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>?) -> Void> { return .name(TableView.Binding.didEndEditingRow) }
+	static var didHightlightRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.didHightlightRow) }
+	static var didSelectRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.didSelectRow) }
+	static var didUnhighlightRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.didUnhighlightRow) }
+	static var didUpdateFocus: TableViewName<(UITableView, UITableViewFocusUpdateContext, UIFocusAnimationCoordinator) -> Void> { return .name(TableView.Binding.didUpdateFocus) }
+	static var editActionsForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> [UITableViewRowAction]?> { return .name(TableView.Binding.editActionsForRow) }
+	static var editingStyleForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> UITableViewCell.EditingStyle> { return .name(TableView.Binding.editingStyleForRow) }
+	static var estimatedHeightForFooter: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(TableView.Binding.estimatedHeightForFooter) }
+	static var estimatedHeightForHeader: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(TableView.Binding.estimatedHeightForHeader) }
+	static var estimatedHeightForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(TableView.Binding.estimatedHeightForRow) }
+	static var footerHeight: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(TableView.Binding.footerHeight) }
+	static var footerView: TableViewName<(_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?> { return .name(TableView.Binding.footerView) }
+	static var headerHeight: TableViewName<(_ tableView: UITableView, _ section: Int) -> CGFloat> { return .name(TableView.Binding.headerHeight) }
+	static var headerView: TableViewName<(_ tableView: UITableView, _ section: Int, _ title: String?) -> ViewConvertible?> { return .name(TableView.Binding.headerView) }
+	static var heightForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> CGFloat> { return .name(TableView.Binding.heightForRow) }
+	static var indentationLevelForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Int> { return .name(TableView.Binding.indentationLevelForRow) }
+	static var indexPathForPreferredFocusedView: TableViewName<(UITableView) -> IndexPath> { return .name(TableView.Binding.indexPathForPreferredFocusedView) }
+	static var moveRow: TableViewName<(UITableView, TableRow<Binding.RowDataType>, IndexPath) -> Void> { return .name(TableView.Binding.moveRow) }
+	static var shouldHighlightRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(TableView.Binding.shouldHighlightRow) }
+	static var shouldIndentWhileEditingRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(TableView.Binding.shouldIndentWhileEditingRow) }
+	static var shouldShowMenuForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Bool> { return .name(TableView.Binding.shouldShowMenuForRow) }
+	static var shouldUpdateFocus: TableViewName<(UITableView, UITableViewFocusUpdateContext) -> Bool> { return .name(TableView.Binding.shouldUpdateFocus) }
+	static var targetIndexPathForMoveFromRow: TableViewName<(_ tableView: UITableView, _ sourceIndexPath: IndexPath, _ proposedIndexPath: IndexPath) -> IndexPath> { return .name(TableView.Binding.targetIndexPathForMoveFromRow) }
+	static var titleForDeleteConfirmationButtonForRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> String?> { return .name(TableView.Binding.titleForDeleteConfirmationButtonForRow) }
+	static var willBeginEditingRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> Void> { return .name(TableView.Binding.willBeginEditingRow) }
+	static var willDeselectRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> IndexPath?> { return .name(TableView.Binding.willDeselectRow) }
+	static var willDisplayFooter: TableViewName<(_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void> { return .name(TableView.Binding.willDisplayFooter) }
+	static var willDisplayHeader: TableViewName<(_ tableView: UITableView, _ section: Int, _ view: UIView) -> Void> { return .name(TableView.Binding.willDisplayHeader) }
+	static var willDisplayRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>, _ cell: UITableViewCell) -> Void> { return .name(TableView.Binding.willDisplayRow) }
+	static var willSelectRow: TableViewName<(_ tableView: UITableView, _ tableRowData: TableRow<Binding.RowDataType>) -> IndexPath?> { return .name(TableView.Binding.willSelectRow) }
 	
 	// Composite binding names
 	static func rowSelected<Value>(_ keyPath: KeyPath<TableRow<Binding.RowDataType>, Value>) -> TableViewName<SignalInput<Value>> {

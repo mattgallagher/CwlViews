@@ -125,7 +125,6 @@ extension MenuItem.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: MenuItemBinding {
 	public typealias MenuItemName<V> = BindingName<V, MenuItem.Binding, Binding>
-	private typealias B = MenuItem.Binding
 	private static func name<V>(_ source: @escaping (V) -> MenuItem.Binding) -> MenuItemName<V> {
 		return MenuItemName<V>(source: source, downcast: Binding.menuItemBinding)
 	}
@@ -133,34 +132,34 @@ extension BindingName where Binding: MenuItemBinding {
 public extension BindingName where Binding: MenuItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: MenuItemName<$2> { return .name(B.$1) }
+	// With:    static var $1: MenuItemName<$2> { return .name(MenuItem.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var isEnabled: MenuItemName<Dynamic<Bool>> { return .name(B.isEnabled) }
-	static var isHidden: MenuItemName<Dynamic<Bool>> { return .name(B.isHidden) }
-	static var isAlternate: MenuItemName<Dynamic<Bool>> { return .name(B.isAlternate) }
-	static var title: MenuItemName<Dynamic<String>> { return .name(B.title) }
-	static var attributedTitle: MenuItemName<Dynamic<NSAttributedString?>> { return .name(B.attributedTitle) }
-	static var tag: MenuItemName<Dynamic<Int>> { return .name(B.tag) }
-	static var representedObject: MenuItemName<Dynamic<AnyObject?>> { return .name(B.representedObject) }
-	static var state: MenuItemName<Dynamic<NSControl.StateValue>> { return .name(B.state) }
-	static var indentationLevel: MenuItemName<Dynamic<Int>> { return .name(B.indentationLevel) }
-	static var image: MenuItemName<Dynamic<NSImage?>> { return .name(B.image) }
-	static var onStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(B.onStateImage) }
-	static var offStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(B.offStateImage) }
-	static var mixedStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(B.mixedStateImage) }
-	static var submenu: MenuItemName<Dynamic<MenuConvertible?>> { return .name(B.submenu) }
-	static var keyEquivalent: MenuItemName<Dynamic<String>> { return .name(B.keyEquivalent) }
-	static var keyEquivalentModifierMask: MenuItemName<Dynamic<NSEvent.ModifierFlags>> { return .name(B.keyEquivalentModifierMask) }
-	static var toolTip: MenuItemName<Dynamic<String?>> { return .name(B.toolTip) }
-	static var view: MenuItemName<Dynamic<ViewConvertible?>> { return .name(B.view) }
+	static var isEnabled: MenuItemName<Dynamic<Bool>> { return .name(MenuItem.Binding.isEnabled) }
+	static var isHidden: MenuItemName<Dynamic<Bool>> { return .name(MenuItem.Binding.isHidden) }
+	static var isAlternate: MenuItemName<Dynamic<Bool>> { return .name(MenuItem.Binding.isAlternate) }
+	static var title: MenuItemName<Dynamic<String>> { return .name(MenuItem.Binding.title) }
+	static var attributedTitle: MenuItemName<Dynamic<NSAttributedString?>> { return .name(MenuItem.Binding.attributedTitle) }
+	static var tag: MenuItemName<Dynamic<Int>> { return .name(MenuItem.Binding.tag) }
+	static var representedObject: MenuItemName<Dynamic<AnyObject?>> { return .name(MenuItem.Binding.representedObject) }
+	static var state: MenuItemName<Dynamic<NSControl.StateValue>> { return .name(MenuItem.Binding.state) }
+	static var indentationLevel: MenuItemName<Dynamic<Int>> { return .name(MenuItem.Binding.indentationLevel) }
+	static var image: MenuItemName<Dynamic<NSImage?>> { return .name(MenuItem.Binding.image) }
+	static var onStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(MenuItem.Binding.onStateImage) }
+	static var offStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(MenuItem.Binding.offStateImage) }
+	static var mixedStateImage: MenuItemName<Dynamic<NSImage?>> { return .name(MenuItem.Binding.mixedStateImage) }
+	static var submenu: MenuItemName<Dynamic<MenuConvertible?>> { return .name(MenuItem.Binding.submenu) }
+	static var keyEquivalent: MenuItemName<Dynamic<String>> { return .name(MenuItem.Binding.keyEquivalent) }
+	static var keyEquivalentModifierMask: MenuItemName<Dynamic<NSEvent.ModifierFlags>> { return .name(MenuItem.Binding.keyEquivalentModifierMask) }
+	static var toolTip: MenuItemName<Dynamic<String?>> { return .name(MenuItem.Binding.toolTip) }
+	static var view: MenuItemName<Dynamic<ViewConvertible?>> { return .name(MenuItem.Binding.view) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var action: MenuItemName<TargetAction> { return .name(B.action) }
+	static var action: MenuItemName<TargetAction> { return .name(MenuItem.Binding.action) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 

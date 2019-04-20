@@ -100,7 +100,6 @@ extension Switch.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SwitchBinding {
 	public typealias SwitchName<V> = BindingName<V, Switch.Binding, Binding>
-	private typealias B = Switch.Binding
 	private static func name<V>(_ source: @escaping (V) -> Switch.Binding) -> SwitchName<V> {
 		return SwitchName<V>(source: source, downcast: Binding.switchBinding)
 	}
@@ -108,17 +107,17 @@ extension BindingName where Binding: SwitchBinding {
 public extension BindingName where Binding: SwitchBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SwitchName<$2> { return .name(B.$1) }
+	// With:    static var $1: SwitchName<$2> { return .name(Switch.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var isOn: SwitchName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isOn) }
-	static var offImage: SwitchName<Dynamic<UIImage?>> { return .name(B.offImage) }
-	static var onImage: SwitchName<Dynamic<UIImage?>> { return .name(B.onImage) }
-	static var onTintColor: SwitchName<Dynamic<UIColor>> { return .name(B.onTintColor) }
-	static var thumbTintColor: SwitchName<Dynamic<UIColor>> { return .name(B.thumbTintColor) }
-	static var tintColor: SwitchName<Dynamic<UIColor>> { return .name(B.tintColor) }
+	static var isOn: SwitchName<Dynamic<SetOrAnimate<Bool>>> { return .name(Switch.Binding.isOn) }
+	static var offImage: SwitchName<Dynamic<UIImage?>> { return .name(Switch.Binding.offImage) }
+	static var onImage: SwitchName<Dynamic<UIImage?>> { return .name(Switch.Binding.onImage) }
+	static var onTintColor: SwitchName<Dynamic<UIColor>> { return .name(Switch.Binding.onTintColor) }
+	static var thumbTintColor: SwitchName<Dynamic<UIColor>> { return .name(Switch.Binding.thumbTintColor) }
+	static var tintColor: SwitchName<Dynamic<UIColor>> { return .name(Switch.Binding.tintColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

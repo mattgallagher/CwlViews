@@ -395,7 +395,6 @@ extension Application.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ApplicationBinding {
 	public typealias ApplicationName<V> = BindingName<V, Application.Binding, Binding>
-	private typealias B = Application.Binding
 	private static func name<V>(_ source: @escaping (V) -> Application.Binding) -> ApplicationName<V> {
 		return ApplicationName<V>(source: source, downcast: Binding.applicationBinding)
 	}
@@ -403,52 +402,52 @@ extension BindingName where Binding: ApplicationBinding {
 public extension BindingName where Binding: ApplicationBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ApplicationName<$2> { return .name(B.$1) }
+	// With:    static var $1: ApplicationName<$2> { return .name(Application.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var iconBadgeNumber: ApplicationName<Dynamic<Int>> { return .name(B.iconBadgeNumber) }
-	static var isIdleTimerDisabled: ApplicationName<Dynamic<Bool>> { return .name(B.isIdleTimerDisabled) }
-	static var isNetworkActivityIndicatorVisible: ApplicationName<Dynamic<Bool>> { return .name(B.isNetworkActivityIndicatorVisible) }
-	static var shortcutItems: ApplicationName<Dynamic<[UIApplicationShortcutItem]?>> { return .name(B.shortcutItems) }
-	static var supportShakeToEdit: ApplicationName<Dynamic<Bool>> { return .name(B.supportShakeToEdit) }
-	static var window: ApplicationName<Dynamic<WindowConvertible?>> { return .name(B.window) }
+	static var iconBadgeNumber: ApplicationName<Dynamic<Int>> { return .name(Application.Binding.iconBadgeNumber) }
+	static var isIdleTimerDisabled: ApplicationName<Dynamic<Bool>> { return .name(Application.Binding.isIdleTimerDisabled) }
+	static var isNetworkActivityIndicatorVisible: ApplicationName<Dynamic<Bool>> { return .name(Application.Binding.isNetworkActivityIndicatorVisible) }
+	static var shortcutItems: ApplicationName<Dynamic<[UIApplicationShortcutItem]?>> { return .name(Application.Binding.shortcutItems) }
+	static var supportShakeToEdit: ApplicationName<Dynamic<Bool>> { return .name(Application.Binding.supportShakeToEdit) }
+	static var window: ApplicationName<Dynamic<WindowConvertible?>> { return .name(Application.Binding.window) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var ignoreInteractionEvents: ApplicationName<Signal<Bool>> { return .name(B.ignoreInteractionEvents) }
-	static var registerForRemoteNotifications: ApplicationName<Signal<Bool>> { return .name(B.registerForRemoteNotifications) }
+	static var ignoreInteractionEvents: ApplicationName<Signal<Bool>> { return .name(Application.Binding.ignoreInteractionEvents) }
+	static var registerForRemoteNotifications: ApplicationName<Signal<Bool>> { return .name(Application.Binding.registerForRemoteNotifications) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var continueUserActivity: ApplicationName<(_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool> { return .name(B.continueUserActivity) }
-	static var didBecomeActive: ApplicationName<(UIApplication) -> Void> { return .name(B.didBecomeActive) }
-	static var didDecodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedUnarchiver) -> Void> { return .name(B.didDecodeRestorableState) }
-	static var didEnterBackground: ApplicationName<(UIApplication) -> Void> { return .name(B.didEnterBackground) }
-	static var didFailToContinueUserActivity: ApplicationName<(UIApplication, String, Error) -> Void> { return .name(B.didFailToContinueUserActivity) }
-	static var didFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.didFinishLaunching) }
-	static var didReceiveMemoryWarning: ApplicationName<(UIApplication) -> Void> { return .name(B.didReceiveMemoryWarning) }
-	static var didReceiveRemoteNotification: ApplicationName<(UIApplication, [AnyHashable: Any], @escaping (UIBackgroundFetchResult) -> Void) -> Void> { return .name(B.didReceiveRemoteNotification) }
-	static var didRegisterRemoteNotifications: ApplicationName<(UIApplication, Error) -> Void> { return .name(B.didRegisterRemoteNotifications) }
-	static var didUpdate: ApplicationName<(_ application: UIApplication, NSUserActivity) -> Void> { return .name(B.didUpdate) }
-	static var handleEventsForBackgroundURLSession: ApplicationName<(UIApplication, String, @escaping () -> Void) -> Void> { return .name(B.handleEventsForBackgroundURLSession) }
-	static var handleWatchKitExtensionRequest: ApplicationName<(UIApplication, [AnyHashable : Any]?, @escaping ([AnyHashable : Any]?) -> Void) -> Void> { return .name(B.handleWatchKitExtensionRequest) }
-	static var open: ApplicationName<(_ application: UIApplication, _ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool> { return .name(B.open) }
-	static var performAction: ApplicationName<(UIApplication, UIApplicationShortcutItem, @escaping (Bool) -> Void) -> Void> { return .name(B.performAction) }
-	static var performFetch: ApplicationName<(UIApplication, @escaping (UIBackgroundFetchResult) -> Void) -> Void> { return .name(B.performFetch) }
-	static var protectedDataDidBecomeAvailable: ApplicationName<(UIApplication) -> Void> { return .name(B.protectedDataDidBecomeAvailable) }
-	static var protectedDataWillBecomeUnavailable: ApplicationName<(UIApplication) -> Void> { return .name(B.protectedDataWillBecomeUnavailable) }
-	static var shouldAllowExtensionPointIdentifier: ApplicationName<(_ application: UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool> { return .name(B.shouldAllowExtensionPointIdentifier) }
-	static var shouldRequestHealthAuthorization: ApplicationName<(_ application: UIApplication) -> Void> { return .name(B.shouldRequestHealthAuthorization) }
-	static var significantTimeChange: ApplicationName<(UIApplication) -> Void> { return .name(B.significantTimeChange) }
-	static var viewControllerWithRestorationPath: ApplicationName<(_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController?> { return .name(B.viewControllerWithRestorationPath) }
-	static var willContinueUserActivity: ApplicationName<(_ application: UIApplication, String) -> Bool> { return .name(B.willContinueUserActivity) }
-	static var willEncodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedArchiver) -> Void> { return .name(B.willEncodeRestorableState) }
-	static var willEnterForeground: ApplicationName<(UIApplication) -> Void> { return .name(B.willEnterForeground) }
-	static var willFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(B.willFinishLaunching) }
-	static var willResignActive: ApplicationName<(UIApplication) -> Void> { return .name(B.willResignActive) }
-	static var willTerminate: ApplicationName<(_ application: UIApplication) -> Void> { return .name(B.willTerminate) }
+	static var continueUserActivity: ApplicationName<(_ application: UIApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool> { return .name(Application.Binding.continueUserActivity) }
+	static var didBecomeActive: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.didBecomeActive) }
+	static var didDecodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedUnarchiver) -> Void> { return .name(Application.Binding.didDecodeRestorableState) }
+	static var didEnterBackground: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.didEnterBackground) }
+	static var didFailToContinueUserActivity: ApplicationName<(UIApplication, String, Error) -> Void> { return .name(Application.Binding.didFailToContinueUserActivity) }
+	static var didFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(Application.Binding.didFinishLaunching) }
+	static var didReceiveMemoryWarning: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.didReceiveMemoryWarning) }
+	static var didReceiveRemoteNotification: ApplicationName<(UIApplication, [AnyHashable: Any], @escaping (UIBackgroundFetchResult) -> Void) -> Void> { return .name(Application.Binding.didReceiveRemoteNotification) }
+	static var didRegisterRemoteNotifications: ApplicationName<(UIApplication, Error) -> Void> { return .name(Application.Binding.didRegisterRemoteNotifications) }
+	static var didUpdate: ApplicationName<(_ application: UIApplication, NSUserActivity) -> Void> { return .name(Application.Binding.didUpdate) }
+	static var handleEventsForBackgroundURLSession: ApplicationName<(UIApplication, String, @escaping () -> Void) -> Void> { return .name(Application.Binding.handleEventsForBackgroundURLSession) }
+	static var handleWatchKitExtensionRequest: ApplicationName<(UIApplication, [AnyHashable : Any]?, @escaping ([AnyHashable : Any]?) -> Void) -> Void> { return .name(Application.Binding.handleWatchKitExtensionRequest) }
+	static var open: ApplicationName<(_ application: UIApplication, _ url: URL, _ options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool> { return .name(Application.Binding.open) }
+	static var performAction: ApplicationName<(UIApplication, UIApplicationShortcutItem, @escaping (Bool) -> Void) -> Void> { return .name(Application.Binding.performAction) }
+	static var performFetch: ApplicationName<(UIApplication, @escaping (UIBackgroundFetchResult) -> Void) -> Void> { return .name(Application.Binding.performFetch) }
+	static var protectedDataDidBecomeAvailable: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.protectedDataDidBecomeAvailable) }
+	static var protectedDataWillBecomeUnavailable: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.protectedDataWillBecomeUnavailable) }
+	static var shouldAllowExtensionPointIdentifier: ApplicationName<(_ application: UIApplication, UIApplication.ExtensionPointIdentifier) -> Bool> { return .name(Application.Binding.shouldAllowExtensionPointIdentifier) }
+	static var shouldRequestHealthAuthorization: ApplicationName<(_ application: UIApplication) -> Void> { return .name(Application.Binding.shouldRequestHealthAuthorization) }
+	static var significantTimeChange: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.significantTimeChange) }
+	static var viewControllerWithRestorationPath: ApplicationName<(_ application: UIApplication, _ path: [String], _ coder: NSCoder) -> UIViewController?> { return .name(Application.Binding.viewControllerWithRestorationPath) }
+	static var willContinueUserActivity: ApplicationName<(_ application: UIApplication, String) -> Bool> { return .name(Application.Binding.willContinueUserActivity) }
+	static var willEncodeRestorableState: ApplicationName<(_ application: UIApplication, NSKeyedArchiver) -> Void> { return .name(Application.Binding.willEncodeRestorableState) }
+	static var willEnterForeground: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.willEnterForeground) }
+	static var willFinishLaunching: ApplicationName<(_ application: UIApplication, [UIApplication.LaunchOptionsKey: Any]?) -> Bool> { return .name(Application.Binding.willFinishLaunching) }
+	static var willResignActive: ApplicationName<(UIApplication) -> Void> { return .name(Application.Binding.willResignActive) }
+	static var willTerminate: ApplicationName<(_ application: UIApplication) -> Void> { return .name(Application.Binding.willTerminate) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

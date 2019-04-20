@@ -267,7 +267,6 @@ extension SearchBar.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SearchBarBinding {
 	public typealias SearchBarName<V> = BindingName<V, SearchBar.Binding, Binding>
-	private typealias B = SearchBar.Binding
 	private static func name<V>(_ source: @escaping (V) -> SearchBar.Binding) -> SearchBarName<V> {
 		return SearchBarName<V>(source: source, downcast: Binding.searchBarBinding)
 	}
@@ -275,52 +274,52 @@ extension BindingName where Binding: SearchBarBinding {
 public extension BindingName where Binding: SearchBarBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SearchBarName<$2> { return .name(B.$1) }
+	// With:    static var $1: SearchBarName<$2> { return .name(SearchBar.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var textInputTraits: SearchBarName<Constant<TextInputTraits>> { return .name(B.textInputTraits) }
+	static var textInputTraits: SearchBarName<Constant<TextInputTraits>> { return .name(SearchBar.Binding.textInputTraits) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundImage: SearchBarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(B.backgroundImage) }
-	static var barStyle: SearchBarName<Dynamic<UIBarStyle>> { return .name(B.barStyle) }
-	static var image: SearchBarName<Dynamic<ScopedValues<IconAndControlState, UIImage?>>> { return .name(B.image) }
-	static var inputAccessoryView: SearchBarName<Dynamic<UIView?>> { return .name(B.inputAccessoryView) }
-	static var isTranslucent: SearchBarName<Dynamic<Bool>> { return .name(B.isTranslucent) }
-	static var placeholder: SearchBarName<Dynamic<String>> { return .name(B.placeholder) }
-	static var positionAdjustment: SearchBarName<Dynamic<ScopedValues<UISearchBar.Icon, UIOffset>>> { return .name(B.positionAdjustment) }
-	static var prompt: SearchBarName<Dynamic<String>> { return .name(B.prompt) }
-	static var scopeBarButtonBackgroundImage: SearchBarName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.scopeBarButtonBackgroundImage) }
-	static var scopeBarButtonDividerImage: SearchBarName<Dynamic<ScopedValues<LeftRightControlState, UIImage?>>> { return .name(B.scopeBarButtonDividerImage) }
-	static var scopeBarButtonTitleTextAttributes: SearchBarName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]?>>> { return .name(B.scopeBarButtonTitleTextAttributes) }
-	static var scopeButtonTitles: SearchBarName<Dynamic<[String]?>> { return .name(B.scopeButtonTitles) }
-	static var searchFieldBackgroundImage: SearchBarName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.searchFieldBackgroundImage) }
-	static var searchFieldBackgroundPositionAdjustment: SearchBarName<Dynamic<UIOffset>> { return .name(B.searchFieldBackgroundPositionAdjustment) }
-	static var searchTextPositionAdjustment: SearchBarName<Dynamic<UIOffset>> { return .name(B.searchTextPositionAdjustment) }
-	static var selectedScopeButtonIndex: SearchBarName<Dynamic<Int>> { return .name(B.selectedScopeButtonIndex) }
-	static var showCancelButton: SearchBarName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.showCancelButton) }
-	static var showsBookmarkButton: SearchBarName<Dynamic<Bool>> { return .name(B.showsBookmarkButton) }
-	static var showsScopeBar: SearchBarName<Dynamic<Bool>> { return .name(B.showsScopeBar) }
-	static var showsSearchResultsButton: SearchBarName<Dynamic<Bool>> { return .name(B.showsSearchResultsButton) }
-	static var text: SearchBarName<Dynamic<String>> { return .name(B.text) }
-	static var tintColor: SearchBarName<Dynamic<UIColor>> { return .name(B.tintColor) }
+	static var backgroundImage: SearchBarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(SearchBar.Binding.backgroundImage) }
+	static var barStyle: SearchBarName<Dynamic<UIBarStyle>> { return .name(SearchBar.Binding.barStyle) }
+	static var image: SearchBarName<Dynamic<ScopedValues<IconAndControlState, UIImage?>>> { return .name(SearchBar.Binding.image) }
+	static var inputAccessoryView: SearchBarName<Dynamic<UIView?>> { return .name(SearchBar.Binding.inputAccessoryView) }
+	static var isTranslucent: SearchBarName<Dynamic<Bool>> { return .name(SearchBar.Binding.isTranslucent) }
+	static var placeholder: SearchBarName<Dynamic<String>> { return .name(SearchBar.Binding.placeholder) }
+	static var positionAdjustment: SearchBarName<Dynamic<ScopedValues<UISearchBar.Icon, UIOffset>>> { return .name(SearchBar.Binding.positionAdjustment) }
+	static var prompt: SearchBarName<Dynamic<String>> { return .name(SearchBar.Binding.prompt) }
+	static var scopeBarButtonBackgroundImage: SearchBarName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(SearchBar.Binding.scopeBarButtonBackgroundImage) }
+	static var scopeBarButtonDividerImage: SearchBarName<Dynamic<ScopedValues<LeftRightControlState, UIImage?>>> { return .name(SearchBar.Binding.scopeBarButtonDividerImage) }
+	static var scopeBarButtonTitleTextAttributes: SearchBarName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]?>>> { return .name(SearchBar.Binding.scopeBarButtonTitleTextAttributes) }
+	static var scopeButtonTitles: SearchBarName<Dynamic<[String]?>> { return .name(SearchBar.Binding.scopeButtonTitles) }
+	static var searchFieldBackgroundImage: SearchBarName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(SearchBar.Binding.searchFieldBackgroundImage) }
+	static var searchFieldBackgroundPositionAdjustment: SearchBarName<Dynamic<UIOffset>> { return .name(SearchBar.Binding.searchFieldBackgroundPositionAdjustment) }
+	static var searchTextPositionAdjustment: SearchBarName<Dynamic<UIOffset>> { return .name(SearchBar.Binding.searchTextPositionAdjustment) }
+	static var selectedScopeButtonIndex: SearchBarName<Dynamic<Int>> { return .name(SearchBar.Binding.selectedScopeButtonIndex) }
+	static var showCancelButton: SearchBarName<Dynamic<SetOrAnimate<Bool>>> { return .name(SearchBar.Binding.showCancelButton) }
+	static var showsBookmarkButton: SearchBarName<Dynamic<Bool>> { return .name(SearchBar.Binding.showsBookmarkButton) }
+	static var showsScopeBar: SearchBarName<Dynamic<Bool>> { return .name(SearchBar.Binding.showsScopeBar) }
+	static var showsSearchResultsButton: SearchBarName<Dynamic<Bool>> { return .name(SearchBar.Binding.showsSearchResultsButton) }
+	static var text: SearchBarName<Dynamic<String>> { return .name(SearchBar.Binding.text) }
+	static var tintColor: SearchBarName<Dynamic<UIColor>> { return .name(SearchBar.Binding.tintColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var bookmarkButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.bookmarkButtonClicked) }
-	static var cancelButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.cancelButtonClicked) }
-	static var textDidBeginEditing: SearchBarName<(UISearchBar) -> Void> { return .name(B.textDidBeginEditing) }
-	static var textDidChange: SearchBarName<(UISearchBar) -> Void> { return .name(B.textDidChange) }
-	static var textDidEndEditing: SearchBarName<(UISearchBar) -> Void> { return .name(B.textDidEndEditing) }
-	static var position: SearchBarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
-	static var resultsListButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.resultsListButtonClicked) }
-	static var searchButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(B.searchButtonClicked) }
-	static var selectedScopeButtonIndexDidChange: SearchBarName<(UISearchBar, Int) -> Void> { return .name(B.selectedScopeButtonIndexDidChange) }
-	static var shouldBeginEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(B.shouldBeginEditing) }
-	static var shouldChangeText: SearchBarName<(UISearchBar, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
-	static var shouldEndEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(B.shouldEndEditing) }
+	static var bookmarkButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.bookmarkButtonClicked) }
+	static var cancelButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.cancelButtonClicked) }
+	static var textDidBeginEditing: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.textDidBeginEditing) }
+	static var textDidChange: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.textDidChange) }
+	static var textDidEndEditing: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.textDidEndEditing) }
+	static var position: SearchBarName<(UIBarPositioning) -> UIBarPosition> { return .name(SearchBar.Binding.position) }
+	static var resultsListButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.resultsListButtonClicked) }
+	static var searchButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.searchButtonClicked) }
+	static var selectedScopeButtonIndexDidChange: SearchBarName<(UISearchBar, Int) -> Void> { return .name(SearchBar.Binding.selectedScopeButtonIndexDidChange) }
+	static var shouldBeginEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(SearchBar.Binding.shouldBeginEditing) }
+	static var shouldChangeText: SearchBarName<(UISearchBar, NSRange, String) -> Bool> { return .name(SearchBar.Binding.shouldChangeText) }
+	static var shouldEndEditing: SearchBarName<(UISearchBar) -> Bool> { return .name(SearchBar.Binding.shouldEndEditing) }
 	
 	// Composite binding names
 	static func textChanged(_ void: Void = ()) -> SearchBarName<SignalInput<String>> {

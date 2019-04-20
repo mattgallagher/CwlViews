@@ -105,7 +105,7 @@ public extension PageViewController.Preparer {
 		case .pageSpacing(let x): pageSpacing = x.value
 		case .pageChanged(let x):
 			pageChanged = pageChanged ?? Input().multicast()
-			pageChanged?.signal.bind(to: x)
+			pageChanged?.source.bind(to: x)
 		case .willTransitionTo(let x): delegate().addMultiHandler2(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
 		case .didFinishAnimating(let x): delegate().addMultiHandler4(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
 		case .spineLocationFor(let x): delegate().addSingleHandler2(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))
@@ -289,7 +289,6 @@ extension PageViewController.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PageViewControllerBinding {
 	public typealias PageViewControllerName<V> = BindingName<V, PageViewController<Binding.PageDataType>.Binding, Binding>
-	private typealias B = PageViewController<Binding.PageDataType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> PageViewController<Binding.PageDataType>.Binding) -> PageViewControllerName<V> {
 		return PageViewControllerName<V>(source: source, downcast: Binding.pageViewControllerBinding)
 	}
@@ -297,31 +296,31 @@ extension BindingName where Binding: PageViewControllerBinding {
 public extension BindingName where Binding: PageViewControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: PageViewControllerName<$2> { return .name(B.$1) }
+	// With:    static var $1: PageViewControllerName<$2> { return .name(PageViewController.Binding.$1) }
 	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
-	static var navigationOrientation: PageViewControllerName<Constant<UIPageViewController.NavigationOrientation>> { return .name(B.navigationOrientation) }
-	static var pageSpacing: PageViewControllerName<Constant<CGFloat>> { return .name(B.pageSpacing) }
-	static var spineLocation: PageViewControllerName<Constant<UIPageViewController.SpineLocation>> { return .name(B.spineLocation) }
-	static var transitionStyle: PageViewControllerName<Constant<UIPageViewController.TransitionStyle>> { return .name(B.transitionStyle) }
+	static var navigationOrientation: PageViewControllerName<Constant<UIPageViewController.NavigationOrientation>> { return .name(PageViewController.Binding.navigationOrientation) }
+	static var pageSpacing: PageViewControllerName<Constant<CGFloat>> { return .name(PageViewController.Binding.pageSpacing) }
+	static var spineLocation: PageViewControllerName<Constant<UIPageViewController.SpineLocation>> { return .name(PageViewController.Binding.spineLocation) }
+	static var transitionStyle: PageViewControllerName<Constant<UIPageViewController.TransitionStyle>> { return .name(PageViewController.Binding.transitionStyle) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var isDoubleSided: PageViewControllerName<Dynamic<Bool>> { return .name(B.isDoubleSided) }
-	static var pageData: PageViewControllerName<Dynamic<Animatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>> { return .name(B.pageData) }
+	static var isDoubleSided: PageViewControllerName<Dynamic<Bool>> { return .name(PageViewController.Binding.isDoubleSided) }
+	static var pageData: PageViewControllerName<Dynamic<Animatable<[Binding.PageDataType], UIPageViewController.NavigationDirection>>> { return .name(PageViewController.Binding.pageData) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var changeCurrentPage: PageViewControllerName<Signal<Animatable<Int, UIPageViewController.NavigationDirection>>> { return .name(B.changeCurrentPage) }
+	static var changeCurrentPage: PageViewControllerName<Signal<Animatable<Int, UIPageViewController.NavigationDirection>>> { return .name(PageViewController.Binding.changeCurrentPage) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var pageChanged: PageViewControllerName<SignalInput<(index: Int, data: Binding.PageDataType)>> { return .name(B.pageChanged) }
+	static var pageChanged: PageViewControllerName<SignalInput<(index: Int, data: Binding.PageDataType)>> { return .name(PageViewController.Binding.pageChanged) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var constructPage: PageViewControllerName<(Binding.PageDataType) -> ViewControllerConvertible> { return .name(B.constructPage) }
-	static var didFinishAnimating: PageViewControllerName<(UIPageViewController, Bool, [UIViewController], Bool) -> Void> { return .name(B.didFinishAnimating) }
-	static var interfaceOrientationForPresentation: PageViewControllerName<(UIPageViewController) -> UIInterfaceOrientation> { return .name(B.interfaceOrientationForPresentation) }
-	static var spineLocationFor: PageViewControllerName<(UIPageViewController, UIInterfaceOrientation) -> UIPageViewController.SpineLocation> { return .name(B.spineLocationFor) }
-	static var supportedInterfaceOrientations: PageViewControllerName<(UIPageViewController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
-	static var willTransitionTo: PageViewControllerName<(UIPageViewController, [UIViewController]) -> Void> { return .name(B.willTransitionTo) }
+	static var constructPage: PageViewControllerName<(Binding.PageDataType) -> ViewControllerConvertible> { return .name(PageViewController.Binding.constructPage) }
+	static var didFinishAnimating: PageViewControllerName<(UIPageViewController, Bool, [UIViewController], Bool) -> Void> { return .name(PageViewController.Binding.didFinishAnimating) }
+	static var interfaceOrientationForPresentation: PageViewControllerName<(UIPageViewController) -> UIInterfaceOrientation> { return .name(PageViewController.Binding.interfaceOrientationForPresentation) }
+	static var spineLocationFor: PageViewControllerName<(UIPageViewController, UIInterfaceOrientation) -> UIPageViewController.SpineLocation> { return .name(PageViewController.Binding.spineLocationFor) }
+	static var supportedInterfaceOrientations: PageViewControllerName<(UIPageViewController) -> UIInterfaceOrientationMask> { return .name(PageViewController.Binding.supportedInterfaceOrientations) }
+	static var willTransitionTo: PageViewControllerName<(UIPageViewController, [UIViewController]) -> Void> { return .name(PageViewController.Binding.willTransitionTo) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

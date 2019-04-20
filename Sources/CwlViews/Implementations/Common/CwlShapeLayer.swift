@@ -93,7 +93,6 @@ extension ShapeLayer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ShapeLayerBinding {
 	public typealias ShapeLayerName<V> = BindingName<V, ShapeLayer.Binding, Binding>
-	private typealias B = ShapeLayer.Binding
 	private static func name<V>(_ source: @escaping (V) -> ShapeLayer.Binding) -> ShapeLayerName<V> {
 		return ShapeLayerName<V>(source: source, downcast: Binding.shapeLayerBinding)
 	}
@@ -101,19 +100,19 @@ extension BindingName where Binding: ShapeLayerBinding {
 public extension BindingName where Binding: ShapeLayerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ShapeLayerName<$2> { return .name(B.$1) }
-	static var fillColor: ShapeLayerName<Dynamic<CGColor?>> { return .name(B.fillColor) }
-	static var fillRule: ShapeLayerName<Dynamic<CAShapeLayerFillRule>> { return .name(B.fillRule) }
-	static var lineCap: ShapeLayerName<Dynamic<CAShapeLayerLineCap>> { return .name(B.lineCap) }
-	static var lineDashPattern: ShapeLayerName<Dynamic<[NSNumber]?>> { return .name(B.lineDashPattern) }
-	static var lineDashPhase: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.lineDashPhase) }
-	static var lineJoin: ShapeLayerName<Dynamic<CAShapeLayerLineJoin>> { return .name(B.lineJoin) }
-	static var lineWidth: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.lineWidth) }
-	static var miterLimit: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.miterLimit) }
-	static var path: ShapeLayerName<Dynamic<CGPath>> { return .name(B.path) }
-	static var strokeColor: ShapeLayerName<Dynamic<CGColor?>> { return .name(B.strokeColor) }
-	static var strokeEnd: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.strokeEnd) }
-	static var strokeStart: ShapeLayerName<Dynamic<CGFloat>> { return .name(B.strokeStart) }
+	// With:    static var $1: ShapeLayerName<$2> { return .name(ShapeLayer.Binding.$1) }
+	static var fillColor: ShapeLayerName<Dynamic<CGColor?>> { return .name(ShapeLayer.Binding.fillColor) }
+	static var fillRule: ShapeLayerName<Dynamic<CAShapeLayerFillRule>> { return .name(ShapeLayer.Binding.fillRule) }
+	static var lineCap: ShapeLayerName<Dynamic<CAShapeLayerLineCap>> { return .name(ShapeLayer.Binding.lineCap) }
+	static var lineDashPattern: ShapeLayerName<Dynamic<[NSNumber]?>> { return .name(ShapeLayer.Binding.lineDashPattern) }
+	static var lineDashPhase: ShapeLayerName<Dynamic<CGFloat>> { return .name(ShapeLayer.Binding.lineDashPhase) }
+	static var lineJoin: ShapeLayerName<Dynamic<CAShapeLayerLineJoin>> { return .name(ShapeLayer.Binding.lineJoin) }
+	static var lineWidth: ShapeLayerName<Dynamic<CGFloat>> { return .name(ShapeLayer.Binding.lineWidth) }
+	static var miterLimit: ShapeLayerName<Dynamic<CGFloat>> { return .name(ShapeLayer.Binding.miterLimit) }
+	static var path: ShapeLayerName<Dynamic<CGPath>> { return .name(ShapeLayer.Binding.path) }
+	static var strokeColor: ShapeLayerName<Dynamic<CGColor?>> { return .name(ShapeLayer.Binding.strokeColor) }
+	static var strokeEnd: ShapeLayerName<Dynamic<CGFloat>> { return .name(ShapeLayer.Binding.strokeEnd) }
+	static var strokeStart: ShapeLayerName<Dynamic<CGFloat>> { return .name(ShapeLayer.Binding.strokeStart) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -103,7 +103,6 @@ extension NavigationItem.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: NavigationItemBinding {
 	public typealias NavigationItemName<V> = BindingName<V, NavigationItem.Binding, Binding>
-	private typealias B = NavigationItem.Binding
 	private static func name<V>(_ source: @escaping (V) -> NavigationItem.Binding) -> NavigationItemName<V> {
 		return NavigationItemName<V>(source: source, downcast: Binding.navigationItemBinding)
 	}
@@ -111,19 +110,19 @@ extension BindingName where Binding: NavigationItemBinding {
 public extension BindingName where Binding: NavigationItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: NavigationItemName<$2> { return .name(B.$1) }
+	// With:    static var $1: NavigationItemName<$2> { return .name(NavigationItem.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backBarButtonItem: NavigationItemName<Dynamic<BarButtonItemConvertible?>> { return .name(B.backBarButtonItem) }
-	static var hidesBackButton: NavigationItemName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.hidesBackButton) }
-	static var leftBarButtonItems: NavigationItemName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.leftBarButtonItems) }
-	static var leftItemsSupplementBackButton: NavigationItemName<Dynamic<Bool>> { return .name(B.leftItemsSupplementBackButton) }
-	static var prompt: NavigationItemName<Dynamic<String?>> { return .name(B.prompt) }
-	static var rightBarButtonItems: NavigationItemName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.rightBarButtonItems) }
-	static var title: NavigationItemName<Dynamic<String>> { return .name(B.title) }
-	static var titleView: NavigationItemName<Dynamic<ViewConvertible?>> { return .name(B.titleView) }
+	static var backBarButtonItem: NavigationItemName<Dynamic<BarButtonItemConvertible?>> { return .name(NavigationItem.Binding.backBarButtonItem) }
+	static var hidesBackButton: NavigationItemName<Dynamic<SetOrAnimate<Bool>>> { return .name(NavigationItem.Binding.hidesBackButton) }
+	static var leftBarButtonItems: NavigationItemName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(NavigationItem.Binding.leftBarButtonItems) }
+	static var leftItemsSupplementBackButton: NavigationItemName<Dynamic<Bool>> { return .name(NavigationItem.Binding.leftItemsSupplementBackButton) }
+	static var prompt: NavigationItemName<Dynamic<String?>> { return .name(NavigationItem.Binding.prompt) }
+	static var rightBarButtonItems: NavigationItemName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(NavigationItem.Binding.rightBarButtonItems) }
+	static var title: NavigationItemName<Dynamic<String>> { return .name(NavigationItem.Binding.title) }
+	static var titleView: NavigationItemName<Dynamic<ViewConvertible?>> { return .name(NavigationItem.Binding.titleView) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

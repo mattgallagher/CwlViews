@@ -337,7 +337,6 @@ extension TextView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextViewBinding {
 	public typealias TextViewName<V> = BindingName<V, TextView.Binding, Binding>
-	private typealias B = TextView.Binding
 	private static func name<V>(_ source: @escaping (V) -> TextView.Binding) -> TextViewName<V> {
 		return TextViewName<V>(source: source, downcast: Binding.textViewBinding)
 	}
@@ -345,130 +344,130 @@ extension BindingName where Binding: TextViewBinding {
 public extension BindingName where Binding: TextViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TextViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TextViewName<$2> { return .name(TextView.Binding.$1) }
 
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var string: TextViewName<Dynamic<String>> { return .name(B.string) }
-	static var backgroundColor: TextViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
-	static var drawsBackground: TextViewName<Dynamic<Bool>> { return .name(B.drawsBackground) }
-	static var isEditable: TextViewName<Dynamic<Bool>> { return .name(B.isEditable) }
-	static var isSelectable: TextViewName<Dynamic<Bool>> { return .name(B.isSelectable) }
-	static var isFieldEditor: TextViewName<Dynamic<Bool>> { return .name(B.isFieldEditor) }
-	static var isRichText: TextViewName<Dynamic<Bool>> { return .name(B.isRichText) }
-	static var importsGraphics: TextViewName<Dynamic<Bool>> { return .name(B.importsGraphics) }
-	static var usesFontPanel: TextViewName<Dynamic<Bool>> { return .name(B.usesFontPanel) }
-	static var font: TextViewName<Dynamic<NSFont>> { return .name(B.font) }
-	static var alignment: TextViewName<Dynamic<NSTextAlignment>> { return .name(B.alignment) }
-	static var textColor: TextViewName<Dynamic<NSColor>> { return .name(B.textColor) }
-	static var baseWritingDirection: TextViewName<Dynamic<NSWritingDirection>> { return .name(B.baseWritingDirection) }
-	static var maxSize: TextViewName<Dynamic<NSSize>> { return .name(B.maxSize) }
-	static var minSize: TextViewName<Dynamic<NSSize>> { return .name(B.minSize) }
-	static var isVerticallyResizable: TextViewName<Dynamic<Bool>> { return .name(B.isVerticallyResizable) }
-	static var isHorizontallyResizable: TextViewName<Dynamic<Bool>> { return .name(B.isHorizontallyResizable) }
+	static var string: TextViewName<Dynamic<String>> { return .name(TextView.Binding.string) }
+	static var backgroundColor: TextViewName<Dynamic<NSColor>> { return .name(TextView.Binding.backgroundColor) }
+	static var drawsBackground: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.drawsBackground) }
+	static var isEditable: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isEditable) }
+	static var isSelectable: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isSelectable) }
+	static var isFieldEditor: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isFieldEditor) }
+	static var isRichText: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isRichText) }
+	static var importsGraphics: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.importsGraphics) }
+	static var usesFontPanel: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.usesFontPanel) }
+	static var font: TextViewName<Dynamic<NSFont>> { return .name(TextView.Binding.font) }
+	static var alignment: TextViewName<Dynamic<NSTextAlignment>> { return .name(TextView.Binding.alignment) }
+	static var textColor: TextViewName<Dynamic<NSColor>> { return .name(TextView.Binding.textColor) }
+	static var baseWritingDirection: TextViewName<Dynamic<NSWritingDirection>> { return .name(TextView.Binding.baseWritingDirection) }
+	static var maxSize: TextViewName<Dynamic<NSSize>> { return .name(TextView.Binding.maxSize) }
+	static var minSize: TextViewName<Dynamic<NSSize>> { return .name(TextView.Binding.minSize) }
+	static var isVerticallyResizable: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isVerticallyResizable) }
+	static var isHorizontallyResizable: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isHorizontallyResizable) }
 
-	static var textContainerInset: TextViewName<Dynamic<NSSize>> { return .name(B.textContainerInset) }
-	static var allowsDocumentBackgroundColorChange: TextViewName<Dynamic<Bool>> { return .name(B.allowsDocumentBackgroundColorChange) }
-	static var allowsUndo: TextViewName<Dynamic<Bool>> { return .name(B.allowsUndo) }
-	static var defaultParagraphStyle: TextViewName<Dynamic<NSParagraphStyle>> { return .name(B.defaultParagraphStyle) }
-	static var allowsImageEditing: TextViewName<Dynamic<Bool>> { return .name(B.allowsImageEditing) }
-	static var isAutomaticQuoteSubstitutionEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticQuoteSubstitutionEnabled) }
-	static var isAutomaticLinkDetectionEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticLinkDetectionEnabled) }
-	static var displaysLinkToolTips: TextViewName<Dynamic<Bool>> { return .name(B.displaysLinkToolTips) }
-	static var usesRuler: TextViewName<Dynamic<Bool>> { return .name(B.usesRuler) }
-	static var usesInspectorBar: TextViewName<Dynamic<Bool>> { return .name(B.usesInspectorBar) }
-	static var selectionGranularity: TextViewName<Dynamic<NSSelectionGranularity>> { return .name(B.selectionGranularity) }
-	static var insertionPointColor: TextViewName<Dynamic<NSColor>> { return .name(B.insertionPointColor) }
-	static var selectedTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(B.selectedTextAttributes) }
-	static var markedTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(B.markedTextAttributes) }
-	static var linkTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(B.linkTextAttributes) }
-	static var typingAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(B.typingAttributes) }
-	static var isContinuousSpellCheckingEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isContinuousSpellCheckingEnabled) }
-	static var isGrammarCheckingEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isGrammarCheckingEnabled) }
-	static var usesFindPanel: TextViewName<Dynamic<Bool>> { return .name(B.usesFindPanel) }
-	static var enabledTextCheckingTypes: TextViewName<Dynamic<NSTextCheckingTypes>> { return .name(B.enabledTextCheckingTypes) }
-	static var isAutomaticDashSubstitutionEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticDashSubstitutionEnabled) }
-	static var isAutomaticDataDetectionEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticDataDetectionEnabled) }
-	static var isAutomaticSpellingCorrectionEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticSpellingCorrectionEnabled) }
-	static var isAutomaticTextReplacementEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticTextReplacementEnabled) }
-	static var layoutOrientation: TextViewName<Dynamic<NSLayoutManager.TextLayoutOrientation>> { return .name(B.layoutOrientation) }
-	static var usesFindBar: TextViewName<Dynamic<Bool>> { return .name(B.usesFindBar) }
-	static var isIncrementalSearchingEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isIncrementalSearchingEnabled) }
-	static var allowsCharacterPickerTouchBarItem: TextViewName<Dynamic<Bool>> { return .name(B.allowsCharacterPickerTouchBarItem) }
-	static var isAutomaticTextCompletionEnabled: TextViewName<Dynamic<Bool>> { return .name(B.isAutomaticTextCompletionEnabled) }
-	static var usesRolloverButtonForSelection: TextViewName<Dynamic<Bool>> { return .name(B.usesRolloverButtonForSelection) }
+	static var textContainerInset: TextViewName<Dynamic<NSSize>> { return .name(TextView.Binding.textContainerInset) }
+	static var allowsDocumentBackgroundColorChange: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.allowsDocumentBackgroundColorChange) }
+	static var allowsUndo: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.allowsUndo) }
+	static var defaultParagraphStyle: TextViewName<Dynamic<NSParagraphStyle>> { return .name(TextView.Binding.defaultParagraphStyle) }
+	static var allowsImageEditing: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.allowsImageEditing) }
+	static var isAutomaticQuoteSubstitutionEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticQuoteSubstitutionEnabled) }
+	static var isAutomaticLinkDetectionEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticLinkDetectionEnabled) }
+	static var displaysLinkToolTips: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.displaysLinkToolTips) }
+	static var usesRuler: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.usesRuler) }
+	static var usesInspectorBar: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.usesInspectorBar) }
+	static var selectionGranularity: TextViewName<Dynamic<NSSelectionGranularity>> { return .name(TextView.Binding.selectionGranularity) }
+	static var insertionPointColor: TextViewName<Dynamic<NSColor>> { return .name(TextView.Binding.insertionPointColor) }
+	static var selectedTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(TextView.Binding.selectedTextAttributes) }
+	static var markedTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(TextView.Binding.markedTextAttributes) }
+	static var linkTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(TextView.Binding.linkTextAttributes) }
+	static var typingAttributes: TextViewName<Dynamic<[NSAttributedString.Key : Any]>> { return .name(TextView.Binding.typingAttributes) }
+	static var isContinuousSpellCheckingEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isContinuousSpellCheckingEnabled) }
+	static var isGrammarCheckingEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isGrammarCheckingEnabled) }
+	static var usesFindPanel: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.usesFindPanel) }
+	static var enabledTextCheckingTypes: TextViewName<Dynamic<NSTextCheckingTypes>> { return .name(TextView.Binding.enabledTextCheckingTypes) }
+	static var isAutomaticDashSubstitutionEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticDashSubstitutionEnabled) }
+	static var isAutomaticDataDetectionEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticDataDetectionEnabled) }
+	static var isAutomaticSpellingCorrectionEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticSpellingCorrectionEnabled) }
+	static var isAutomaticTextReplacementEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticTextReplacementEnabled) }
+	static var layoutOrientation: TextViewName<Dynamic<NSLayoutManager.TextLayoutOrientation>> { return .name(TextView.Binding.layoutOrientation) }
+	static var usesFindBar: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.usesFindBar) }
+	static var isIncrementalSearchingEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isIncrementalSearchingEnabled) }
+	static var allowsCharacterPickerTouchBarItem: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.allowsCharacterPickerTouchBarItem) }
+	static var isAutomaticTextCompletionEnabled: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isAutomaticTextCompletionEnabled) }
+	static var usesRolloverButtonForSelection: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.usesRolloverButtonForSelection) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var selectRange: TextViewName<Signal<NSRange>> { return .name(B.selectRange) }
-	static var selectAll: TextViewName<Signal<Void>> { return .name(B.selectAll) }
-	static var copy: TextViewName<Signal<Void>> { return .name(B.copy) }
-	static var cut: TextViewName<Signal<Void>> { return .name(B.cut) }
-	static var paste: TextViewName<Signal<Void>> { return .name(B.paste) }
-	static var copyFont: TextViewName<Signal<Void>> { return .name(B.copyFont) }
-	static var pasteFont: TextViewName<Signal<Void>> { return .name(B.pasteFont) }
-	static var copyRuler: TextViewName<Signal<Void>> { return .name(B.copyRuler) }
-	static var pasteRuler: TextViewName<Signal<Void>> { return .name(B.pasteRuler) }
-	static var delete: TextViewName<Signal<Void>> { return .name(B.delete) }
-	static var changeFont: TextViewName<Signal<Void>> { return .name(B.changeFont) }
-	static var alignCenter: TextViewName<Signal<Void>> { return .name(B.alignCenter) }
-	static var alignLeft: TextViewName<Signal<Void>> { return .name(B.alignLeft) }
-	static var alignRight: TextViewName<Signal<Void>> { return .name(B.alignRight) }
-	static var superscript: TextViewName<Signal<Void>> { return .name(B.superscript) }
+	static var selectRange: TextViewName<Signal<NSRange>> { return .name(TextView.Binding.selectRange) }
+	static var selectAll: TextViewName<Signal<Void>> { return .name(TextView.Binding.selectAll) }
+	static var copy: TextViewName<Signal<Void>> { return .name(TextView.Binding.copy) }
+	static var cut: TextViewName<Signal<Void>> { return .name(TextView.Binding.cut) }
+	static var paste: TextViewName<Signal<Void>> { return .name(TextView.Binding.paste) }
+	static var copyFont: TextViewName<Signal<Void>> { return .name(TextView.Binding.copyFont) }
+	static var pasteFont: TextViewName<Signal<Void>> { return .name(TextView.Binding.pasteFont) }
+	static var copyRuler: TextViewName<Signal<Void>> { return .name(TextView.Binding.copyRuler) }
+	static var pasteRuler: TextViewName<Signal<Void>> { return .name(TextView.Binding.pasteRuler) }
+	static var delete: TextViewName<Signal<Void>> { return .name(TextView.Binding.delete) }
+	static var changeFont: TextViewName<Signal<Void>> { return .name(TextView.Binding.changeFont) }
+	static var alignCenter: TextViewName<Signal<Void>> { return .name(TextView.Binding.alignCenter) }
+	static var alignLeft: TextViewName<Signal<Void>> { return .name(TextView.Binding.alignLeft) }
+	static var alignRight: TextViewName<Signal<Void>> { return .name(TextView.Binding.alignRight) }
+	static var superscript: TextViewName<Signal<Void>> { return .name(TextView.Binding.superscript) }
 	static var `subscript`: TextViewName<Signal<Void>> { return .name(B.`subscript`) }
-	static var unscript: TextViewName<Signal<Void>> { return .name(B.unscript) }
-	static var underline: TextViewName<Signal<Void>> { return .name(B.underline) }
-	static var checkSpelling: TextViewName<Signal<Void>> { return .name(B.checkSpelling) }
-	static var showGuessPanel: TextViewName<Signal<Void>> { return .name(B.showGuessPanel) }
-	static var sizeToFit: TextViewName<Signal<Void>> { return .name(B.sizeToFit) }
-	static var scrollRangeToVisible: TextViewName<Signal<NSRange>> { return .name(B.scrollRangeToVisible) }
+	static var unscript: TextViewName<Signal<Void>> { return .name(TextView.Binding.unscript) }
+	static var underline: TextViewName<Signal<Void>> { return .name(TextView.Binding.underline) }
+	static var checkSpelling: TextViewName<Signal<Void>> { return .name(TextView.Binding.checkSpelling) }
+	static var showGuessPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.showGuessPanel) }
+	static var sizeToFit: TextViewName<Signal<Void>> { return .name(TextView.Binding.sizeToFit) }
+	static var scrollRangeToVisible: TextViewName<Signal<NSRange>> { return .name(TextView.Binding.scrollRangeToVisible) }
 
-	static var showFindIndicator: TextViewName<Signal<NSRange>> { return .name(B.showFindIndicator) }
-	static var changeDocumentBackgroundColor: TextViewName<Signal<Void>> { return .name(B.changeDocumentBackgroundColor) }
-	static var outline: TextViewName<Signal<Void>> { return .name(B.outline) }
-	static var alignJustified: TextViewName<Signal<Void>> { return .name(B.alignJustified) }
-	static var changeAttributes: TextViewName<Signal<Void>> { return .name(B.changeAttributes) }
-	static var useStandardKerning: TextViewName<Signal<Void>> { return .name(B.useStandardKerning) }
-	static var lowerBaseline: TextViewName<Signal<Void>> { return .name(B.lowerBaseline) }
-	static var raiseBaseline: TextViewName<Signal<Void>> { return .name(B.raiseBaseline) }
-	static var turnOffKerning: TextViewName<Signal<Void>> { return .name(B.turnOffKerning) }
-	static var loosenKerning: TextViewName<Signal<Void>> { return .name(B.loosenKerning) }
-	static var tightenKerning: TextViewName<Signal<Void>> { return .name(B.tightenKerning) }
-	static var useStandardLigatures: TextViewName<Signal<Void>> { return .name(B.useStandardLigatures) }
-	static var turnOffLigatures: TextViewName<Signal<Void>> { return .name(B.turnOffLigatures) }
-	static var useAllLigatures: TextViewName<Signal<Void>> { return .name(B.useAllLigatures) }
-	static var clicked: TextViewName<Signal<(Any, Int)>> { return .name(B.clicked) }
-	static var pasteAsPlainText: TextViewName<Signal<Void>> { return .name(B.pasteAsPlainText) }
-	static var pasteAsRichText: TextViewName<Signal<Void>> { return .name(B.pasteAsRichText) }
-	static var breakUndoCoalescing: TextViewName<Signal<Void>> { return .name(B.breakUndoCoalescing) }
-	static var setSpellingState: TextViewName<Signal<(NSAttributedString.SpellingState, NSRange)>> { return .name(B.setSpellingState) }
-	static var orderFrontSharingServicePicker: TextViewName<Signal<Void>> { return .name(B.orderFrontSharingServicePicker) }
-	static var startSpeaking: TextViewName<Signal<Void>> { return .name(B.startSpeaking) }
-	static var stopSpeaking: TextViewName<Signal<Void>> { return .name(B.stopSpeaking) }
-	static var performFindPanelAction: TextViewName<Signal<Void>> { return .name(B.performFindPanelAction) }
-	static var orderFrontLinkPanel: TextViewName<Signal<Void>> { return .name(B.orderFrontLinkPanel) }
-	static var orderFrontListPanel: TextViewName<Signal<Void>> { return .name(B.orderFrontListPanel) }
-	static var orderFrontSpacingPanel: TextViewName<Signal<Void>> { return .name(B.orderFrontSpacingPanel) }
-	static var orderFrontTablePanel: TextViewName<Signal<Void>> { return .name(B.orderFrontTablePanel) }
-	static var orderFrontSubstitutionsPanel: TextViewName<Signal<Void>> { return .name(B.orderFrontSubstitutionsPanel) }
-	static var complete: TextViewName<Signal<Void>> { return .name(B.complete) }
-	static var checkTextInDocument: TextViewName<Signal<Void>> { return .name(B.checkTextInDocument) }
-	static var checkTextInSelection: TextViewName<Signal<Void>> { return .name(B.checkTextInSelection) }
-	static var checkText: TextViewName<Signal<(NSRange, NSTextCheckingTypes, [NSSpellChecker.OptionKey: Any])>> { return .name(B.checkText) }
-	static var updateQuickLookPreviewPanel: TextViewName<Signal<Void>> { return .name(B.updateQuickLookPreviewPanel) }
-	static var toggleQuickLookPreviewPanel: TextViewName<Signal<Void>> { return .name(B.toggleQuickLookPreviewPanel) }
-	static var updateCandidates: TextViewName<Signal<Void>> { return .name(B.updateCandidates) }
-	static var updateTextTouchBarItems: TextViewName<Signal<Void>> { return .name(B.updateTextTouchBarItems) }
-	static var updateTouchBarItemIdentifiers: TextViewName<Signal<Void>> { return .name(B.updateTouchBarItemIdentifiers) }
+	static var showFindIndicator: TextViewName<Signal<NSRange>> { return .name(TextView.Binding.showFindIndicator) }
+	static var changeDocumentBackgroundColor: TextViewName<Signal<Void>> { return .name(TextView.Binding.changeDocumentBackgroundColor) }
+	static var outline: TextViewName<Signal<Void>> { return .name(TextView.Binding.outline) }
+	static var alignJustified: TextViewName<Signal<Void>> { return .name(TextView.Binding.alignJustified) }
+	static var changeAttributes: TextViewName<Signal<Void>> { return .name(TextView.Binding.changeAttributes) }
+	static var useStandardKerning: TextViewName<Signal<Void>> { return .name(TextView.Binding.useStandardKerning) }
+	static var lowerBaseline: TextViewName<Signal<Void>> { return .name(TextView.Binding.lowerBaseline) }
+	static var raiseBaseline: TextViewName<Signal<Void>> { return .name(TextView.Binding.raiseBaseline) }
+	static var turnOffKerning: TextViewName<Signal<Void>> { return .name(TextView.Binding.turnOffKerning) }
+	static var loosenKerning: TextViewName<Signal<Void>> { return .name(TextView.Binding.loosenKerning) }
+	static var tightenKerning: TextViewName<Signal<Void>> { return .name(TextView.Binding.tightenKerning) }
+	static var useStandardLigatures: TextViewName<Signal<Void>> { return .name(TextView.Binding.useStandardLigatures) }
+	static var turnOffLigatures: TextViewName<Signal<Void>> { return .name(TextView.Binding.turnOffLigatures) }
+	static var useAllLigatures: TextViewName<Signal<Void>> { return .name(TextView.Binding.useAllLigatures) }
+	static var clicked: TextViewName<Signal<(Any, Int)>> { return .name(TextView.Binding.clicked) }
+	static var pasteAsPlainText: TextViewName<Signal<Void>> { return .name(TextView.Binding.pasteAsPlainText) }
+	static var pasteAsRichText: TextViewName<Signal<Void>> { return .name(TextView.Binding.pasteAsRichText) }
+	static var breakUndoCoalescing: TextViewName<Signal<Void>> { return .name(TextView.Binding.breakUndoCoalescing) }
+	static var setSpellingState: TextViewName<Signal<(NSAttributedString.SpellingState, NSRange)>> { return .name(TextView.Binding.setSpellingState) }
+	static var orderFrontSharingServicePicker: TextViewName<Signal<Void>> { return .name(TextView.Binding.orderFrontSharingServicePicker) }
+	static var startSpeaking: TextViewName<Signal<Void>> { return .name(TextView.Binding.startSpeaking) }
+	static var stopSpeaking: TextViewName<Signal<Void>> { return .name(TextView.Binding.stopSpeaking) }
+	static var performFindPanelAction: TextViewName<Signal<Void>> { return .name(TextView.Binding.performFindPanelAction) }
+	static var orderFrontLinkPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.orderFrontLinkPanel) }
+	static var orderFrontListPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.orderFrontListPanel) }
+	static var orderFrontSpacingPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.orderFrontSpacingPanel) }
+	static var orderFrontTablePanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.orderFrontTablePanel) }
+	static var orderFrontSubstitutionsPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.orderFrontSubstitutionsPanel) }
+	static var complete: TextViewName<Signal<Void>> { return .name(TextView.Binding.complete) }
+	static var checkTextInDocument: TextViewName<Signal<Void>> { return .name(TextView.Binding.checkTextInDocument) }
+	static var checkTextInSelection: TextViewName<Signal<Void>> { return .name(TextView.Binding.checkTextInSelection) }
+	static var checkText: TextViewName<Signal<(NSRange, NSTextCheckingTypes, [NSSpellChecker.OptionKey: Any])>> { return .name(TextView.Binding.checkText) }
+	static var updateQuickLookPreviewPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.updateQuickLookPreviewPanel) }
+	static var toggleQuickLookPreviewPanel: TextViewName<Signal<Void>> { return .name(TextView.Binding.toggleQuickLookPreviewPanel) }
+	static var updateCandidates: TextViewName<Signal<Void>> { return .name(TextView.Binding.updateCandidates) }
+	static var updateTextTouchBarItems: TextViewName<Signal<Void>> { return .name(TextView.Binding.updateTextTouchBarItems) }
+	static var updateTouchBarItemIdentifiers: TextViewName<Signal<Void>> { return .name(TextView.Binding.updateTouchBarItemIdentifiers) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didBeginEditing: TextViewName<SignalInput<NSTextView>> { return .name(B.didBeginEditing) }
-	static var didChange: TextViewName<SignalInput<NSTextView>> { return .name(B.didChange) }
-	static var didEndEditing: TextViewName<SignalInput<(NSTextView, NSTextMovement?)>> { return .name(B.didEndEditing) }
+	static var didBeginEditing: TextViewName<SignalInput<NSTextView>> { return .name(TextView.Binding.didBeginEditing) }
+	static var didChange: TextViewName<SignalInput<NSTextView>> { return .name(TextView.Binding.didChange) }
+	static var didEndEditing: TextViewName<SignalInput<(NSTextView, NSTextMovement?)>> { return .name(TextView.Binding.didEndEditing) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var shouldBeginEditing: TextViewName<(NSTextView) -> Bool> { return .name(B.shouldBeginEditing) }
-	static var shouldEndEditing: TextViewName<(NSTextView) -> Bool> { return .name(B.shouldEndEditing) }
+	static var shouldBeginEditing: TextViewName<(NSTextView) -> Bool> { return .name(TextView.Binding.shouldBeginEditing) }
+	static var shouldEndEditing: TextViewName<(NSTextView) -> Bool> { return .name(TextView.Binding.shouldEndEditing) }
 	
 	// Composite binding names
 	static func font(_ void: Void = ()) -> BindingName<Dynamic<NSFont>, BinderBase.Binding, Binding> {

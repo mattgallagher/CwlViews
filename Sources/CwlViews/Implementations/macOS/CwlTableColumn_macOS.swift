@@ -160,7 +160,6 @@ extension TableColumn.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableColumnBinding {
 	public typealias TableColumnName<V> = BindingName<V, TableColumn<Binding.RowDataType>.Binding, Binding>
-	private typealias B = TableColumn<Binding.RowDataType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableColumn<Binding.RowDataType>.Binding) -> TableColumnName<V> {
 		return TableColumnName<V>(source: source, downcast: Binding.tableColumnBinding)
 	}
@@ -168,33 +167,33 @@ extension BindingName where Binding: TableColumnBinding {
 public extension BindingName where Binding: TableColumnBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableColumnName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableColumnName<$2> { return .name(TableColumn.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var identifier: TableColumnName<Constant<NSUserInterfaceItemIdentifier>> { return .name(B.identifier) }
+	static var identifier: TableColumnName<Constant<NSUserInterfaceItemIdentifier>> { return .name(TableColumn.Binding.identifier) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var headerCell: TableColumnName<Dynamic<NSTableHeaderCell>> { return .name(B.headerCell) }
-	static var headerToolTip: TableColumnName<Dynamic<String?>> { return .name(B.headerToolTip) }
-	static var isEditable: TableColumnName<Dynamic<Bool>> { return .name(B.isEditable) }
-	static var isHidden: TableColumnName<Dynamic<Bool>> { return .name(B.isHidden) }
-	static var maxWidth: TableColumnName<Dynamic<CGFloat>> { return .name(B.maxWidth) }
-	static var minWidth: TableColumnName<Dynamic<CGFloat>> { return .name(B.minWidth) }
-	static var resizingMask: TableColumnName<Dynamic<NSTableColumn.ResizingOptions>> { return .name(B.resizingMask) }
-	static var sortDescriptorPrototype: TableColumnName<Dynamic<NSSortDescriptor?>> { return .name(B.sortDescriptorPrototype) }
-	static var sortFunction: TableColumnName<Dynamic<(_ isRow: Binding.RowDataType, _ orderedBefore: Binding.RowDataType) -> Bool>> { return .name(B.sortFunction) }
-	static var title: TableColumnName<Dynamic<String>> { return .name(B.title) }
-	static var width: TableColumnName<Dynamic<CGFloat>> { return .name(B.width) }
+	static var headerCell: TableColumnName<Dynamic<NSTableHeaderCell>> { return .name(TableColumn.Binding.headerCell) }
+	static var headerToolTip: TableColumnName<Dynamic<String?>> { return .name(TableColumn.Binding.headerToolTip) }
+	static var isEditable: TableColumnName<Dynamic<Bool>> { return .name(TableColumn.Binding.isEditable) }
+	static var isHidden: TableColumnName<Dynamic<Bool>> { return .name(TableColumn.Binding.isHidden) }
+	static var maxWidth: TableColumnName<Dynamic<CGFloat>> { return .name(TableColumn.Binding.maxWidth) }
+	static var minWidth: TableColumnName<Dynamic<CGFloat>> { return .name(TableColumn.Binding.minWidth) }
+	static var resizingMask: TableColumnName<Dynamic<NSTableColumn.ResizingOptions>> { return .name(TableColumn.Binding.resizingMask) }
+	static var sortDescriptorPrototype: TableColumnName<Dynamic<NSSortDescriptor?>> { return .name(TableColumn.Binding.sortDescriptorPrototype) }
+	static var sortFunction: TableColumnName<Dynamic<(_ isRow: Binding.RowDataType, _ orderedBefore: Binding.RowDataType) -> Bool>> { return .name(TableColumn.Binding.sortFunction) }
+	static var title: TableColumnName<Dynamic<String>> { return .name(TableColumn.Binding.title) }
+	static var width: TableColumnName<Dynamic<CGFloat>> { return .name(TableColumn.Binding.width) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var sizeToFit: TableColumnName<Signal<Void>> { return .name(B.sizeToFit) }
+	static var sizeToFit: TableColumnName<Signal<Void>> { return .name(TableColumn.Binding.sizeToFit) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var cellConstructor: TableColumnName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<Binding.RowDataType>) -> TableCellViewConvertible> { return .name(B.cellConstructor) }
-	static var cellIdentifierForRow: TableColumnName<(Binding.RowDataType?) -> NSUserInterfaceItemIdentifier> { return .name(B.cellIdentifierForRow) }
-	static var dataMissingCell: TableColumnName<() -> TableCellViewConvertible?> { return .name(B.dataMissingCell) }
+	static var cellConstructor: TableColumnName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<Binding.RowDataType>) -> TableCellViewConvertible> { return .name(TableColumn.Binding.cellConstructor) }
+	static var cellIdentifierForRow: TableColumnName<(Binding.RowDataType?) -> NSUserInterfaceItemIdentifier> { return .name(TableColumn.Binding.cellIdentifierForRow) }
+	static var dataMissingCell: TableColumnName<() -> TableCellViewConvertible?> { return .name(TableColumn.Binding.dataMissingCell) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -169,7 +169,6 @@ extension Toolbar.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ToolbarBinding {
 	public typealias ToolbarName<V> = BindingName<V, Toolbar.Binding, Binding>
-	private typealias B = Toolbar.Binding
 	private static func name<V>(_ source: @escaping (V) -> Toolbar.Binding) -> ToolbarName<V> {
 		return ToolbarName<V>(source: source, downcast: Binding.toolbarBinding)
 	}
@@ -177,29 +176,29 @@ extension BindingName where Binding: ToolbarBinding {
 public extension BindingName where Binding: ToolbarBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ToolbarName<$2> { return .name(B.$1) }
+	// With:    static var $1: ToolbarName<$2> { return .name(Toolbar.Binding.$1) }
 
 	//	0. Static styles are applied at construction and are subsequently immutable.
-	static var itemDescriptions: ToolbarName<Constant<[ToolbarItemDescription]>> { return .name(B.itemDescriptions) }
+	static var itemDescriptions: ToolbarName<Constant<[ToolbarItemDescription]>> { return .name(Toolbar.Binding.itemDescriptions) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsExtensionItems: ToolbarName<Dynamic<Bool>> { return .name(B.allowsExtensionItems) }
-	static var allowsUserCustomization: ToolbarName<Dynamic<Bool>> { return .name(B.allowsUserCustomization) }
-	static var autosavesConfiguration: ToolbarName<Dynamic<Bool>> { return .name(B.autosavesConfiguration) }
-	static var displayMode: ToolbarName<Dynamic<NSToolbar.DisplayMode>> { return .name(B.displayMode) }
-	static var isVisible: ToolbarName<Dynamic<Bool>> { return .name(B.isVisible) }
-	static var selectedItemIdentifier: ToolbarName<Dynamic<NSToolbarItem.Identifier>> { return .name(B.selectedItemIdentifier) }
-	static var showsBaselineSeparator: ToolbarName<Dynamic<Bool>> { return .name(B.showsBaselineSeparator) }
-	static var sizeMode: ToolbarName<Dynamic<NSToolbar.SizeMode>> { return .name(B.sizeMode) }
+	static var allowsExtensionItems: ToolbarName<Dynamic<Bool>> { return .name(Toolbar.Binding.allowsExtensionItems) }
+	static var allowsUserCustomization: ToolbarName<Dynamic<Bool>> { return .name(Toolbar.Binding.allowsUserCustomization) }
+	static var autosavesConfiguration: ToolbarName<Dynamic<Bool>> { return .name(Toolbar.Binding.autosavesConfiguration) }
+	static var displayMode: ToolbarName<Dynamic<NSToolbar.DisplayMode>> { return .name(Toolbar.Binding.displayMode) }
+	static var isVisible: ToolbarName<Dynamic<Bool>> { return .name(Toolbar.Binding.isVisible) }
+	static var selectedItemIdentifier: ToolbarName<Dynamic<NSToolbarItem.Identifier>> { return .name(Toolbar.Binding.selectedItemIdentifier) }
+	static var showsBaselineSeparator: ToolbarName<Dynamic<Bool>> { return .name(Toolbar.Binding.showsBaselineSeparator) }
+	static var sizeMode: ToolbarName<Dynamic<NSToolbar.SizeMode>> { return .name(Toolbar.Binding.sizeMode) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var runCustomizationPalette: ToolbarName<Signal<Void>> { return .name(B.runCustomizationPalette) }
+	static var runCustomizationPalette: ToolbarName<Signal<Void>> { return .name(Toolbar.Binding.runCustomizationPalette) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didRemoveItem: ToolbarName<SignalInput<Void>> { return .name(B.didRemoveItem) }
-	static var willAddItem: ToolbarName<SignalInput<Void>> { return .name(B.willAddItem) }
+	static var didRemoveItem: ToolbarName<SignalInput<Void>> { return .name(Toolbar.Binding.didRemoveItem) }
+	static var willAddItem: ToolbarName<SignalInput<Void>> { return .name(Toolbar.Binding.willAddItem) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

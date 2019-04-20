@@ -220,7 +220,6 @@ extension TextField.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextFieldBinding {
 	public typealias TextFieldName<V> = BindingName<V, TextField.Binding, Binding>
-	private typealias B = TextField.Binding
 	private static func name<V>(_ source: @escaping (V) -> TextField.Binding) -> TextFieldName<V> {
 		return TextFieldName<V>(source: source, downcast: Binding.textFieldBinding)
 	}
@@ -228,45 +227,45 @@ extension BindingName where Binding: TextFieldBinding {
 public extension BindingName where Binding: TextFieldBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TextFieldName<$2> { return .name(B.$1) }
+	// With:    static var $1: TextFieldName<$2> { return .name(TextField.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsCharacterPickerTouchBarItem: TextFieldName<Dynamic<Bool>> { return .name(B.allowsCharacterPickerTouchBarItem) }
-	static var allowsDefaultTighteningForTruncation: TextFieldName<Dynamic<Bool>> { return .name(B.allowsDefaultTighteningForTruncation) }
-	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
-	static var allowsUndo: TextFieldName<Dynamic<Bool>> { return .name(B.allowsUndo) }
-	static var backgroundColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.backgroundColor) }
-	static var isBezeled: TextFieldName<Dynamic<Bool>> { return .name(B.isBezeled) }
-	static var bezelStyle: TextFieldName<Dynamic<NSTextField.BezelStyle>> { return .name(B.bezelStyle) }
-	static var drawsBackground: TextFieldName<Dynamic<Bool>> { return .name(B.drawsBackground) }
-	static var importsGraphics: TextFieldName<Dynamic<Bool>> { return .name(B.importsGraphics) }
-	static var isAutomaticTextCompletionEnabled: TextFieldName<Dynamic<Bool>> { return .name(B.isAutomaticTextCompletionEnabled) }
-	static var isBordered: TextFieldName<Dynamic<Bool>> { return .name(B.isBordered) }
-	static var isEditable: TextFieldName<Dynamic<Bool>> { return .name(B.isEditable) }
-	static var isSelectable: TextFieldName<Dynamic<Bool>> { return .name(B.isSelectable) }
-	static var maximumNumberOfLines: TextFieldName<Dynamic<Int>> { return .name(B.maximumNumberOfLines) }
-	static var placeholderAttributedString: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.placeholderAttributedString) }
-	static var placeholderString: TextFieldName<Dynamic<String?>> { return .name(B.placeholderString) }
-	static var preferredMaxLayoutWidth: TextFieldName<Dynamic<CGFloat>> { return .name(B.preferredMaxLayoutWidth) }
-	static var sendsActionOnEndEditing: TextFieldName<Dynamic<Bool>> { return .name(B.sendsActionOnEndEditing) }
-	static var textColor: TextFieldName<Dynamic<NSColor?>> { return .name(B.textColor) }
-	static var usesSingleLineMode: TextFieldName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
+	static var allowsCharacterPickerTouchBarItem: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.allowsCharacterPickerTouchBarItem) }
+	static var allowsDefaultTighteningForTruncation: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.allowsDefaultTighteningForTruncation) }
+	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.allowsEditingTextAttributes) }
+	static var allowsUndo: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.allowsUndo) }
+	static var backgroundColor: TextFieldName<Dynamic<NSColor?>> { return .name(TextField.Binding.backgroundColor) }
+	static var isBezeled: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.isBezeled) }
+	static var bezelStyle: TextFieldName<Dynamic<NSTextField.BezelStyle>> { return .name(TextField.Binding.bezelStyle) }
+	static var drawsBackground: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.drawsBackground) }
+	static var importsGraphics: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.importsGraphics) }
+	static var isAutomaticTextCompletionEnabled: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.isAutomaticTextCompletionEnabled) }
+	static var isBordered: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.isBordered) }
+	static var isEditable: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.isEditable) }
+	static var isSelectable: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.isSelectable) }
+	static var maximumNumberOfLines: TextFieldName<Dynamic<Int>> { return .name(TextField.Binding.maximumNumberOfLines) }
+	static var placeholderAttributedString: TextFieldName<Dynamic<NSAttributedString?>> { return .name(TextField.Binding.placeholderAttributedString) }
+	static var placeholderString: TextFieldName<Dynamic<String?>> { return .name(TextField.Binding.placeholderString) }
+	static var preferredMaxLayoutWidth: TextFieldName<Dynamic<CGFloat>> { return .name(TextField.Binding.preferredMaxLayoutWidth) }
+	static var sendsActionOnEndEditing: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.sendsActionOnEndEditing) }
+	static var textColor: TextFieldName<Dynamic<NSColor?>> { return .name(TextField.Binding.textColor) }
+	static var usesSingleLineMode: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.usesSingleLineMode) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var selectText: TextFieldName<Signal<Void>> { return .name(B.selectText) }
+	static var selectText: TextFieldName<Signal<Void>> { return .name(TextField.Binding.selectText) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var completions: TextFieldName<(_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String]> { return .name(B.completions) }
-	static var didFailToFormatString: TextFieldName<(_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool> { return .name(B.didFailToFormatString) }
-	static var didFailToValidatePartialString: TextFieldName<(_ control: NSTextField, _ partialString: String, _ errorDescription: String?) -> Void> { return .name(B.didFailToValidatePartialString) }
-	static var doCommand: TextFieldName<(_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool> { return .name(B.doCommand) }
-	static var isValidObject: TextFieldName<(_ control: NSTextField, _ object: AnyObject) -> Bool> { return .name(B.isValidObject) }
-	static var shouldBeginEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(B.shouldBeginEditing) }
-	static var shouldEndEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(B.shouldEndEditing) }
+	static var completions: TextFieldName<(_ control: NSTextField, _ textView: NSTextView, _ completions: [String], _ partialWordRange: NSRange, _ indexOfSelectedItem: UnsafeMutablePointer<Int>) -> [String]> { return .name(TextField.Binding.completions) }
+	static var didFailToFormatString: TextFieldName<(_ control: NSTextField, _ string: String, _ errorDescription: String?) -> Bool> { return .name(TextField.Binding.didFailToFormatString) }
+	static var didFailToValidatePartialString: TextFieldName<(_ control: NSTextField, _ partialString: String, _ errorDescription: String?) -> Void> { return .name(TextField.Binding.didFailToValidatePartialString) }
+	static var doCommand: TextFieldName<(_ control: NSTextField, _ textView: NSText, _ doCommandBySelector: Selector) -> Bool> { return .name(TextField.Binding.doCommand) }
+	static var isValidObject: TextFieldName<(_ control: NSTextField, _ object: AnyObject) -> Bool> { return .name(TextField.Binding.isValidObject) }
+	static var shouldBeginEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(TextField.Binding.shouldBeginEditing) }
+	static var shouldEndEditing: TextFieldName<(_ control: NSTextField, _ text: NSText) -> Bool> { return .name(TextField.Binding.shouldEndEditing) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

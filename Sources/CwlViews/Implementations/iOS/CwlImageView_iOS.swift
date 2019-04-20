@@ -126,7 +126,6 @@ extension ImageView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ImageViewBinding {
 	public typealias ImageViewName<V> = BindingName<V, ImageView.Binding, Binding>
-	private typealias B = ImageView.Binding
 	private static func name<V>(_ source: @escaping (V) -> ImageView.Binding) -> ImageViewName<V> {
 		return ImageViewName<V>(source: source, downcast: Binding.imageViewBinding)
 	}
@@ -134,21 +133,21 @@ extension BindingName where Binding: ImageViewBinding {
 public extension BindingName where Binding: ImageViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ImageViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ImageViewName<$2> { return .name(ImageView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var image: ImageViewName<Dynamic<UIImage?>> { return .name(B.image) }
-	static var highlightedImage: ImageViewName<Dynamic<UIImage?>> { return .name(B.highlightedImage) }
-	static var animationImages: ImageViewName<Dynamic<[UIImage]?>> { return .name(B.animationImages) }
-	static var highlightedAnimationImages: ImageViewName<Dynamic<[UIImage]?>> { return .name(B.highlightedAnimationImages) }
-	static var animationDuration: ImageViewName<Dynamic<TimeInterval>> { return .name(B.animationDuration) }
-	static var animationRepeatCount: ImageViewName<Dynamic<Int>> { return .name(B.animationRepeatCount) }
-	static var isHighlighted: ImageViewName<Dynamic<Bool>> { return .name(B.isHighlighted) }
+	static var image: ImageViewName<Dynamic<UIImage?>> { return .name(ImageView.Binding.image) }
+	static var highlightedImage: ImageViewName<Dynamic<UIImage?>> { return .name(ImageView.Binding.highlightedImage) }
+	static var animationImages: ImageViewName<Dynamic<[UIImage]?>> { return .name(ImageView.Binding.animationImages) }
+	static var highlightedAnimationImages: ImageViewName<Dynamic<[UIImage]?>> { return .name(ImageView.Binding.highlightedAnimationImages) }
+	static var animationDuration: ImageViewName<Dynamic<TimeInterval>> { return .name(ImageView.Binding.animationDuration) }
+	static var animationRepeatCount: ImageViewName<Dynamic<Int>> { return .name(ImageView.Binding.animationRepeatCount) }
+	static var isHighlighted: ImageViewName<Dynamic<Bool>> { return .name(ImageView.Binding.isHighlighted) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var animating: ImageViewName<Signal<Bool>> { return .name(B.animating) }
+	static var animating: ImageViewName<Signal<Bool>> { return .name(ImageView.Binding.animating) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	

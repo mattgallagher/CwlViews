@@ -202,7 +202,6 @@ extension TextField.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextFieldBinding {
 	public typealias TextFieldName<V> = BindingName<V, TextField.Binding, Binding>
-	private typealias B = TextField.Binding
 	private static func name<V>(_ source: @escaping (V) -> TextField.Binding) -> TextFieldName<V> {
 		return TextFieldName<V>(source: source, downcast: Binding.textFieldBinding)
 	}
@@ -210,52 +209,52 @@ extension BindingName where Binding: TextFieldBinding {
 public extension BindingName where Binding: TextFieldBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TextFieldName<$2> { return .name(B.$1) }
+	// With:    static var $1: TextFieldName<$2> { return .name(TextField.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var textInputTraits: TextFieldName<Constant<TextInputTraits>> { return .name(B.textInputTraits) }
+	static var textInputTraits: TextFieldName<Constant<TextInputTraits>> { return .name(TextField.Binding.textInputTraits) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var adjustsFontSizeToFitWidth: TextFieldName<Dynamic<Bool>> { return .name(B.adjustsFontSizeToFitWidth) }
-	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
-	static var attributedPlaceholder: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.attributedPlaceholder) }
-	static var attributedText: TextFieldName<Dynamic<NSAttributedString?>> { return .name(B.attributedText) }
-	static var background: TextFieldName<Dynamic<UIImage?>> { return .name(B.background) }
-	static var borderStyle: TextFieldName<Dynamic<UITextField.BorderStyle>> { return .name(B.borderStyle) }
-	static var clearButtonMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(B.clearButtonMode) }
-	static var clearsOnBeginEditing: TextFieldName<Dynamic<Bool>> { return .name(B.clearsOnBeginEditing) }
-	static var clearsOnInsertion: TextFieldName<Dynamic<Bool>> { return .name(B.clearsOnInsertion) }
-	static var defaultTextAttributes: TextFieldName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.defaultTextAttributes) }
-	static var disabledBackground: TextFieldName<Dynamic<UIImage?>> { return .name(B.disabledBackground) }
-	static var font: TextFieldName<Dynamic<UIFont?>> { return .name(B.font) }
-	static var inputAccessoryView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.inputAccessoryView) }
-	static var inputView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.inputView) }
-	static var leftView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.leftView) }
-	static var leftViewMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(B.leftViewMode) }
-	static var minimumFontSize: TextFieldName<Dynamic<CGFloat>> { return .name(B.minimumFontSize) }
-	static var placeholder: TextFieldName<Dynamic<String?>> { return .name(B.placeholder) }
-	static var rightView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(B.rightView) }
-	static var rightViewMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(B.rightViewMode) }
-	static var text: TextFieldName<Dynamic<String>> { return .name(B.text) }
-	static var textAlignment: TextFieldName<Dynamic<NSTextAlignment>> { return .name(B.textAlignment) }
-	static var textColor: TextFieldName<Dynamic<UIColor?>> { return .name(B.textColor) }
-	static var typingAttributes: TextFieldName<Dynamic<[NSAttributedString.Key: Any]?>> { return .name(B.typingAttributes) }
+	static var adjustsFontSizeToFitWidth: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.adjustsFontSizeToFitWidth) }
+	static var allowsEditingTextAttributes: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.allowsEditingTextAttributes) }
+	static var attributedPlaceholder: TextFieldName<Dynamic<NSAttributedString?>> { return .name(TextField.Binding.attributedPlaceholder) }
+	static var attributedText: TextFieldName<Dynamic<NSAttributedString?>> { return .name(TextField.Binding.attributedText) }
+	static var background: TextFieldName<Dynamic<UIImage?>> { return .name(TextField.Binding.background) }
+	static var borderStyle: TextFieldName<Dynamic<UITextField.BorderStyle>> { return .name(TextField.Binding.borderStyle) }
+	static var clearButtonMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(TextField.Binding.clearButtonMode) }
+	static var clearsOnBeginEditing: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.clearsOnBeginEditing) }
+	static var clearsOnInsertion: TextFieldName<Dynamic<Bool>> { return .name(TextField.Binding.clearsOnInsertion) }
+	static var defaultTextAttributes: TextFieldName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(TextField.Binding.defaultTextAttributes) }
+	static var disabledBackground: TextFieldName<Dynamic<UIImage?>> { return .name(TextField.Binding.disabledBackground) }
+	static var font: TextFieldName<Dynamic<UIFont?>> { return .name(TextField.Binding.font) }
+	static var inputAccessoryView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(TextField.Binding.inputAccessoryView) }
+	static var inputView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(TextField.Binding.inputView) }
+	static var leftView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(TextField.Binding.leftView) }
+	static var leftViewMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(TextField.Binding.leftViewMode) }
+	static var minimumFontSize: TextFieldName<Dynamic<CGFloat>> { return .name(TextField.Binding.minimumFontSize) }
+	static var placeholder: TextFieldName<Dynamic<String?>> { return .name(TextField.Binding.placeholder) }
+	static var rightView: TextFieldName<Dynamic<ViewConvertible?>> { return .name(TextField.Binding.rightView) }
+	static var rightViewMode: TextFieldName<Dynamic<UITextField.ViewMode>> { return .name(TextField.Binding.rightViewMode) }
+	static var text: TextFieldName<Dynamic<String>> { return .name(TextField.Binding.text) }
+	static var textAlignment: TextFieldName<Dynamic<NSTextAlignment>> { return .name(TextField.Binding.textAlignment) }
+	static var textColor: TextFieldName<Dynamic<UIColor?>> { return .name(TextField.Binding.textColor) }
+	static var typingAttributes: TextFieldName<Dynamic<[NSAttributedString.Key: Any]?>> { return .name(TextField.Binding.typingAttributes) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var resignFirstResponder: TextFieldName<Signal<Void>> { return .name(B.resignFirstResponder) }
+	static var resignFirstResponder: TextFieldName<Signal<Void>> { return .name(TextField.Binding.resignFirstResponder) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didBeginEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didBeginEditing) }
-	static var didChange: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didChange) }
-	static var didEndEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(B.didEndEditing) }
-	static var didEndEditingWithReason: TextFieldName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void> { return .name(B.didEndEditingWithReason) }
-	static var shouldBeginEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldBeginEditing) }
-	static var shouldChangeCharacters: TextFieldName<(_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool> { return .name(B.shouldChangeCharacters) }
-	static var shouldClear: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldClear) }
-	static var shouldEndEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldEndEditing) }
-	static var shouldReturn: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(B.shouldReturn) }
+	static var didBeginEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(TextField.Binding.didBeginEditing) }
+	static var didChange: TextFieldName<(_ textField: UITextField) -> Void> { return .name(TextField.Binding.didChange) }
+	static var didEndEditing: TextFieldName<(_ textField: UITextField) -> Void> { return .name(TextField.Binding.didEndEditing) }
+	static var didEndEditingWithReason: TextFieldName<(_ textField: UITextField, _ reason: UITextField.DidEndEditingReason) -> Void> { return .name(TextField.Binding.didEndEditingWithReason) }
+	static var shouldBeginEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(TextField.Binding.shouldBeginEditing) }
+	static var shouldChangeCharacters: TextFieldName<(_ textField: UITextField, _ range: NSRange, _ replacementString: String) -> Bool> { return .name(TextField.Binding.shouldChangeCharacters) }
+	static var shouldClear: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(TextField.Binding.shouldClear) }
+	static var shouldEndEditing: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(TextField.Binding.shouldEndEditing) }
+	static var shouldReturn: TextFieldName<(_ textField: UITextField) -> Bool> { return .name(TextField.Binding.shouldReturn) }
 	
 	// Composite binding names
 	static func textChanged(_ void: Void = ()) -> TextFieldName<SignalInput<String>> {

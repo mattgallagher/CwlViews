@@ -163,7 +163,6 @@ extension TableViewCell.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableViewCellBinding {
 	public typealias TableViewCellName<V> = BindingName<V, TableViewCell.Binding, Binding>
-	private typealias B = TableViewCell.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableViewCell.Binding) -> TableViewCellName<V> {
 		return TableViewCellName<V>(source: source, downcast: Binding.tableViewCellBinding)
 	}
@@ -171,32 +170,32 @@ extension BindingName where Binding: TableViewCellBinding {
 public extension BindingName where Binding: TableViewCellBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableViewCellName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableViewCellName<$2> { return .name(TableViewCell.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var cellStyle: TableViewCellName<Constant<UITableViewCell.CellStyle>> { return .name(B.cellStyle) }
-	static var contentView: TableViewCellName<Constant<View>> { return .name(B.contentView) }
-	static var detailLabel: TableViewCellName<Constant<Label>> { return .name(B.detailLabel) }
-	static var imageView: TableViewCellName<Constant<ImageView>> { return .name(B.imageView) }
-	static var textLabel: TableViewCellName<Constant<Label>> { return .name(B.textLabel) }
+	static var cellStyle: TableViewCellName<Constant<UITableViewCell.CellStyle>> { return .name(TableViewCell.Binding.cellStyle) }
+	static var contentView: TableViewCellName<Constant<View>> { return .name(TableViewCell.Binding.contentView) }
+	static var detailLabel: TableViewCellName<Constant<Label>> { return .name(TableViewCell.Binding.detailLabel) }
+	static var imageView: TableViewCellName<Constant<ImageView>> { return .name(TableViewCell.Binding.imageView) }
+	static var textLabel: TableViewCellName<Constant<Label>> { return .name(TableViewCell.Binding.textLabel) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var accessoryType: TableViewCellName<Dynamic<UITableViewCell.AccessoryType>> { return .name(B.accessoryType) }
-	static var accessoryView: TableViewCellName<Dynamic<ViewConvertible>> { return .name(B.accessoryView) }
-	static var backgroundView: TableViewCellName<Dynamic<ViewConvertible?>> { return .name(B.backgroundView) }
-	static var editingAccessoryType: TableViewCellName<Dynamic<UITableViewCell.AccessoryType>> { return .name(B.editingAccessoryType) }
-	static var editingAccessoryView: TableViewCellName<Dynamic<ViewConvertible>> { return .name(B.editingAccessoryView) }
-	static var focusStyle: TableViewCellName<Dynamic<UITableViewCell.FocusStyle>> { return .name(B.focusStyle) }
-	static var indentationLevel: TableViewCellName<Dynamic<Int>> { return .name(B.indentationLevel) }
-	static var indentationWidth: TableViewCellName<Dynamic<CGFloat>> { return .name(B.indentationWidth) }
-	static var isEditing: TableViewCellName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isEditing) }
-	static var isHighlighted: TableViewCellName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isHighlighted) }
-	static var isSelected: TableViewCellName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isSelected) }
-	static var multipleSelectionBackgroundView: TableViewCellName<Dynamic<ViewConvertible?>> { return .name(B.multipleSelectionBackgroundView) }
-	static var selectedBackgroundView: TableViewCellName<Dynamic<ViewConvertible?>> { return .name(B.selectedBackgroundView) }
-	static var separatorInset: TableViewCellName<Dynamic<UIEdgeInsets>> { return .name(B.separatorInset) }
-	static var shouldIndentWhileEditing: TableViewCellName<Dynamic<Bool>> { return .name(B.shouldIndentWhileEditing) }
-	static var showsReorderControl: TableViewCellName<Dynamic<Bool>> { return .name(B.showsReorderControl) }
+	static var accessoryType: TableViewCellName<Dynamic<UITableViewCell.AccessoryType>> { return .name(TableViewCell.Binding.accessoryType) }
+	static var accessoryView: TableViewCellName<Dynamic<ViewConvertible>> { return .name(TableViewCell.Binding.accessoryView) }
+	static var backgroundView: TableViewCellName<Dynamic<ViewConvertible?>> { return .name(TableViewCell.Binding.backgroundView) }
+	static var editingAccessoryType: TableViewCellName<Dynamic<UITableViewCell.AccessoryType>> { return .name(TableViewCell.Binding.editingAccessoryType) }
+	static var editingAccessoryView: TableViewCellName<Dynamic<ViewConvertible>> { return .name(TableViewCell.Binding.editingAccessoryView) }
+	static var focusStyle: TableViewCellName<Dynamic<UITableViewCell.FocusStyle>> { return .name(TableViewCell.Binding.focusStyle) }
+	static var indentationLevel: TableViewCellName<Dynamic<Int>> { return .name(TableViewCell.Binding.indentationLevel) }
+	static var indentationWidth: TableViewCellName<Dynamic<CGFloat>> { return .name(TableViewCell.Binding.indentationWidth) }
+	static var isEditing: TableViewCellName<Dynamic<SetOrAnimate<Bool>>> { return .name(TableViewCell.Binding.isEditing) }
+	static var isHighlighted: TableViewCellName<Dynamic<SetOrAnimate<Bool>>> { return .name(TableViewCell.Binding.isHighlighted) }
+	static var isSelected: TableViewCellName<Dynamic<SetOrAnimate<Bool>>> { return .name(TableViewCell.Binding.isSelected) }
+	static var multipleSelectionBackgroundView: TableViewCellName<Dynamic<ViewConvertible?>> { return .name(TableViewCell.Binding.multipleSelectionBackgroundView) }
+	static var selectedBackgroundView: TableViewCellName<Dynamic<ViewConvertible?>> { return .name(TableViewCell.Binding.selectedBackgroundView) }
+	static var separatorInset: TableViewCellName<Dynamic<UIEdgeInsets>> { return .name(TableViewCell.Binding.separatorInset) }
+	static var shouldIndentWhileEditing: TableViewCellName<Dynamic<Bool>> { return .name(TableViewCell.Binding.shouldIndentWhileEditing) }
+	static var showsReorderControl: TableViewCellName<Dynamic<Bool>> { return .name(TableViewCell.Binding.showsReorderControl) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	

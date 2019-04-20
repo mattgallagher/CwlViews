@@ -147,7 +147,6 @@ extension Window.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: WindowBinding {
 	public typealias WindowName<V> = BindingName<V, Window.Binding, Binding>
-	private typealias B = Window.Binding
 	private static func name<V>(_ source: @escaping (V) -> Window.Binding) -> WindowName<V> {
 		return WindowName<V>(source: source, downcast: Binding.windowBinding)
 	}
@@ -155,30 +154,30 @@ extension BindingName where Binding: WindowBinding {
 public extension BindingName where Binding: WindowBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: WindowName<$2> { return .name(B.$1) }
+	// With:    static var $1: WindowName<$2> { return .name(Window.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var frame: WindowName<Dynamic<CGRect>> { return .name(B.frame) }
-	static var rootViewController: WindowName<Dynamic<ViewControllerConvertible>> { return .name(B.rootViewController) }
-	static var screen: WindowName<Dynamic<UIScreen>> { return .name(B.screen) }
-	static var windowLevel: WindowName<Dynamic<UIWindow.Level>> { return .name(B.windowLevel) }
+	static var frame: WindowName<Dynamic<CGRect>> { return .name(Window.Binding.frame) }
+	static var rootViewController: WindowName<Dynamic<ViewControllerConvertible>> { return .name(Window.Binding.rootViewController) }
+	static var screen: WindowName<Dynamic<UIScreen>> { return .name(Window.Binding.screen) }
+	static var windowLevel: WindowName<Dynamic<UIWindow.Level>> { return .name(Window.Binding.windowLevel) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var makeKey: WindowName<Signal<Void>> { return .name(B.makeKey) }
+	static var makeKey: WindowName<Signal<Void>> { return .name(Window.Binding.makeKey) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didBecomeVisible: WindowName<SignalInput<Void>> { return .name(B.didBecomeVisible) }
-	static var didBecomeHidden: WindowName<SignalInput<Void>> { return .name(B.didBecomeHidden) }
-	static var didBecomeKey: WindowName<SignalInput<Void>> { return .name(B.didBecomeKey) }
-	static var didResignKey: WindowName<SignalInput<Void>> { return .name(B.didResignKey) }
-	static var keyboardWillShow: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardWillShow) }
-	static var keyboardDidShow: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardDidShow) }
-	static var keyboardWillHide: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardWillHide) }
-	static var keyboardDidHide: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardDidHide) }
-	static var keyboardWillChangeFrame: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardWillChangeFrame) }
-	static var keyboardDidChangeFrame: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(B.keyboardDidChangeFrame) }
+	static var didBecomeVisible: WindowName<SignalInput<Void>> { return .name(Window.Binding.didBecomeVisible) }
+	static var didBecomeHidden: WindowName<SignalInput<Void>> { return .name(Window.Binding.didBecomeHidden) }
+	static var didBecomeKey: WindowName<SignalInput<Void>> { return .name(Window.Binding.didBecomeKey) }
+	static var didResignKey: WindowName<SignalInput<Void>> { return .name(Window.Binding.didResignKey) }
+	static var keyboardWillShow: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(Window.Binding.keyboardWillShow) }
+	static var keyboardDidShow: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(Window.Binding.keyboardDidShow) }
+	static var keyboardWillHide: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(Window.Binding.keyboardWillHide) }
+	static var keyboardDidHide: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(Window.Binding.keyboardDidHide) }
+	static var keyboardWillChangeFrame: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(Window.Binding.keyboardWillChangeFrame) }
+	static var keyboardDidChangeFrame: WindowName<SignalInput<[AnyHashable: Any]?>> { return .name(Window.Binding.keyboardDidChangeFrame) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

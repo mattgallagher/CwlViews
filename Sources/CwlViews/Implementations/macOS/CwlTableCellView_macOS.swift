@@ -91,7 +91,6 @@ extension TableCellView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableCellViewBinding {
 	public typealias TableCellViewName<V> = BindingName<V, TableCellView.Binding, Binding>
-	private typealias B = TableCellView.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableCellView.Binding) -> TableCellViewName<V> {
 		return TableCellViewName<V>(source: source, downcast: Binding.tableCellViewBinding)
 	}
@@ -99,13 +98,13 @@ extension BindingName where Binding: TableCellViewBinding {
 public extension BindingName where Binding: TableCellViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableCellViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableCellViewName<$2> { return .name(TableCellView.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundStyle: TableCellViewName<Dynamic<NSView.BackgroundStyle>> { return .name(B.backgroundStyle) }
-	static var rowSizeStyle: TableCellViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(B.rowSizeStyle) }
+	static var backgroundStyle: TableCellViewName<Dynamic<NSView.BackgroundStyle>> { return .name(TableCellView.Binding.backgroundStyle) }
+	static var rowSizeStyle: TableCellViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(TableCellView.Binding.rowSizeStyle) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

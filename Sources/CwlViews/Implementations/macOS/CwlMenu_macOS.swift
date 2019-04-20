@@ -210,7 +210,6 @@ extension Menu.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: MenuBinding {
 	public typealias MenuName<V> = BindingName<V, Menu.Binding, Binding>
-	private typealias B = Menu.Binding
 	private static func name<V>(_ source: @escaping (V) -> Menu.Binding) -> MenuName<V> {
 		return MenuName<V>(source: source, downcast: Binding.menuBinding)
 	}
@@ -218,39 +217,39 @@ extension BindingName where Binding: MenuBinding {
 public extension BindingName where Binding: MenuBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: MenuName<$2> { return .name(B.$1) }
+	// With:    static var $1: MenuName<$2> { return .name(Menu.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var systemName: MenuName<Constant<SystemMenu>> { return .name(B.systemName) }
+	static var systemName: MenuName<Constant<SystemMenu>> { return .name(Menu.Binding.systemName) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsContextMenuPlugIns: MenuName<Dynamic<Bool>> { return .name(B.allowsContextMenuPlugIns) }
-	static var autoenablesItems: MenuName<Dynamic<Bool>> { return .name(B.autoenablesItems) }
-	static var font: MenuName<Dynamic<NSFont>> { return .name(B.font) }
-	static var items: MenuName<Dynamic<[MenuItemConvertible]>> { return .name(B.items) }
-	static var minimumWidth: MenuName<Dynamic<CGFloat>> { return .name(B.minimumWidth) }
-	static var showsStateColumn: MenuName<Dynamic<Bool>> { return .name(B.showsStateColumn) }
-	static var title: MenuName<Dynamic<String>> { return .name(B.title) }
-	static var userInterfaceLayoutDirection: MenuName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
+	static var allowsContextMenuPlugIns: MenuName<Dynamic<Bool>> { return .name(Menu.Binding.allowsContextMenuPlugIns) }
+	static var autoenablesItems: MenuName<Dynamic<Bool>> { return .name(Menu.Binding.autoenablesItems) }
+	static var font: MenuName<Dynamic<NSFont>> { return .name(Menu.Binding.font) }
+	static var items: MenuName<Dynamic<[MenuItemConvertible]>> { return .name(Menu.Binding.items) }
+	static var minimumWidth: MenuName<Dynamic<CGFloat>> { return .name(Menu.Binding.minimumWidth) }
+	static var showsStateColumn: MenuName<Dynamic<Bool>> { return .name(Menu.Binding.showsStateColumn) }
+	static var title: MenuName<Dynamic<String>> { return .name(Menu.Binding.title) }
+	static var userInterfaceLayoutDirection: MenuName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(Menu.Binding.userInterfaceLayoutDirection) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var popUpContextMenu: MenuName<Signal<(with: NSEvent, for: NSView)>> { return .name(B.popUpContextMenu) }
-	static var popUp: MenuName<Signal<(item: Int, at: NSPoint, in: NSView?)>> { return .name(B.popUp) }
-	static var performAction: MenuName<Signal<Int>> { return .name(B.performAction) }
-	static var cancelTracking: MenuName<Signal<Void>> { return .name(B.cancelTracking) }
-	static var cancelTrackingWithoutAnimation: MenuName<Signal<Void>> { return .name(B.cancelTrackingWithoutAnimation) }
+	static var popUpContextMenu: MenuName<Signal<(with: NSEvent, for: NSView)>> { return .name(Menu.Binding.popUpContextMenu) }
+	static var popUp: MenuName<Signal<(item: Int, at: NSPoint, in: NSView?)>> { return .name(Menu.Binding.popUp) }
+	static var performAction: MenuName<Signal<Int>> { return .name(Menu.Binding.performAction) }
+	static var cancelTracking: MenuName<Signal<Void>> { return .name(Menu.Binding.cancelTracking) }
+	static var cancelTrackingWithoutAnimation: MenuName<Signal<Void>> { return .name(Menu.Binding.cancelTrackingWithoutAnimation) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var willOpen: MenuName<(NSMenu) -> Void> { return .name(B.willOpen) }
-	static var didClose: MenuName<(NSMenu) -> Void> { return .name(B.didClose) }
-	static var didBeginTracking: MenuName<SignalInput<Void>> { return .name(B.didBeginTracking) }
-	static var didEndTracking: MenuName<SignalInput<Void>> { return .name(B.didEndTracking) }
-	static var willHighlight: MenuName<(NSMenu, NSMenuItem?, Int?) -> Void> { return .name(B.willHighlight) }
-	static var willSendAction: MenuName<SignalInput<Int>> { return .name(B.willSendAction) }
-	static var didSendAction: MenuName<SignalInput<Int>> { return .name(B.didSendAction) }
+	static var willOpen: MenuName<(NSMenu) -> Void> { return .name(Menu.Binding.willOpen) }
+	static var didClose: MenuName<(NSMenu) -> Void> { return .name(Menu.Binding.didClose) }
+	static var didBeginTracking: MenuName<SignalInput<Void>> { return .name(Menu.Binding.didBeginTracking) }
+	static var didEndTracking: MenuName<SignalInput<Void>> { return .name(Menu.Binding.didEndTracking) }
+	static var willHighlight: MenuName<(NSMenu, NSMenuItem?, Int?) -> Void> { return .name(Menu.Binding.willHighlight) }
+	static var willSendAction: MenuName<SignalInput<Int>> { return .name(Menu.Binding.willSendAction) }
+	static var didSendAction: MenuName<SignalInput<Int>> { return .name(Menu.Binding.didSendAction) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var confinementRect: MenuName<(_ menu: NSMenu, _ screen: NSScreen?) -> NSRect> { return .name(B.confinementRect) }
+	static var confinementRect: MenuName<(_ menu: NSMenu, _ screen: NSScreen?) -> NSRect> { return .name(Menu.Binding.confinementRect) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

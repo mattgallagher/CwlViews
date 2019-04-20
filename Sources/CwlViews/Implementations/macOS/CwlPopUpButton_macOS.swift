@@ -115,7 +115,6 @@ extension PopUpButton.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PopUpButtonBinding {
 	public typealias PopUpButtonName<V> = BindingName<V, PopUpButton.Binding, Binding>
-	private typealias B = PopUpButton.Binding
 	private static func name<V>(_ source: @escaping (V) -> PopUpButton.Binding) -> PopUpButtonName<V> {
 		return PopUpButtonName<V>(source: source, downcast: Binding.popUpButtonBinding)
 	}
@@ -123,22 +122,22 @@ extension BindingName where Binding: PopUpButtonBinding {
 public extension BindingName where Binding: PopUpButtonBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: PopUpButtonName<$2> { return .name(B.$1) }
+	// With:    static var $1: PopUpButtonName<$2> { return .name(PopUpButton.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var autoenablesItems: PopUpButtonName<Dynamic<Bool>> { return .name(B.autoenablesItems) }
-	static var menu: PopUpButtonName<Dynamic<MenuConvertible>> { return .name(B.menu) }
-	static var preferredEdge: PopUpButtonName<Dynamic<NSRectEdge>> { return .name(B.preferredEdge) }
-	static var pullsDown: PopUpButtonName<Dynamic<Bool>> { return .name(B.pullsDown) }
-	static var selectedIndex: PopUpButtonName<Dynamic<Int>> { return .name(B.selectedIndex) }
-	static var title: PopUpButtonName<Dynamic<String>> { return .name(B.title) }
+	static var autoenablesItems: PopUpButtonName<Dynamic<Bool>> { return .name(PopUpButton.Binding.autoenablesItems) }
+	static var menu: PopUpButtonName<Dynamic<MenuConvertible>> { return .name(PopUpButton.Binding.menu) }
+	static var preferredEdge: PopUpButtonName<Dynamic<NSRectEdge>> { return .name(PopUpButton.Binding.preferredEdge) }
+	static var pullsDown: PopUpButtonName<Dynamic<Bool>> { return .name(PopUpButton.Binding.pullsDown) }
+	static var selectedIndex: PopUpButtonName<Dynamic<Int>> { return .name(PopUpButton.Binding.selectedIndex) }
+	static var title: PopUpButtonName<Dynamic<String>> { return .name(PopUpButton.Binding.title) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var willPopUp: PopUpButtonName<SignalInput<Void>> { return .name(B.willPopUp) }
+	static var willPopUp: PopUpButtonName<SignalInput<Void>> { return .name(PopUpButton.Binding.willPopUp) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

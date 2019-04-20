@@ -123,7 +123,6 @@ extension AlertController.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: AlertControllerBinding {
 	public typealias AlertControllerName<V> = BindingName<V, AlertController.Binding, Binding>
-	private typealias B = AlertController.Binding
 	private static func name<V>(_ source: @escaping (V) -> AlertController.Binding) -> AlertControllerName<V> {
 		return AlertControllerName<V>(source: source, downcast: Binding.alertControllerBinding)
 	}
@@ -131,16 +130,16 @@ extension BindingName where Binding: AlertControllerBinding {
 public extension BindingName where Binding: AlertControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: AlertControllerName<$2> { return .name(B.$1) }
+	// With:    static var $1: AlertControllerName<$2> { return .name(AlertController.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var actions: AlertControllerName<Constant<[AlertActionConvertible]>> { return .name(B.actions) }
-	static var preferredStyle: AlertControllerName<Constant<UIAlertController.Style>> { return .name(B.preferredStyle) }
-	static var textFields: AlertControllerName<Constant<[TextField]>> { return .name(B.textFields) }
+	static var actions: AlertControllerName<Constant<[AlertActionConvertible]>> { return .name(AlertController.Binding.actions) }
+	static var preferredStyle: AlertControllerName<Constant<UIAlertController.Style>> { return .name(AlertController.Binding.preferredStyle) }
+	static var textFields: AlertControllerName<Constant<[TextField]>> { return .name(AlertController.Binding.textFields) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var message: AlertControllerName<Dynamic<String?>> { return .name(B.message) }
-	static var preferredActionIndex: AlertControllerName<Dynamic<Int?>> { return .name(B.preferredActionIndex) }
+	static var message: AlertControllerName<Dynamic<String?>> { return .name(AlertController.Binding.message) }
+	static var preferredActionIndex: AlertControllerName<Dynamic<Int?>> { return .name(AlertController.Binding.preferredActionIndex) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

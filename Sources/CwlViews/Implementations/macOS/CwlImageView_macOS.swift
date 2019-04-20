@@ -89,7 +89,6 @@ extension ImageView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ImageViewBinding {
 	public typealias ImageViewName<V> = BindingName<V, ImageView.Binding, Binding>
-	private typealias B = ImageView.Binding
 	private static func name<V>(_ source: @escaping (V) -> ImageView.Binding) -> ImageViewName<V> {
 		return ImageViewName<V>(source: source, downcast: Binding.imageViewBinding)
 	}
@@ -97,15 +96,15 @@ extension BindingName where Binding: ImageViewBinding {
 public extension BindingName where Binding: ImageViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ImageViewName<$2> { return .name(B.$1) }
-	static var allowsCutCopyPaste: ImageViewName<Dynamic<Bool>> { return .name(B.allowsCutCopyPaste) }
-	static var animates: ImageViewName<Dynamic<Bool>> { return .name(B.animates) }
-	static var image: ImageViewName<Dynamic<NSImage?>> { return .name(B.image) }
-	static var imageAlignment: ImageViewName<Dynamic<NSImageAlignment>> { return .name(B.imageAlignment) }
-	static var imageFrameStyle: ImageViewName<Dynamic<NSImageView.FrameStyle>> { return .name(B.imageFrameStyle) }
-	static var imageScaling: ImageViewName<Dynamic<NSImageScaling>> { return .name(B.imageScaling) }
-	static var isEditable: ImageViewName<Dynamic<Bool>> { return .name(B.isEditable) }
-	@available(macOS 10.14, *) static var contentTintColor: ImageViewName<Dynamic<NSColor?>> { return .name(B.contentTintColor) }
+	// With:    static var $1: ImageViewName<$2> { return .name(ImageView.Binding.$1) }
+	static var allowsCutCopyPaste: ImageViewName<Dynamic<Bool>> { return .name(ImageView.Binding.allowsCutCopyPaste) }
+	static var animates: ImageViewName<Dynamic<Bool>> { return .name(ImageView.Binding.animates) }
+	static var image: ImageViewName<Dynamic<NSImage?>> { return .name(ImageView.Binding.image) }
+	static var imageAlignment: ImageViewName<Dynamic<NSImageAlignment>> { return .name(ImageView.Binding.imageAlignment) }
+	static var imageFrameStyle: ImageViewName<Dynamic<NSImageView.FrameStyle>> { return .name(ImageView.Binding.imageFrameStyle) }
+	static var imageScaling: ImageViewName<Dynamic<NSImageScaling>> { return .name(ImageView.Binding.imageScaling) }
+	static var isEditable: ImageViewName<Dynamic<Bool>> { return .name(ImageView.Binding.isEditable) }
+	@available(macOS 10.14, *) static var contentTintColor: ImageViewName<Dynamic<NSColor?>> { return .name(ImageView.Binding.contentTintColor) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

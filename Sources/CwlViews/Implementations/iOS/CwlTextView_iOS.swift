@@ -211,7 +211,6 @@ extension TextView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TextViewBinding {
 	public typealias TextViewName<V> = BindingName<V, TextView.Binding, Binding>
-	private typealias B = TextView.Binding
 	private static func name<V>(_ source: @escaping (V) -> TextView.Binding) -> TextViewName<V> {
 		return TextViewName<V>(source: source, downcast: Binding.textViewBinding)
 	}
@@ -219,44 +218,44 @@ extension BindingName where Binding: TextViewBinding {
 public extension BindingName where Binding: TextViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TextViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TextViewName<$2> { return .name(TextView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var textInputTraits: TextViewName<Constant<TextInputTraits>> { return .name(B.textInputTraits) }
+	static var textInputTraits: TextViewName<Constant<TextInputTraits>> { return .name(TextView.Binding.textInputTraits) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsEditingTextAttributes: TextViewName<Dynamic<Bool>> { return .name(B.allowsEditingTextAttributes) }
-	static var attributedText: TextViewName<Dynamic<NSAttributedString>> { return .name(B.attributedText) }
-	static var clearsOnInsertion: TextViewName<Dynamic<Bool>> { return .name(B.clearsOnInsertion) }
-	static var dataDetectorTypes: TextViewName<Dynamic<UIDataDetectorTypes>> { return .name(B.dataDetectorTypes) }
-	static var font: TextViewName<Dynamic<UIFont?>> { return .name(B.font) }
-	static var inputAccessoryView: TextViewName<Dynamic<ViewConvertible?>> { return .name(B.inputAccessoryView) }
-	static var inputView: TextViewName<Dynamic<ViewConvertible?>> { return .name(B.inputView) }
-	static var isEditable: TextViewName<Dynamic<Bool>> { return .name(B.isEditable) }
-	static var isSelectable: TextViewName<Dynamic<Bool>> { return .name(B.isSelectable) }
-	static var linkTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.linkTextAttributes) }
-	static var selectedRange: TextViewName<Dynamic<NSRange>> { return .name(B.selectedRange) }
-	static var text: TextViewName<Dynamic<String>> { return .name(B.text) }
-	static var textAlignment: TextViewName<Dynamic<NSTextAlignment>> { return .name(B.textAlignment) }
-	static var textColor: TextViewName<Dynamic<UIColor?>> { return .name(B.textColor) }
-	static var textContainerInset: TextViewName<Dynamic<UIEdgeInsets>> { return .name(B.textContainerInset) }
-	static var typingAttributes: TextViewName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.typingAttributes) }
+	static var allowsEditingTextAttributes: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.allowsEditingTextAttributes) }
+	static var attributedText: TextViewName<Dynamic<NSAttributedString>> { return .name(TextView.Binding.attributedText) }
+	static var clearsOnInsertion: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.clearsOnInsertion) }
+	static var dataDetectorTypes: TextViewName<Dynamic<UIDataDetectorTypes>> { return .name(TextView.Binding.dataDetectorTypes) }
+	static var font: TextViewName<Dynamic<UIFont?>> { return .name(TextView.Binding.font) }
+	static var inputAccessoryView: TextViewName<Dynamic<ViewConvertible?>> { return .name(TextView.Binding.inputAccessoryView) }
+	static var inputView: TextViewName<Dynamic<ViewConvertible?>> { return .name(TextView.Binding.inputView) }
+	static var isEditable: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isEditable) }
+	static var isSelectable: TextViewName<Dynamic<Bool>> { return .name(TextView.Binding.isSelectable) }
+	static var linkTextAttributes: TextViewName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(TextView.Binding.linkTextAttributes) }
+	static var selectedRange: TextViewName<Dynamic<NSRange>> { return .name(TextView.Binding.selectedRange) }
+	static var text: TextViewName<Dynamic<String>> { return .name(TextView.Binding.text) }
+	static var textAlignment: TextViewName<Dynamic<NSTextAlignment>> { return .name(TextView.Binding.textAlignment) }
+	static var textColor: TextViewName<Dynamic<UIColor?>> { return .name(TextView.Binding.textColor) }
+	static var textContainerInset: TextViewName<Dynamic<UIEdgeInsets>> { return .name(TextView.Binding.textContainerInset) }
+	static var typingAttributes: TextViewName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(TextView.Binding.typingAttributes) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var scrollRangeToVisible: TextViewName<Signal<NSRange>> { return .name(B.scrollRangeToVisible) }
+	static var scrollRangeToVisible: TextViewName<Signal<NSRange>> { return .name(TextView.Binding.scrollRangeToVisible) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didBeginEditing: TextViewName<(UITextView) -> Void> { return .name(B.didBeginEditing) }
-	static var didChange: TextViewName<(UITextView) -> Void> { return .name(B.didChange) }
-	static var didChangeSelection: TextViewName<(UITextView) -> Void> { return .name(B.didChangeSelection) }
-	static var didEndEditing: TextViewName<(UITextView) -> Void> { return .name(B.didEndEditing) }
-	static var shouldBeginEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldBeginEditing) }
-	static var shouldChangeText: TextViewName<(UITextView, NSRange, String) -> Bool> { return .name(B.shouldChangeText) }
-	static var shouldEndEditing: TextViewName<(UITextView) -> Bool> { return .name(B.shouldEndEditing) }
-	static var shouldInteractWithAttachment: TextViewName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithAttachment) }
-	static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(B.shouldInteractWithURL) }
+	static var didBeginEditing: TextViewName<(UITextView) -> Void> { return .name(TextView.Binding.didBeginEditing) }
+	static var didChange: TextViewName<(UITextView) -> Void> { return .name(TextView.Binding.didChange) }
+	static var didChangeSelection: TextViewName<(UITextView) -> Void> { return .name(TextView.Binding.didChangeSelection) }
+	static var didEndEditing: TextViewName<(UITextView) -> Void> { return .name(TextView.Binding.didEndEditing) }
+	static var shouldBeginEditing: TextViewName<(UITextView) -> Bool> { return .name(TextView.Binding.shouldBeginEditing) }
+	static var shouldChangeText: TextViewName<(UITextView, NSRange, String) -> Bool> { return .name(TextView.Binding.shouldChangeText) }
+	static var shouldEndEditing: TextViewName<(UITextView) -> Bool> { return .name(TextView.Binding.shouldEndEditing) }
+	static var shouldInteractWithAttachment: TextViewName<(UITextView, NSTextAttachment, NSRange, UITextItemInteraction) -> Bool> { return .name(TextView.Binding.shouldInteractWithAttachment) }
+	static var shouldInteractWithURL: TextViewName<(UITextView, URL, NSRange, UITextItemInteraction) -> Bool> { return .name(TextView.Binding.shouldInteractWithURL) }
 	
 	// Composite binding names
 	static func textChanged(_ void: Void = ()) -> TextViewName<SignalInput<String>> {

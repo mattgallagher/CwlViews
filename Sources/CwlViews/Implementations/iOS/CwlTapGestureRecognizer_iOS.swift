@@ -91,7 +91,6 @@ extension TapGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TapGestureRecognizerBinding {
 	public typealias TapGestureRecognizerName<V> = BindingName<V, TapGestureRecognizer.Binding, Binding>
-	private typealias B = TapGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> TapGestureRecognizer.Binding) -> TapGestureRecognizerName<V> {
 		return TapGestureRecognizerName<V>(source: source, downcast: Binding.tapGestureRecognizerBinding)
 	}
@@ -99,13 +98,13 @@ extension BindingName where Binding: TapGestureRecognizerBinding {
 public extension BindingName where Binding: TapGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TapGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: TapGestureRecognizerName<$2> { return .name(TapGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var numberOfTapsRequired: TapGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTapsRequired) }
-	static var numberOfTouchesRequired: TapGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfTouchesRequired) }
+	static var numberOfTapsRequired: TapGestureRecognizerName<Dynamic<Int>> { return .name(TapGestureRecognizer.Binding.numberOfTapsRequired) }
+	static var numberOfTouchesRequired: TapGestureRecognizerName<Dynamic<Int>> { return .name(TapGestureRecognizer.Binding.numberOfTouchesRequired) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

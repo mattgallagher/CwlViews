@@ -460,7 +460,6 @@ extension WebView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: WebViewBinding {
 	public typealias WebViewName<V> = BindingName<V, WebView.Binding, Binding>
-	private typealias B = WebView.Binding
 	private static func name<V>(_ source: @escaping (V) -> WebView.Binding) -> WebViewName<V> {
 		return WebViewName<V>(source: source, downcast: Binding.webViewBinding)
 	}
@@ -468,77 +467,77 @@ extension BindingName where Binding: WebViewBinding {
 public extension BindingName where Binding: WebViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: WebViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: WebViewName<$2> { return .name(WebView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var allowsAirPlayForMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsAirPlayForMediaPlayback) }
-	static var allowsInlineMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsInlineMediaPlayback) }
-	static var allowsPictureInPictureForMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsPictureInPictureForMediaPlayback) }
-	static var applicationNameForUserAgent: WebViewName<Constant<String?>> { return .name(B.applicationNameForUserAgent) }
-	static var dataDetectorTypes: WebViewName<Constant<WebView.WKDataDetectorTypes>> { return .name(B.dataDetectorTypes) }
-	static var ignoresViewportScaleLimits: WebViewName<Constant<Bool>> { return .name(B.ignoresViewportScaleLimits) }
-	static var javaScriptCanOpenWindowsAutomatically: WebViewName<Constant<Bool>> { return .name(B.javaScriptCanOpenWindowsAutomatically) }
-	static var javaScriptEnabled: WebViewName<Constant<Bool>> { return .name(B.javaScriptEnabled) }
-	static var mediaTypesRequiringUserActionForPlayback: WebViewName<Constant<WKAudiovisualMediaTypes>> { return .name(B.mediaTypesRequiringUserActionForPlayback) }
-	static var minimumFontSize: WebViewName<Constant<CGFloat>> { return .name(B.minimumFontSize) }
-	static var processPool: WebViewName<Constant<WKProcessPool>> { return .name(B.processPool) }
-	static var selectionGranularity: WebViewName<Constant<WebView.WKSelectionGranularity>> { return .name(B.selectionGranularity) }
-	static var suppressesIncrementalRendering: WebViewName<Constant<Bool>> { return .name(B.suppressesIncrementalRendering) }
-	static var urlSchemeHandlers: WebViewName<Constant<[String: WKURLSchemeHandler]>> { return .name(B.urlSchemeHandlers) }
-	static var userContentController: WebViewName<Constant<WKUserContentController>> { return .name(B.userContentController) }
+	static var allowsAirPlayForMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsAirPlayForMediaPlayback) }
+	static var allowsInlineMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsInlineMediaPlayback) }
+	static var allowsPictureInPictureForMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsPictureInPictureForMediaPlayback) }
+	static var applicationNameForUserAgent: WebViewName<Constant<String?>> { return .name(WebView.Binding.applicationNameForUserAgent) }
+	static var dataDetectorTypes: WebViewName<Constant<WebView.WKDataDetectorTypes>> { return .name(WebView.Binding.dataDetectorTypes) }
+	static var ignoresViewportScaleLimits: WebViewName<Constant<Bool>> { return .name(WebView.Binding.ignoresViewportScaleLimits) }
+	static var javaScriptCanOpenWindowsAutomatically: WebViewName<Constant<Bool>> { return .name(WebView.Binding.javaScriptCanOpenWindowsAutomatically) }
+	static var javaScriptEnabled: WebViewName<Constant<Bool>> { return .name(WebView.Binding.javaScriptEnabled) }
+	static var mediaTypesRequiringUserActionForPlayback: WebViewName<Constant<WKAudiovisualMediaTypes>> { return .name(WebView.Binding.mediaTypesRequiringUserActionForPlayback) }
+	static var minimumFontSize: WebViewName<Constant<CGFloat>> { return .name(WebView.Binding.minimumFontSize) }
+	static var processPool: WebViewName<Constant<WKProcessPool>> { return .name(WebView.Binding.processPool) }
+	static var selectionGranularity: WebViewName<Constant<WebView.WKSelectionGranularity>> { return .name(WebView.Binding.selectionGranularity) }
+	static var suppressesIncrementalRendering: WebViewName<Constant<Bool>> { return .name(WebView.Binding.suppressesIncrementalRendering) }
+	static var urlSchemeHandlers: WebViewName<Constant<[String: WKURLSchemeHandler]>> { return .name(WebView.Binding.urlSchemeHandlers) }
+	static var userContentController: WebViewName<Constant<WKUserContentController>> { return .name(WebView.Binding.userContentController) }
 	
-	@available(macOS 10.10, *) @available(iOS, unavailable) static var javaEnabled: WebViewName<Constant<Bool>> { return .name(B.javaEnabled) }
-	@available(macOS 10.10, *) @available(iOS, unavailable) static var plugInsEnabled: WebViewName<Constant<Bool>> { return .name(B.plugInsEnabled) }
-	@available(macOS 10.10, *) @available(iOS, unavailable) static var tabFocusesLinks: WebViewName<Constant<Bool>> { return .name(B.tabFocusesLinks) }
-	@available(macOS 10.12, *) @available(iOS, unavailable) static var userInterfaceDirectionPolicy: WebViewName<Constant<WebView.WKUserInterfaceDirectionPolicy>> { return .name(B.userInterfaceDirectionPolicy) }
-	@available(macOS, unavailable) @available(iOS 9, *) static var allowsPictureInPictureMediaPlayback: WebViewName<Constant<Bool>> { return .name(B.allowsPictureInPictureMediaPlayback) }
-	@available(macOS, unavailable) @available(iOS 11, *) static var scrollView: WebViewName<Constant<ScrollView>> { return .name(B.scrollView) }
+	@available(macOS 10.10, *) @available(iOS, unavailable) static var javaEnabled: WebViewName<Constant<Bool>> { return .name(WebView.Binding.javaEnabled) }
+	@available(macOS 10.10, *) @available(iOS, unavailable) static var plugInsEnabled: WebViewName<Constant<Bool>> { return .name(WebView.Binding.plugInsEnabled) }
+	@available(macOS 10.10, *) @available(iOS, unavailable) static var tabFocusesLinks: WebViewName<Constant<Bool>> { return .name(WebView.Binding.tabFocusesLinks) }
+	@available(macOS 10.12, *) @available(iOS, unavailable) static var userInterfaceDirectionPolicy: WebViewName<Constant<WebView.WKUserInterfaceDirectionPolicy>> { return .name(WebView.Binding.userInterfaceDirectionPolicy) }
+	@available(macOS, unavailable) @available(iOS 9, *) static var allowsPictureInPictureMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsPictureInPictureMediaPlayback) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var scrollView: WebViewName<Constant<ScrollView>> { return .name(WebView.Binding.scrollView) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsBackForwardNavigationGestures: WebViewName<Dynamic<Bool>> { return .name(B.allowsBackForwardNavigationGestures) }
+	static var allowsBackForwardNavigationGestures: WebViewName<Dynamic<Bool>> { return .name(WebView.Binding.allowsBackForwardNavigationGestures) }
 	
-	static var allowsLinkPreview: WebViewName<Dynamic<Bool>> { return .name(B.allowsLinkPreview) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var allowsMagnification: WebViewName<Dynamic<Bool>> { return .name(B.allowsMagnification) }
-	static var customUserAgent: WebViewName<Dynamic<String?>> { return .name(B.customUserAgent) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var magnification: WebViewName<Dynamic<(factor: CGFloat, centeredAt: CGPoint)>> { return .name(B.magnification) }
+	static var allowsLinkPreview: WebViewName<Dynamic<Bool>> { return .name(WebView.Binding.allowsLinkPreview) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var allowsMagnification: WebViewName<Dynamic<Bool>> { return .name(WebView.Binding.allowsMagnification) }
+	static var customUserAgent: WebViewName<Dynamic<String?>> { return .name(WebView.Binding.customUserAgent) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var magnification: WebViewName<Dynamic<(factor: CGFloat, centeredAt: CGPoint)>> { return .name(WebView.Binding.magnification) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var evaluateJavaScript: WebViewName<Signal<Callback<String, (Any?, Error?)>>> { return .name(B.evaluateJavaScript) }
-	static var goBack: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(B.goBack) }
-	static var goForward: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(B.goForward) }
-	static var goTo: WebViewName<Signal<Callback<WKBackForwardListItem, WKNavigation?>>> { return .name(B.goTo) }
-	static var load: WebViewName<Signal<Callback<URLRequest, WKNavigation?>>> { return .name(B.load) }
-	static var loadHTMLString: WebViewName<Signal<Callback<(string: String, baseURL: URL?), WKNavigation?>>> { return .name(B.loadHTMLString) }
-	static var reload: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(B.reload) }
-	static var reloadFromOrigin: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(B.reloadFromOrigin) }
-	static var stopLoading: WebViewName<Signal<Void>> { return .name(B.stopLoading) }
+	static var evaluateJavaScript: WebViewName<Signal<Callback<String, (Any?, Error?)>>> { return .name(WebView.Binding.evaluateJavaScript) }
+	static var goBack: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(WebView.Binding.goBack) }
+	static var goForward: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(WebView.Binding.goForward) }
+	static var goTo: WebViewName<Signal<Callback<WKBackForwardListItem, WKNavigation?>>> { return .name(WebView.Binding.goTo) }
+	static var load: WebViewName<Signal<Callback<URLRequest, WKNavigation?>>> { return .name(WebView.Binding.load) }
+	static var loadHTMLString: WebViewName<Signal<Callback<(string: String, baseURL: URL?), WKNavigation?>>> { return .name(WebView.Binding.loadHTMLString) }
+	static var reload: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(WebView.Binding.reload) }
+	static var reloadFromOrigin: WebViewName<Signal<Callback<Void, WKNavigation?>>> { return .name(WebView.Binding.reloadFromOrigin) }
+	static var stopLoading: WebViewName<Signal<Void>> { return .name(WebView.Binding.stopLoading) }
 	
-	static var loadData: WebViewName<Signal<Callback<(data: Data, mimeType: String, baseURL: URL, characterEncodingName: String), WKNavigation?>>> { return .name(B.loadData) }
-	static var loadFile: WebViewName<Signal<Callback<(url: URL, allowingReadAccessTo: URL), WKNavigation?>>> { return .name(B.loadFile) }
+	static var loadData: WebViewName<Signal<Callback<(data: Data, mimeType: String, baseURL: URL, characterEncodingName: String), WKNavigation?>>> { return .name(WebView.Binding.loadData) }
+	static var loadFile: WebViewName<Signal<Callback<(url: URL, allowingReadAccessTo: URL), WKNavigation?>>> { return .name(WebView.Binding.loadFile) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var createWebView: WebViewName<(_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?> { return .name(B.createWebView) }
-	static var didClose: WebViewName<(WKWebView) -> Void> { return .name(B.didClose) }
-	static var didCommit: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didCommit) }
-	static var didStartProvisionalNavigation: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didStartProvisionalNavigation) }
-	static var didReceiveServerRedirectForProvisionalNavigation: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didReceiveServerRedirectForProvisionalNavigation) }
-	static var didFail: WebViewName<(WKWebView, WKNavigation, Error) -> Void> { return .name(B.didFail) }
-	static var didFailProvisionalNavigation: WebViewName<(WKWebView, WKNavigation, Error) -> Void> { return .name(B.didFailProvisionalNavigation) }
-	static var didFinish: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(B.didFinish) }
-	static var contentProcessDidTerminate: WebViewName<(WKWebView) -> Void> { return .name(B.contentProcessDidTerminate) }
-	static var decideActionPolicy: WebViewName<(WKWebView, WKNavigationAction, (WKNavigationActionPolicy) -> Void) -> Void> { return .name(B.decideActionPolicy) }
-	static var decideResponsePolicy: WebViewName<(WKWebView, WKNavigationResponse, (WKNavigationActionPolicy) -> Void) -> Void> { return .name(B.decideResponsePolicy) }
-	static var didReceiveAuthenticationChallenge: WebViewName<(WKWebView, URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) -> Void> { return .name(B.didReceiveAuthenticationChallenge) }
-	static var runJavaScriptAlertPanel: WebViewName<(WKWebView, String, WKFrameInfo, () -> Void) -> Void> { return .name(B.runJavaScriptAlertPanel) }
-	static var runJavaScriptConfirmPanel: WebViewName<(WKWebView, String, WKFrameInfo, (Bool) -> Void) -> Void> { return .name(B.runJavaScriptConfirmPanel) }
-	static var runJavaScriptTextInputPanel: WebViewName<(WKWebView, String, String?, WKFrameInfo, (String?) -> Void) -> Void> { return .name(B.runJavaScriptTextInputPanel) }
+	static var createWebView: WebViewName<(_ webView: WKWebView, _ with: WKWebViewConfiguration, _ for: WKNavigationAction, _ windowFeatures: WKWindowFeatures) -> WKWebView?> { return .name(WebView.Binding.createWebView) }
+	static var didClose: WebViewName<(WKWebView) -> Void> { return .name(WebView.Binding.didClose) }
+	static var didCommit: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(WebView.Binding.didCommit) }
+	static var didStartProvisionalNavigation: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(WebView.Binding.didStartProvisionalNavigation) }
+	static var didReceiveServerRedirectForProvisionalNavigation: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(WebView.Binding.didReceiveServerRedirectForProvisionalNavigation) }
+	static var didFail: WebViewName<(WKWebView, WKNavigation, Error) -> Void> { return .name(WebView.Binding.didFail) }
+	static var didFailProvisionalNavigation: WebViewName<(WKWebView, WKNavigation, Error) -> Void> { return .name(WebView.Binding.didFailProvisionalNavigation) }
+	static var didFinish: WebViewName<(WKWebView, WKNavigation) -> Void> { return .name(WebView.Binding.didFinish) }
+	static var contentProcessDidTerminate: WebViewName<(WKWebView) -> Void> { return .name(WebView.Binding.contentProcessDidTerminate) }
+	static var decideActionPolicy: WebViewName<(WKWebView, WKNavigationAction, (WKNavigationActionPolicy) -> Void) -> Void> { return .name(WebView.Binding.decideActionPolicy) }
+	static var decideResponsePolicy: WebViewName<(WKWebView, WKNavigationResponse, (WKNavigationActionPolicy) -> Void) -> Void> { return .name(WebView.Binding.decideResponsePolicy) }
+	static var didReceiveAuthenticationChallenge: WebViewName<(WKWebView, URLAuthenticationChallenge, (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) -> Void> { return .name(WebView.Binding.didReceiveAuthenticationChallenge) }
+	static var runJavaScriptAlertPanel: WebViewName<(WKWebView, String, WKFrameInfo, () -> Void) -> Void> { return .name(WebView.Binding.runJavaScriptAlertPanel) }
+	static var runJavaScriptConfirmPanel: WebViewName<(WKWebView, String, WKFrameInfo, (Bool) -> Void) -> Void> { return .name(WebView.Binding.runJavaScriptConfirmPanel) }
+	static var runJavaScriptTextInputPanel: WebViewName<(WKWebView, String, String?, WKFrameInfo, (String?) -> Void) -> Void> { return .name(WebView.Binding.runJavaScriptTextInputPanel) }
 	
-	@available(macOS, unavailable) @available(iOS 10.0, *) static var commitPreviewingViewController: WebViewName<(_ webView: WKWebView, _ previewingViewController: WebView.UIViewController) -> Void> { return .name(B.commitPreviewingViewController) }
-	@available(macOS, unavailable) @available(iOS 10.0, *) static var previewingViewController: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo, _ previewActions: [WebView.WKPreviewActionItem]) -> WebView.UIViewController?> { return .name(B.previewingViewController) }
-	@available(macOS 10.12, *) @available(iOS, unavailable) static var runOpenPanel: WebViewName<(WKWebView, WebView.WKOpenPanelParameters, WKFrameInfo, ([URL]?) -> Void) -> Void> { return .name(B.runOpenPanel) }
-	@available(macOS, unavailable) @available(iOS 10.0, *) static var shouldPreviewElement: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo) -> Bool> { return .name(B.shouldPreviewElement) }
+	@available(macOS, unavailable) @available(iOS 10.0, *) static var commitPreviewingViewController: WebViewName<(_ webView: WKWebView, _ previewingViewController: WebView.UIViewController) -> Void> { return .name(WebView.Binding.commitPreviewingViewController) }
+	@available(macOS, unavailable) @available(iOS 10.0, *) static var previewingViewController: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo, _ previewActions: [WebView.WKPreviewActionItem]) -> WebView.UIViewController?> { return .name(WebView.Binding.previewingViewController) }
+	@available(macOS 10.12, *) @available(iOS, unavailable) static var runOpenPanel: WebViewName<(WKWebView, WebView.WKOpenPanelParameters, WKFrameInfo, ([URL]?) -> Void) -> Void> { return .name(WebView.Binding.runOpenPanel) }
+	@available(macOS, unavailable) @available(iOS 10.0, *) static var shouldPreviewElement: WebViewName<(_ webView: WKWebView, _ elementInfo: WebView.WKPreviewElementInfo) -> Bool> { return .name(WebView.Binding.shouldPreviewElement) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

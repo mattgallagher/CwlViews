@@ -287,7 +287,6 @@ extension ViewController.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ViewControllerBinding {
 	public typealias ViewControllerName<V> = BindingName<V, ViewController.Binding, Binding>
-	private typealias B = ViewController.Binding
 	private static func name<V>(_ source: @escaping (V) -> ViewController.Binding) -> ViewControllerName<V> {
 		return ViewControllerName<V>(source: source, downcast: Binding.viewControllerBinding)
 	}
@@ -295,40 +294,40 @@ extension BindingName where Binding: ViewControllerBinding {
 public extension BindingName where Binding: ViewControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ViewControllerName<$2> { return .name(B.$1) }
+	// With:    static var $1: ViewControllerName<$2> { return .name(ViewController.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var navigationItem: ViewControllerName<Constant<NavigationItem>> { return .name(B.navigationItem) }
+	static var navigationItem: ViewControllerName<Constant<NavigationItem>> { return .name(ViewController.Binding.navigationItem) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var additionalSafeAreaInsets: ViewControllerName<Dynamic<UIEdgeInsets>> { return .name(B.additionalSafeAreaInsets) }
-	static var children: ViewControllerName<Dynamic<[ViewControllerConvertible]>> { return .name(B.children) }
-	static var definesPresentationContext: ViewControllerName<Dynamic<Bool>> { return .name(B.definesPresentationContext) }
-	static var edgesForExtendedLayout: ViewControllerName<Dynamic<UIRectEdge>> { return .name(B.edgesForExtendedLayout) }
-	static var extendedLayoutIncludesOpaqueBars: ViewControllerName<Dynamic<Bool>> { return .name(B.extendedLayoutIncludesOpaqueBars) }
-	static var hidesBottomBarWhenPushed: ViewControllerName<Dynamic<Bool>> { return .name(B.hidesBottomBarWhenPushed) }
-	static var isEditing: ViewControllerName<Signal<SetOrAnimate<Bool>>> { return .name(B.isEditing) }
-	static var isModalInPopover: ViewControllerName<Dynamic<Bool>> { return .name(B.isModalInPopover) }
-	static var modalPresentationCapturesStatusBarAppearance: ViewControllerName<Dynamic<Bool>> { return .name(B.modalPresentationCapturesStatusBarAppearance) }
-	static var modalPresentationStyle: ViewControllerName<Dynamic<UIModalPresentationStyle>> { return .name(B.modalPresentationStyle) }
-	static var modalTransitionStyle: ViewControllerName<Dynamic<UIModalTransitionStyle>> { return .name(B.modalTransitionStyle) }
-	static var preferredContentSize: ViewControllerName<Dynamic<CGSize>> { return .name(B.preferredContentSize) }
-	static var providesPresentationContextTransitionStyle: ViewControllerName<Dynamic<Bool>> { return .name(B.providesPresentationContextTransitionStyle) }
-	static var restorationClass: ViewControllerName<Dynamic<UIViewControllerRestoration.Type?>> { return .name(B.restorationClass) }
-	static var restorationIdentifier: ViewControllerName<Dynamic<String?>> { return .name(B.restorationIdentifier) }
-	static var tabBarItem: ViewControllerName<Dynamic<TabBarItemConvertible>> { return .name(B.tabBarItem) }
-	static var title: ViewControllerName<Dynamic<String>> { return .name(B.title) }
-	static var toolbarItems: ViewControllerName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.toolbarItems) }
-	static var transitioningDelegate: ViewControllerName<Dynamic<UIViewControllerTransitioningDelegate>> { return .name(B.transitioningDelegate) }
-	static var view: ViewControllerName<Dynamic<ViewConvertible>> { return .name(B.view) }
+	static var additionalSafeAreaInsets: ViewControllerName<Dynamic<UIEdgeInsets>> { return .name(ViewController.Binding.additionalSafeAreaInsets) }
+	static var children: ViewControllerName<Dynamic<[ViewControllerConvertible]>> { return .name(ViewController.Binding.children) }
+	static var definesPresentationContext: ViewControllerName<Dynamic<Bool>> { return .name(ViewController.Binding.definesPresentationContext) }
+	static var edgesForExtendedLayout: ViewControllerName<Dynamic<UIRectEdge>> { return .name(ViewController.Binding.edgesForExtendedLayout) }
+	static var extendedLayoutIncludesOpaqueBars: ViewControllerName<Dynamic<Bool>> { return .name(ViewController.Binding.extendedLayoutIncludesOpaqueBars) }
+	static var hidesBottomBarWhenPushed: ViewControllerName<Dynamic<Bool>> { return .name(ViewController.Binding.hidesBottomBarWhenPushed) }
+	static var isEditing: ViewControllerName<Signal<SetOrAnimate<Bool>>> { return .name(ViewController.Binding.isEditing) }
+	static var isModalInPopover: ViewControllerName<Dynamic<Bool>> { return .name(ViewController.Binding.isModalInPopover) }
+	static var modalPresentationCapturesStatusBarAppearance: ViewControllerName<Dynamic<Bool>> { return .name(ViewController.Binding.modalPresentationCapturesStatusBarAppearance) }
+	static var modalPresentationStyle: ViewControllerName<Dynamic<UIModalPresentationStyle>> { return .name(ViewController.Binding.modalPresentationStyle) }
+	static var modalTransitionStyle: ViewControllerName<Dynamic<UIModalTransitionStyle>> { return .name(ViewController.Binding.modalTransitionStyle) }
+	static var preferredContentSize: ViewControllerName<Dynamic<CGSize>> { return .name(ViewController.Binding.preferredContentSize) }
+	static var providesPresentationContextTransitionStyle: ViewControllerName<Dynamic<Bool>> { return .name(ViewController.Binding.providesPresentationContextTransitionStyle) }
+	static var restorationClass: ViewControllerName<Dynamic<UIViewControllerRestoration.Type?>> { return .name(ViewController.Binding.restorationClass) }
+	static var restorationIdentifier: ViewControllerName<Dynamic<String?>> { return .name(ViewController.Binding.restorationIdentifier) }
+	static var tabBarItem: ViewControllerName<Dynamic<TabBarItemConvertible>> { return .name(ViewController.Binding.tabBarItem) }
+	static var title: ViewControllerName<Dynamic<String>> { return .name(ViewController.Binding.title) }
+	static var toolbarItems: ViewControllerName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(ViewController.Binding.toolbarItems) }
+	static var transitioningDelegate: ViewControllerName<Dynamic<UIViewControllerTransitioningDelegate>> { return .name(ViewController.Binding.transitioningDelegate) }
+	static var view: ViewControllerName<Dynamic<ViewConvertible>> { return .name(ViewController.Binding.view) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var present: ViewControllerName<Signal<Animatable<ModalPresentation?, ()>>> { return .name(B.present) }
+	static var present: ViewControllerName<Signal<Animatable<ModalPresentation?, ()>>> { return .name(ViewController.Binding.present) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var childrenLayout: ViewControllerName<([UIView]) -> Layout> { return .name(B.childrenLayout) }
+	static var childrenLayout: ViewControllerName<([UIView]) -> Layout> { return .name(ViewController.Binding.childrenLayout) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

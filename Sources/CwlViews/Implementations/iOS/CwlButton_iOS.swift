@@ -169,7 +169,6 @@ extension Button.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ButtonBinding {
 	public typealias ButtonName<V> = BindingName<V, Button.Binding, Binding>
-	private typealias B = Button.Binding
 	private static func name<V>(_ source: @escaping (V) -> Button.Binding) -> ButtonName<V> {
 		return ButtonName<V>(source: source, downcast: Binding.buttonBinding)
 	}
@@ -177,26 +176,26 @@ extension BindingName where Binding: ButtonBinding {
 public extension BindingName where Binding: ButtonBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ButtonName<$2> { return .name(B.$1) }
+	// With:    static var $1: ButtonName<$2> { return .name(Button.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var imageView: ButtonName<Constant<ImageView>> { return .name(B.imageView) }
-	static var titleLabel: ButtonName<Constant<Label>> { return .name(B.titleLabel) }
-	static var type: ButtonName<Constant<UIButton.ButtonType>> { return .name(B.type) }
+	static var imageView: ButtonName<Constant<ImageView>> { return .name(Button.Binding.imageView) }
+	static var titleLabel: ButtonName<Constant<Label>> { return .name(Button.Binding.titleLabel) }
+	static var type: ButtonName<Constant<UIButton.ButtonType>> { return .name(Button.Binding.type) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var adjustsImageWhenDisabled: ButtonName<Dynamic<Bool>> { return .name(B.adjustsImageWhenDisabled) }
-	static var adjustsImageWhenHighlighted: ButtonName<Dynamic<Bool>> { return .name(B.adjustsImageWhenHighlighted) }
-	static var attributedTitle: ButtonName<Dynamic<ScopedValues<UIControl.State, NSAttributedString?>>> { return .name(B.attributedTitle) }
-	static var backgroundImage: ButtonName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.backgroundImage) }
-	static var contentEdgeInsets: ButtonName<Dynamic<UIEdgeInsets>> { return .name(B.contentEdgeInsets) }
-	static var image: ButtonName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(B.image) }
-	static var imageEdgeInsets: ButtonName<Dynamic<UIEdgeInsets>> { return .name(B.imageEdgeInsets) }
-	static var showsTouchWhenHighlighted: ButtonName<Dynamic<Bool>> { return .name(B.showsTouchWhenHighlighted) }
-	static var title: ButtonName<Dynamic<ScopedValues<UIControl.State, String?>>> { return .name(B.title) }
-	static var titleColor: ButtonName<Dynamic<ScopedValues<UIControl.State, UIColor?>>> { return .name(B.titleColor) }
-	static var titleEdgeInsets: ButtonName<Dynamic<UIEdgeInsets>> { return .name(B.titleEdgeInsets) }
-	static var titleShadowColor: ButtonName<Dynamic<ScopedValues<UIControl.State, UIColor?>>> { return .name(B.titleShadowColor) }
+	static var adjustsImageWhenDisabled: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.adjustsImageWhenDisabled) }
+	static var adjustsImageWhenHighlighted: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.adjustsImageWhenHighlighted) }
+	static var attributedTitle: ButtonName<Dynamic<ScopedValues<UIControl.State, NSAttributedString?>>> { return .name(Button.Binding.attributedTitle) }
+	static var backgroundImage: ButtonName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(Button.Binding.backgroundImage) }
+	static var contentEdgeInsets: ButtonName<Dynamic<UIEdgeInsets>> { return .name(Button.Binding.contentEdgeInsets) }
+	static var image: ButtonName<Dynamic<ScopedValues<UIControl.State, UIImage?>>> { return .name(Button.Binding.image) }
+	static var imageEdgeInsets: ButtonName<Dynamic<UIEdgeInsets>> { return .name(Button.Binding.imageEdgeInsets) }
+	static var showsTouchWhenHighlighted: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.showsTouchWhenHighlighted) }
+	static var title: ButtonName<Dynamic<ScopedValues<UIControl.State, String?>>> { return .name(Button.Binding.title) }
+	static var titleColor: ButtonName<Dynamic<ScopedValues<UIControl.State, UIColor?>>> { return .name(Button.Binding.titleColor) }
+	static var titleEdgeInsets: ButtonName<Dynamic<UIEdgeInsets>> { return .name(Button.Binding.titleEdgeInsets) }
+	static var titleShadowColor: ButtonName<Dynamic<ScopedValues<UIControl.State, UIColor?>>> { return .name(Button.Binding.titleShadowColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

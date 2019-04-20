@@ -177,7 +177,6 @@ extension View.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ViewBinding {
 	public typealias ViewName<V> = BindingName<V, View.Binding, Binding>
-	private typealias B = View.Binding
 	private static func name<V>(_ source: @escaping (V) -> View.Binding) -> ViewName<V> {
 		return ViewName<V>(source: source, downcast: Binding.viewBinding)
 	}
@@ -185,40 +184,40 @@ extension BindingName where Binding: ViewBinding {
 public extension BindingName where Binding: ViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ViewName<$2> { return .name(View.Binding.$1) }
 	
 	//	0. Static styles are applied at construction and are subsequently immutable.
-	static var layer: ViewName<Constant<Layer>> { return .name(B.layer) }
+	static var layer: ViewName<Constant<Layer>> { return .name(View.Binding.layer) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var appearance: ViewName<Dynamic<NSAppearance?>> { return .name(B.appearance) }
-	static var canDrawSubviewsIntoLayer: ViewName<Dynamic<Bool>> { return .name(B.canDrawSubviewsIntoLayer) }
-	static var focusRingType: ViewName<Dynamic<NSFocusRingType>> { return .name(B.focusRingType) }
-	static var frameRotation: ViewName<Dynamic<CGFloat>> { return .name(B.frameRotation) }
-	static var gestureRecognizers: ViewName<Dynamic<[GestureRecognizerConvertible]>> { return .name(B.gestureRecognizers) }
-	static var horizontalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.horizontalContentCompressionResistancePriority) }
-	static var horizontalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.horizontalContentHuggingPriority) }
-	static var identifier: ViewName<Dynamic<NSUserInterfaceItemIdentifier?>> { return .name(B.identifier) }
-	static var isHidden: ViewName<Dynamic<Bool>> { return .name(B.isHidden) }
-	static var layerContentsRedrawPolicy: ViewName<Dynamic<NSView.LayerContentsRedrawPolicy>> { return .name(B.layerContentsRedrawPolicy) }
-	static var layout: ViewName<Dynamic<Layout>> { return .name(B.layout) }
-	static var pressureConfiguration: ViewName<Dynamic<NSPressureConfiguration>> { return .name(B.pressureConfiguration) }
-	static var registeredDragTypes: ViewName<Dynamic<[NSPasteboard.PasteboardType]>> { return .name(B.registeredDragTypes) }
-	static var tooltip: ViewName<Dynamic<String>> { return .name(B.tooltip) }
-	static var verticalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentCompressionResistancePriority) }
-	static var verticalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(B.verticalContentHuggingPriority) }
+	static var appearance: ViewName<Dynamic<NSAppearance?>> { return .name(View.Binding.appearance) }
+	static var canDrawSubviewsIntoLayer: ViewName<Dynamic<Bool>> { return .name(View.Binding.canDrawSubviewsIntoLayer) }
+	static var focusRingType: ViewName<Dynamic<NSFocusRingType>> { return .name(View.Binding.focusRingType) }
+	static var frameRotation: ViewName<Dynamic<CGFloat>> { return .name(View.Binding.frameRotation) }
+	static var gestureRecognizers: ViewName<Dynamic<[GestureRecognizerConvertible]>> { return .name(View.Binding.gestureRecognizers) }
+	static var horizontalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(View.Binding.horizontalContentCompressionResistancePriority) }
+	static var horizontalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(View.Binding.horizontalContentHuggingPriority) }
+	static var identifier: ViewName<Dynamic<NSUserInterfaceItemIdentifier?>> { return .name(View.Binding.identifier) }
+	static var isHidden: ViewName<Dynamic<Bool>> { return .name(View.Binding.isHidden) }
+	static var layerContentsRedrawPolicy: ViewName<Dynamic<NSView.LayerContentsRedrawPolicy>> { return .name(View.Binding.layerContentsRedrawPolicy) }
+	static var layout: ViewName<Dynamic<Layout>> { return .name(View.Binding.layout) }
+	static var pressureConfiguration: ViewName<Dynamic<NSPressureConfiguration>> { return .name(View.Binding.pressureConfiguration) }
+	static var registeredDragTypes: ViewName<Dynamic<[NSPasteboard.PasteboardType]>> { return .name(View.Binding.registeredDragTypes) }
+	static var tooltip: ViewName<Dynamic<String>> { return .name(View.Binding.tooltip) }
+	static var verticalContentCompressionResistancePriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(View.Binding.verticalContentCompressionResistancePriority) }
+	static var verticalContentHuggingPriority: ViewName<Dynamic<NSLayoutConstraint.Priority>> { return .name(View.Binding.verticalContentHuggingPriority) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var becomeFirstResponder: ViewName<Signal<Void>> { return .name(B.becomeFirstResponder) }
-	static var needsDisplay: ViewName<Signal<Bool>> { return .name(B.needsDisplay) }
-	static var printView: ViewName<Signal<Void>> { return .name(B.printView) }
-	static var scrollRectToVisible: ViewName<Signal<NSRect>> { return .name(B.scrollRectToVisible) }
-	static var setNeedsDisplayInRect: ViewName<Signal<NSRect>> { return .name(B.setNeedsDisplayInRect) }
+	static var becomeFirstResponder: ViewName<Signal<Void>> { return .name(View.Binding.becomeFirstResponder) }
+	static var needsDisplay: ViewName<Signal<Bool>> { return .name(View.Binding.needsDisplay) }
+	static var printView: ViewName<Signal<Void>> { return .name(View.Binding.printView) }
+	static var scrollRectToVisible: ViewName<Signal<NSRect>> { return .name(View.Binding.scrollRectToVisible) }
+	static var setNeedsDisplayInRect: ViewName<Signal<NSRect>> { return .name(View.Binding.setNeedsDisplayInRect) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var boundsDidChange: ViewName<SignalInput<NSRect>> { return .name(B.boundsDidChange) }
-	static var frameDidChange: ViewName<SignalInput<NSRect>> { return .name(B.frameDidChange) }
-	static var globalFrameDidChange: ViewName<SignalInput<NSRect>> { return .name(B.globalFrameDidChange) }
+	static var boundsDidChange: ViewName<SignalInput<NSRect>> { return .name(View.Binding.boundsDidChange) }
+	static var frameDidChange: ViewName<SignalInput<NSRect>> { return .name(View.Binding.frameDidChange) }
+	static var globalFrameDidChange: ViewName<SignalInput<NSRect>> { return .name(View.Binding.globalFrameDidChange) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

@@ -292,7 +292,6 @@ extension Layer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: LayerBinding {
 	public typealias LayerName<V> = BindingName<V, Layer.Binding, Binding>
-	private typealias B = Layer.Binding
 	private static func name<V>(_ source: @escaping (V) -> Layer.Binding) -> LayerName<V> {
 		return LayerName<V>(source: source, downcast: Binding.layerBinding)
 	}
@@ -300,75 +299,75 @@ extension BindingName where Binding: LayerBinding {
 public extension BindingName where Binding: LayerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: LayerName<$2> { return .name(B.$1) }
+	// With:    static var $1: LayerName<$2> { return .name(Layer.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var actions: LayerName<Dynamic<[String: SignalInput<[AnyHashable: Any]?>?]>> { return .name(B.actions) }
-	static var affineTransform: LayerName<Dynamic<CGAffineTransform>> { return .name(B.affineTransform) }
-	static var anchorPoint: LayerName<Dynamic<CGPoint>> { return .name(B.anchorPoint) }
-	static var anchorPointZ: LayerName<Dynamic<CGFloat>> { return .name(B.anchorPointZ) }
-	static var backgroundColor: LayerName<Dynamic<CGColor>> { return .name(B.backgroundColor) }
-	static var borderColor: LayerName<Dynamic<CGColor>> { return .name(B.borderColor) }
-	static var borderWidth: LayerName<Dynamic<CGFloat>> { return .name(B.borderWidth) }
-	static var bounds: LayerName<Dynamic<CGRect>> { return .name(B.bounds) }
-	static var contents: LayerName<Dynamic<Any?>> { return .name(B.contents) }
-	static var contentsCenter: LayerName<Dynamic<CGRect>> { return .name(B.contentsCenter) }
-	static var contentsGravity: LayerName<Dynamic<CALayerContentsGravity>> { return .name(B.contentsGravity) }
-	static var contentsRect: LayerName<Dynamic<CGRect>> { return .name(B.contentsRect) }
-	static var contentsScale: LayerName<Dynamic<CGFloat>> { return .name(B.contentsScale) }
-	static var cornerRadius: LayerName<Dynamic<CGFloat>> { return .name(B.cornerRadius) }
-	static var drawsAsynchronously: LayerName<Dynamic<Bool>> { return .name(B.drawsAsynchronously) }
-	static var edgeAntialiasingMask: LayerName<Dynamic<CAEdgeAntialiasingMask>> { return .name(B.edgeAntialiasingMask) }
-	static var frame: LayerName<Dynamic<CGRect>> { return .name(B.frame) }
-	static var isDoubleSided: LayerName<Dynamic<Bool>> { return .name(B.isDoubleSided) }
-	static var isGeometryFlipped: LayerName<Dynamic<Bool>> { return .name(B.isGeometryFlipped) }
-	static var isHidden: LayerName<Dynamic<Bool>> { return .name(B.isHidden) }
-	static var isOpaque: LayerName<Dynamic<Bool>> { return .name(B.isOpaque) }
-	static var magnificationFilter: LayerName<Dynamic<CALayerContentsFilter>> { return .name(B.magnificationFilter) }
-	static var mask: LayerName<Dynamic<LayerConvertible?>> { return .name(B.mask) }
-	static var masksToBounds: LayerName<Dynamic<Bool>> { return .name(B.masksToBounds) }
-	static var minificationFilter: LayerName<Dynamic<CALayerContentsFilter>> { return .name(B.minificationFilter) }
-	static var minificationFilterBias: LayerName<Dynamic<Float>> { return .name(B.minificationFilterBias) }
-	static var name: LayerName<Dynamic<String>> { return .name(B.name) }
-	static var needsDisplayOnBoundsChange: LayerName<Dynamic<Bool>> { return .name(B.needsDisplayOnBoundsChange) }
-	static var opacity: LayerName<Dynamic<Float>> { return .name(B.opacity) }
-	static var position: LayerName<Dynamic<CGPoint>> { return .name(B.position) }
-	static var rasterizationScale: LayerName<Dynamic<CGFloat>> { return .name(B.rasterizationScale) }
-	static var shadowColor: LayerName<Dynamic<CGColor?>> { return .name(B.shadowColor) }
-	static var shadowOffset: LayerName<Dynamic<CGSize>> { return .name(B.shadowOffset) }
-	static var shadowOpacity: LayerName<Dynamic<Float>> { return .name(B.shadowOpacity) }
-	static var shadowPath: LayerName<Dynamic<CGPath?>> { return .name(B.shadowPath) }
-	static var shadowRadius: LayerName<Dynamic<CGFloat>> { return .name(B.shadowRadius) }
-	static var shouldRasterize: LayerName<Dynamic<Bool>> { return .name(B.shouldRasterize) }
-	static var style: LayerName<Dynamic<[AnyHashable: Any]>> { return .name(B.style) }
-	static var sublayers: LayerName<Dynamic<[LayerConvertible]>> { return .name(B.sublayers) }
-	static var sublayerTransform: LayerName<Dynamic<CATransform3D>> { return .name(B.sublayerTransform) }
-	static var transform: LayerName<Dynamic<CATransform3D>> { return .name(B.transform) }
-	static var zPosition: LayerName<Dynamic<CGFloat>> { return .name(B.zPosition) }
+	static var actions: LayerName<Dynamic<[String: SignalInput<[AnyHashable: Any]?>?]>> { return .name(Layer.Binding.actions) }
+	static var affineTransform: LayerName<Dynamic<CGAffineTransform>> { return .name(Layer.Binding.affineTransform) }
+	static var anchorPoint: LayerName<Dynamic<CGPoint>> { return .name(Layer.Binding.anchorPoint) }
+	static var anchorPointZ: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.anchorPointZ) }
+	static var backgroundColor: LayerName<Dynamic<CGColor>> { return .name(Layer.Binding.backgroundColor) }
+	static var borderColor: LayerName<Dynamic<CGColor>> { return .name(Layer.Binding.borderColor) }
+	static var borderWidth: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.borderWidth) }
+	static var bounds: LayerName<Dynamic<CGRect>> { return .name(Layer.Binding.bounds) }
+	static var contents: LayerName<Dynamic<Any?>> { return .name(Layer.Binding.contents) }
+	static var contentsCenter: LayerName<Dynamic<CGRect>> { return .name(Layer.Binding.contentsCenter) }
+	static var contentsGravity: LayerName<Dynamic<CALayerContentsGravity>> { return .name(Layer.Binding.contentsGravity) }
+	static var contentsRect: LayerName<Dynamic<CGRect>> { return .name(Layer.Binding.contentsRect) }
+	static var contentsScale: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.contentsScale) }
+	static var cornerRadius: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.cornerRadius) }
+	static var drawsAsynchronously: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.drawsAsynchronously) }
+	static var edgeAntialiasingMask: LayerName<Dynamic<CAEdgeAntialiasingMask>> { return .name(Layer.Binding.edgeAntialiasingMask) }
+	static var frame: LayerName<Dynamic<CGRect>> { return .name(Layer.Binding.frame) }
+	static var isDoubleSided: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.isDoubleSided) }
+	static var isGeometryFlipped: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.isGeometryFlipped) }
+	static var isHidden: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.isHidden) }
+	static var isOpaque: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.isOpaque) }
+	static var magnificationFilter: LayerName<Dynamic<CALayerContentsFilter>> { return .name(Layer.Binding.magnificationFilter) }
+	static var mask: LayerName<Dynamic<LayerConvertible?>> { return .name(Layer.Binding.mask) }
+	static var masksToBounds: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.masksToBounds) }
+	static var minificationFilter: LayerName<Dynamic<CALayerContentsFilter>> { return .name(Layer.Binding.minificationFilter) }
+	static var minificationFilterBias: LayerName<Dynamic<Float>> { return .name(Layer.Binding.minificationFilterBias) }
+	static var name: LayerName<Dynamic<String>> { return .name(Layer.Binding.name) }
+	static var needsDisplayOnBoundsChange: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.needsDisplayOnBoundsChange) }
+	static var opacity: LayerName<Dynamic<Float>> { return .name(Layer.Binding.opacity) }
+	static var position: LayerName<Dynamic<CGPoint>> { return .name(Layer.Binding.position) }
+	static var rasterizationScale: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.rasterizationScale) }
+	static var shadowColor: LayerName<Dynamic<CGColor?>> { return .name(Layer.Binding.shadowColor) }
+	static var shadowOffset: LayerName<Dynamic<CGSize>> { return .name(Layer.Binding.shadowOffset) }
+	static var shadowOpacity: LayerName<Dynamic<Float>> { return .name(Layer.Binding.shadowOpacity) }
+	static var shadowPath: LayerName<Dynamic<CGPath?>> { return .name(Layer.Binding.shadowPath) }
+	static var shadowRadius: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.shadowRadius) }
+	static var shouldRasterize: LayerName<Dynamic<Bool>> { return .name(Layer.Binding.shouldRasterize) }
+	static var style: LayerName<Dynamic<[AnyHashable: Any]>> { return .name(Layer.Binding.style) }
+	static var sublayers: LayerName<Dynamic<[LayerConvertible]>> { return .name(Layer.Binding.sublayers) }
+	static var sublayerTransform: LayerName<Dynamic<CATransform3D>> { return .name(Layer.Binding.sublayerTransform) }
+	static var transform: LayerName<Dynamic<CATransform3D>> { return .name(Layer.Binding.transform) }
+	static var zPosition: LayerName<Dynamic<CGFloat>> { return .name(Layer.Binding.zPosition) }
 	
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var autoresizingMask: LayerName<Dynamic<Layer.CAAutoresizingMask>> { return .name(B.autoresizingMask) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var backgroundFilters: LayerName<Dynamic<[Layer.CIFilter]?>> { return .name(B.backgroundFilters) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var compositingFilter: LayerName<Dynamic<Layer.CIFilter?>> { return .name(B.compositingFilter) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var constraints: LayerName<Dynamic<[Layer.CAConstraint]>> { return .name(B.constraints) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var filters: LayerName<Dynamic<[Layer.CIFilter]?>> { return .name(B.filters) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var autoresizingMask: LayerName<Dynamic<Layer.CAAutoresizingMask>> { return .name(Layer.Binding.autoresizingMask) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var backgroundFilters: LayerName<Dynamic<[Layer.CIFilter]?>> { return .name(Layer.Binding.backgroundFilters) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var compositingFilter: LayerName<Dynamic<Layer.CIFilter?>> { return .name(Layer.Binding.compositingFilter) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var constraints: LayerName<Dynamic<[Layer.CAConstraint]>> { return .name(Layer.Binding.constraints) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var filters: LayerName<Dynamic<[Layer.CIFilter]?>> { return .name(Layer.Binding.filters) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var addAnimation: LayerName<Signal<AnimationForKey>> { return .name(B.addAnimation) }
-	static var needsDisplay: LayerName<Signal<Void>> { return .name(B.needsDisplay) }
-	static var needsDisplayInRect: LayerName<Signal<CGRect>> { return .name(B.needsDisplayInRect) }
-	static var removeAllAnimations: LayerName<Signal<Void>> { return .name(B.removeAllAnimations) }
-	static var removeAnimationForKey: LayerName<Signal<String>> { return .name(B.removeAnimationForKey) }
-	static var scrollRectToVisible: LayerName<Signal<CGRect>> { return .name(B.scrollRectToVisible) }
+	static var addAnimation: LayerName<Signal<AnimationForKey>> { return .name(Layer.Binding.addAnimation) }
+	static var needsDisplay: LayerName<Signal<Void>> { return .name(Layer.Binding.needsDisplay) }
+	static var needsDisplayInRect: LayerName<Signal<CGRect>> { return .name(Layer.Binding.needsDisplayInRect) }
+	static var removeAllAnimations: LayerName<Signal<Void>> { return .name(Layer.Binding.removeAllAnimations) }
+	static var removeAnimationForKey: LayerName<Signal<String>> { return .name(Layer.Binding.removeAnimationForKey) }
+	static var scrollRectToVisible: LayerName<Signal<CGRect>> { return .name(Layer.Binding.scrollRectToVisible) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var display: LayerName<(CALayer) -> Void> { return .name(B.display) }
-	static var draw: LayerName<(CALayer, CGContext) -> Void> { return .name(B.draw) }
-	static var layoutSublayers: LayerName<(CALayer) -> Void> { return .name(B.layoutSublayers) }
-	static var willDraw: LayerName<(CALayer) -> Void> { return .name(B.willDraw) }
+	static var display: LayerName<(CALayer) -> Void> { return .name(Layer.Binding.display) }
+	static var draw: LayerName<(CALayer, CGContext) -> Void> { return .name(Layer.Binding.draw) }
+	static var layoutSublayers: LayerName<(CALayer) -> Void> { return .name(Layer.Binding.layoutSublayers) }
+	static var willDraw: LayerName<(CALayer) -> Void> { return .name(Layer.Binding.willDraw) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -95,7 +95,6 @@ extension SegmentedControl.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SegmentedControlBinding {
 	public typealias SegmentedControlName<V> = BindingName<V, SegmentedControl.Binding, Binding>
-	private typealias B = SegmentedControl.Binding
 	private static func name<V>(_ source: @escaping (V) -> SegmentedControl.Binding) -> SegmentedControlName<V> {
 		return SegmentedControlName<V>(source: source, downcast: Binding.segmentedControlBinding)
 	}
@@ -103,14 +102,14 @@ extension BindingName where Binding: SegmentedControlBinding {
 public extension BindingName where Binding: SegmentedControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SegmentedControlName<$2> { return .name(B.$1) }
+	// With:    static var $1: SegmentedControlName<$2> { return .name(SegmentedControl.Binding.$1) }
 
-	static var isSpringLoaded: SegmentedControlName<Dynamic<Bool>> { return .name(B.isSpringLoaded) }
-	static var distribution: SegmentedControlName<Dynamic<NSSegmentedControl.Distribution>> { return .name(B.distribution) }
-	static var segments: SegmentedControlName<Dynamic<[SegmentDescription]>> { return .name(B.segments) }
-	static var segmentStyle: SegmentedControlName<Dynamic<NSSegmentedControl.Style>> { return .name(B.segmentStyle) }
-	static var selectedSegment: SegmentedControlName<Dynamic<Int>> { return .name(B.selectedSegment) }
-	static var trackingMode: SegmentedControlName<Dynamic<NSSegmentedControl.SwitchTracking>> { return .name(B.trackingMode) }
+	static var isSpringLoaded: SegmentedControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.isSpringLoaded) }
+	static var distribution: SegmentedControlName<Dynamic<NSSegmentedControl.Distribution>> { return .name(SegmentedControl.Binding.distribution) }
+	static var segments: SegmentedControlName<Dynamic<[SegmentDescription]>> { return .name(SegmentedControl.Binding.segments) }
+	static var segmentStyle: SegmentedControlName<Dynamic<NSSegmentedControl.Style>> { return .name(SegmentedControl.Binding.segmentStyle) }
+	static var selectedSegment: SegmentedControlName<Dynamic<Int>> { return .name(SegmentedControl.Binding.selectedSegment) }
+	static var trackingMode: SegmentedControlName<Dynamic<NSSegmentedControl.SwitchTracking>> { return .name(SegmentedControl.Binding.trackingMode) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

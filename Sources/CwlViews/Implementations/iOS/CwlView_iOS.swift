@@ -145,7 +145,6 @@ extension View.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ViewBinding {
 	public typealias ViewName<V> = BindingName<V, View.Binding, Binding>
-	private typealias B = View.Binding
 	private static func name<V>(_ source: @escaping (V) -> View.Binding) -> ViewName<V> {
 		return ViewName<V>(source: source, downcast: Binding.viewBinding)
 	}
@@ -153,41 +152,41 @@ extension BindingName where Binding: ViewBinding {
 public extension BindingName where Binding: ViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ViewName<$2> { return .name(View.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var layer: ViewName<Constant<Layer>> { return .name(B.layer) }
+	static var layer: ViewName<Constant<Layer>> { return .name(View.Binding.layer) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var alpha: ViewName<Dynamic<(CGFloat)>> { return .name(B.alpha) }
-	static var backgroundColor: ViewName<Dynamic<(UIColor?)>> { return .name(B.backgroundColor) }
-	static var clearsContextBeforeDrawing: ViewName<Dynamic<(Bool)>> { return .name(B.clearsContextBeforeDrawing) }
-	static var clipsToBounds: ViewName<Dynamic<(Bool)>> { return .name(B.clipsToBounds) }
-	static var contentMode: ViewName<Dynamic<(UIView.ContentMode)>> { return .name(B.contentMode) }
-	static var gestureRecognizers: ViewName<Dynamic<[GestureRecognizerConvertible]>> { return .name(B.gestureRecognizers) }
-	static var horizontalContentCompressionResistancePriority: ViewName<Dynamic<UILayoutPriority>> { return .name(B.horizontalContentCompressionResistancePriority) }
-	static var horizontalContentHuggingPriority: ViewName<Dynamic<UILayoutPriority>> { return .name(B.horizontalContentHuggingPriority) }
-	static var isExclusiveTouch: ViewName<Dynamic<(Bool)>> { return .name(B.isExclusiveTouch) }
-	static var isHidden: ViewName<Dynamic<(Bool)>> { return .name(B.isHidden) }
-	static var isMultipleTouchEnabled: ViewName<Dynamic<(Bool)>> { return .name(B.isMultipleTouchEnabled) }
-	static var isOpaque: ViewName<Dynamic<(Bool)>> { return .name(B.isOpaque) }
-	static var isUserInteractionEnabled: ViewName<Dynamic<(Bool)>> { return .name(B.isUserInteractionEnabled) }
-	static var layout: ViewName<Dynamic<Layout>> { return .name(B.layout) }
-	static var layoutMargins: ViewName<Dynamic<(UIEdgeInsets)>> { return .name(B.layoutMargins) }
-	static var mask: ViewName<Dynamic<(ViewConvertible?)>> { return .name(B.mask) }
-	static var motionEffects: ViewName<Dynamic<([UIMotionEffect])>> { return .name(B.motionEffects) }
-	static var preservesSuperviewLayoutMargins: ViewName<Dynamic<(Bool)>> { return .name(B.preservesSuperviewLayoutMargins) }
-	static var restorationIdentifier: ViewName<Dynamic<String?>> { return .name(B.restorationIdentifier) }
-	static var semanticContentAttribute: ViewName<Dynamic<(UISemanticContentAttribute)>> { return .name(B.semanticContentAttribute) }
-	static var tag: ViewName<Dynamic<Int>> { return .name(B.tag) }
-	static var tintAdjustmentMode: ViewName<Dynamic<(UIView.TintAdjustmentMode)>> { return .name(B.tintAdjustmentMode) }
-	static var tintColor: ViewName<Dynamic<(UIColor)>> { return .name(B.tintColor) }
-	static var verticalContentCompressionResistancePriority: ViewName<Dynamic<UILayoutPriority>> { return .name(B.verticalContentCompressionResistancePriority) }
-	static var verticalContentHuggingPriority: ViewName<Dynamic<UILayoutPriority>> { return .name(B.verticalContentHuggingPriority) }
+	static var alpha: ViewName<Dynamic<(CGFloat)>> { return .name(View.Binding.alpha) }
+	static var backgroundColor: ViewName<Dynamic<(UIColor?)>> { return .name(View.Binding.backgroundColor) }
+	static var clearsContextBeforeDrawing: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.clearsContextBeforeDrawing) }
+	static var clipsToBounds: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.clipsToBounds) }
+	static var contentMode: ViewName<Dynamic<(UIView.ContentMode)>> { return .name(View.Binding.contentMode) }
+	static var gestureRecognizers: ViewName<Dynamic<[GestureRecognizerConvertible]>> { return .name(View.Binding.gestureRecognizers) }
+	static var horizontalContentCompressionResistancePriority: ViewName<Dynamic<UILayoutPriority>> { return .name(View.Binding.horizontalContentCompressionResistancePriority) }
+	static var horizontalContentHuggingPriority: ViewName<Dynamic<UILayoutPriority>> { return .name(View.Binding.horizontalContentHuggingPriority) }
+	static var isExclusiveTouch: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.isExclusiveTouch) }
+	static var isHidden: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.isHidden) }
+	static var isMultipleTouchEnabled: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.isMultipleTouchEnabled) }
+	static var isOpaque: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.isOpaque) }
+	static var isUserInteractionEnabled: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.isUserInteractionEnabled) }
+	static var layout: ViewName<Dynamic<Layout>> { return .name(View.Binding.layout) }
+	static var layoutMargins: ViewName<Dynamic<(UIEdgeInsets)>> { return .name(View.Binding.layoutMargins) }
+	static var mask: ViewName<Dynamic<(ViewConvertible?)>> { return .name(View.Binding.mask) }
+	static var motionEffects: ViewName<Dynamic<([UIMotionEffect])>> { return .name(View.Binding.motionEffects) }
+	static var preservesSuperviewLayoutMargins: ViewName<Dynamic<(Bool)>> { return .name(View.Binding.preservesSuperviewLayoutMargins) }
+	static var restorationIdentifier: ViewName<Dynamic<String?>> { return .name(View.Binding.restorationIdentifier) }
+	static var semanticContentAttribute: ViewName<Dynamic<(UISemanticContentAttribute)>> { return .name(View.Binding.semanticContentAttribute) }
+	static var tag: ViewName<Dynamic<Int>> { return .name(View.Binding.tag) }
+	static var tintAdjustmentMode: ViewName<Dynamic<(UIView.TintAdjustmentMode)>> { return .name(View.Binding.tintAdjustmentMode) }
+	static var tintColor: ViewName<Dynamic<(UIColor)>> { return .name(View.Binding.tintColor) }
+	static var verticalContentCompressionResistancePriority: ViewName<Dynamic<UILayoutPriority>> { return .name(View.Binding.verticalContentCompressionResistancePriority) }
+	static var verticalContentHuggingPriority: ViewName<Dynamic<UILayoutPriority>> { return .name(View.Binding.verticalContentHuggingPriority) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var becomeFirstResponder: ViewName<Signal<Void>> { return .name(B.becomeFirstResponder) }
-	static var endEditing: ViewName<Signal<Bool>> { return .name(B.endEditing) }
+	static var becomeFirstResponder: ViewName<Signal<Void>> { return .name(View.Binding.becomeFirstResponder) }
+	static var endEditing: ViewName<Signal<Bool>> { return .name(View.Binding.endEditing) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	

@@ -89,7 +89,6 @@ extension RotationGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: RotationGestureRecognizerBinding {
 	public typealias RotationGestureRecognizerName<V> = BindingName<V, RotationGestureRecognizer.Binding, Binding>
-	private typealias B = RotationGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> RotationGestureRecognizer.Binding) -> RotationGestureRecognizerName<V> {
 		return RotationGestureRecognizerName<V>(source: source, downcast: Binding.rotationGestureRecognizerBinding)
 	}
@@ -97,12 +96,12 @@ extension BindingName where Binding: RotationGestureRecognizerBinding {
 public extension BindingName where Binding: RotationGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: RotationGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: RotationGestureRecognizerName<$2> { return .name(RotationGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var rotationInRadians: RotationGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.rotationInRadians) }
+	static var rotationInRadians: RotationGestureRecognizerName<Dynamic<CGFloat>> { return .name(RotationGestureRecognizer.Binding.rotationInRadians) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

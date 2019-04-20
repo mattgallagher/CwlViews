@@ -85,7 +85,7 @@ public extension AlertAction.Preparer {
 		
 		case .handler(let x):
 			handler = handler ?? Input<Void>().multicast()
-			handler?.signal.bind(to: x)
+			handler?.source.bind(to: x)
 		default: break
 		}
 	}
@@ -119,7 +119,6 @@ extension AlertAction.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: AlertActionBinding {
 	public typealias AlertActionName<V> = BindingName<V, AlertAction.Binding, Binding>
-	private typealias B = AlertAction.Binding
 	private static func name<V>(_ source: @escaping (V) -> AlertAction.Binding) -> AlertActionName<V> {
 		return AlertActionName<V>(source: source, downcast: Binding.alertActionBinding)
 	}
@@ -127,19 +126,19 @@ extension BindingName where Binding: AlertActionBinding {
 public extension BindingName where Binding: AlertActionBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: AlertActionName<$2> { return .name(B.$1) }
+	// With:    static var $1: AlertActionName<$2> { return .name(AlertAction.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var style: AlertActionName<Constant<UIAlertAction.Style>> { return .name(B.style) }
-	static var title: AlertActionName<Constant<String>> { return .name(B.title) }
+	static var style: AlertActionName<Constant<UIAlertAction.Style>> { return .name(AlertAction.Binding.style) }
+	static var title: AlertActionName<Constant<String>> { return .name(AlertAction.Binding.title) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var isEnabled: AlertActionName<Dynamic<Bool>> { return .name(B.isEnabled) }
+	static var isEnabled: AlertActionName<Dynamic<Bool>> { return .name(AlertAction.Binding.isEnabled) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var handler: AlertActionName<SignalInput<Void>> { return .name(B.handler) }
+	static var handler: AlertActionName<SignalInput<Void>> { return .name(AlertAction.Binding.handler) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 }

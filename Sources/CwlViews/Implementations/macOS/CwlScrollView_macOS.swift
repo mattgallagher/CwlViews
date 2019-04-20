@@ -179,7 +179,6 @@ extension ScrollView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ScrollViewBinding {
 	public typealias ScrollViewName<V> = BindingName<V, ScrollView.Binding, Binding>
-	private typealias B = ScrollView.Binding
 	private static func name<V>(_ source: @escaping (V) -> ScrollView.Binding) -> ScrollViewName<V> {
 		return ScrollViewName<V>(source: source, downcast: Binding.scrollViewBinding)
 	}
@@ -187,54 +186,54 @@ extension BindingName where Binding: ScrollViewBinding {
 public extension BindingName where Binding: ScrollViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ScrollViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ScrollViewName<$2> { return .name(ScrollView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsMagnification: ScrollViewName<Dynamic<Bool>> { return .name(B.allowsMagnification) }
-	static var autohidesScrollers: ScrollViewName<Dynamic<Bool>> { return .name(B.autohidesScrollers) }
-	static var automaticallyAdjustsContentInsets: ScrollViewName<Dynamic<Bool>> { return .name(B.automaticallyAdjustsContentInsets) }
-	static var backgroundColor: ScrollViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
-	static var borderType: ScrollViewName<Dynamic<NSBorderType>> { return .name(B.borderType) }
-	static var contentInsets: ScrollViewName<Dynamic<NSEdgeInsets>> { return .name(B.contentInsets) }
-	static var contentView: ScrollViewName<Dynamic<ClipViewConvertible>> { return .name(B.contentView) }
-	static var documentCursor: ScrollViewName<Dynamic<NSCursor?>> { return .name(B.documentCursor) }
-	static var drawsBackground: ScrollViewName<Dynamic<Bool>> { return .name(B.drawsBackground) }
-	static var findBarPosition: ScrollViewName<Dynamic<NSScrollView.FindBarPosition>> { return .name(B.findBarPosition) }
-	static var floatingSubviews: ScrollViewName<Dynamic<[(view: ViewConvertible, axis: NSEvent.GestureAxis)]>> { return .name(B.floatingSubviews) }
-	static var hasHorizontalRuler: ScrollViewName<Dynamic<Bool>> { return .name(B.hasHorizontalRuler) }
-	static var hasHorizontalScroller: ScrollViewName<Dynamic<Bool>> { return .name(B.hasHorizontalScroller) }
-	static var hasVerticalRuler: ScrollViewName<Dynamic<Bool>> { return .name(B.hasVerticalRuler) }
-	static var hasVerticalScroller: ScrollViewName<Dynamic<Bool>> { return .name(B.hasVerticalScroller) }
-	static var horizontalLineScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(B.horizontalLineScroll) }
-	static var horizontalPageScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(B.horizontalPageScroll) }
-	static var horizontalScrollElasticity: ScrollViewName<Dynamic<NSScrollView.Elasticity>> { return .name(B.horizontalScrollElasticity) }
-	static var magnification: ScrollViewName<Dynamic<CGFloat>> { return .name(B.magnification) }
-	static var maxMagnification: ScrollViewName<Dynamic<CGFloat>> { return .name(B.maxMagnification) }
-	static var minMagnification: ScrollViewName<Dynamic<CGFloat>> { return .name(B.minMagnification) }
-	static var rulersVisible: ScrollViewName<Dynamic<Bool>> { return .name(B.rulersVisible) }
-	static var scrollerInsets: ScrollViewName<Dynamic<NSEdgeInsets>> { return .name(B.scrollerInsets) }
-	static var scrollerKnobStyle: ScrollViewName<Dynamic<NSScroller.KnobStyle>> { return .name(B.scrollerKnobStyle) }
-	static var scrollerStyle: ScrollViewName<Dynamic<NSScroller.Style>> { return .name(B.scrollerStyle) }
-	static var scrollsDynamically: ScrollViewName<Dynamic<Bool>> { return .name(B.scrollsDynamically) }
-	static var usesPredominantAxisScrolling: ScrollViewName<Dynamic<Bool>> { return .name(B.usesPredominantAxisScrolling) }
-	static var verticalLineScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(B.verticalLineScroll) }
-	static var verticalPageScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(B.verticalPageScroll) }
-	static var verticalScrollElasticity: ScrollViewName<Dynamic<NSScrollView.Elasticity>> { return .name(B.verticalScrollElasticity) }
+	static var allowsMagnification: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.allowsMagnification) }
+	static var autohidesScrollers: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.autohidesScrollers) }
+	static var automaticallyAdjustsContentInsets: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.automaticallyAdjustsContentInsets) }
+	static var backgroundColor: ScrollViewName<Dynamic<NSColor>> { return .name(ScrollView.Binding.backgroundColor) }
+	static var borderType: ScrollViewName<Dynamic<NSBorderType>> { return .name(ScrollView.Binding.borderType) }
+	static var contentInsets: ScrollViewName<Dynamic<NSEdgeInsets>> { return .name(ScrollView.Binding.contentInsets) }
+	static var contentView: ScrollViewName<Dynamic<ClipViewConvertible>> { return .name(ScrollView.Binding.contentView) }
+	static var documentCursor: ScrollViewName<Dynamic<NSCursor?>> { return .name(ScrollView.Binding.documentCursor) }
+	static var drawsBackground: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.drawsBackground) }
+	static var findBarPosition: ScrollViewName<Dynamic<NSScrollView.FindBarPosition>> { return .name(ScrollView.Binding.findBarPosition) }
+	static var floatingSubviews: ScrollViewName<Dynamic<[(view: ViewConvertible, axis: NSEvent.GestureAxis)]>> { return .name(ScrollView.Binding.floatingSubviews) }
+	static var hasHorizontalRuler: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.hasHorizontalRuler) }
+	static var hasHorizontalScroller: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.hasHorizontalScroller) }
+	static var hasVerticalRuler: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.hasVerticalRuler) }
+	static var hasVerticalScroller: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.hasVerticalScroller) }
+	static var horizontalLineScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.horizontalLineScroll) }
+	static var horizontalPageScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.horizontalPageScroll) }
+	static var horizontalScrollElasticity: ScrollViewName<Dynamic<NSScrollView.Elasticity>> { return .name(ScrollView.Binding.horizontalScrollElasticity) }
+	static var magnification: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.magnification) }
+	static var maxMagnification: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.maxMagnification) }
+	static var minMagnification: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.minMagnification) }
+	static var rulersVisible: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.rulersVisible) }
+	static var scrollerInsets: ScrollViewName<Dynamic<NSEdgeInsets>> { return .name(ScrollView.Binding.scrollerInsets) }
+	static var scrollerKnobStyle: ScrollViewName<Dynamic<NSScroller.KnobStyle>> { return .name(ScrollView.Binding.scrollerKnobStyle) }
+	static var scrollerStyle: ScrollViewName<Dynamic<NSScroller.Style>> { return .name(ScrollView.Binding.scrollerStyle) }
+	static var scrollsDynamically: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.scrollsDynamically) }
+	static var usesPredominantAxisScrolling: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.usesPredominantAxisScrolling) }
+	static var verticalLineScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.verticalLineScroll) }
+	static var verticalPageScroll: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.verticalPageScroll) }
+	static var verticalScrollElasticity: ScrollViewName<Dynamic<NSScrollView.Elasticity>> { return .name(ScrollView.Binding.verticalScrollElasticity) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var flashScrollers: ScrollViewName<Signal<Bool>> { return .name(B.flashScrollers) }
-	static var magnificationCenteredAtPoint: ScrollViewName<Signal<(CGFloat, NSPoint)>> { return .name(B.magnificationCenteredAtPoint) }
-	static var magnifyToFitRect: ScrollViewName<Signal<CGRect>> { return .name(B.magnifyToFitRect) }
-	static var scrollWheel: ScrollViewName<Signal<NSEvent>> { return .name(B.scrollWheel) }
+	static var flashScrollers: ScrollViewName<Signal<Bool>> { return .name(ScrollView.Binding.flashScrollers) }
+	static var magnificationCenteredAtPoint: ScrollViewName<Signal<(CGFloat, NSPoint)>> { return .name(ScrollView.Binding.magnificationCenteredAtPoint) }
+	static var magnifyToFitRect: ScrollViewName<Signal<CGRect>> { return .name(ScrollView.Binding.magnifyToFitRect) }
+	static var scrollWheel: ScrollViewName<Signal<NSEvent>> { return .name(ScrollView.Binding.scrollWheel) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didEndLiveMagnify: ScrollViewName<SignalInput<Void>> { return .name(B.didEndLiveMagnify) }
-	static var didEndLiveScroll: ScrollViewName<SignalInput<Void>> { return .name(B.didEndLiveScroll) }
-	static var didLiveScroll: ScrollViewName<SignalInput<Void>> { return .name(B.didLiveScroll) }
-	static var willStartLiveMagnify: ScrollViewName<SignalInput<Void>> { return .name(B.willStartLiveMagnify) }
-	static var willStartLiveScroll: ScrollViewName<SignalInput<Void>> { return .name(B.willStartLiveScroll) }
+	static var didEndLiveMagnify: ScrollViewName<SignalInput<Void>> { return .name(ScrollView.Binding.didEndLiveMagnify) }
+	static var didEndLiveScroll: ScrollViewName<SignalInput<Void>> { return .name(ScrollView.Binding.didEndLiveScroll) }
+	static var didLiveScroll: ScrollViewName<SignalInput<Void>> { return .name(ScrollView.Binding.didLiveScroll) }
+	static var willStartLiveMagnify: ScrollViewName<SignalInput<Void>> { return .name(ScrollView.Binding.willStartLiveMagnify) }
+	static var willStartLiveScroll: ScrollViewName<SignalInput<Void>> { return .name(ScrollView.Binding.willStartLiveScroll) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

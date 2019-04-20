@@ -89,7 +89,6 @@ extension ScreenEdgePanGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ScreenEdgePanGestureRecognizerBinding {
 	public typealias ScreenEdgePanGestureRecognizerName<V> = BindingName<V, ScreenEdgePanGestureRecognizer.Binding, Binding>
-	private typealias B = ScreenEdgePanGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> ScreenEdgePanGestureRecognizer.Binding) -> ScreenEdgePanGestureRecognizerName<V> {
 		return ScreenEdgePanGestureRecognizerName<V>(source: source, downcast: Binding.screenEdgePanGestureRecognizerBinding)
 	}
@@ -97,12 +96,12 @@ extension BindingName where Binding: ScreenEdgePanGestureRecognizerBinding {
 public extension BindingName where Binding: ScreenEdgePanGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ScreenEdgePanGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: ScreenEdgePanGestureRecognizerName<$2> { return .name(ScreenEdgePanGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var edges: ScreenEdgePanGestureRecognizerName<Dynamic<UIRectEdge>> { return .name(B.edges) }
+	static var edges: ScreenEdgePanGestureRecognizerName<Dynamic<UIRectEdge>> { return .name(ScreenEdgePanGestureRecognizer.Binding.edges) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

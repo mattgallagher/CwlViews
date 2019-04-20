@@ -93,7 +93,6 @@ extension PressGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PressGestureRecognizerBinding {
 	public typealias PressGestureRecognizerName<V> = BindingName<V, PressGestureRecognizer.Binding, Binding>
-	private typealias B = PressGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> PressGestureRecognizer.Binding) -> PressGestureRecognizerName<V> {
 		return PressGestureRecognizerName<V>(source: source, downcast: Binding.pressGestureRecognizerBinding)
 	}
@@ -101,14 +100,14 @@ extension BindingName where Binding: PressGestureRecognizerBinding {
 public extension BindingName where Binding: PressGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: PressGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: PressGestureRecognizerName<$2> { return .name(PressGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowableMovement: PressGestureRecognizerName<Dynamic<CGFloat>> { return .name(B.allowableMovement) }
-	static var buttonMask: PressGestureRecognizerName<Dynamic<Int>> { return .name(B.buttonMask) }
-	static var minimumPressDuration: PressGestureRecognizerName<Dynamic<TimeInterval>> { return .name(B.minimumPressDuration) }
+	static var allowableMovement: PressGestureRecognizerName<Dynamic<CGFloat>> { return .name(PressGestureRecognizer.Binding.allowableMovement) }
+	static var buttonMask: PressGestureRecognizerName<Dynamic<Int>> { return .name(PressGestureRecognizer.Binding.buttonMask) }
+	static var minimumPressDuration: PressGestureRecognizerName<Dynamic<TimeInterval>> { return .name(PressGestureRecognizer.Binding.minimumPressDuration) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

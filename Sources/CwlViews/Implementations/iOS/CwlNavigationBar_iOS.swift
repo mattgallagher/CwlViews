@@ -180,7 +180,6 @@ extension NavigationBar.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: NavigationBarBinding {
 	public typealias NavigationBarName<V> = BindingName<V, NavigationBar.Binding, Binding>
-	private typealias B = NavigationBar.Binding
 	private static func name<V>(_ source: @escaping (V) -> NavigationBar.Binding) -> NavigationBarName<V> {
 		return NavigationBarName<V>(source: source, downcast: Binding.scrollViewBinding)
 	}
@@ -188,33 +187,33 @@ extension BindingName where Binding: NavigationBarBinding {
 public extension BindingName where Binding: NavigationBarBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: NavigationBarName<$2> { return .name(B.$1) }
+	// With:    static var $1: NavigationBarName<$2> { return .name(NavigationBar.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundImage: NavigationBarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(B.backgroundImage) }
-	static var backIndicatorImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.backIndicatorImage) }
-	static var backIndicatorTransitionMaskImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.backIndicatorTransitionMaskImage) }
-	static var barStyle: NavigationBarName<Dynamic<UIBarStyle>> { return .name(B.barStyle) }
-	static var barTintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(B.barTintColor) }
-	static var isTranslucent: NavigationBarName<Dynamic<Bool>> { return .name(B.isTranslucent) }
-	static var items: NavigationBarName<Dynamic<StackMutation<NavigationItemConvertible>>> { return .name(B.items) }
-	static var shadowImage: NavigationBarName<Dynamic<UIImage?>> { return .name(B.shadowImage) }
-	static var tintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(B.tintColor) }
-	static var titleTextAttributes: NavigationBarName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(B.titleTextAttributes) }
-	static var titleVerticalPositionAdjustment: NavigationBarName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> { return .name(B.titleVerticalPositionAdjustment) }
+	static var backgroundImage: NavigationBarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(NavigationBar.Binding.backgroundImage) }
+	static var backIndicatorImage: NavigationBarName<Dynamic<UIImage?>> { return .name(NavigationBar.Binding.backIndicatorImage) }
+	static var backIndicatorTransitionMaskImage: NavigationBarName<Dynamic<UIImage?>> { return .name(NavigationBar.Binding.backIndicatorTransitionMaskImage) }
+	static var barStyle: NavigationBarName<Dynamic<UIBarStyle>> { return .name(NavigationBar.Binding.barStyle) }
+	static var barTintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(NavigationBar.Binding.barTintColor) }
+	static var isTranslucent: NavigationBarName<Dynamic<Bool>> { return .name(NavigationBar.Binding.isTranslucent) }
+	static var items: NavigationBarName<Dynamic<StackMutation<NavigationItemConvertible>>> { return .name(NavigationBar.Binding.items) }
+	static var shadowImage: NavigationBarName<Dynamic<UIImage?>> { return .name(NavigationBar.Binding.shadowImage) }
+	static var tintColor: NavigationBarName<Dynamic<UIColor?>> { return .name(NavigationBar.Binding.tintColor) }
+	static var titleTextAttributes: NavigationBarName<Dynamic<[NSAttributedString.Key: Any]>> { return .name(NavigationBar.Binding.titleTextAttributes) }
+	static var titleVerticalPositionAdjustment: NavigationBarName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> { return .name(NavigationBar.Binding.titleVerticalPositionAdjustment) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Void> { return .name(B.didPop) }
-	static var didPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Void> { return .name(B.didPush) }
-	static var position: NavigationBarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
-	static var shouldPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(B.shouldPop) }
-	static var shouldPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(B.shouldPush) }
+	static var didPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Void> { return .name(NavigationBar.Binding.didPop) }
+	static var didPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Void> { return .name(NavigationBar.Binding.didPush) }
+	static var position: NavigationBarName<(UIBarPositioning) -> UIBarPosition> { return .name(NavigationBar.Binding.position) }
+	static var shouldPop: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(NavigationBar.Binding.shouldPop) }
+	static var shouldPush: NavigationBarName<(UINavigationBar, UINavigationItem) -> Bool> { return .name(NavigationBar.Binding.shouldPush) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

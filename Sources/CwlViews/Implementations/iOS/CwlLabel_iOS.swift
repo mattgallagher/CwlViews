@@ -121,7 +121,6 @@ extension Label.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: LabelBinding {
 	public typealias LabelName<V> = BindingName<V, Label.Binding, Binding>
-	private typealias B = Label.Binding
 	private static func name<V>(_ source: @escaping (V) -> Label.Binding) -> LabelName<V> {
 		return LabelName<V>(source: source, downcast: Binding.windowBinding)
 	}
@@ -129,28 +128,28 @@ extension BindingName where Binding: LabelBinding {
 public extension BindingName where Binding: LabelBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: LabelName<$2> { return .name(B.$1) }
+	// With:    static var $1: LabelName<$2> { return .name(Label.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var adjustsFontSizeToFitWidth: LabelName<Dynamic<Bool>> { return .name(B.adjustsFontSizeToFitWidth) }
-	static var allowsDefaultTighteningForTruncation: LabelName<Dynamic<Bool>> { return .name(B.allowsDefaultTighteningForTruncation) }
-	static var attributedText: LabelName<Dynamic<NSAttributedString?>> { return .name(B.attributedText) }
-	static var baselineAdjustment: LabelName<Dynamic<UIBaselineAdjustment>> { return .name(B.baselineAdjustment) }
-	static var font: LabelName<Dynamic<UIFont>> { return .name(B.font) }
-	static var highlightedTextColor: LabelName<Dynamic<UIColor?>> { return .name(B.highlightedTextColor) }
-	static var isEnabled: LabelName<Dynamic<Bool>> { return .name(B.isEnabled) }
-	static var isHighlighted: LabelName<Dynamic<Bool>> { return .name(B.isHighlighted) }
-	static var lineBreakMode: LabelName<Dynamic<NSLineBreakMode>> { return .name(B.lineBreakMode) }
-	static var minimumScaleFactor: LabelName<Dynamic<CGFloat>> { return .name(B.minimumScaleFactor) }
-	static var numberOfLines: LabelName<Dynamic<Int>> { return .name(B.numberOfLines) }
-	static var preferredMaxLayoutWidth: LabelName<Dynamic<CGFloat>> { return .name(B.preferredMaxLayoutWidth) }
-	static var shadowColor: LabelName<Dynamic<UIColor?>> { return .name(B.shadowColor) }
-	static var shadowOffset: LabelName<Dynamic<CGSize>> { return .name(B.shadowOffset) }
-	static var text: LabelName<Dynamic<String>> { return .name(B.text) }
-	static var textAlignment: LabelName<Dynamic<NSTextAlignment>> { return .name(B.textAlignment) }
-	static var textColor: LabelName<Dynamic<UIColor>> { return .name(B.textColor) }
+	static var adjustsFontSizeToFitWidth: LabelName<Dynamic<Bool>> { return .name(Label.Binding.adjustsFontSizeToFitWidth) }
+	static var allowsDefaultTighteningForTruncation: LabelName<Dynamic<Bool>> { return .name(Label.Binding.allowsDefaultTighteningForTruncation) }
+	static var attributedText: LabelName<Dynamic<NSAttributedString?>> { return .name(Label.Binding.attributedText) }
+	static var baselineAdjustment: LabelName<Dynamic<UIBaselineAdjustment>> { return .name(Label.Binding.baselineAdjustment) }
+	static var font: LabelName<Dynamic<UIFont>> { return .name(Label.Binding.font) }
+	static var highlightedTextColor: LabelName<Dynamic<UIColor?>> { return .name(Label.Binding.highlightedTextColor) }
+	static var isEnabled: LabelName<Dynamic<Bool>> { return .name(Label.Binding.isEnabled) }
+	static var isHighlighted: LabelName<Dynamic<Bool>> { return .name(Label.Binding.isHighlighted) }
+	static var lineBreakMode: LabelName<Dynamic<NSLineBreakMode>> { return .name(Label.Binding.lineBreakMode) }
+	static var minimumScaleFactor: LabelName<Dynamic<CGFloat>> { return .name(Label.Binding.minimumScaleFactor) }
+	static var numberOfLines: LabelName<Dynamic<Int>> { return .name(Label.Binding.numberOfLines) }
+	static var preferredMaxLayoutWidth: LabelName<Dynamic<CGFloat>> { return .name(Label.Binding.preferredMaxLayoutWidth) }
+	static var shadowColor: LabelName<Dynamic<UIColor?>> { return .name(Label.Binding.shadowColor) }
+	static var shadowOffset: LabelName<Dynamic<CGSize>> { return .name(Label.Binding.shadowOffset) }
+	static var text: LabelName<Dynamic<String>> { return .name(Label.Binding.text) }
+	static var textAlignment: LabelName<Dynamic<NSTextAlignment>> { return .name(Label.Binding.textAlignment) }
+	static var textColor: LabelName<Dynamic<UIColor>> { return .name(Label.Binding.textColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

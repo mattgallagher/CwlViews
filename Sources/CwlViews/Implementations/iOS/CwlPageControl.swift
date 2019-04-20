@@ -91,7 +91,6 @@ extension PageControl.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: PageControlBinding {
 	public typealias PageControlName<V> = BindingName<V, PageControl.Binding, Binding>
-	private typealias B = PageControl.Binding
 	private static func name<V>(_ source: @escaping (V) -> PageControl.Binding) -> PageControlName<V> {
 		return PageControlName<V>(source: source, downcast: Binding.pageControlBinding)
 	}
@@ -99,19 +98,19 @@ extension BindingName where Binding: PageControlBinding {
 public extension BindingName where Binding: PageControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: PageControlName<$2> { return .name(B.$1) }
+	// With:    static var $1: PageControlName<$2> { return .name(PageControl.Binding.$1) }
 
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var currentPage: PageControlName<Dynamic<Int>> { return .name(B.currentPage) }
-	static var currentPageIndicatorTintColor: PageControlName<Dynamic<UIColor?>> { return .name(B.currentPageIndicatorTintColor) }
-	static var defersCurrentPageDisplay: PageControlName<Dynamic<Bool>> { return .name(B.defersCurrentPageDisplay) }
-	static var numberOfPages: PageControlName<Dynamic<Int>> { return .name(B.numberOfPages) }
-	static var pageIndicatorTintColor: PageControlName<Dynamic<UIColor?>> { return .name(B.pageIndicatorTintColor) }
+	static var currentPage: PageControlName<Dynamic<Int>> { return .name(PageControl.Binding.currentPage) }
+	static var currentPageIndicatorTintColor: PageControlName<Dynamic<UIColor?>> { return .name(PageControl.Binding.currentPageIndicatorTintColor) }
+	static var defersCurrentPageDisplay: PageControlName<Dynamic<Bool>> { return .name(PageControl.Binding.defersCurrentPageDisplay) }
+	static var numberOfPages: PageControlName<Dynamic<Int>> { return .name(PageControl.Binding.numberOfPages) }
+	static var pageIndicatorTintColor: PageControlName<Dynamic<UIColor?>> { return .name(PageControl.Binding.pageIndicatorTintColor) }
 
 	// 2. Signal bindings are performed on the object after construction.
-	static var updateCurrentPageDisplay: PageControlName<Signal<Void>> { return .name(B.updateCurrentPageDisplay) }
+	static var updateCurrentPageDisplay: PageControlName<Signal<Void>> { return .name(PageControl.Binding.updateCurrentPageDisplay) }
 
 	// 3. Action bindings are triggered by the object after construction.
 

@@ -188,7 +188,6 @@ extension ExtendedViewController.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ExtendedViewControllerBinding {
 	public typealias ExtendedViewControllerName<V> = BindingName<V, ExtendedViewController<Binding.SubclassType>.Binding, Binding>
-	private typealias B = ExtendedViewController<Binding.SubclassType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> ExtendedViewController<Binding.SubclassType>.Binding) -> ExtendedViewControllerName<V> {
 		return ExtendedViewControllerName<V>(source: source, downcast: Binding.extendedViewControllerBinding)
 	}
@@ -196,7 +195,7 @@ extension BindingName where Binding: ExtendedViewControllerBinding {
 public extension BindingName where Binding: ExtendedViewControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ExtendedViewControllerName<$2> { return .name(B.$1) }
+	// With:    static var $1: ExtendedViewControllerName<$2> { return .name(ExtendedViewController.Binding.$1) }
 
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
@@ -207,13 +206,13 @@ public extension BindingName where Binding: ExtendedViewControllerBinding {
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didAppear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.didAppear) }
-	static var didDisappear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.didDisappear) }
-	static var didReceiveMemoryWarning: ExtendedViewControllerName<(UIViewController) -> Void> { return .name(B.didReceiveMemoryWarning) }
-	static var loadView: ExtendedViewControllerName<() -> ViewConvertible> { return .name(B.loadView) }
-	static var traitCollectionDidChange: ExtendedViewControllerName<(UIViewController, UITraitCollection?) -> Void> { return .name(B.traitCollectionDidChange) }
-	static var willAppear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.willAppear) }
-	static var willDisappear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(B.willDisappear) }
+	static var didAppear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(ExtendedViewController.Binding.didAppear) }
+	static var didDisappear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(ExtendedViewController.Binding.didDisappear) }
+	static var didReceiveMemoryWarning: ExtendedViewControllerName<(UIViewController) -> Void> { return .name(ExtendedViewController.Binding.didReceiveMemoryWarning) }
+	static var loadView: ExtendedViewControllerName<() -> ViewConvertible> { return .name(ExtendedViewController.Binding.loadView) }
+	static var traitCollectionDidChange: ExtendedViewControllerName<(UIViewController, UITraitCollection?) -> Void> { return .name(ExtendedViewController.Binding.traitCollectionDidChange) }
+	static var willAppear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(ExtendedViewController.Binding.willAppear) }
+	static var willDisappear: ExtendedViewControllerName<(UIViewController, Bool) -> Void> { return .name(ExtendedViewController.Binding.willDisappear) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

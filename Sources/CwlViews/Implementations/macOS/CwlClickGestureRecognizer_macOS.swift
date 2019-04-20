@@ -91,7 +91,6 @@ extension ClickGestureRecognizer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ClickGestureRecognizerBinding {
 	public typealias ClickGestureRecognizerName<V> = BindingName<V, ClickGestureRecognizer.Binding, Binding>
-	private typealias B = ClickGestureRecognizer.Binding
 	private static func name<V>(_ source: @escaping (V) -> ClickGestureRecognizer.Binding) -> ClickGestureRecognizerName<V> {
 		return ClickGestureRecognizerName<V>(source: source, downcast: Binding.clickGestureRecognizerBinding)
 	}
@@ -99,13 +98,13 @@ extension BindingName where Binding: ClickGestureRecognizerBinding {
 public extension BindingName where Binding: ClickGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ClickGestureRecognizerName<$2> { return .name(B.$1) }
+	// With:    static var $1: ClickGestureRecognizerName<$2> { return .name(ClickGestureRecognizer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var buttonMask: ClickGestureRecognizerName<Dynamic<Int>> { return .name(B.buttonMask) }
-	static var numberOfClicksRequired: ClickGestureRecognizerName<Dynamic<Int>> { return .name(B.numberOfClicksRequired) }
+	static var buttonMask: ClickGestureRecognizerName<Dynamic<Int>> { return .name(ClickGestureRecognizer.Binding.buttonMask) }
+	static var numberOfClicksRequired: ClickGestureRecognizerName<Dynamic<Int>> { return .name(ClickGestureRecognizer.Binding.numberOfClicksRequired) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

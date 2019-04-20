@@ -111,7 +111,6 @@ public struct TextInputTraits {
 
 extension BindingName where Source == Binding, Binding == TextInputTraits.Binding {
 	// NOTE: for some reason, any attempt at a TextInputTraitsName typealias led to a compiler crash so the explicit BindingName<V, TextInputTraits.Binding, TextInputTraits.Binding> must be used instead.
-	private typealias B = TextInputTraits.Binding
 	private static func name<V>(_ source: @escaping (V) -> TextInputTraits.Binding) -> BindingName<V, TextInputTraits.Binding, TextInputTraits.Binding> {
 		return BindingName<V, TextInputTraits.Binding, TextInputTraits.Binding>(source: source, downcast: { b in b})
 	}
@@ -119,19 +118,19 @@ extension BindingName where Source == Binding, Binding == TextInputTraits.Bindin
 public extension BindingName where Source == Binding, Binding == TextInputTraits.Binding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: BindingName<$2> { return .name(B.$1) }
-	static var autocapitalizationType: BindingName<Dynamic<UITextAutocapitalizationType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.autocapitalizationType) }
-	static var autocorrectionType: BindingName<Dynamic<UITextAutocorrectionType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.autocorrectionType) }
-	static var enablesReturnKeyAutomatically: BindingName<Dynamic<Bool>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.enablesReturnKeyAutomatically) }
-	static var isSecureTextEntry: BindingName<Dynamic<Bool>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.isSecureTextEntry) }
-	static var keyboardAppearance: BindingName<Dynamic<UIKeyboardAppearance>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.keyboardAppearance) }
-	static var keyboardType: BindingName<Dynamic<UIKeyboardType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.keyboardType) }
-	static var returnKeyType: BindingName<Dynamic<UIReturnKeyType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.returnKeyType) }
-	static var smartDashesType: BindingName<Dynamic<UITextSmartDashesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartDashesType) }
-	static var smartInsertDeleteType: BindingName<Dynamic<UITextSmartInsertDeleteType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartInsertDeleteType) }
-	static var smartQuotesType: BindingName<Dynamic<UITextSmartQuotesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.smartQuotesType) }
-	static var spellCheckingType: BindingName<Dynamic<UITextSpellCheckingType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.spellCheckingType) }
-	static var textContentType: BindingName<Dynamic<UITextContentType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(B.textContentType) }
+	// With:    static var $1: BindingName<$2> { return .name(Binding.Binding.$1) }
+	static var autocapitalizationType: BindingName<Dynamic<UITextAutocapitalizationType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.autocapitalizationType) }
+	static var autocorrectionType: BindingName<Dynamic<UITextAutocorrectionType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.autocorrectionType) }
+	static var enablesReturnKeyAutomatically: BindingName<Dynamic<Bool>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.enablesReturnKeyAutomatically) }
+	static var isSecureTextEntry: BindingName<Dynamic<Bool>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.isSecureTextEntry) }
+	static var keyboardAppearance: BindingName<Dynamic<UIKeyboardAppearance>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.keyboardAppearance) }
+	static var keyboardType: BindingName<Dynamic<UIKeyboardType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.keyboardType) }
+	static var returnKeyType: BindingName<Dynamic<UIReturnKeyType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.returnKeyType) }
+	static var smartDashesType: BindingName<Dynamic<UITextSmartDashesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.smartDashesType) }
+	static var smartInsertDeleteType: BindingName<Dynamic<UITextSmartInsertDeleteType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.smartInsertDeleteType) }
+	static var smartQuotesType: BindingName<Dynamic<UITextSmartQuotesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.smartQuotesType) }
+	static var spellCheckingType: BindingName<Dynamic<UITextSpellCheckingType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.spellCheckingType) }
+	static var textContentType: BindingName<Dynamic<UITextContentType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .name(Binding.Binding.textContentType) }
 }
 
 #endif

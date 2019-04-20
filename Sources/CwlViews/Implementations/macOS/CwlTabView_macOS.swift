@@ -182,7 +182,6 @@ extension TabView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TabViewBinding {
 	public typealias TabViewName<V> = BindingName<V, TabView<Binding.IdentifierType>.Binding, Binding>
-	private typealias B = TabView<Binding.IdentifierType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> TabView<Binding.IdentifierType>.Binding) -> TabViewName<V> {
 		return TabViewName<V>(source: source, downcast: Binding.tabViewBinding)
 	}
@@ -190,35 +189,35 @@ extension BindingName where Binding: TabViewBinding {
 public extension BindingName where Binding: TabViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TabViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TabViewName<$2> { return .name(TabView.Binding.$1) }
 	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsTruncatedLabels: TabViewName<Dynamic<Bool>> { return .name(B.allowsTruncatedLabels) }
-	static var borderType: TabViewName<Dynamic<NSTabView.TabViewBorderType>> { return .name(B.borderType) }
-	static var controlSize: TabViewName<Dynamic<NSControl.ControlSize>> { return .name(B.controlSize) }
-	static var drawsBackground: TabViewName<Dynamic<Bool>> { return .name(B.drawsBackground) }
-	static var font: TabViewName<Dynamic<NSFont>> { return .name(B.font) }
-	static var position: TabViewName<Dynamic<NSTabView.TabPosition>> { return .name(B.position) }
-	static var tabs: TabViewName<Dynamic<ArrayMutation<Binding.IdentifierType>>> { return .name(B.tabs) }
-	static var type: TabViewName<Dynamic<NSTabView.TabType>> { return .name(B.type) }
+	static var allowsTruncatedLabels: TabViewName<Dynamic<Bool>> { return .name(TabView.Binding.allowsTruncatedLabels) }
+	static var borderType: TabViewName<Dynamic<NSTabView.TabViewBorderType>> { return .name(TabView.Binding.borderType) }
+	static var controlSize: TabViewName<Dynamic<NSControl.ControlSize>> { return .name(TabView.Binding.controlSize) }
+	static var drawsBackground: TabViewName<Dynamic<Bool>> { return .name(TabView.Binding.drawsBackground) }
+	static var font: TabViewName<Dynamic<NSFont>> { return .name(TabView.Binding.font) }
+	static var position: TabViewName<Dynamic<NSTabView.TabPosition>> { return .name(TabView.Binding.position) }
+	static var tabs: TabViewName<Dynamic<ArrayMutation<Binding.IdentifierType>>> { return .name(TabView.Binding.tabs) }
+	static var type: TabViewName<Dynamic<NSTabView.TabType>> { return .name(TabView.Binding.type) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var selectedItem: TabViewName<Dynamic<Binding.IdentifierType>> { return .name(B.selectedItem) }
-	static var selectFirstItem: TabViewName<Signal<Void>> { return .name(B.selectFirstItem) }
-	static var selectLastItem: TabViewName<Signal<Void>> { return .name(B.selectLastItem) }
-	static var selectNextItem: TabViewName<Signal<Void>> { return .name(B.selectNextItem) }
-	static var selectPreviousItem: TabViewName<Signal<Void>> { return .name(B.selectPreviousItem) }
+	static var selectedItem: TabViewName<Dynamic<Binding.IdentifierType>> { return .name(TabView.Binding.selectedItem) }
+	static var selectFirstItem: TabViewName<Signal<Void>> { return .name(TabView.Binding.selectFirstItem) }
+	static var selectLastItem: TabViewName<Signal<Void>> { return .name(TabView.Binding.selectLastItem) }
+	static var selectNextItem: TabViewName<Signal<Void>> { return .name(TabView.Binding.selectNextItem) }
+	static var selectPreviousItem: TabViewName<Signal<Void>> { return .name(TabView.Binding.selectPreviousItem) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didChangeNumberOfItems: TabViewName<(NSTabView) -> Void> { return .name(B.didChangeNumberOfItems) }
-	static var didSelect: TabViewName<(NSTabView, NSTabViewItem?, Binding.IdentifierType?) -> Void> { return .name(B.didSelect) }
-	static var shouldSelect: TabViewName<(NSTabView, NSTabViewItem?, Binding.IdentifierType?) -> Bool> { return .name(B.shouldSelect) }
-	static var tabConstructor: TabViewName<(Binding.IdentifierType) -> TabViewItemConvertible> { return .name(B.tabConstructor) }
-	static var willSelect: TabViewName<(NSTabView, NSTabViewItem?, Binding.IdentifierType?) -> Void> { return .name(B.willSelect) }
+	static var didChangeNumberOfItems: TabViewName<(NSTabView) -> Void> { return .name(TabView.Binding.didChangeNumberOfItems) }
+	static var didSelect: TabViewName<(NSTabView, NSTabViewItem?, Binding.IdentifierType?) -> Void> { return .name(TabView.Binding.didSelect) }
+	static var shouldSelect: TabViewName<(NSTabView, NSTabViewItem?, Binding.IdentifierType?) -> Bool> { return .name(TabView.Binding.shouldSelect) }
+	static var tabConstructor: TabViewName<(Binding.IdentifierType) -> TabViewItemConvertible> { return .name(TabView.Binding.tabConstructor) }
+	static var willSelect: TabViewName<(NSTabView, NSTabViewItem?, Binding.IdentifierType?) -> Void> { return .name(TabView.Binding.willSelect) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

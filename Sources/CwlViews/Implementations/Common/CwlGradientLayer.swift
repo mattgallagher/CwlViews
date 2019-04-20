@@ -96,7 +96,6 @@ extension GradientLayer.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: GradientLayerBinding {
 	public typealias GradientLayerName<V> = BindingName<V, GradientLayer.Binding, Binding>
-	private typealias B = GradientLayer.Binding
 	private static func name<V>(_ source: @escaping (V) -> GradientLayer.Binding) -> GradientLayerName<V> {
 		return GradientLayerName<V>(source: source, downcast: Binding.gradientLayerBinding)
 	}
@@ -104,15 +103,15 @@ extension BindingName where Binding: GradientLayerBinding {
 public extension BindingName where Binding: GradientLayerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: GradientLayerName<$2> { return .name(B.$1) }
+	// With:    static var $1: GradientLayerName<$2> { return .name(GradientLayer.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var colors: GradientLayerName<Dynamic<[CGColor]>> { return .name(B.colors) }
-	static var locations: GradientLayerName<Dynamic<[CGFloat]>> { return .name(B.locations) }
-	static var endPoint: GradientLayerName<Dynamic<CGPoint>> { return .name(B.endPoint) }
-	static var startPoint: GradientLayerName<Dynamic<CGPoint>> { return .name(B.startPoint) }
+	static var colors: GradientLayerName<Dynamic<[CGColor]>> { return .name(GradientLayer.Binding.colors) }
+	static var locations: GradientLayerName<Dynamic<[CGFloat]>> { return .name(GradientLayer.Binding.locations) }
+	static var endPoint: GradientLayerName<Dynamic<CGPoint>> { return .name(GradientLayer.Binding.endPoint) }
+	static var startPoint: GradientLayerName<Dynamic<CGPoint>> { return .name(GradientLayer.Binding.startPoint) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

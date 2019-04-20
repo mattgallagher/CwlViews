@@ -107,7 +107,6 @@ extension TabViewItem.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TabViewItemBinding {
 	public typealias TabViewItemName<V> = BindingName<V, TabViewItem.Binding, Binding>
-	private typealias B = TabViewItem.Binding
 	private static func name<V>(_ source: @escaping (V) -> TabViewItem.Binding) -> TabViewItemName<V> {
 		return TabViewItemName<V>(source: source, downcast: Binding.tabViewItemBinding)
 	}
@@ -115,13 +114,13 @@ extension BindingName where Binding: TabViewItemBinding {
 public extension BindingName where Binding: TabViewItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TabViewItemName<$2> { return .name(B.$1) }
-	static var color: TabViewItemName<Dynamic<NSColor>> { return .name(B.color) }
-	static var image: TabViewItemName<Dynamic<NSImage?>> { return .name(B.image) }
-	static var initialFirstResponderTag: TabViewItemName<Dynamic<Int>> { return .name(B.initialFirstResponderTag) }
-	static var label: TabViewItemName<Dynamic<String>> { return .name(B.label) }
-	static var toolTip: TabViewItemName<Dynamic<String>> { return .name(B.toolTip) }
-	static var view: TabViewItemName<Dynamic<ViewConvertible>> { return .name(B.view) }
+	// With:    static var $1: TabViewItemName<$2> { return .name(TabViewItem.Binding.$1) }
+	static var color: TabViewItemName<Dynamic<NSColor>> { return .name(TabViewItem.Binding.color) }
+	static var image: TabViewItemName<Dynamic<NSImage?>> { return .name(TabViewItem.Binding.image) }
+	static var initialFirstResponderTag: TabViewItemName<Dynamic<Int>> { return .name(TabViewItem.Binding.initialFirstResponderTag) }
+	static var label: TabViewItemName<Dynamic<String>> { return .name(TabViewItem.Binding.label) }
+	static var toolTip: TabViewItemName<Dynamic<String>> { return .name(TabViewItem.Binding.toolTip) }
+	static var view: TabViewItemName<Dynamic<ViewConvertible>> { return .name(TabViewItem.Binding.view) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

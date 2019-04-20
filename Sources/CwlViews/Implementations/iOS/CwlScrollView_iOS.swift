@@ -270,7 +270,6 @@ extension ScrollView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ScrollViewBinding {
 	public typealias ScrollViewName<V> = BindingName<V, ScrollView.Binding, Binding>
-	private typealias B = ScrollView.Binding
 	private static func name<V>(_ source: @escaping (V) -> ScrollView.Binding) -> ScrollViewName<V> {
 		return ScrollViewName<V>(source: source, downcast: Binding.scrollViewBinding)
 	}
@@ -278,59 +277,59 @@ extension BindingName where Binding: ScrollViewBinding {
 public extension BindingName where Binding: ScrollViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ScrollViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ScrollViewName<$2> { return .name(ScrollView.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var panGestureRecognizerStyles: ScrollViewName<Constant<PanGestureRecognizer>> { return .name(B.panGestureRecognizerStyles) }
-	static var pinchGestureRecognizerStyles: ScrollViewName<Constant<PinchGestureRecognizer>> { return .name(B.pinchGestureRecognizerStyles) }
+	static var panGestureRecognizerStyles: ScrollViewName<Constant<PanGestureRecognizer>> { return .name(ScrollView.Binding.panGestureRecognizerStyles) }
+	static var pinchGestureRecognizerStyles: ScrollViewName<Constant<PinchGestureRecognizer>> { return .name(ScrollView.Binding.pinchGestureRecognizerStyles) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var alwaysBounceHorizontal: ScrollViewName<Dynamic<Bool>> { return .name(B.alwaysBounceHorizontal) }
-	static var alwaysBounceVertical: ScrollViewName<Dynamic<Bool>> { return .name(B.alwaysBounceVertical) }
-	static var bounces: ScrollViewName<Dynamic<Bool>> { return .name(B.bounces) }
-	static var bouncesZoom: ScrollViewName<Dynamic<Bool>> { return .name(B.bouncesZoom) }
-	static var canCancelContentTouches: ScrollViewName<Dynamic<Bool>> { return .name(B.canCancelContentTouches) }
-	static var contentInset: ScrollViewName<Dynamic<UIEdgeInsets>> { return .name(B.contentInset) }
-	static var contentInsetAdjustmentBehavior: ScrollViewName<Dynamic<UIScrollView.ContentInsetAdjustmentBehavior>> { return .name(B.contentInsetAdjustmentBehavior) }
-	static var contentOffset: ScrollViewName<Dynamic<SetOrAnimate<CGPoint>>> { return .name(B.contentOffset) }
-	static var contentSize: ScrollViewName<Dynamic<CGSize>> { return .name(B.contentSize) }
-	static var decelerationRate: ScrollViewName<Dynamic<UIScrollView.DecelerationRate>> { return .name(B.decelerationRate) }
-	static var delaysContentTouches: ScrollViewName<Dynamic<Bool>> { return .name(B.delaysContentTouches) }
-	static var indicatorStyle: ScrollViewName<Dynamic<UIScrollView.IndicatorStyle>> { return .name(B.indicatorStyle) }
-	static var isDirectionalLockEnabled: ScrollViewName<Dynamic<Bool>> { return .name(B.isDirectionalLockEnabled) }
-	static var isPagingEnabled: ScrollViewName<Dynamic<Bool>> { return .name(B.isPagingEnabled) }
-	static var isScrollEnabled: ScrollViewName<Dynamic<Bool>> { return .name(B.isScrollEnabled) }
-	static var maximumZoomScale: ScrollViewName<Dynamic<CGFloat>> { return .name(B.maximumZoomScale) }
-	static var minimumZoomScale: ScrollViewName<Dynamic<CGFloat>> { return .name(B.minimumZoomScale) }
-	static var refreshControl: ScrollViewName<Dynamic<UIRefreshControl?>> { return .name(B.refreshControl) }
-	static var scrollIndicatorInsets: ScrollViewName<Dynamic<UIEdgeInsets>> { return .name(B.scrollIndicatorInsets) }
-	static var scrollsToTop: ScrollViewName<Dynamic<Bool>> { return .name(B.scrollsToTop) }
-	static var showsHorizontalScrollIndicator: ScrollViewName<Dynamic<Bool>> { return .name(B.showsHorizontalScrollIndicator) }
-	static var showsVerticalScrollIndicator: ScrollViewName<Dynamic<Bool>> { return .name(B.showsVerticalScrollIndicator) }
-	static var zoomScale: ScrollViewName<Dynamic<CGFloat>> { return .name(B.zoomScale) }
+	static var alwaysBounceHorizontal: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.alwaysBounceHorizontal) }
+	static var alwaysBounceVertical: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.alwaysBounceVertical) }
+	static var bounces: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.bounces) }
+	static var bouncesZoom: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.bouncesZoom) }
+	static var canCancelContentTouches: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.canCancelContentTouches) }
+	static var contentInset: ScrollViewName<Dynamic<UIEdgeInsets>> { return .name(ScrollView.Binding.contentInset) }
+	static var contentInsetAdjustmentBehavior: ScrollViewName<Dynamic<UIScrollView.ContentInsetAdjustmentBehavior>> { return .name(ScrollView.Binding.contentInsetAdjustmentBehavior) }
+	static var contentOffset: ScrollViewName<Dynamic<SetOrAnimate<CGPoint>>> { return .name(ScrollView.Binding.contentOffset) }
+	static var contentSize: ScrollViewName<Dynamic<CGSize>> { return .name(ScrollView.Binding.contentSize) }
+	static var decelerationRate: ScrollViewName<Dynamic<UIScrollView.DecelerationRate>> { return .name(ScrollView.Binding.decelerationRate) }
+	static var delaysContentTouches: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.delaysContentTouches) }
+	static var indicatorStyle: ScrollViewName<Dynamic<UIScrollView.IndicatorStyle>> { return .name(ScrollView.Binding.indicatorStyle) }
+	static var isDirectionalLockEnabled: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.isDirectionalLockEnabled) }
+	static var isPagingEnabled: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.isPagingEnabled) }
+	static var isScrollEnabled: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.isScrollEnabled) }
+	static var maximumZoomScale: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.maximumZoomScale) }
+	static var minimumZoomScale: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.minimumZoomScale) }
+	static var refreshControl: ScrollViewName<Dynamic<UIRefreshControl?>> { return .name(ScrollView.Binding.refreshControl) }
+	static var scrollIndicatorInsets: ScrollViewName<Dynamic<UIEdgeInsets>> { return .name(ScrollView.Binding.scrollIndicatorInsets) }
+	static var scrollsToTop: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.scrollsToTop) }
+	static var showsHorizontalScrollIndicator: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.showsHorizontalScrollIndicator) }
+	static var showsVerticalScrollIndicator: ScrollViewName<Dynamic<Bool>> { return .name(ScrollView.Binding.showsVerticalScrollIndicator) }
+	static var zoomScale: ScrollViewName<Dynamic<CGFloat>> { return .name(ScrollView.Binding.zoomScale) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var flashScrollIndicators: ScrollViewName<Signal<Void>> { return .name(B.flashScrollIndicators) }
-	static var scrollRectToVisible: ScrollViewName<Signal<(rect: CGRect, animated: Bool)>> { return .name(B.scrollRectToVisible) }
-	static var zoom: ScrollViewName<Signal<(rect: CGRect, animated: Bool)>> { return .name(B.zoom) }
+	static var flashScrollIndicators: ScrollViewName<Signal<Void>> { return .name(ScrollView.Binding.flashScrollIndicators) }
+	static var scrollRectToVisible: ScrollViewName<Signal<(rect: CGRect, animated: Bool)>> { return .name(ScrollView.Binding.scrollRectToVisible) }
+	static var zoom: ScrollViewName<Signal<(rect: CGRect, animated: Bool)>> { return .name(ScrollView.Binding.zoom) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var userDidScroll: ScrollViewName<SignalInput<CGPoint>> { return .name(B.userDidScroll) }
+	static var userDidScroll: ScrollViewName<SignalInput<CGPoint>> { return .name(ScrollView.Binding.userDidScroll) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var didEndDecelerating: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didEndDecelerating) }
-	static var didEndDragging: ScrollViewName<(UIScrollView, Bool) -> Void> { return .name(B.didEndDragging) }
-	static var didEndScrollingAnimation: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didEndScrollingAnimation) }
-	static var didEndZooming: ScrollViewName<(UIScrollView, UIView?, CGFloat) -> Void> { return .name(B.didEndZooming) }
-	static var didScroll: ScrollViewName<(UIScrollView, CGPoint) -> Void> { return .name(B.didScroll) }
-	static var didScrollToTop: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didScrollToTop) }
-	static var didZoom: ScrollViewName<(UIScrollView) -> Void> { return .name(B.didZoom) }
-	static var shouldScrollToTop: ScrollViewName<(_ scrollView: UIScrollView) -> Bool> { return .name(B.shouldScrollToTop) }
-	static var viewForZooming: ScrollViewName<(_ scrollView: UIScrollView) -> UIView?> { return .name(B.viewForZooming) }
-	static var willBeginDecelerating: ScrollViewName<(UIScrollView) -> Void> { return .name(B.willBeginDecelerating) }
-	static var willBeginDragging: ScrollViewName<(UIScrollView) -> Void> { return .name(B.willBeginDragging) }
-	static var willBeginZooming: ScrollViewName<(UIScrollView, UIView?) -> Void> { return .name(B.willBeginZooming) }
-	static var willEndDragging: ScrollViewName<(_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>) -> Void> { return .name(B.willEndDragging) }
+	static var didEndDecelerating: ScrollViewName<(UIScrollView) -> Void> { return .name(ScrollView.Binding.didEndDecelerating) }
+	static var didEndDragging: ScrollViewName<(UIScrollView, Bool) -> Void> { return .name(ScrollView.Binding.didEndDragging) }
+	static var didEndScrollingAnimation: ScrollViewName<(UIScrollView) -> Void> { return .name(ScrollView.Binding.didEndScrollingAnimation) }
+	static var didEndZooming: ScrollViewName<(UIScrollView, UIView?, CGFloat) -> Void> { return .name(ScrollView.Binding.didEndZooming) }
+	static var didScroll: ScrollViewName<(UIScrollView, CGPoint) -> Void> { return .name(ScrollView.Binding.didScroll) }
+	static var didScrollToTop: ScrollViewName<(UIScrollView) -> Void> { return .name(ScrollView.Binding.didScrollToTop) }
+	static var didZoom: ScrollViewName<(UIScrollView) -> Void> { return .name(ScrollView.Binding.didZoom) }
+	static var shouldScrollToTop: ScrollViewName<(_ scrollView: UIScrollView) -> Bool> { return .name(ScrollView.Binding.shouldScrollToTop) }
+	static var viewForZooming: ScrollViewName<(_ scrollView: UIScrollView) -> UIView?> { return .name(ScrollView.Binding.viewForZooming) }
+	static var willBeginDecelerating: ScrollViewName<(UIScrollView) -> Void> { return .name(ScrollView.Binding.willBeginDecelerating) }
+	static var willBeginDragging: ScrollViewName<(UIScrollView) -> Void> { return .name(ScrollView.Binding.willBeginDragging) }
+	static var willBeginZooming: ScrollViewName<(UIScrollView, UIView?) -> Void> { return .name(ScrollView.Binding.willBeginZooming) }
+	static var willEndDragging: ScrollViewName<(_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>) -> Void> { return .name(ScrollView.Binding.willEndDragging) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

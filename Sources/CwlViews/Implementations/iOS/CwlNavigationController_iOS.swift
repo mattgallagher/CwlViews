@@ -96,7 +96,7 @@ public extension NavigationController.Preparer {
 		case .didShow(let x): delegate().addMultiHandler3(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
 		case .poppedToCount(let x):
 			popSignal = popSignal ?? Input().multicast()
-			popSignal?.signal.bind(to: x)
+			popSignal?.source.bind(to: x)
 		case .preferredInterfaceOrientation(let x): delegate().addSingleHandler1(x, #selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
 		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler1(x, #selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
 		case .willShow(let x): delegate().addMultiHandler3(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
@@ -222,7 +222,6 @@ extension NavigationController.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: NavigationControllerBinding {
 	public typealias NavigationControllerName<V> = BindingName<V, NavigationController.Binding, Binding>
-	private typealias B = NavigationController.Binding
 	private static func name<V>(_ source: @escaping (V) -> NavigationController.Binding) -> NavigationControllerName<V> {
 		return NavigationControllerName<V>(source: source, downcast: Binding.navigationControllerBinding)
 	}
@@ -230,32 +229,32 @@ extension BindingName where Binding: NavigationControllerBinding {
 public extension BindingName where Binding: NavigationControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: NavigationControllerName<$2> { return .name(B.$1) }
+	// With:    static var $1: NavigationControllerName<$2> { return .name(NavigationController.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var navigationBar: NavigationControllerName<Constant<NavigationBar>> { return .name(B.navigationBar) }
+	static var navigationBar: NavigationControllerName<Constant<NavigationBar>> { return .name(NavigationController.Binding.navigationBar) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var hidesBarsOnSwipe: NavigationControllerName<Dynamic<Bool>> { return .name(B.hidesBarsOnSwipe) }
-	static var hidesBarsOnTap: NavigationControllerName<Dynamic<Bool>> { return .name(B.hidesBarsOnTap) }
-	static var hidesBarsWhenKeyboardAppears: NavigationControllerName<Dynamic<Bool>> { return .name(B.hidesBarsWhenKeyboardAppears) }
-	static var hidesBarsWhenVerticallyCompact: NavigationControllerName<Dynamic<Bool>> { return .name(B.hidesBarsWhenVerticallyCompact) }
-	static var isNavigationBarHidden: NavigationControllerName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isNavigationBarHidden) }
-	static var isToolbarHidden: NavigationControllerName<Dynamic<SetOrAnimate<Bool>>> { return .name(B.isToolbarHidden) }
-	static var stack: NavigationControllerName<Dynamic<StackMutation<ViewControllerConvertible>>> { return .name(B.stack) }
+	static var hidesBarsOnSwipe: NavigationControllerName<Dynamic<Bool>> { return .name(NavigationController.Binding.hidesBarsOnSwipe) }
+	static var hidesBarsOnTap: NavigationControllerName<Dynamic<Bool>> { return .name(NavigationController.Binding.hidesBarsOnTap) }
+	static var hidesBarsWhenKeyboardAppears: NavigationControllerName<Dynamic<Bool>> { return .name(NavigationController.Binding.hidesBarsWhenKeyboardAppears) }
+	static var hidesBarsWhenVerticallyCompact: NavigationControllerName<Dynamic<Bool>> { return .name(NavigationController.Binding.hidesBarsWhenVerticallyCompact) }
+	static var isNavigationBarHidden: NavigationControllerName<Dynamic<SetOrAnimate<Bool>>> { return .name(NavigationController.Binding.isNavigationBarHidden) }
+	static var isToolbarHidden: NavigationControllerName<Dynamic<SetOrAnimate<Bool>>> { return .name(NavigationController.Binding.isToolbarHidden) }
+	static var stack: NavigationControllerName<Dynamic<StackMutation<ViewControllerConvertible>>> { return .name(NavigationController.Binding.stack) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var poppedToCount: NavigationControllerName<SignalInput<Int>> { return .name(B.poppedToCount) }
+	static var poppedToCount: NavigationControllerName<SignalInput<Int>> { return .name(NavigationController.Binding.poppedToCount) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var animationController: NavigationControllerName<(_ navigationController: UINavigationController, _ operation: UINavigationController.Operation, _ from: UIViewController, _ to: UIViewController) -> UIViewControllerAnimatedTransitioning?> { return .name(B.animationController) }
-	static var interactionController: NavigationControllerName<(_ navigationController: UINavigationController, _ animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(B.interactionController) }
-	static var preferredInterfaceOrientation: NavigationControllerName<(_ navigationController: UINavigationController) -> UIInterfaceOrientation> { return .name(B.preferredInterfaceOrientation) }
-	static var supportedInterfaceOrientations: NavigationControllerName<(_ navigationController: UINavigationController) -> UIInterfaceOrientationMask> { return .name(B.supportedInterfaceOrientations) }
-	static var didShow: NavigationControllerName<(_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void> { return .name(B.didShow) }
-	static var willShow: NavigationControllerName<(_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void> { return .name(B.willShow) }
+	static var animationController: NavigationControllerName<(_ navigationController: UINavigationController, _ operation: UINavigationController.Operation, _ from: UIViewController, _ to: UIViewController) -> UIViewControllerAnimatedTransitioning?> { return .name(NavigationController.Binding.animationController) }
+	static var interactionController: NavigationControllerName<(_ navigationController: UINavigationController, _ animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning?> { return .name(NavigationController.Binding.interactionController) }
+	static var preferredInterfaceOrientation: NavigationControllerName<(_ navigationController: UINavigationController) -> UIInterfaceOrientation> { return .name(NavigationController.Binding.preferredInterfaceOrientation) }
+	static var supportedInterfaceOrientations: NavigationControllerName<(_ navigationController: UINavigationController) -> UIInterfaceOrientationMask> { return .name(NavigationController.Binding.supportedInterfaceOrientations) }
+	static var didShow: NavigationControllerName<(_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void> { return .name(NavigationController.Binding.didShow) }
+	static var willShow: NavigationControllerName<(_ navigationController: UINavigationController, _ viewController: UIViewController, _ animated: Bool) -> Void> { return .name(NavigationController.Binding.willShow) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

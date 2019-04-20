@@ -105,7 +105,6 @@ extension TableRowView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableRowViewBinding {
 	public typealias TableRowViewName<V> = BindingName<V, TableRowView.Binding, Binding>
-	private typealias B = TableRowView.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableRowView.Binding) -> TableRowViewName<V> {
 		return TableRowViewName<V>(source: source, downcast: Binding.tableRowViewBinding)
 	}
@@ -113,20 +112,20 @@ extension BindingName where Binding: TableRowViewBinding {
 public extension BindingName where Binding: TableRowViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableRowViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableRowViewName<$2> { return .name(TableRowView.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundColor: TableRowViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
-	static var draggingDestinationFeedbackStyle: TableRowViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(B.draggingDestinationFeedbackStyle) }
-	static var indentationForDropOperation: TableRowViewName<Dynamic<CGFloat>> { return .name(B.indentationForDropOperation) }
-	static var isEmphasized: TableRowViewName<Dynamic<Bool>> { return .name(B.isEmphasized) }
-	static var isFloating: TableRowViewName<Dynamic<Bool>> { return .name(B.isFloating) }
-	static var isGroupRowStyle: TableRowViewName<Dynamic<Bool>> { return .name(B.isGroupRowStyle) }
-	static var isSelected: TableRowViewName<Dynamic<Bool>> { return .name(B.isSelected) }
-	static var isTargetForDropOperation: TableRowViewName<Dynamic<Bool>> { return .name(B.isTargetForDropOperation) }
-	static var selectionHighlightStyle: TableRowViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
+	static var backgroundColor: TableRowViewName<Dynamic<NSColor>> { return .name(TableRowView.Binding.backgroundColor) }
+	static var draggingDestinationFeedbackStyle: TableRowViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(TableRowView.Binding.draggingDestinationFeedbackStyle) }
+	static var indentationForDropOperation: TableRowViewName<Dynamic<CGFloat>> { return .name(TableRowView.Binding.indentationForDropOperation) }
+	static var isEmphasized: TableRowViewName<Dynamic<Bool>> { return .name(TableRowView.Binding.isEmphasized) }
+	static var isFloating: TableRowViewName<Dynamic<Bool>> { return .name(TableRowView.Binding.isFloating) }
+	static var isGroupRowStyle: TableRowViewName<Dynamic<Bool>> { return .name(TableRowView.Binding.isGroupRowStyle) }
+	static var isSelected: TableRowViewName<Dynamic<Bool>> { return .name(TableRowView.Binding.isSelected) }
+	static var isTargetForDropOperation: TableRowViewName<Dynamic<Bool>> { return .name(TableRowView.Binding.isTargetForDropOperation) }
+	static var selectionHighlightStyle: TableRowViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(TableRowView.Binding.selectionHighlightStyle) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

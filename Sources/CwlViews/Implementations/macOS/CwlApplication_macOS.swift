@@ -382,7 +382,6 @@ extension Application.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ApplicationBinding {
 	public typealias ApplicationName<V> = BindingName<V, Application.Binding, Binding>
-	private typealias B = Application.Binding
 	private static func name<V>(_ source: @escaping (V) -> Application.Binding) -> ApplicationName<V> {
 		return ApplicationName<V>(source: source, downcast: Binding.applicationBinding)
 	}
@@ -390,79 +389,79 @@ extension BindingName where Binding: ApplicationBinding {
 public extension BindingName where Binding: ApplicationBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ApplicationName<$2> { return .name(B.$1) }
+	// With:    static var $1: ApplicationName<$2> { return .name(Application.Binding.$1) }
 	
 	//	0. Static styles are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var activationPolicy: ApplicationName<Dynamic<NSApplication.ActivationPolicy>> { return .name(B.activationPolicy) }
-	static var applicationIconImage: ApplicationName<Dynamic<NSImage?>> { return .name(B.applicationIconImage) }
-	static var dockMenu: ApplicationName<Dynamic<MenuConvertible?>> { return .name(B.dockMenu) }
-	static var mainMenu: ApplicationName<Dynamic<MenuConvertible?>> { return .name(B.mainMenu) }
-	static var menuBarVisible: ApplicationName<Dynamic<Bool>> { return .name(B.menuBarVisible) }
-	static var presentationOptions: ApplicationName<Dynamic<NSApplication.PresentationOptions>> { return .name(B.presentationOptions) }
-	static var relauchOnLogin: ApplicationName<Dynamic<Bool>> { return .name(B.relauchOnLogin) }
-	static var remoteNotifications: ApplicationName<Dynamic<NSApplication.RemoteNotificationType>> { return .name(B.remoteNotifications) }
+	static var activationPolicy: ApplicationName<Dynamic<NSApplication.ActivationPolicy>> { return .name(Application.Binding.activationPolicy) }
+	static var applicationIconImage: ApplicationName<Dynamic<NSImage?>> { return .name(Application.Binding.applicationIconImage) }
+	static var dockMenu: ApplicationName<Dynamic<MenuConvertible?>> { return .name(Application.Binding.dockMenu) }
+	static var mainMenu: ApplicationName<Dynamic<MenuConvertible?>> { return .name(Application.Binding.mainMenu) }
+	static var menuBarVisible: ApplicationName<Dynamic<Bool>> { return .name(Application.Binding.menuBarVisible) }
+	static var presentationOptions: ApplicationName<Dynamic<NSApplication.PresentationOptions>> { return .name(Application.Binding.presentationOptions) }
+	static var relauchOnLogin: ApplicationName<Dynamic<Bool>> { return .name(Application.Binding.relauchOnLogin) }
+	static var remoteNotifications: ApplicationName<Dynamic<NSApplication.RemoteNotificationType>> { return .name(Application.Binding.remoteNotifications) }
 
-	@available(macOS 10.14, *) static var appearance: ApplicationName<Dynamic<NSAppearance?>> { return .name(B.appearance) }
+	@available(macOS 10.14, *) static var appearance: ApplicationName<Dynamic<NSAppearance?>> { return .name(Application.Binding.appearance) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var activate: ApplicationName<Signal<Bool>> { return .name(B.activate) }
-	static var arrangeInFront: ApplicationName<Signal<Void>> { return .name(B.arrangeInFront) }
-	static var deactivate: ApplicationName<Signal<Void>> { return .name(B.deactivate) }
-	static var hide: ApplicationName<Signal<Void>> { return .name(B.hide) }
-	static var hideOtherApplications: ApplicationName<Signal<Void>> { return .name(B.hideOtherApplications) }
-	static var miniaturizeAll: ApplicationName<Signal<Void>> { return .name(B.miniaturizeAll) }
-	static var orderFrontCharacterPalette: ApplicationName<Signal<Void>> { return .name(B.orderFrontCharacterPalette) }
-	static var orderFrontColorPanel: ApplicationName<Signal<Void>> { return .name(B.orderFrontColorPanel) }
-	static var orderFrontStandardAboutPanel: ApplicationName<Signal<Dictionary<NSApplication.AboutPanelOptionKey, Any>>> { return .name(B.orderFrontStandardAboutPanel) }
-	static var presentError: ApplicationName<Signal<Callback<Error, Bool>>> { return .name(B.presentError) }
-	static var requestUserAttention: ApplicationName<Signal<(NSApplication.RequestUserAttentionType, Signal<Void>)>> { return .name(B.requestUserAttention) }
-	static var terminate: ApplicationName<Signal<Void>> { return .name(B.terminate) }
-	static var unhide: ApplicationName<Signal<Bool>> { return .name(B.unhide) }
-	static var unhideAllApplications: ApplicationName<Signal<Void>> { return .name(B.unhideAllApplications) }
+	static var activate: ApplicationName<Signal<Bool>> { return .name(Application.Binding.activate) }
+	static var arrangeInFront: ApplicationName<Signal<Void>> { return .name(Application.Binding.arrangeInFront) }
+	static var deactivate: ApplicationName<Signal<Void>> { return .name(Application.Binding.deactivate) }
+	static var hide: ApplicationName<Signal<Void>> { return .name(Application.Binding.hide) }
+	static var hideOtherApplications: ApplicationName<Signal<Void>> { return .name(Application.Binding.hideOtherApplications) }
+	static var miniaturizeAll: ApplicationName<Signal<Void>> { return .name(Application.Binding.miniaturizeAll) }
+	static var orderFrontCharacterPalette: ApplicationName<Signal<Void>> { return .name(Application.Binding.orderFrontCharacterPalette) }
+	static var orderFrontColorPanel: ApplicationName<Signal<Void>> { return .name(Application.Binding.orderFrontColorPanel) }
+	static var orderFrontStandardAboutPanel: ApplicationName<Signal<Dictionary<NSApplication.AboutPanelOptionKey, Any>>> { return .name(Application.Binding.orderFrontStandardAboutPanel) }
+	static var presentError: ApplicationName<Signal<Callback<Error, Bool>>> { return .name(Application.Binding.presentError) }
+	static var requestUserAttention: ApplicationName<Signal<(NSApplication.RequestUserAttentionType, Signal<Void>)>> { return .name(Application.Binding.requestUserAttention) }
+	static var terminate: ApplicationName<Signal<Void>> { return .name(Application.Binding.terminate) }
+	static var unhide: ApplicationName<Signal<Bool>> { return .name(Application.Binding.unhide) }
+	static var unhideAllApplications: ApplicationName<Signal<Void>> { return .name(Application.Binding.unhideAllApplications) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didBecomeActive: ApplicationName<SignalInput<Void>> { return .name(B.didBecomeActive) }
-	static var didChangeOcclusionState: ApplicationName<SignalInput<Void>> { return .name(B.didChangeOcclusionState) }
-	static var didChangeScreenParameters: ApplicationName<SignalInput<Void>> { return .name(B.didChangeScreenParameters) }
-	static var didFailToContinueUserActivity: ApplicationName<(NSApplication, String, Error) -> Void> { return .name(B.didFailToContinueUserActivity) }
-	static var didFailToRegisterForRemoteNotifications: ApplicationName<(NSApplication, Error) -> Void> { return .name(B.didFailToRegisterForRemoteNotifications) }
-	static var didFinishLaunching: ApplicationName<SignalInput<[AnyHashable: Any]>> { return .name(B.didFinishLaunching) }
-	static var didFinishRestoringWindows: ApplicationName<SignalInput<Void>> { return .name(B.didFinishRestoringWindows) }
-	static var didHide: ApplicationName<SignalInput<Void>> { return .name(B.didHide) }
-	static var didReceiveRemoteNotification: ApplicationName<(NSApplication, [String: Any]) -> Void> { return .name(B.didReceiveRemoteNotification) }
-	static var didRegisterForRemoteNotifications: ApplicationName<(NSApplication, Data) -> Void> { return .name(B.didRegisterForRemoteNotifications) }
-	static var didResignActive: ApplicationName<SignalInput<Void>> { return .name(B.didResignActive) }
-	static var didUnhide: ApplicationName<SignalInput<Void>> { return .name(B.didUnhide) }
-	static var didUpdate: ApplicationName<SignalInput<Void>> { return .name(B.didUpdate) }
-	static var willBecomeActive: ApplicationName<SignalInput<Void>> { return .name(B.willBecomeActive) }
-	static var willFinishLaunching: ApplicationName<SignalInput<Void>> { return .name(B.willFinishLaunching) }
-	static var willHide: ApplicationName<SignalInput<Void>> { return .name(B.willHide) }
-	static var willResignActive: ApplicationName<SignalInput<Void>> { return .name(B.willResignActive) }
-	static var willUnhide: ApplicationName<SignalInput<Void>> { return .name(B.willUnhide) }
-	static var willUpdate: ApplicationName<SignalInput<Void>> { return .name(B.willUpdate) }
+	static var didBecomeActive: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didBecomeActive) }
+	static var didChangeOcclusionState: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didChangeOcclusionState) }
+	static var didChangeScreenParameters: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didChangeScreenParameters) }
+	static var didFailToContinueUserActivity: ApplicationName<(NSApplication, String, Error) -> Void> { return .name(Application.Binding.didFailToContinueUserActivity) }
+	static var didFailToRegisterForRemoteNotifications: ApplicationName<(NSApplication, Error) -> Void> { return .name(Application.Binding.didFailToRegisterForRemoteNotifications) }
+	static var didFinishLaunching: ApplicationName<SignalInput<[AnyHashable: Any]>> { return .name(Application.Binding.didFinishLaunching) }
+	static var didFinishRestoringWindows: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didFinishRestoringWindows) }
+	static var didHide: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didHide) }
+	static var didReceiveRemoteNotification: ApplicationName<(NSApplication, [String: Any]) -> Void> { return .name(Application.Binding.didReceiveRemoteNotification) }
+	static var didRegisterForRemoteNotifications: ApplicationName<(NSApplication, Data) -> Void> { return .name(Application.Binding.didRegisterForRemoteNotifications) }
+	static var didResignActive: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didResignActive) }
+	static var didUnhide: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didUnhide) }
+	static var didUpdate: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didUpdate) }
+	static var willBecomeActive: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.willBecomeActive) }
+	static var willFinishLaunching: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.willFinishLaunching) }
+	static var willHide: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.willHide) }
+	static var willResignActive: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.willResignActive) }
+	static var willUnhide: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.willUnhide) }
+	static var willUpdate: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.willUpdate) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var continueUserActivity: ApplicationName<(_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool> { return .name(B.continueUserActivity) }
-	static var didDecodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(B.didDecodeRestorableState) }
-	static var didUpdateUserActivity: ApplicationName<(_ application: NSApplication, NSUserActivity) -> Void> { return .name(B.didUpdateUserActivity) }
-	static var openFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(B.openFile) }
-	static var openFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String]) -> Void> { return .name(B.openFiles) }
-	static var openFileWithoutUI: ApplicationName<(_ application: Any, _ filename: String) -> Bool> { return .name(B.openFileWithoutUI) }
-	static var openTempFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(B.openTempFile) }
-	static var openUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.openUntitledFile) }
-	static var printFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(B.printFile) }
-	static var printFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply> { return .name(B.printFiles) }
-	static var shouldHandleReopen: ApplicationName<(_ application: NSApplication, _ hasVisibleWindows: Bool) -> Bool> { return .name(B.shouldHandleReopen) }
-	static var shouldOpenUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.shouldOpenUntitledFile) }
-	static var shouldTerminate: ApplicationName<(_ application: NSApplication) -> NSApplication.TerminateReply> { return .name(B.shouldTerminate) }
-	static var shouldTerminateAfterLastWindowClosed: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(B.shouldTerminateAfterLastWindowClosed) }
-	static var userDidAcceptCloudKitShare: ApplicationName<(_ application: NSApplication, CKShare.Metadata) -> Void> { return .name(B.userDidAcceptCloudKitShare) }
-	static var willContinueUserActivity: ApplicationName<(_ application: NSApplication, _ type: String) -> Bool> { return .name(B.willContinueUserActivity) }
-	static var willEncodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(B.willEncodeRestorableState) }
-	static var willPresentError: ApplicationName<(_ application: NSApplication, Error) -> Error> { return .name(B.willPresentError) }
-	static var willTerminate: ApplicationName<(_ notification: Notification) -> Void> { return .name(B.willTerminate) }
+	static var continueUserActivity: ApplicationName<(_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool> { return .name(Application.Binding.continueUserActivity) }
+	static var didDecodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(Application.Binding.didDecodeRestorableState) }
+	static var didUpdateUserActivity: ApplicationName<(_ application: NSApplication, NSUserActivity) -> Void> { return .name(Application.Binding.didUpdateUserActivity) }
+	static var openFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(Application.Binding.openFile) }
+	static var openFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String]) -> Void> { return .name(Application.Binding.openFiles) }
+	static var openFileWithoutUI: ApplicationName<(_ application: Any, _ filename: String) -> Bool> { return .name(Application.Binding.openFileWithoutUI) }
+	static var openTempFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(Application.Binding.openTempFile) }
+	static var openUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(Application.Binding.openUntitledFile) }
+	static var printFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(Application.Binding.printFile) }
+	static var printFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String], _ settings: [NSPrintInfo.AttributeKey: Any], _ showPrintPanels: Bool) -> NSApplication.PrintReply> { return .name(Application.Binding.printFiles) }
+	static var shouldHandleReopen: ApplicationName<(_ application: NSApplication, _ hasVisibleWindows: Bool) -> Bool> { return .name(Application.Binding.shouldHandleReopen) }
+	static var shouldOpenUntitledFile: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(Application.Binding.shouldOpenUntitledFile) }
+	static var shouldTerminate: ApplicationName<(_ application: NSApplication) -> NSApplication.TerminateReply> { return .name(Application.Binding.shouldTerminate) }
+	static var shouldTerminateAfterLastWindowClosed: ApplicationName<(_ application: NSApplication) -> Bool> { return .name(Application.Binding.shouldTerminateAfterLastWindowClosed) }
+	static var userDidAcceptCloudKitShare: ApplicationName<(_ application: NSApplication, CKShare.Metadata) -> Void> { return .name(Application.Binding.userDidAcceptCloudKitShare) }
+	static var willContinueUserActivity: ApplicationName<(_ application: NSApplication, _ type: String) -> Bool> { return .name(Application.Binding.willContinueUserActivity) }
+	static var willEncodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(Application.Binding.willEncodeRestorableState) }
+	static var willPresentError: ApplicationName<(_ application: NSApplication, Error) -> Error> { return .name(Application.Binding.willPresentError) }
+	static var willTerminate: ApplicationName<(_ notification: Notification) -> Void> { return .name(Application.Binding.willTerminate) }
 
 	// Composite binding names
 	static func shouldTerminateAfterLastWindowClosed(_ void: Void = ()) -> ApplicationName<Constant<Bool>> {

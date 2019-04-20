@@ -218,7 +218,6 @@ extension SplitView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: SplitViewBinding {
 	public typealias SplitViewName<V> = BindingName<V, SplitView.Binding, Binding>
-	private typealias B = SplitView.Binding
 	private static func name<V>(_ source: @escaping (V) -> SplitView.Binding) -> SplitViewName<V> {
 		return SplitViewName<V>(source: source, downcast: Binding.splitViewBinding)
 	}
@@ -226,34 +225,34 @@ extension BindingName where Binding: SplitViewBinding {
 public extension BindingName where Binding: SplitViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SplitViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: SplitViewName<$2> { return .name(SplitView.Binding.$1) }
 
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var arrangedSubviews: SplitViewName<Dynamic<ArrayMutation<SplitSubview>>> { return .name(B.arrangedSubviews) }
-	static var autosaveName: SplitViewName<Dynamic<NSSplitView.AutosaveName?>> { return .name(B.autosaveName) }
-	static var dividerStyle: SplitViewName<Dynamic<NSSplitView.DividerStyle>> { return .name(B.dividerStyle) }
-	static var isVertical: SplitViewName<Dynamic<Bool>> { return .name(B.isVertical) }
+	static var arrangedSubviews: SplitViewName<Dynamic<ArrayMutation<SplitSubview>>> { return .name(SplitView.Binding.arrangedSubviews) }
+	static var autosaveName: SplitViewName<Dynamic<NSSplitView.AutosaveName?>> { return .name(SplitView.Binding.autosaveName) }
+	static var dividerStyle: SplitViewName<Dynamic<NSSplitView.DividerStyle>> { return .name(SplitView.Binding.dividerStyle) }
+	static var isVertical: SplitViewName<Dynamic<Bool>> { return .name(SplitView.Binding.isVertical) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var setDividerPosition: SplitViewName<Signal<(position: CGFloat, dividerIndex: Int)>> { return .name(B.setDividerPosition) }
+	static var setDividerPosition: SplitViewName<Signal<(position: CGFloat, dividerIndex: Int)>> { return .name(SplitView.Binding.setDividerPosition) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var didResizeSubviews: SplitViewName<SignalInput<Int?>> { return .name(B.didResizeSubviews) }
-	static var willResizeSubviews: SplitViewName<SignalInput<Int?>> { return .name(B.willResizeSubviews) }
+	static var didResizeSubviews: SplitViewName<SignalInput<Int?>> { return .name(SplitView.Binding.didResizeSubviews) }
+	static var willResizeSubviews: SplitViewName<SignalInput<Int?>> { return .name(SplitView.Binding.willResizeSubviews) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var additionalEffectiveRect: SplitViewName<(_ splitView: NSSplitView, _ dividerAt: Int) -> NSRect> { return .name(B.additionalEffectiveRect) }
-	static var canCollapseSubview: SplitViewName<(_ splitView: NSSplitView, _ subview: NSView) -> Bool> { return .name(B.canCollapseSubview) }
-	static var constrainMaxCoordinate: SplitViewName<(_ splitView: NSSplitView, _ proposedMaximumPosition: CGFloat, _ dividerIndex: Int) -> CGFloat> { return .name(B.constrainMaxCoordinate) }
-	static var constrainMinCoordinate: SplitViewName<(_ splitView: NSSplitView, _ proposedMinimumPosition: CGFloat, _ dividerIndex: Int) -> CGFloat> { return .name(B.constrainMinCoordinate) }
-	static var constrainSplitPosition: SplitViewName<(_ splitView: NSSplitView, _ proposedPosition: CGFloat, _ dividerIndex: Int) -> CGFloat> { return .name(B.constrainSplitPosition) }
-	static var effectiveRectForDrawnRect: SplitViewName<(_ splitView: NSSplitView, _ proposedEffectiveRect: NSRect, _ drawnRect: NSRect, _ dividerIndex: Int) -> NSRect> { return .name(B.effectiveRectForDrawnRect) }
-	static var resizeSubviews: SplitViewName<(NSSplitView, NSSize) -> Void> { return .name(B.resizeSubviews) }
-	static var shouldAdjustSizeOfSubview: SplitViewName<(_ splitView: NSSplitView, _ subview: NSView) -> Bool> { return .name(B.shouldAdjustSizeOfSubview) }
-	static var shouldCollapseSubview: SplitViewName<(_ splitView: NSSplitView, _ subview: NSView, _ dividerIndex: Int) -> Bool> { return .name(B.shouldCollapseSubview) }
-	static var shouldHideDivider: SplitViewName<(_ splitView: NSSplitView, _ dividerIndex: Int) -> Bool> { return .name(B.shouldHideDivider) }
+	static var additionalEffectiveRect: SplitViewName<(_ splitView: NSSplitView, _ dividerAt: Int) -> NSRect> { return .name(SplitView.Binding.additionalEffectiveRect) }
+	static var canCollapseSubview: SplitViewName<(_ splitView: NSSplitView, _ subview: NSView) -> Bool> { return .name(SplitView.Binding.canCollapseSubview) }
+	static var constrainMaxCoordinate: SplitViewName<(_ splitView: NSSplitView, _ proposedMaximumPosition: CGFloat, _ dividerIndex: Int) -> CGFloat> { return .name(SplitView.Binding.constrainMaxCoordinate) }
+	static var constrainMinCoordinate: SplitViewName<(_ splitView: NSSplitView, _ proposedMinimumPosition: CGFloat, _ dividerIndex: Int) -> CGFloat> { return .name(SplitView.Binding.constrainMinCoordinate) }
+	static var constrainSplitPosition: SplitViewName<(_ splitView: NSSplitView, _ proposedPosition: CGFloat, _ dividerIndex: Int) -> CGFloat> { return .name(SplitView.Binding.constrainSplitPosition) }
+	static var effectiveRectForDrawnRect: SplitViewName<(_ splitView: NSSplitView, _ proposedEffectiveRect: NSRect, _ drawnRect: NSRect, _ dividerIndex: Int) -> NSRect> { return .name(SplitView.Binding.effectiveRectForDrawnRect) }
+	static var resizeSubviews: SplitViewName<(NSSplitView, NSSize) -> Void> { return .name(SplitView.Binding.resizeSubviews) }
+	static var shouldAdjustSizeOfSubview: SplitViewName<(_ splitView: NSSplitView, _ subview: NSView) -> Bool> { return .name(SplitView.Binding.shouldAdjustSizeOfSubview) }
+	static var shouldCollapseSubview: SplitViewName<(_ splitView: NSSplitView, _ subview: NSView, _ dividerIndex: Int) -> Bool> { return .name(SplitView.Binding.shouldCollapseSubview) }
+	static var shouldHideDivider: SplitViewName<(_ splitView: NSSplitView, _ dividerIndex: Int) -> Bool> { return .name(SplitView.Binding.shouldHideDivider) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

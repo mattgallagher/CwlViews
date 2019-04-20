@@ -625,7 +625,6 @@ extension TableView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: TableViewBinding {
 	public typealias TableViewName<V> = BindingName<V, TableView<Binding.RowDataType>.Binding, Binding>
-	private typealias B = TableView<Binding.RowDataType>.Binding
 	private static func name<V>(_ source: @escaping (V) -> TableView<Binding.RowDataType>.Binding) -> TableViewName<V> {
 		return TableViewName<V>(source: source, downcast: Binding.tableViewBinding)
 	}
@@ -633,87 +632,87 @@ extension BindingName where Binding: TableViewBinding {
 public extension BindingName where Binding: TableViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: TableViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: TableViewName<$2> { return .name(TableView.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsColumnReordering: TableViewName<Dynamic<Bool>> { return .name(B.allowsColumnReordering) }
-	static var allowsColumnResizing: TableViewName<Dynamic<Bool>> { return .name(B.allowsColumnResizing) }
-	static var allowsColumnSelection: TableViewName<Dynamic<Bool>> { return .name(B.allowsColumnSelection) }
-	static var allowsEmptySelection: TableViewName<Dynamic<Bool>> { return .name(B.allowsEmptySelection) }
-	static var allowsMultipleSelection: TableViewName<Dynamic<Bool>> { return .name(B.allowsMultipleSelection) }
-	static var allowsTypeSelect: TableViewName<Dynamic<Bool>> { return .name(B.allowsTypeSelect) }
-	static var autosaveName: TableViewName<Dynamic<NSTableView.AutosaveName?>> { return .name(B.autosaveName) }
-	static var autosaveTableColumns: TableViewName<Dynamic<Bool>> { return .name(B.autosaveTableColumns) }
-	static var backgroundColor: TableViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
-	static var columnAutoresizingStyle: TableViewName<Dynamic<NSTableView.ColumnAutoresizingStyle>> { return .name(B.columnAutoresizingStyle) }
-	static var columns: TableViewName<Dynamic<[TableColumn<Binding.RowDataType>]>> { return .name(B.columns) }
-	static var cornerView: TableViewName<Dynamic<ViewConvertible?>> { return .name(B.cornerView) }
-	static var draggingDestinationFeedbackStyle: TableViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(B.draggingDestinationFeedbackStyle) }
-	static var floatsGroupRows: TableViewName<Dynamic<Bool>> { return .name(B.floatsGroupRows) }
-	static var gridColor: TableViewName<Dynamic<NSColor>> { return .name(B.gridColor) }
-	static var gridStyleMask: TableViewName<Dynamic<NSTableView.GridLineStyle>> { return .name(B.gridStyleMask) }
-	static var headerView: TableViewName<Dynamic<TableHeaderViewConvertible?>> { return .name(B.headerView) }
-	static var intercellSpacing: TableViewName<Dynamic<NSSize>> { return .name(B.intercellSpacing) }
-	static var rowHeight: TableViewName<Dynamic<CGFloat>> { return .name(B.rowHeight) }
-	static var rows: TableViewName<Dynamic<TableRowAnimatable<Binding.RowDataType>>> { return .name(B.rows) }
-	static var rowSizeStyle: TableViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(B.rowSizeStyle) }
-	static var selectionHighlightStyle: TableViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(B.selectionHighlightStyle) }
-	static var userInterfaceLayoutDirection: TableViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(B.userInterfaceLayoutDirection) }
-	static var usesAlternatingRowBackgroundColors: TableViewName<Dynamic<Bool>> { return .name(B.usesAlternatingRowBackgroundColors) }
-	static var usesAutomaticRowHeights: TableViewName<Dynamic<Bool>> { return .name(B.usesAutomaticRowHeights) }
-	static var verticalMotionCanBeginDrag: TableViewName<Dynamic<Bool>> { return .name(B.verticalMotionCanBeginDrag) }
+	static var allowsColumnReordering: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsColumnReordering) }
+	static var allowsColumnResizing: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsColumnResizing) }
+	static var allowsColumnSelection: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsColumnSelection) }
+	static var allowsEmptySelection: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsEmptySelection) }
+	static var allowsMultipleSelection: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsMultipleSelection) }
+	static var allowsTypeSelect: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.allowsTypeSelect) }
+	static var autosaveName: TableViewName<Dynamic<NSTableView.AutosaveName?>> { return .name(TableView.Binding.autosaveName) }
+	static var autosaveTableColumns: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.autosaveTableColumns) }
+	static var backgroundColor: TableViewName<Dynamic<NSColor>> { return .name(TableView.Binding.backgroundColor) }
+	static var columnAutoresizingStyle: TableViewName<Dynamic<NSTableView.ColumnAutoresizingStyle>> { return .name(TableView.Binding.columnAutoresizingStyle) }
+	static var columns: TableViewName<Dynamic<[TableColumn<Binding.RowDataType>]>> { return .name(TableView.Binding.columns) }
+	static var cornerView: TableViewName<Dynamic<ViewConvertible?>> { return .name(TableView.Binding.cornerView) }
+	static var draggingDestinationFeedbackStyle: TableViewName<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> { return .name(TableView.Binding.draggingDestinationFeedbackStyle) }
+	static var floatsGroupRows: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.floatsGroupRows) }
+	static var gridColor: TableViewName<Dynamic<NSColor>> { return .name(TableView.Binding.gridColor) }
+	static var gridStyleMask: TableViewName<Dynamic<NSTableView.GridLineStyle>> { return .name(TableView.Binding.gridStyleMask) }
+	static var headerView: TableViewName<Dynamic<TableHeaderViewConvertible?>> { return .name(TableView.Binding.headerView) }
+	static var intercellSpacing: TableViewName<Dynamic<NSSize>> { return .name(TableView.Binding.intercellSpacing) }
+	static var rowHeight: TableViewName<Dynamic<CGFloat>> { return .name(TableView.Binding.rowHeight) }
+	static var rows: TableViewName<Dynamic<TableRowAnimatable<Binding.RowDataType>>> { return .name(TableView.Binding.rows) }
+	static var rowSizeStyle: TableViewName<Dynamic<NSTableView.RowSizeStyle>> { return .name(TableView.Binding.rowSizeStyle) }
+	static var selectionHighlightStyle: TableViewName<Dynamic<NSTableView.SelectionHighlightStyle>> { return .name(TableView.Binding.selectionHighlightStyle) }
+	static var userInterfaceLayoutDirection: TableViewName<Dynamic<NSUserInterfaceLayoutDirection>> { return .name(TableView.Binding.userInterfaceLayoutDirection) }
+	static var usesAlternatingRowBackgroundColors: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.usesAlternatingRowBackgroundColors) }
+	static var usesAutomaticRowHeights: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.usesAutomaticRowHeights) }
+	static var verticalMotionCanBeginDrag: TableViewName<Dynamic<Bool>> { return .name(TableView.Binding.verticalMotionCanBeginDrag) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var deselectAll: TableViewName<Signal<Void>> { return .name(B.deselectAll) }
-	static var deselectColumn: TableViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.deselectColumn) }
-	static var deselectRow: TableViewName<Signal<Int>> { return .name(B.deselectRow) }
-	static var hideRowActions: TableViewName<Signal<Void>> { return .name(B.hideRowActions) }
-	static var hideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.hideRows) }
-	static var highlightColumn: TableViewName<Signal<NSUserInterfaceItemIdentifier?>> { return .name(B.highlightColumn) }
-	static var moveColumn: TableViewName<Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>> { return .name(B.moveColumn) }
-	static var scrollColumnToVisible: TableViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(B.scrollColumnToVisible) }
-	static var scrollRowToVisible: TableViewName<Signal<Int>> { return .name(B.scrollRowToVisible) }
-	static var selectAll: TableViewName<Signal<Void>> { return .name(B.selectAll) }
-	static var selectColumns: TableViewName<Signal<(identifiers: Set<NSUserInterfaceItemIdentifier>, byExtendingSelection: Bool)>> { return .name(B.selectColumns) }
-	static var selectRows: TableViewName<Signal<(indexes: IndexSet, byExtendingSelection: Bool)>> { return .name(B.selectRows) }
-	static var sizeLastColumnToFit: TableViewName<Signal<Void>> { return .name(B.sizeLastColumnToFit) }
-	static var sizeToFit: TableViewName<Signal<Void>> { return .name(B.sizeToFit) }
-	static var unhideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(B.unhideRows) }
+	static var deselectAll: TableViewName<Signal<Void>> { return .name(TableView.Binding.deselectAll) }
+	static var deselectColumn: TableViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(TableView.Binding.deselectColumn) }
+	static var deselectRow: TableViewName<Signal<Int>> { return .name(TableView.Binding.deselectRow) }
+	static var hideRowActions: TableViewName<Signal<Void>> { return .name(TableView.Binding.hideRowActions) }
+	static var hideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(TableView.Binding.hideRows) }
+	static var highlightColumn: TableViewName<Signal<NSUserInterfaceItemIdentifier?>> { return .name(TableView.Binding.highlightColumn) }
+	static var moveColumn: TableViewName<Signal<(identifier: NSUserInterfaceItemIdentifier, toIndex: Int)>> { return .name(TableView.Binding.moveColumn) }
+	static var scrollColumnToVisible: TableViewName<Signal<NSUserInterfaceItemIdentifier>> { return .name(TableView.Binding.scrollColumnToVisible) }
+	static var scrollRowToVisible: TableViewName<Signal<Int>> { return .name(TableView.Binding.scrollRowToVisible) }
+	static var selectAll: TableViewName<Signal<Void>> { return .name(TableView.Binding.selectAll) }
+	static var selectColumns: TableViewName<Signal<(identifiers: Set<NSUserInterfaceItemIdentifier>, byExtendingSelection: Bool)>> { return .name(TableView.Binding.selectColumns) }
+	static var selectRows: TableViewName<Signal<(indexes: IndexSet, byExtendingSelection: Bool)>> { return .name(TableView.Binding.selectRows) }
+	static var sizeLastColumnToFit: TableViewName<Signal<Void>> { return .name(TableView.Binding.sizeLastColumnToFit) }
+	static var sizeToFit: TableViewName<Signal<Void>> { return .name(TableView.Binding.sizeToFit) }
+	static var unhideRows: TableViewName<Signal<(indexes: IndexSet, withAnimation: NSTableView.AnimationOptions)>> { return .name(TableView.Binding.unhideRows) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	static var columnMoved: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(B.columnMoved) }
-	static var columnResized: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(B.columnResized) }
-	static var doubleAction: TableViewName<TargetAction> { return .name(B.doubleAction) }
-	static var visibleRowsChanged: TableViewName<SignalInput<CountableRange<Int>>> { return .name(B.visibleRowsChanged) }
+	static var columnMoved: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldIndex: Int, newIndex: Int)>> { return .name(TableView.Binding.columnMoved) }
+	static var columnResized: TableViewName<SignalInput<(column: NSUserInterfaceItemIdentifier, oldWidth: CGFloat, newWidth: CGFloat)>> { return .name(TableView.Binding.columnResized) }
+	static var doubleAction: TableViewName<TargetAction> { return .name(TableView.Binding.doubleAction) }
+	static var visibleRowsChanged: TableViewName<SignalInput<CountableRange<Int>>> { return .name(TableView.Binding.visibleRowsChanged) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var acceptDrop: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> Bool> { return .name(B.acceptDrop) }
-	static var didClickTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(B.didClickTableColumn) }
-	static var didDragTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(B.didDragTableColumn) }
-	static var draggingSessionEnded: TableViewName<(_ tableView: NSTableView, _ session: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void> { return .name(B.draggingSessionEnded) }
-	static var draggingSessionWillBegin: TableViewName<(_ tableView: NSTableView, _ session: NSDraggingSession, _ willBeginAt: NSPoint, _ forRowIndexes: IndexSet) -> Void> { return .name(B.draggingSessionWillBegin) }
-	static var groupRowCellConstructor: TableViewName<(Int) -> TableCellViewConvertible> { return .name(B.groupRowCellConstructor) }
-	static var heightOfRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> CGFloat> { return .name(B.heightOfRow) }
-	static var isGroupRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> Bool> { return .name(B.isGroupRow) }
-	static var mouseDownInHeaderOfTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(B.mouseDownInHeaderOfTableColumn) }
-	static var nextTypeSelectMatch: TableViewName<(_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int> { return .name(B.nextTypeSelectMatch) }
-	static var pasteboardWriter: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> NSPasteboardWriting> { return .name(B.pasteboardWriter) }
-	static var rowActionsForRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(B.rowActionsForRow) }
-	static var rowView: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> TableRowViewConvertible?> { return .name(B.rowView) }
-	static var selectionDidChange: TableViewName<(Notification) -> Void> { return .name(B.selectionDidChange) }
-	static var selectionIndexesForProposedSelection: TableViewName<(_ tableView: NSTableView, IndexSet) -> IndexSet> { return .name(B.selectionIndexesForProposedSelection) }
-	static var selectionShouldChange: TableViewName<(_ tableView: NSTableView) -> Bool> { return .name(B.selectionShouldChange) }
-	static var shouldReorderColumn: TableViewName<(_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier, _ newIndex: Int) -> Bool> { return .name(B.shouldReorderColumn) }
-	static var shouldSelectRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> Bool> { return .name(B.shouldSelectRow) }
-	static var shouldSelectTableColumn: TableViewName<(_ tableView: NSTableView, _ column: NSTableColumn?) -> Bool> { return .name(B.shouldSelectTableColumn) }
-	static var shouldTypeSelectForEvent: TableViewName<(_ tableView: NSTableView, _ event: NSEvent, _ searchString: String?) -> Bool> { return .name(B.shouldTypeSelectForEvent) }
-	static var sizeToFitWidthOfColumn: TableViewName<(_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier) -> CGFloat> { return .name(B.sizeToFitWidthOfColumn) }
-	static var sortDescriptorsDidChange: TableViewName<(NSTableView, [NSSortDescriptor]) -> Void> { return .name(B.sortDescriptorsDidChange) }
-	static var typeSelectString: TableViewName<(_ tableView: NSTableView, _ cell: TableCell<Binding.RowDataType>) -> String?> { return .name(B.typeSelectString) }
-	static var updateDraggingItems: TableViewName<(_ tableView: NSTableView, _ forDrag: NSDraggingInfo) -> Void> { return .name(B.updateDraggingItems) }
-	static var validateDrop: TableViewName<(_ tableView: NSTableView, _ info: NSDraggingInfo, _ proposedRow: Int, _ proposedDropOperation: NSTableView.DropOperation) -> NSDragOperation> { return .name(B.validateDrop) }
+	static var acceptDrop: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> Bool> { return .name(TableView.Binding.acceptDrop) }
+	static var didClickTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(TableView.Binding.didClickTableColumn) }
+	static var didDragTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(TableView.Binding.didDragTableColumn) }
+	static var draggingSessionEnded: TableViewName<(_ tableView: NSTableView, _ session: NSDraggingSession, _ endedAt: NSPoint, _ operation: NSDragOperation) -> Void> { return .name(TableView.Binding.draggingSessionEnded) }
+	static var draggingSessionWillBegin: TableViewName<(_ tableView: NSTableView, _ session: NSDraggingSession, _ willBeginAt: NSPoint, _ forRowIndexes: IndexSet) -> Void> { return .name(TableView.Binding.draggingSessionWillBegin) }
+	static var groupRowCellConstructor: TableViewName<(Int) -> TableCellViewConvertible> { return .name(TableView.Binding.groupRowCellConstructor) }
+	static var heightOfRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> CGFloat> { return .name(TableView.Binding.heightOfRow) }
+	static var isGroupRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> Bool> { return .name(TableView.Binding.isGroupRow) }
+	static var mouseDownInHeaderOfTableColumn: TableViewName<(NSTableView, NSTableColumn) -> Void> { return .name(TableView.Binding.mouseDownInHeaderOfTableColumn) }
+	static var nextTypeSelectMatch: TableViewName<(_ tableView: NSTableView, _ startRow: Int, _ endRow: Int, _ searchString: String) -> Int> { return .name(TableView.Binding.nextTypeSelectMatch) }
+	static var pasteboardWriter: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?) -> NSPasteboardWriting> { return .name(TableView.Binding.pasteboardWriter) }
+	static var rowActionsForRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ data: Binding.RowDataType?, _ edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction]> { return .name(TableView.Binding.rowActionsForRow) }
+	static var rowView: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> TableRowViewConvertible?> { return .name(TableView.Binding.rowView) }
+	static var selectionDidChange: TableViewName<(Notification) -> Void> { return .name(TableView.Binding.selectionDidChange) }
+	static var selectionIndexesForProposedSelection: TableViewName<(_ tableView: NSTableView, IndexSet) -> IndexSet> { return .name(TableView.Binding.selectionIndexesForProposedSelection) }
+	static var selectionShouldChange: TableViewName<(_ tableView: NSTableView) -> Bool> { return .name(TableView.Binding.selectionShouldChange) }
+	static var shouldReorderColumn: TableViewName<(_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier, _ newIndex: Int) -> Bool> { return .name(TableView.Binding.shouldReorderColumn) }
+	static var shouldSelectRow: TableViewName<(_ tableView: NSTableView, _ row: Int, _ rowData: Binding.RowDataType?) -> Bool> { return .name(TableView.Binding.shouldSelectRow) }
+	static var shouldSelectTableColumn: TableViewName<(_ tableView: NSTableView, _ column: NSTableColumn?) -> Bool> { return .name(TableView.Binding.shouldSelectTableColumn) }
+	static var shouldTypeSelectForEvent: TableViewName<(_ tableView: NSTableView, _ event: NSEvent, _ searchString: String?) -> Bool> { return .name(TableView.Binding.shouldTypeSelectForEvent) }
+	static var sizeToFitWidthOfColumn: TableViewName<(_ tableView: NSTableView, _ column: NSUserInterfaceItemIdentifier) -> CGFloat> { return .name(TableView.Binding.sizeToFitWidthOfColumn) }
+	static var sortDescriptorsDidChange: TableViewName<(NSTableView, [NSSortDescriptor]) -> Void> { return .name(TableView.Binding.sortDescriptorsDidChange) }
+	static var typeSelectString: TableViewName<(_ tableView: NSTableView, _ cell: TableCell<Binding.RowDataType>) -> String?> { return .name(TableView.Binding.typeSelectString) }
+	static var updateDraggingItems: TableViewName<(_ tableView: NSTableView, _ forDrag: NSDraggingInfo) -> Void> { return .name(TableView.Binding.updateDraggingItems) }
+	static var validateDrop: TableViewName<(_ tableView: NSTableView, _ info: NSDraggingInfo, _ proposedRow: Int, _ proposedDropOperation: NSTableView.DropOperation) -> NSDragOperation> { return .name(TableView.Binding.validateDrop) }
 
 	// Composite binding names
 	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {

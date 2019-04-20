@@ -152,7 +152,6 @@ extension ClipView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ClipViewBinding {
 	public typealias ClipViewName<V> = BindingName<V, ClipView.Binding, Binding>
-	private typealias B = ClipView.Binding
 	private static func name<V>(_ source: @escaping (V) -> ClipView.Binding) -> ClipViewName<V> {
 		return ClipViewName<V>(source: source, downcast: Binding.clipViewBinding)
 	}
@@ -160,19 +159,19 @@ extension BindingName where Binding: ClipViewBinding {
 public extension BindingName where Binding: ClipViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ClipViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: ClipViewName<$2> { return .name(ClipView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundColor: ClipViewName<Dynamic<NSColor>> { return .name(B.backgroundColor) }
-	static var copiesOnScroll: ClipViewName<Dynamic<Bool>> { return .name(B.copiesOnScroll) }
-	static var documentCursor: ClipViewName<Dynamic<NSCursor?>> { return .name(B.documentCursor) }
-	static var documentView: ClipViewName<Dynamic<ViewConvertible?>> { return .name(B.documentView) }
-	static var drawsBackground: ClipViewName<Dynamic<Bool>> { return .name(B.drawsBackground) }
+	static var backgroundColor: ClipViewName<Dynamic<NSColor>> { return .name(ClipView.Binding.backgroundColor) }
+	static var copiesOnScroll: ClipViewName<Dynamic<Bool>> { return .name(ClipView.Binding.copiesOnScroll) }
+	static var documentCursor: ClipViewName<Dynamic<NSCursor?>> { return .name(ClipView.Binding.documentCursor) }
+	static var documentView: ClipViewName<Dynamic<ViewConvertible?>> { return .name(ClipView.Binding.documentView) }
+	static var drawsBackground: ClipViewName<Dynamic<Bool>> { return .name(ClipView.Binding.drawsBackground) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	static var scrollTo: ClipViewName<Signal<CGPoint>> { return .name(B.scrollTo) }
+	static var scrollTo: ClipViewName<Signal<CGPoint>> { return .name(ClipView.Binding.scrollTo) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	

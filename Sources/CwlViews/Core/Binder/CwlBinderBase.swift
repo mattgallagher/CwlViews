@@ -83,7 +83,6 @@ public extension BinderBase.Binding {
 
 extension BindingName where Binding: BinderBaseBinding {
 	public typealias BinderBaseName<V> = BindingName<V, BinderBase.Binding, Binding>
-	private typealias B = BinderBase.Binding
 	private static func name<V>(_ source: @escaping (V) -> BinderBase.Binding) -> BinderBaseName<V> {
 		return BinderBaseName<V>(source: source, downcast: Binding.binderBaseBinding)
 	}
@@ -92,7 +91,7 @@ public extension BindingName where Binding: BinderBaseBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: BinderBaseName<$2> { return .name(BinderBase.Binding.$1) }
-	static var lifetimes: BinderBaseName<Dynamic<[Lifetime]>> { return .name(B.lifetimes) }
+	static var lifetimes: BinderBaseName<Dynamic<[Lifetime]>> { return .name(BinderBase.Binding.lifetimes) }
 
 	static var adHocPrepare: BinderBaseName<(Binding.Preparer.Instance) -> Void> {
 		return Binding.compositeName(

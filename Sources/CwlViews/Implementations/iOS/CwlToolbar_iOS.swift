@@ -121,7 +121,6 @@ extension Toolbar.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ToolbarBinding {
 	public typealias ToolbarName<V> = BindingName<V, Toolbar.Binding, Binding>
-	private typealias B = Toolbar.Binding
 	private static func name<V>(_ source: @escaping (V) -> Toolbar.Binding) -> ToolbarName<V> {
 		return ToolbarName<V>(source: source, downcast: Binding.scrollViewBinding)
 	}
@@ -129,25 +128,25 @@ extension BindingName where Binding: ToolbarBinding {
 public extension BindingName where Binding: ToolbarBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ToolbarName<$2> { return .name(B.$1) }
+	// With:    static var $1: ToolbarName<$2> { return .name(Toolbar.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var backgroundImage: ToolbarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(B.backgroundImage) }
-	static var barStyle: ToolbarName<Dynamic<UIBarStyle>> { return .name(B.barStyle) }
-	static var barTintColor: ToolbarName<Dynamic<UIColor?>> { return .name(B.barTintColor) }
-	static var isTranslucent: ToolbarName<Dynamic<Bool>> { return .name(B.isTranslucent) }
-	static var items: ToolbarName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(B.items) }
-	static var shadowImage: ToolbarName<Dynamic<ScopedValues<UIBarPosition, UIImage?>>> { return .name(B.shadowImage) }
-	static var tintColor: ToolbarName<Dynamic<UIColor?>> { return .name(B.tintColor) }
+	static var backgroundImage: ToolbarName<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> { return .name(Toolbar.Binding.backgroundImage) }
+	static var barStyle: ToolbarName<Dynamic<UIBarStyle>> { return .name(Toolbar.Binding.barStyle) }
+	static var barTintColor: ToolbarName<Dynamic<UIColor?>> { return .name(Toolbar.Binding.barTintColor) }
+	static var isTranslucent: ToolbarName<Dynamic<Bool>> { return .name(Toolbar.Binding.isTranslucent) }
+	static var items: ToolbarName<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> { return .name(Toolbar.Binding.items) }
+	static var shadowImage: ToolbarName<Dynamic<ScopedValues<UIBarPosition, UIImage?>>> { return .name(Toolbar.Binding.shadowImage) }
+	static var tintColor: ToolbarName<Dynamic<UIColor?>> { return .name(Toolbar.Binding.tintColor) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var position: ToolbarName<(UIBarPositioning) -> UIBarPosition> { return .name(B.position) }
+	static var position: ToolbarName<(UIBarPositioning) -> UIBarPosition> { return .name(Toolbar.Binding.position) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

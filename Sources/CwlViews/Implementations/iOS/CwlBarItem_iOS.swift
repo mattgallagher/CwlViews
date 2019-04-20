@@ -108,7 +108,6 @@ extension BarItem.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: BarItemBinding {
 	public typealias BarItemName<V> = BindingName<V, BarItem.Binding, Binding>
-	private typealias B = BarItem.Binding
 	private static func name<V>(_ source: @escaping (V) -> BarItem.Binding) -> BarItemName<V> {
 		return BarItemName<V>(source: source, downcast: Binding.barItemBinding)
 	}
@@ -116,19 +115,19 @@ extension BindingName where Binding: BarItemBinding {
 public extension BindingName where Binding: BarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: BarItemName<$2> { return .name(B.$1) }
+	// With:    static var $1: BarItemName<$2> { return .name(BarItem.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var image: BarItemName<Dynamic<UIImage?>> { return .name(B.image) }
-	static var imageInsets: BarItemName<Dynamic<UIEdgeInsets>> { return .name(B.imageInsets) }
-	static var isEnabled: BarItemName<Dynamic<Bool>> { return .name(B.isEnabled) }
-	static var landscapeImagePhone: BarItemName<Dynamic<UIImage?>> { return .name(B.landscapeImagePhone) }
-	static var landscapeImagePhoneInsets: BarItemName<Dynamic<UIEdgeInsets>> { return .name(B.landscapeImagePhoneInsets) }
-	static var tag: BarItemName<Dynamic<Int>> { return .name(B.tag) }
-	static var title: BarItemName<Dynamic<String>> { return .name(B.title) }
-	static var titleTextAttributes: BarItemName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>> { return .name(B.titleTextAttributes) }
+	static var image: BarItemName<Dynamic<UIImage?>> { return .name(BarItem.Binding.image) }
+	static var imageInsets: BarItemName<Dynamic<UIEdgeInsets>> { return .name(BarItem.Binding.imageInsets) }
+	static var isEnabled: BarItemName<Dynamic<Bool>> { return .name(BarItem.Binding.isEnabled) }
+	static var landscapeImagePhone: BarItemName<Dynamic<UIImage?>> { return .name(BarItem.Binding.landscapeImagePhone) }
+	static var landscapeImagePhoneInsets: BarItemName<Dynamic<UIEdgeInsets>> { return .name(BarItem.Binding.landscapeImagePhoneInsets) }
+	static var tag: BarItemName<Dynamic<Int>> { return .name(BarItem.Binding.tag) }
+	static var title: BarItemName<Dynamic<String>> { return .name(BarItem.Binding.title) }
+	static var titleTextAttributes: BarItemName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>> { return .name(BarItem.Binding.titleTextAttributes) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	

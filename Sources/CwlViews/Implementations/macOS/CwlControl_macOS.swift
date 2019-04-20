@@ -156,7 +156,6 @@ extension Control.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ControlBinding {
 	public typealias ControlName<V> = BindingName<V, Control.Binding, Binding>
-	private typealias B = Control.Binding
 	private static func name<V>(_ source: @escaping (V) -> Control.Binding) -> ControlName<V> {
 		return ControlName<V>(source: source, downcast: Binding.controlBinding)
 	}
@@ -164,47 +163,47 @@ extension BindingName where Binding: ControlBinding {
 public extension BindingName where Binding: ControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ControlName<$2> { return .name(B.$1) }
+	// With:    static var $1: ControlName<$2> { return .name(Control.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var alignment: ControlName<Dynamic<NSTextAlignment>> { return .name(B.alignment) }
-	static var allowsExpansionToolTips: ControlName<Dynamic<Bool>> { return .name(B.allowsExpansionToolTips) }
-	static var attributedStringValue: ControlName<Dynamic<NSAttributedString>> { return .name(B.attributedStringValue) }
-	static var baseWritingDirection: ControlName<Dynamic<NSWritingDirection>> { return .name(B.baseWritingDirection) }
-	static var doubleValue: ControlName<Dynamic<Double>> { return .name(B.doubleValue) }
-	static var floatValue: ControlName<Dynamic<Float>> { return .name(B.floatValue) }
-	static var font: ControlName<Dynamic<NSFont>> { return .name(B.font) }
-	static var formatter: ControlName<Dynamic<Foundation.Formatter?>> { return .name(B.formatter) }
-	static var ignoresMultiClick: ControlName<Dynamic<Bool>> { return .name(B.ignoresMultiClick) }
-	static var integerValue: ControlName<Dynamic<Int>> { return .name(B.integerValue) }
-	static var intValue: ControlName<Dynamic<Int32>> { return .name(B.intValue) }
-	static var isContinuous: ControlName<Dynamic<Bool>> { return .name(B.isContinuous) }
-	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(B.isEnabled) }
-	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(B.isHighlighted) }
-	static var lineBreakMode: ControlName<Dynamic<NSLineBreakMode>> { return .name(B.lineBreakMode) }
-	static var objectValue: ControlName<Dynamic<Any>> { return .name(B.objectValue) }
-	static var refusesFirstResponder: ControlName<Dynamic<Bool>> { return .name(B.refusesFirstResponder) }
-	static var sendActionOn: ControlName<Dynamic<NSEvent.EventTypeMask>> { return .name(B.sendActionOn) }
-	static var size: ControlName<Dynamic<NSControl.ControlSize>> { return .name(B.size) }
-	static var stringValue: ControlName<Dynamic<String>> { return .name(B.stringValue) }
-	static var tag: ControlName<Dynamic<Int>> { return .name(B.tag) }
-	static var usesSingleLineMode: ControlName<Dynamic<Bool>> { return .name(B.usesSingleLineMode) }
+	static var alignment: ControlName<Dynamic<NSTextAlignment>> { return .name(Control.Binding.alignment) }
+	static var allowsExpansionToolTips: ControlName<Dynamic<Bool>> { return .name(Control.Binding.allowsExpansionToolTips) }
+	static var attributedStringValue: ControlName<Dynamic<NSAttributedString>> { return .name(Control.Binding.attributedStringValue) }
+	static var baseWritingDirection: ControlName<Dynamic<NSWritingDirection>> { return .name(Control.Binding.baseWritingDirection) }
+	static var doubleValue: ControlName<Dynamic<Double>> { return .name(Control.Binding.doubleValue) }
+	static var floatValue: ControlName<Dynamic<Float>> { return .name(Control.Binding.floatValue) }
+	static var font: ControlName<Dynamic<NSFont>> { return .name(Control.Binding.font) }
+	static var formatter: ControlName<Dynamic<Foundation.Formatter?>> { return .name(Control.Binding.formatter) }
+	static var ignoresMultiClick: ControlName<Dynamic<Bool>> { return .name(Control.Binding.ignoresMultiClick) }
+	static var integerValue: ControlName<Dynamic<Int>> { return .name(Control.Binding.integerValue) }
+	static var intValue: ControlName<Dynamic<Int32>> { return .name(Control.Binding.intValue) }
+	static var isContinuous: ControlName<Dynamic<Bool>> { return .name(Control.Binding.isContinuous) }
+	static var isEnabled: ControlName<Dynamic<Bool>> { return .name(Control.Binding.isEnabled) }
+	static var isHighlighted: ControlName<Dynamic<Bool>> { return .name(Control.Binding.isHighlighted) }
+	static var lineBreakMode: ControlName<Dynamic<NSLineBreakMode>> { return .name(Control.Binding.lineBreakMode) }
+	static var objectValue: ControlName<Dynamic<Any>> { return .name(Control.Binding.objectValue) }
+	static var refusesFirstResponder: ControlName<Dynamic<Bool>> { return .name(Control.Binding.refusesFirstResponder) }
+	static var sendActionOn: ControlName<Dynamic<NSEvent.EventTypeMask>> { return .name(Control.Binding.sendActionOn) }
+	static var size: ControlName<Dynamic<NSControl.ControlSize>> { return .name(Control.Binding.size) }
+	static var stringValue: ControlName<Dynamic<String>> { return .name(Control.Binding.stringValue) }
+	static var tag: ControlName<Dynamic<Int>> { return .name(Control.Binding.tag) }
+	static var usesSingleLineMode: ControlName<Dynamic<Bool>> { return .name(Control.Binding.usesSingleLineMode) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var abortEditing: ControlName<Signal<Void>> { return .name(B.abortEditing) }
-	static var performClick: ControlName<Signal<Void>> { return .name(B.performClick) }
-	static var sizeToFit: ControlName<Signal<Void>> { return .name(B.sizeToFit) }
-	static var validateEditing: ControlName<Signal<Void>> { return .name(B.validateEditing) }
+	static var abortEditing: ControlName<Signal<Void>> { return .name(Control.Binding.abortEditing) }
+	static var performClick: ControlName<Signal<Void>> { return .name(Control.Binding.performClick) }
+	static var sizeToFit: ControlName<Signal<Void>> { return .name(Control.Binding.sizeToFit) }
+	static var validateEditing: ControlName<Signal<Void>> { return .name(Control.Binding.validateEditing) }
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var action: ControlName<TargetAction> { return .name(B.action) }
+	static var action: ControlName<TargetAction> { return .name(Control.Binding.action) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
-	static var textDidBeginEditing: ControlName<(NSText) -> Void> { return .name(B.textDidBeginEditing) }
-	static var textDidChange: ControlName<(NSText) -> Void> { return .name(B.textDidChange) }
-	static var textDidEndEditing: ControlName<(NSText) -> Void> { return .name(B.textDidEndEditing) }
+	static var textDidBeginEditing: ControlName<(NSText) -> Void> { return .name(Control.Binding.textDidBeginEditing) }
+	static var textDidChange: ControlName<(NSText) -> Void> { return .name(Control.Binding.textDidChange) }
+	static var textDidEndEditing: ControlName<(NSText) -> Void> { return .name(Control.Binding.textDidEndEditing) }
 
 	// Composite binding names
 	static func action( _ void: Void = ()) -> ControlName<SignalInput<Void>> {

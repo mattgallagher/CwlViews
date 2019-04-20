@@ -174,7 +174,6 @@ extension BarButtonItem.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: BarButtonItemBinding {
 	public typealias BarButtonItemName<V> = BindingName<V, BarButtonItem.Binding, Binding>
-	private typealias B = BarButtonItem.Binding
 	private static func name<V>(_ source: @escaping (V) -> BarButtonItem.Binding) -> BarButtonItemName<V> {
 		return BarButtonItemName<V>(source: source, downcast: Binding.barButtonItemBinding)
 	}
@@ -182,27 +181,27 @@ extension BindingName where Binding: BarButtonItemBinding {
 public extension BindingName where Binding: BarButtonItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: BarButtonItemName<$2> { return .name(B.$1) }
+	// With:    static var $1: BarButtonItemName<$2> { return .name(BarButtonItem.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var systemItem: BarButtonItemName<Constant<UIBarButtonItem.SystemItem>> { return .name(B.systemItem) }
+	static var systemItem: BarButtonItemName<Constant<UIBarButtonItem.SystemItem>> { return .name(BarButtonItem.Binding.systemItem) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var backButtonBackgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> { return .name(B.backButtonBackgroundImage) }
-	static var backButtonTitlePositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> { return .name(B.backButtonTitlePositionAdjustment) }
-	static var backgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>> { return .name(B.backgroundImage) }
-	static var backgroundVerticalPositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> { return .name(B.backgroundVerticalPositionAdjustment) }
-	static var customView: BarButtonItemName<Dynamic<ViewConvertible?>> { return .name(B.customView) }
-	static var itemStyle: BarButtonItemName<Dynamic<UIBarButtonItem.Style>> { return .name(B.itemStyle) }
-	static var possibleTitles: BarButtonItemName<Dynamic<Set<String>?>> { return .name(B.possibleTitles) }
-	static var tintColor: BarButtonItemName<Dynamic<UIColor?>> { return .name(B.tintColor) }
-	static var titlePositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> { return .name(B.titlePositionAdjustment) }
-	static var width: BarButtonItemName<Dynamic<CGFloat>> { return .name(B.width) }
+	static var backButtonBackgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> { return .name(BarButtonItem.Binding.backButtonBackgroundImage) }
+	static var backButtonTitlePositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> { return .name(BarButtonItem.Binding.backButtonTitlePositionAdjustment) }
+	static var backgroundImage: BarButtonItemName<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>> { return .name(BarButtonItem.Binding.backgroundImage) }
+	static var backgroundVerticalPositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> { return .name(BarButtonItem.Binding.backgroundVerticalPositionAdjustment) }
+	static var customView: BarButtonItemName<Dynamic<ViewConvertible?>> { return .name(BarButtonItem.Binding.customView) }
+	static var itemStyle: BarButtonItemName<Dynamic<UIBarButtonItem.Style>> { return .name(BarButtonItem.Binding.itemStyle) }
+	static var possibleTitles: BarButtonItemName<Dynamic<Set<String>?>> { return .name(BarButtonItem.Binding.possibleTitles) }
+	static var tintColor: BarButtonItemName<Dynamic<UIColor?>> { return .name(BarButtonItem.Binding.tintColor) }
+	static var titlePositionAdjustment: BarButtonItemName<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> { return .name(BarButtonItem.Binding.titlePositionAdjustment) }
+	static var width: BarButtonItemName<Dynamic<CGFloat>> { return .name(BarButtonItem.Binding.width) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var action: BarButtonItemName<TargetAction> { return .name(B.action) }
+	static var action: BarButtonItemName<TargetAction> { return .name(BarButtonItem.Binding.action) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 

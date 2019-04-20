@@ -320,15 +320,14 @@ func binderContent() -> String {
 		// MARK: - Binder Part 6: BindingNames
 		extension BindingName where Binding: ___VARIABLE_basename___Binding {
 			public typealias ___VARIABLE_basename___Name<V> = BindingName<V, ___VARIABLE_basename___.Binding, Binding>
-			private typealias B = ___VARIABLE_basename___.Binding
-			private static func name<V>(_ source: @escaping (V) -> ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___Name<V> {
+					private static func name<V>(_ source: @escaping (V) -> ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___Name<V> {
 				return ___VARIABLE_basename___Name<V>(source: source, downcast: Binding.___VARIABLE_lowercaseBasename___Binding)
 			}
 		}
 		public extension BindingName where Binding: ___VARIABLE_basename___Binding {
 			// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 			// Replace: case ([^\(]+)\((.+)\)$
-			// With:    static var $1: ___VARIABLE_basename___Name<$2> { return .name(B.$1) }
+			// With:    static var $1: ___VARIABLE_basename___Name<$2> { return .name(___VARIABLE_basename___.Binding.$1) }
 		}
 		
 		// MARK: - Binder Part 7: Convertible protocols (if constructible)

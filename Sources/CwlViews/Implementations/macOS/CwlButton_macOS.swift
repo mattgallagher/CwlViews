@@ -147,7 +147,6 @@ extension Button.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: ButtonBinding {
 	public typealias ButtonName<V> = BindingName<V, Button.Binding, Binding>
-	private typealias B = Button.Binding
 	private static func name<V>(_ source: @escaping (V) -> Button.Binding) -> ButtonName<V> {
 		return ButtonName<V>(source: source, downcast: Binding.buttonBinding)
 	}
@@ -155,41 +154,41 @@ extension BindingName where Binding: ButtonBinding {
 public extension BindingName where Binding: ButtonBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: ButtonName<$2> { return .name(B.$1) }
+	// With:    static var $1: ButtonName<$2> { return .name(Button.Binding.$1) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var allowsMixedState: ButtonName<Dynamic<Bool>> { return .name(B.allowsMixedState) }
-	static var alternateImage: ButtonName<Dynamic<NSImage?>> { return .name(B.alternateImage) }
-	static var alternateTitle: ButtonName<Dynamic<String>> { return .name(B.alternateTitle) }
-	static var attributedAlternateTitle: ButtonName<Dynamic<NSAttributedString>> { return .name(B.attributedAlternateTitle) }
-	static var attributedTitle: ButtonName<Dynamic<NSAttributedString>> { return .name(B.attributedTitle) }
-	static var bezelColor: ButtonName<Dynamic<NSColor?>> { return .name(B.bezelColor) }
-	static var bezelStyle: ButtonName<Dynamic<NSButton.BezelStyle>> { return .name(B.bezelStyle) }
-	static var buttonType: ButtonName<Dynamic<NSButton.ButtonType>> { return .name(B.buttonType) }
-	static var highlight: ButtonName<Dynamic<Bool>> { return .name(B.highlight) }
-	static var image: ButtonName<Dynamic<NSImage?>> { return .name(B.image) }
-	static var imageHugsTitle: ButtonName<Dynamic<Bool>> { return .name(B.imageHugsTitle) }
-	static var imagePosition: ButtonName<Dynamic<NSControl.ImagePosition>> { return .name(B.imagePosition) }
-	static var imageScaling: ButtonName<Dynamic<NSImageScaling>> { return .name(B.imageScaling) }
-	static var isBordered: ButtonName<Dynamic<Bool>> { return .name(B.isBordered) }
-	static var isSpringLoaded: ButtonName<Dynamic<Bool>> { return .name(B.isSpringLoaded) }
-	static var isTransparent: ButtonName<Dynamic<Bool>> { return .name(B.isTransparent) }
-	static var keyEquivalent: ButtonName<Dynamic<String>> { return .name(B.keyEquivalent) }
-	static var keyEquivalentModifierMask: ButtonName<Dynamic<NSEvent.ModifierFlags>> { return .name(B.keyEquivalentModifierMask) }
-	static var maxAcceleratorLevel: ButtonName<Dynamic<Int>> { return .name(B.maxAcceleratorLevel) }
-	static var performKeyEquivalent: ButtonName<Dynamic<NSEvent>> { return .name(B.performKeyEquivalent) }
-	static var periodicDelay: ButtonName<Dynamic<(delay: Float, interval: Float)>> { return .name(B.periodicDelay) }
-	static var showsBorderOnlyWhileMouseInside: ButtonName<Dynamic<Bool>> { return .name(B.showsBorderOnlyWhileMouseInside) }
-	static var sound: ButtonName<Dynamic<NSSound?>> { return .name(B.sound) }
-	static var state: ButtonName<Dynamic<NSControl.StateValue>> { return .name(B.state) }
-	static var title: ButtonName<Dynamic<String>> { return .name(B.title) }
+	static var allowsMixedState: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.allowsMixedState) }
+	static var alternateImage: ButtonName<Dynamic<NSImage?>> { return .name(Button.Binding.alternateImage) }
+	static var alternateTitle: ButtonName<Dynamic<String>> { return .name(Button.Binding.alternateTitle) }
+	static var attributedAlternateTitle: ButtonName<Dynamic<NSAttributedString>> { return .name(Button.Binding.attributedAlternateTitle) }
+	static var attributedTitle: ButtonName<Dynamic<NSAttributedString>> { return .name(Button.Binding.attributedTitle) }
+	static var bezelColor: ButtonName<Dynamic<NSColor?>> { return .name(Button.Binding.bezelColor) }
+	static var bezelStyle: ButtonName<Dynamic<NSButton.BezelStyle>> { return .name(Button.Binding.bezelStyle) }
+	static var buttonType: ButtonName<Dynamic<NSButton.ButtonType>> { return .name(Button.Binding.buttonType) }
+	static var highlight: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.highlight) }
+	static var image: ButtonName<Dynamic<NSImage?>> { return .name(Button.Binding.image) }
+	static var imageHugsTitle: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.imageHugsTitle) }
+	static var imagePosition: ButtonName<Dynamic<NSControl.ImagePosition>> { return .name(Button.Binding.imagePosition) }
+	static var imageScaling: ButtonName<Dynamic<NSImageScaling>> { return .name(Button.Binding.imageScaling) }
+	static var isBordered: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.isBordered) }
+	static var isSpringLoaded: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.isSpringLoaded) }
+	static var isTransparent: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.isTransparent) }
+	static var keyEquivalent: ButtonName<Dynamic<String>> { return .name(Button.Binding.keyEquivalent) }
+	static var keyEquivalentModifierMask: ButtonName<Dynamic<NSEvent.ModifierFlags>> { return .name(Button.Binding.keyEquivalentModifierMask) }
+	static var maxAcceleratorLevel: ButtonName<Dynamic<Int>> { return .name(Button.Binding.maxAcceleratorLevel) }
+	static var performKeyEquivalent: ButtonName<Dynamic<NSEvent>> { return .name(Button.Binding.performKeyEquivalent) }
+	static var periodicDelay: ButtonName<Dynamic<(delay: Float, interval: Float)>> { return .name(Button.Binding.periodicDelay) }
+	static var showsBorderOnlyWhileMouseInside: ButtonName<Dynamic<Bool>> { return .name(Button.Binding.showsBorderOnlyWhileMouseInside) }
+	static var sound: ButtonName<Dynamic<NSSound?>> { return .name(Button.Binding.sound) }
+	static var state: ButtonName<Dynamic<NSControl.StateValue>> { return .name(Button.Binding.state) }
+	static var title: ButtonName<Dynamic<String>> { return .name(Button.Binding.title) }
 
-	@available(macOS 10.14, *) static var contentTintColor: ButtonName<Dynamic<NSColor?>> { return .name(B.contentTintColor) }
+	@available(macOS 10.14, *) static var contentTintColor: ButtonName<Dynamic<NSColor?>> { return .name(Button.Binding.contentTintColor) }
 	
 	//	2. Signal bindings are performed on the object after construction.
-	static var setNextState: ButtonName<Signal<Void>> { return .name(B.setNextState) }
+	static var setNextState: ButtonName<Signal<Void>> { return .name(Button.Binding.setNextState) }
 	
 	//	3. Action bindings are triggered by the object after construction.
 	

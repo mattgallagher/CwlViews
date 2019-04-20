@@ -182,7 +182,6 @@ extension StackView.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: StackViewBinding {
 	public typealias StackViewName<V> = BindingName<V, StackView.Binding, Binding>
-	private typealias B = StackView.Binding
 	private static func name<V>(_ source: @escaping (V) -> StackView.Binding) -> StackViewName<V> {
 		return StackViewName<V>(source: source, downcast: Binding.stackViewBinding)
 	}
@@ -190,23 +189,23 @@ extension BindingName where Binding: StackViewBinding {
 public extension BindingName where Binding: StackViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: StackViewName<$2> { return .name(B.$1) }
+	// With:    static var $1: StackViewName<$2> { return .name(StackView.Binding.$1) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	static var alignment: StackViewName<Dynamic<StackView.NSUIStackViewAlignment>> { return .name(B.alignment) }
-	static var arrangedSubviews: StackViewName<Dynamic<[ViewConvertible]>> { return .name(B.arrangedSubviews) }
-	static var axis: StackViewName<Dynamic<StackView.NSUIUserInterfaceLayoutOrientation>> { return .name(B.axis) }
-	static var distribution: StackViewName<Dynamic<StackView.NSUIStackViewDistribution>> { return .name(B.distribution) }
-	static var spacing: StackViewName<Dynamic<CGFloat>> { return .name(B.spacing) }
+	static var alignment: StackViewName<Dynamic<StackView.NSUIStackViewAlignment>> { return .name(StackView.Binding.alignment) }
+	static var arrangedSubviews: StackViewName<Dynamic<[ViewConvertible]>> { return .name(StackView.Binding.arrangedSubviews) }
+	static var axis: StackViewName<Dynamic<StackView.NSUIUserInterfaceLayoutOrientation>> { return .name(StackView.Binding.axis) }
+	static var distribution: StackViewName<Dynamic<StackView.NSUIStackViewDistribution>> { return .name(StackView.Binding.distribution) }
+	static var spacing: StackViewName<Dynamic<CGFloat>> { return .name(StackView.Binding.spacing) }
 	
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<StackView.EdgeInsets>> { return .name(B.edgeInsets) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalClippingResistance) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.horizontalHuggingPriority) }
-	@available(macOS, unavailable) @available(iOS 11, *) static var isLayoutMarginsRelativeArrangement: StackViewName<Dynamic<Bool>> { return .name(B.isLayoutMarginsRelativeArrangement) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalClippingResistance) }
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(B.verticalHuggingPriority) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<StackView.EdgeInsets>> { return .name(StackView.Binding.edgeInsets) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(StackView.Binding.horizontalClippingResistance) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(StackView.Binding.horizontalHuggingPriority) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var isLayoutMarginsRelativeArrangement: StackViewName<Dynamic<Bool>> { return .name(StackView.Binding.isLayoutMarginsRelativeArrangement) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(StackView.Binding.verticalClippingResistance) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var verticalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(StackView.Binding.verticalHuggingPriority) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

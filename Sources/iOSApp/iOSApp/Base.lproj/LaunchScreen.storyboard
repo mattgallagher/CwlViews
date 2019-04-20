@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13189.4" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+	 <device id="retina4_7" orientation="portrait">
+			<adaptation id="fullscreen"/>
+	 </device>
+	 <dependencies>
+			<deployment identifier="iOS"/>
+			<plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13165.3"/>
+			<capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+	 </dependencies>
+	 <scenes>
+			<!--View Controller-->
+			<scene sceneID="EHf-IW-A2E">
+				<objects>
+					 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+							<layoutGuides>
+								<viewControllerLayoutGuide type="top" id="Llm-lL-Icb"/>
+								<viewControllerLayoutGuide type="bottom" id="xb3-aO-Qok"/>
+							</layoutGuides>
+							<view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+								<rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+								<autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+								<subviews>
+									 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ilo-2J-HnV">
+											<rect key="frame" x="0.0" y="0.0" width="375" height="20"/>
+											<color key="backgroundColor" red="0.58671200275421143" green="0.45805174112319946" blue="0.40488135814666748" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+									 </view>
+									 <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KER-g4-TUS">
+											<rect key="frame" x="0.0" y="20" width="375" height="44"/>
+											<color key="barTintColor" red="0.52133625745773315" green="0.36783450841903687" blue="0.30591660737991333" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+											<textAttributes key="titleTextAttributes">
+												<color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+											</textAttributes>
+											<items>
+												<navigationItem title="Hello, world!" id="hxk-eu-Ttl">
+													 <barButtonItem key="rightBarButtonItem" title="•••" id="2pN-zF-GVh">
+															<color key="tintColor" red="0.24383053183555603" green="0.25354817509651184" blue="0.33036026358604431" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+													 </barButtonItem>
+												</navigationItem>
+											</items>
+									 </navigationBar>
+								</subviews>
+								<color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+								<constraints>
+									 <constraint firstItem="KER-g4-TUS" firstAttribute="top" secondItem="Ilo-2J-HnV" secondAttribute="bottom" id="1ny-Xm-OFA"/>
+									 <constraint firstItem="Ilo-2J-HnV" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="9JC-Jz-GFc"/>
+									 <constraint firstAttribute="trailing" secondItem="Ilo-2J-HnV" secondAttribute="trailing" id="DDd-fW-xa1"/>
+									 <constraint firstItem="KER-g4-TUS" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="FyK-f0-tSm"/>
+									 <constraint firstItem="KER-g4-TUS" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" id="OJG-f1-aCz"/>
+									 <constraint firstAttribute="trailing" secondItem="KER-g4-TUS" secondAttribute="trailing" id="U58-DS-ymh"/>
+									 <constraint firstItem="Ilo-2J-HnV" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="dXy-B8-7Ws"/>
+								</constraints>
+							</view>
+					 </viewController>
+					 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+				</objects>
+				<point key="canvasLocation" x="52" y="374.66266866566718"/>
+			</scene>
+	 </scenes>
+</document>

@@ -30,8 +30,6 @@
 		C90BAE96223917A90043948A /* CwlSplitView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90BAE95223917A90043948A /* CwlSplitView_macOS.swift */; };
 		C90CF7D12220E536001B4FAB /* CwlSubrangeMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90CF7D02220E536001B4FAB /* CwlSubrangeMutation.swift */; };
 		C90CF7D62220F23A001B4FAB /* CwlTableView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */; };
-		C9111CBC1E361D670029DD2F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A45E1E3476E50088F2AD /* main.swift */; };
-		C9111CBD1E3623470029DD2F /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0A4651E34CD900088F2AD /* MainMenu.swift */; };
 		C91307411F66384200174902 /* CwlCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C913073F1F66384200174902 /* CwlCoder.swift */; };
 		C91CC2D1206F0DD7006FFF97 /* CwlBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */; };
 		C9216978218D55D700396AB0 /* CwlApplication_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9216977218D55D700396AB0 /* CwlApplication_iOSTests.swift */; };
@@ -57,7 +55,6 @@
 		C93FBC6C216105EF00DFCF0E /* CwlUtils.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C93FBC6E2161061600DFCF0E /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; };
 		C94853CF1DC4E306009CC145 /* CwlApplication_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */; };
-		C94853F51DC4E4EA009CC145 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C94853F41DC4E4EA009CC145 /* Assets.xcassets */; };
 		C94D2C0C2191BD1300B6D53B /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
 		C94D2C0E2191BD2F00B6D53B /* CwlSignal.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C94D2C0F2191BD3500B6D53B /* CwlViews.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -166,8 +163,6 @@
 		C9B0D12422225A7B00D2FB42 /* CwlTableRowView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBA1DD0160A00913019 /* CwlTableRowView_macOS.swift */; };
 		C9B0D12522225A7B00D2FB42 /* CwlTableView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B38DBB1DD0160A00913019 /* CwlTableView_macOS.swift */; };
 		C9B0D126222268FE00D2FB42 /* CwlOutlineView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E181211EA89B6F00DD0107 /* CwlOutlineView_macOS.swift */; };
-		C9B27E8A1E51CAD100265580 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9B27E891E51CAD100265580 /* Assets.xcassets */; };
-		C9B27E8D1E51CAD100265580 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */; };
 		C9B27EA91E51D34300265580 /* CwlIndexedMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD96A11DF8415500D66AD9 /* CwlIndexedMutation.swift */; };
 		C9B676F121EDE14400A7D5C9 /* CwlAdapter+Signals.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B676F021EDE14400A7D5C9 /* CwlAdapter+Signals.swift */; };
 		C9B705EC20686CBD00B4CD29 /* CwlViewsTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -196,10 +191,6 @@
 		C9C30218222529E5005B0FCD /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C30217222529E5005B0FCD /* WebView.swift */; };
 		C9C868611FEE83D200865A60 /* CwlTreeMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C8685F1FEE83D200865A60 /* CwlTreeMutation.swift */; };
 		C9CCD8B12181D75E00443079 /* CwlViews.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C9DF3DDA1FF5B6DB0058E427 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD21FF5B6DA0058E427 /* Document.swift */; };
-		C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */; };
-		C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD51FF5B6DA0058E427 /* main.swift */; };
-		C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */; };
 		C9E4CEF6220C390B00D7165D /* SplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E4CEF4220C38E200D7165D /* SplitView.swift */; };
 		C9E4CEF9220C39D900D7165D /* TabbedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E4CEF7220C395000D7165D /* TabbedView.swift */; };
 		C9E50BA8224EDF6E004E3D4E /* CwlTabViewItem_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E50BA7224EDF6E004E3D4E /* CwlTabViewItem_macOS.swift */; };
@@ -209,8 +200,6 @@
 		C9F0AC6B223635420051DD43 /* CwlUnanticipatedErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F0AC68223635190051DD43 /* CwlUnanticipatedErrorTests.swift */; };
 		C9F0AC6D2236736A0051DD43 /* CwlShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F0AC6C2236736A0051DD43 /* CwlShapeLayer.swift */; };
 		C9F0AC79223731E30051DD43 /* CwlExtendedViewController_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F0AC78223731E30051DD43 /* CwlExtendedViewController_iOS.swift */; };
-		C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143961FF5BB8A002BBB13 /* NavView.swift */; };
-		C9F143991FF5BB98002BBB13 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F143981FF5BB98002BBB13 /* TableView.swift */; };
 		C9F3979B1FD0CA3E00BEE049 /* CwlStackAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A6834F1F5283940055D487 /* CwlStackAdapter.swift */; };
 		C9F9A32421DEF5A400026DC1 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F9A32321DEF5A400026DC1 /* main.swift */; };
 		C9F9A32621DEF5A500026DC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9F9A32521DEF5A500026DC1 /* Assets.xcassets */; };
@@ -227,6 +216,41 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		C90652E72269EC24001C8DDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C906528D2269EC02001C8DDB;
+			remoteInfo = iOSApp;
+		};
+		C90652E92269EC24001C8DDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C90652922269EC02001C8DDB;
+			remoteInfo = CwlUtils_iOS;
+		};
+		C90652EB2269EC24001C8DDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C90652942269EC02001C8DDB;
+			remoteInfo = CwlSignal_iOS;
+		};
+		C90652ED2269EC24001C8DDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C90652972269EC02001C8DDB;
+			remoteInfo = CwlViews_iOS;
+		};
+		C90652EF2269EC24001C8DDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C90652B82269EC02001C8DDB;
+			remoteInfo = iOSAppTests;
+		};
 		C9216984218D5EA600396AB0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
@@ -337,6 +361,7 @@
 
 /* Begin PBXFileReference section */
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
+		C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = iOSApp.xcodeproj; path = iOSApp/iOSApp.xcodeproj; sourceTree = "<group>"; };
 		C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageView_macOS.swift; sourceTree = "<group>"; };
 		C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSlider_macOS.swift; sourceTree = "<group>"; };
 		C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageDrawn.swift; sourceTree = "<group>"; };
@@ -387,8 +412,6 @@
 		C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlApplication_macOSTests.swift; sourceTree = "<group>"; };
 		C94853D01DC4E306009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_macOSTestingSandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C94853F41DC4E4EA009CC145 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C94853F91DC4E4EA009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C948540E1DC4E8E1009CC145 /* CwlWindow_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindow_macOS.swift; sourceTree = "<group>"; };
 		C94854151DC59DFC009CC145 /* CwlView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlView_macOS.swift; sourceTree = "<group>"; };
 		C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableView_iOS.swift; sourceTree = "<group>"; };
@@ -470,9 +493,6 @@
 		C9B27E6D1E51CA9700265580 /* CwlViewsTests_iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViewsTests_iOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9B27E741E51CA9700265580 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C9B27E801E51CAD100265580 /* CwlViews_iOSTestingSandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_iOSTestingSandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C9B27E891E51CAD100265580 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C9B27E8C1E51CAD100265580 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		C9B27E8E1E51CAD100265580 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C9B38DB11DD0087900913019 /* CwlScrollView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollView_macOS.swift; sourceTree = "<group>"; };
 		C9B38DB71DD0160A00913019 /* CwlTableCellView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableCellView_macOS.swift; sourceTree = "<group>"; };
 		C9B38DB81DD0160A00913019 /* CwlTableColumn_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableColumn_macOS.swift; sourceTree = "<group>"; };
@@ -511,13 +531,7 @@
 		C9C8685F1FEE83D200865A60 /* CwlTreeMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTreeMutation.swift; sourceTree = "<group>"; };
 		C9C945561E80DABE00325F12 /* CwlNavigationItem_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationItem_iOS.swift; sourceTree = "<group>"; };
 		C9C958521EB8E16300D86558 /* CwlGradientLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGradientLayer.swift; sourceTree = "<group>"; };
-		C9D0A45E1E3476E50088F2AD /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		C9D0A4651E34CD900088F2AD /* MainMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		C9D282341E76398A0072A18C /* CwlViewController_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewController_iOS.swift; sourceTree = "<group>"; };
-		C9DF3DD21FF5B6DA0058E427 /* Document.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
-		C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentAdapter.swift; sourceTree = "<group>"; };
-		C9DF3DD51FF5B6DA0058E427 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		C9E181211EA89B6F00DD0107 /* CwlOutlineView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlOutlineView_macOS.swift; sourceTree = "<group>"; };
 		C9E4CEF4220C38E200D7165D /* SplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitView.swift; sourceTree = "<group>"; };
 		C9E4CEF7220C395000D7165D /* TabbedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbedView.swift; sourceTree = "<group>"; };
@@ -528,8 +542,6 @@
 		C9F0AC68223635190051DD43 /* CwlUnanticipatedErrorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlUnanticipatedErrorTests.swift; sourceTree = "<group>"; };
 		C9F0AC6C2236736A0051DD43 /* CwlShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlShapeLayer.swift; sourceTree = "<group>"; };
 		C9F0AC78223731E30051DD43 /* CwlExtendedViewController_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlExtendedViewController_iOS.swift; sourceTree = "<group>"; };
-		C9F143961FF5BB8A002BBB13 /* NavView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavView.swift; sourceTree = "<group>"; };
-		C9F143981FF5BB98002BBB13 /* TableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		C9F35BB61E7ABA8900D948D2 /* CwlNavigationController_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationController_iOS.swift; sourceTree = "<group>"; };
 		C9F397A71FD2602200BEE049 /* CwlTabBarItem_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabBarItem_iOS.swift; sourceTree = "<group>"; };
 		C9F9406A1EA86693002011D2 /* CwlPopUpButton_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPopUpButton_macOS.swift; sourceTree = "<group>"; };
@@ -630,6 +642,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C90652DF2269EC24001C8DDB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C90652E82269EC24001C8DDB /* iOSApp.app */,
+				C90652EA2269EC24001C8DDB /* CwlUtils.framework */,
+				C90652EC2269EC24001C8DDB /* CwlSignal.framework */,
+				C90652EE2269EC24001C8DDB /* CwlViews.framework */,
+				C90652F02269EC24001C8DDB /* iOSAppTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C90652F12269EEC3001C8DDB /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
 		C921698B218D5F0200396AB0 /* CwlViewsUnitTestHarness_iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -725,17 +756,6 @@
 				C94853D01DC4E306009CC145 /* Info.plist */,
 			);
 			path = macOS;
-			sourceTree = "<group>";
-		};
-		C94853F11DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox */ = {
-			isa = PBXGroup;
-			children = (
-				C9D0A45E1E3476E50088F2AD /* main.swift */,
-				C9D0A4651E34CD900088F2AD /* MainMenu.swift */,
-				C94853F41DC4E4EA009CC145 /* Assets.xcassets */,
-				C94853F91DC4E4EA009CC145 /* Info.plist */,
-			);
-			path = CwlViews_macOSTestingSandbox;
 			sourceTree = "<group>";
 		};
 		C948540D1DC4E8D1009CC145 /* macOS */ = {
@@ -920,6 +940,7 @@
 			children = (
 				C94853C21DC4E306009CC145 /* CwlViews */,
 				C9B705F020686D2200B4CD29 /* CwlViewsTesting */,
+				C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -930,8 +951,6 @@
 				C9F9A31821DEF0C000026DC1 /* UnitTests */,
 				C9F9A33E21DF6FBE00026DC1 /* CwlViewsCatalog_iOS */,
 				C9F9A32221DEF5A400026DC1 /* CwlViewsCatalog_macOS */,
-				C9B27E811E51CAD100265580 /* CwlViews_iOSTestingSandbox */,
-				C94853F11DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -956,22 +975,6 @@
 				C9B27E741E51CA9700265580 /* Info.plist */,
 			);
 			path = iOS;
-			sourceTree = "<group>";
-		};
-		C9B27E811E51CAD100265580 /* CwlViews_iOSTestingSandbox */ = {
-			isa = PBXGroup;
-			children = (
-				C9DF3DD51FF5B6DA0058E427 /* main.swift */,
-				C9F143961FF5BB8A002BBB13 /* NavView.swift */,
-				C9F143981FF5BB98002BBB13 /* TableView.swift */,
-				C9DF3DD71FF5B6DB0058E427 /* DetailView.swift */,
-				C9DF3DD21FF5B6DA0058E427 /* Document.swift */,
-				C9DF3DD31FF5B6DA0058E427 /* DocumentAdapter.swift */,
-				C9B27E891E51CAD100265580 /* Assets.xcassets */,
-				C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */,
-				C9B27E8E1E51CAD100265580 /* Info.plist */,
-			);
-			path = CwlViews_iOSTestingSandbox;
 			sourceTree = "<group>";
 		};
 		C9B27EAB1E51DA5100265580 /* iOS */ = {
@@ -1028,6 +1031,7 @@
 				C9B705EB20686CBD00B4CD29 /* Info.plist */,
 				C9B705F420686DD300B4CD29 /* Core */,
 				C9B705F120686D8600B4CD29 /* iOS */,
+				C90652F12269EEC3001C8DDB /* macOS */,
 			);
 			path = CwlViewsTesting;
 			sourceTree = "<group>";
@@ -1414,6 +1418,10 @@
 					ProductGroup = C93FBC012160FCFF00DFCF0E /* Products */;
 					ProjectRef = C93FBC002160FCFF00DFCF0E /* CwlSignal.xcodeproj */;
 				},
+				{
+					ProductGroup = C90652DF2269EC24001C8DDB /* Products */;
+					ProjectRef = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -1433,6 +1441,41 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		C90652E82269EC24001C8DDB /* iOSApp.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = iOSApp.app;
+			remoteRef = C90652E72269EC24001C8DDB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C90652EA2269EC24001C8DDB /* CwlUtils.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CwlUtils.framework;
+			remoteRef = C90652E92269EC24001C8DDB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C90652EC2269EC24001C8DDB /* CwlSignal.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CwlSignal.framework;
+			remoteRef = C90652EB2269EC24001C8DDB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C90652EE2269EC24001C8DDB /* CwlViews.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CwlViews.framework;
+			remoteRef = C90652ED2269EC24001C8DDB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C90652F02269EC24001C8DDB /* iOSAppTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = iOSAppTests.xctest;
+			remoteRef = C90652EF2269EC24001C8DDB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -1484,7 +1527,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C94853F51DC4E4EA009CC145 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1500,8 +1542,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9B27E8D1E51CAD100265580 /* LaunchScreen.storyboard in Resources */,
-				C9B27E8A1E51CAD100265580 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1545,7 +1585,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsCore.swift -t \"\" -t \"import Foundation\" -i \"$SRCROOT/Sources/CwlViews/Core\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOS.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViews/iOS\" -i \"$SRCROOT/Sources/CwlViews/Common\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOSTesting.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOS.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViews/macOS\" -i \"$SRCROOT/Sources/CwlViews/Common\"\n";
+			shellScript = "/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsCore.swift -t \"\" -t \"import Foundation\" -i \"$SRCROOT/Sources/CwlViews/Core\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOS.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViews/Implementations/Common\" -i \"$SRCROOT/Sources/CwlViews/Implementations/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOSTesting.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOS.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViews/Implementations/Common\" -i \"$SRCROOT/Sources/CwlViews/Implementations/macOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOSTesting.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/macOS\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1573,8 +1613,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9111CBC1E361D670029DD2F /* main.swift in Sources */,
-				C9111CBD1E3623470029DD2F /* MainMenu.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1723,12 +1761,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9DF3DDB1FF5B6DB0058E427 /* DocumentAdapter.swift in Sources */,
-				C9F143991FF5BB98002BBB13 /* TableView.swift in Sources */,
-				C9DF3DDD1FF5B6DB0058E427 /* main.swift in Sources */,
-				C9DF3DDF1FF5B6DB0058E427 /* DetailView.swift in Sources */,
-				C9F143971FF5BB8A002BBB13 /* NavView.swift in Sources */,
-				C9DF3DDA1FF5B6DB0058E427 /* Document.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1842,14 +1874,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				C9216996218D5F0200396AB0 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		C9B27E8B1E51CAD100265580 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C9B27E8C1E51CAD100265580 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -2264,7 +2288,6 @@
 		C9B27E7A1E51CA9700265580 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Tests/UnitTests/iOS/Info.plist";
@@ -2280,7 +2303,6 @@
 		C9B27E7B1E51CA9700265580 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Tests/UnitTests/iOS/Info.plist";

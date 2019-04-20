@@ -51,10 +51,11 @@ public struct ModelState<Wrapped, M, N>: AdapterState {
 	}
 }
 
+
 public extension Adapter {
 	func sync<Wrapped, R, M, N>(_ processor: (Wrapped) throws -> R) throws -> R where ModelState<Wrapped, M, N> == State {
 		// Don't `peek` inside the `invokeSync` since that would require re-entering the `executionContext`.
-		let wrapped = try combinedSignal.peek().state.wrapped
+		let wrapped = try combinedSignal.capture().get().state.wrapped
 		return try executionContext.invokeSync { return try processor(wrapped) }
 	}
 	

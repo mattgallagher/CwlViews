@@ -19,7 +19,7 @@
 
 extension Adapter: Lifetime {
 	public func cancel() {
-		if State.self is CodableContainer.Type, let value = (try? combinedSignal.peek())?.state, var sc = value as? CodableContainer {
+		if State.self is CodableContainer.Type, let value = combinedSignal.peek()?.state, var sc = value as? CodableContainer {
 			sc.cancel()
 		}
 		input.cancel()
@@ -34,7 +34,7 @@ extension Adapter: Codable where State: Codable {
 	}
 	
 	public func encode(to encoder: Encoder) throws {
-		if let s = (try? combinedSignal.peek())?.state {
+		if let s = combinedSignal.peek()?.state {
 			var c = encoder.singleValueContainer()
 			try c.encode(s)
 		}
@@ -43,7 +43,7 @@ extension Adapter: Codable where State: Codable {
 
 extension Adapter: CodableContainer where State: PersistentAdapterState {
 	public var childCodableContainers: [CodableContainer] {
-		if let state = try? combinedSignal.peek().state {
+		if let state = combinedSignal.peek()?.state {
 			return (state as? CodableContainer)?.childCodableContainers ?? []
 		} else {
 			return []

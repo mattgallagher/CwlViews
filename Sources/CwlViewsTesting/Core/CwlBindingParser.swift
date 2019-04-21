@@ -24,30 +24,37 @@ public struct BindingParser<AssociatedValue, Binding> {
 	}
 }
 
-enum BindingParserErrors: Error {
+public enum BindingParserErrors: Error {
 	case multipleMatchesFound
 	case noMatchesFound
 	case unexpectedArgumentType
 }
 
-extension Binder {
-	public static func consumeBindings(from possibleBinder: Any) throws -> [Self.Binding] {
-		if let b = possibleBinder as? Self {
-			return b.consumeBindings()
+public extension Dynamic {
+	var values: [Value] {
+		switch self {
+		case .constant(let v): return [v]
+		case .dynamic(let s): return s.capture().values
 		}
-		throw BindingParserErrors.unexpectedArgumentType
+	}
+	
+	var signal: Signal<Value> {
+		switch self {
+		case .constant(let f): return Signal.just(f)
+		case .dynamic(let s): return s
+		}
 	}
 }
 
-extension BaseBinding {
-	public static func value<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
+public extension Binding {
+	static func value<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
 		var found: AssociatedValue? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				found = v.captureValues().last
+				found = v.values.first
 			}
 		}
 		if let f = found {
@@ -56,14 +63,14 @@ extension BaseBinding {
 		throw BindingParserErrors.noMatchesFound
 	}
 	
-	public static func valuesArray<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> [AssociatedValue] where S.Element == Self {
+	static func valuesArray<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> [AssociatedValue] where S.Element == Self {
 		var found: [AssociatedValue]? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				found = v.captureValues()
+				found = v.values
 			}
 		}
 		if let f = found {
@@ -72,7 +79,7 @@ extension BaseBinding {
 		throw BindingParserErrors.noMatchesFound
 	}
 	
- 	public static func value<AssociatedValue, S: Sequence>(for parser: BindingParser<Constant<AssociatedValue>, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
+	static func value<AssociatedValue, S: Sequence>(for parser: BindingParser<Constant<AssociatedValue>, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
 		var found: AssociatedValue? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {
@@ -88,14 +95,14 @@ extension BaseBinding {
 		throw BindingParserErrors.noMatchesFound
 	}
 	
-	public static func signal<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> Signal<AssociatedValue> where S.Element == Self {
+	static func signal<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> Signal<AssociatedValue> where S.Element == Self {
 		var found: Signal<AssociatedValue>? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				found = v.signal()
+				found = v.signal
 			}
 		}
 		if let f = found {
@@ -104,7 +111,7 @@ extension BaseBinding {
 		throw BindingParserErrors.noMatchesFound
 	}
 	
-	public static func argument<AssociatedValue, S: Sequence>(for parser: BindingParser<AssociatedValue, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
+	static func argument<AssociatedValue, S: Sequence>(for parser: BindingParser<AssociatedValue, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
 		var found: AssociatedValue? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {

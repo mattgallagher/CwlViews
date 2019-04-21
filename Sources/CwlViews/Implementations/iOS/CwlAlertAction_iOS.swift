@@ -85,7 +85,7 @@ public extension AlertAction.Preparer {
 		
 		case .handler(let x):
 			handler = handler ?? Input<Void>().multicast()
-			handler?.source.bind(to: x)
+			handler?.signal.bind(to: x)
 		default: break
 		}
 	}

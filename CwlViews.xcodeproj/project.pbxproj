@@ -31,6 +31,85 @@
 		C90CF7D12220E536001B4FAB /* CwlSubrangeMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90CF7D02220E536001B4FAB /* CwlSubrangeMutation.swift */; };
 		C90CF7D62220F23A001B4FAB /* CwlTableView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */; };
 		C91307411F66384200174902 /* CwlCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C913073F1F66384200174902 /* CwlCoder.swift */; };
+		C918FD2B226B2A9F002C6308 /* CwlSearchBarTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD03226B2A9B002C6308 /* CwlSearchBarTesting_iOS.swift */; };
+		C918FD2C226B2A9F002C6308 /* CwlSliderTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD04226B2A9B002C6308 /* CwlSliderTesting_iOS.swift */; };
+		C918FD2D226B2A9F002C6308 /* CwlTextFieldTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD05226B2A9B002C6308 /* CwlTextFieldTesting_iOS.swift */; };
+		C918FD2E226B2A9F002C6308 /* CwlTabBarTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD06226B2A9B002C6308 /* CwlTabBarTesting_iOS.swift */; };
+		C918FD2F226B2A9F002C6308 /* CwlScrollViewTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD07226B2A9B002C6308 /* CwlScrollViewTesting_iOS.swift */; };
+		C918FD30226B2A9F002C6308 /* CwlLongPressGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD08226B2A9B002C6308 /* CwlLongPressGestureRecognizerTesting_iOS.swift */; };
+		C918FD31226B2A9F002C6308 /* CwlSplitViewControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD09226B2A9B002C6308 /* CwlSplitViewControllerTesting_iOS.swift */; };
+		C918FD32226B2A9F002C6308 /* CwlPageControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD0A226B2A9C002C6308 /* CwlPageControl.swift */; };
+		C918FD33226B2A9F002C6308 /* CwlAlertActionTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD0B226B2A9C002C6308 /* CwlAlertActionTesting_iOS.swift */; };
+		C918FD34226B2A9F002C6308 /* CwlControlTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD0C226B2A9C002C6308 /* CwlControlTesting_iOS.swift */; };
+		C918FD35226B2A9F002C6308 /* CwlToolbarTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD0D226B2A9C002C6308 /* CwlToolbarTesting_iOS.swift */; };
+		C918FD36226B2A9F002C6308 /* CwlLabelTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD0E226B2A9C002C6308 /* CwlLabelTesting_iOS.swift */; };
+		C918FD37226B2A9F002C6308 /* CwlApplicationTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD0F226B2A9C002C6308 /* CwlApplicationTesting_iOS.swift */; };
+		C918FD38226B2A9F002C6308 /* CwlPanGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD10226B2A9C002C6308 /* CwlPanGestureRecognizerTesting_iOS.swift */; };
+		C918FD39226B2A9F002C6308 /* CwlTapGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD11226B2A9C002C6308 /* CwlTapGestureRecognizerTesting_iOS.swift */; };
+		C918FD3A226B2A9F002C6308 /* CwlTableViewTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD12226B2A9C002C6308 /* CwlTableViewTesting_iOS.swift */; };
+		C918FD3B226B2A9F002C6308 /* CwlSwitchTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD13226B2A9D002C6308 /* CwlSwitchTesting_iOS.swift */; };
+		C918FD3C226B2A9F002C6308 /* CwlViewTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD14226B2A9D002C6308 /* CwlViewTesting_iOS.swift */; };
+		C918FD3D226B2A9F002C6308 /* CwlPageViewControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD15226B2A9D002C6308 /* CwlPageViewControllerTesting_iOS.swift */; };
+		C918FD3E226B2A9F002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD16226B2A9D002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift */; };
+		C918FD3F226B2A9F002C6308 /* CwlNavigationControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD17226B2A9D002C6308 /* CwlNavigationControllerTesting_iOS.swift */; };
+		C918FD40226B2A9F002C6308 /* CwlBarItemTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD18226B2A9D002C6308 /* CwlBarItemTesting_iOS.swift */; };
+		C918FD41226B2A9F002C6308 /* CwlTableViewCellTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD19226B2A9D002C6308 /* CwlTableViewCellTesting_iOS.swift */; };
+		C918FD42226B2A9F002C6308 /* CwlBarButtonItemTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD1A226B2A9D002C6308 /* CwlBarButtonItemTesting_iOS.swift */; };
+		C918FD43226B2A9F002C6308 /* CwlTextInputTraitsTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD1B226B2A9D002C6308 /* CwlTextInputTraitsTesting_iOS.swift */; };
+		C918FD44226B2A9F002C6308 /* CwlViewControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD1C226B2A9E002C6308 /* CwlViewControllerTesting_iOS.swift */; };
+		C918FD45226B2A9F002C6308 /* CwlGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD1D226B2A9E002C6308 /* CwlGestureRecognizerTesting_iOS.swift */; };
+		C918FD46226B2A9F002C6308 /* CwlExtendedViewControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD1E226B2A9E002C6308 /* CwlExtendedViewControllerTesting_iOS.swift */; };
+		C918FD47226B2A9F002C6308 /* CwlTabBarControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD1F226B2A9E002C6308 /* CwlTabBarControllerTesting_iOS.swift */; };
+		C918FD48226B2A9F002C6308 /* CwlTextViewTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD20226B2A9E002C6308 /* CwlTextViewTesting_iOS.swift */; };
+		C918FD49226B2A9F002C6308 /* CwlRotationGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD21226B2A9E002C6308 /* CwlRotationGestureRecognizerTesting_iOS.swift */; };
+		C918FD4A226B2A9F002C6308 /* CwlWindowTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD22226B2A9E002C6308 /* CwlWindowTesting_iOS.swift */; };
+		C918FD4B226B2A9F002C6308 /* CwlImageViewTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD23226B2A9E002C6308 /* CwlImageViewTesting_iOS.swift */; };
+		C918FD4C226B2A9F002C6308 /* CwlScreenEdgePanGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD24226B2A9F002C6308 /* CwlScreenEdgePanGestureRecognizerTesting_iOS.swift */; };
+		C918FD4D226B2A9F002C6308 /* CwlAlertControllerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD25226B2A9F002C6308 /* CwlAlertControllerTesting_iOS.swift */; };
+		C918FD4E226B2A9F002C6308 /* CwlTabBarItemTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD26226B2A9F002C6308 /* CwlTabBarItemTesting_iOS.swift */; };
+		C918FD4F226B2A9F002C6308 /* CwlNavigationBarTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD27226B2A9F002C6308 /* CwlNavigationBarTesting_iOS.swift */; };
+		C918FD50226B2A9F002C6308 /* CwlNavigationItemTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD28226B2A9F002C6308 /* CwlNavigationItemTesting_iOS.swift */; };
+		C918FD51226B2A9F002C6308 /* CwlButtonTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD29226B2A9F002C6308 /* CwlButtonTesting_iOS.swift */; };
+		C918FD52226B2A9F002C6308 /* CwlSwipeGestureRecognizerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD2A226B2A9F002C6308 /* CwlSwipeGestureRecognizerTesting_iOS.swift */; };
+		C918FD53226B2C92002C6308 /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
+		C918FD7D226B51E8002C6308 /* CwlStackViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD56226B51E7002C6308 /* CwlStackViewTesting.swift */; };
+		C918FD7E226B51E8002C6308 /* CwlExtendedViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD57226B51E7002C6308 /* CwlExtendedViewTesting.swift */; };
+		C918FD7F226B51E8002C6308 /* CwlShapeLayerTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD58226B51E7002C6308 /* CwlShapeLayerTesting.swift */; };
+		C918FD80226B51E8002C6308 /* CwlWebViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD59226B51E7002C6308 /* CwlWebViewTesting.swift */; };
+		C918FD81226B51E8002C6308 /* CwlGradientLayerTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD5A226B51E7002C6308 /* CwlGradientLayerTesting.swift */; };
+		C918FD82226B51E8002C6308 /* CwlLayerTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD5B226B51E7002C6308 /* CwlLayerTesting.swift */; };
+		C918FD83226B51E8002C6308 /* CwlScrollViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD5D226B51E8002C6308 /* CwlScrollViewTesting_macOS.swift */; };
+		C918FD84226B51E8002C6308 /* CwlToolbarTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD5E226B51E8002C6308 /* CwlToolbarTesting_macOS.swift */; };
+		C918FD85226B51E8002C6308 /* CwlSplitViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD5F226B51E8002C6308 /* CwlSplitViewTesting_macOS.swift */; };
+		C918FD86226B51E8002C6308 /* CwlTextFieldTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD60226B51E8002C6308 /* CwlTextFieldTesting_macOS.swift */; };
+		C918FD87226B51E8002C6308 /* CwlPopUpButtonTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD61226B51E8002C6308 /* CwlPopUpButtonTesting_macOS.swift */; };
+		C918FD88226B51E8002C6308 /* CwlViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD62226B51E8002C6308 /* CwlViewTesting_macOS.swift */; };
+		C918FD89226B51E8002C6308 /* CwlTabViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD63226B51E8002C6308 /* CwlTabViewTesting_macOS.swift */; };
+		C918FD8A226B51E8002C6308 /* CwlTableRowViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD64226B51E8002C6308 /* CwlTableRowViewTesting_macOS.swift */; };
+		C918FD8B226B51E8002C6308 /* CwlSliderTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD65226B51E8002C6308 /* CwlSliderTesting_macOS.swift */; };
+		C918FD8C226B51E8002C6308 /* CwlApplicationTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD66226B51E8002C6308 /* CwlApplicationTesting_macOS.swift */; };
+		C918FD8D226B51E8002C6308 /* CwlMagnificationGestureRecognizerTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD67226B51E8002C6308 /* CwlMagnificationGestureRecognizerTesting_macOS.swift */; };
+		C918FD8E226B51E8002C6308 /* CwlPressGestureRecognizerTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD68226B51E8002C6308 /* CwlPressGestureRecognizerTesting_macOS.swift */; };
+		C918FD8F226B51E8002C6308 /* CwlMenuTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD69226B51E8002C6308 /* CwlMenuTesting_macOS.swift */; };
+		C918FD90226B51E8002C6308 /* CwlOutlineViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD6A226B51E8002C6308 /* CwlOutlineViewTesting_macOS.swift */; };
+		C918FD91226B51E8002C6308 /* CwlTextViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD6B226B51E8002C6308 /* CwlTextViewTesting_macOS.swift */; };
+		C918FD92226B51E8002C6308 /* CwlTableHeaderViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD6C226B51E8002C6308 /* CwlTableHeaderViewTesting_macOS.swift */; };
+		C918FD93226B51E8002C6308 /* CwlButtonTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD6D226B51E8002C6308 /* CwlButtonTesting_macOS.swift */; };
+		C918FD94226B51E8002C6308 /* CwlRotationGestureRecognizerTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD6E226B51E8002C6308 /* CwlRotationGestureRecognizerTesting_macOS.swift */; };
+		C918FD95226B51E8002C6308 /* CwlSegmentedControlTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD6F226B51E8002C6308 /* CwlSegmentedControlTesting_macOS.swift */; };
+		C918FD96226B51E8002C6308 /* CwlImageViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD70226B51E8002C6308 /* CwlImageViewTesting_macOS.swift */; };
+		C918FD97226B51E8002C6308 /* CwlWindowTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD71226B51E8002C6308 /* CwlWindowTesting_macOS.swift */; };
+		C918FD98226B51E8002C6308 /* CwlClipViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD72226B51E8002C6308 /* CwlClipViewTesting_macOS.swift */; };
+		C918FD99226B51E8002C6308 /* CwlMenuItemTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD73226B51E8002C6308 /* CwlMenuItemTesting_macOS.swift */; };
+		C918FD9A226B51E8002C6308 /* CwlClickGestureRecognizerTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD74226B51E8002C6308 /* CwlClickGestureRecognizerTesting_macOS.swift */; };
+		C918FD9B226B51E8002C6308 /* CwlTableViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD75226B51E8002C6308 /* CwlTableViewTesting_macOS.swift */; };
+		C918FD9C226B51E8002C6308 /* CwlControlTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD76226B51E8002C6308 /* CwlControlTesting_macOS.swift */; };
+		C918FD9D226B51E8002C6308 /* CwlPanGestureRecognizerTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD77226B51E8002C6308 /* CwlPanGestureRecognizerTesting_macOS.swift */; };
+		C918FD9E226B51E8002C6308 /* CwlTabViewItemTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD78226B51E8002C6308 /* CwlTabViewItemTesting_macOS.swift */; };
+		C918FD9F226B51E8002C6308 /* CwlTableColumnTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD79226B51E8002C6308 /* CwlTableColumnTesting_macOS.swift */; };
+		C918FDA0226B51E8002C6308 /* CwlToolbarItemTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD7A226B51E8002C6308 /* CwlToolbarItemTesting_macOS.swift */; };
+		C918FDA1226B51E8002C6308 /* CwlTableCellViewTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD7B226B51E8002C6308 /* CwlTableCellViewTesting_macOS.swift */; };
+		C918FDA2226B51E8002C6308 /* CwlGestureRecognizerTesting_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FD7C226B51E8002C6308 /* CwlGestureRecognizerTesting_macOS.swift */; };
 		C91CC2D1206F0DD7006FFF97 /* CwlBinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */; };
 		C9216978218D55D700396AB0 /* CwlApplication_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9216977218D55D700396AB0 /* CwlApplication_iOSTests.swift */; };
 		C9216983218D5A6300396AB0 /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
@@ -166,14 +245,7 @@
 		C9B27EA91E51D34300265580 /* CwlIndexedMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD96A11DF8415500D66AD9 /* CwlIndexedMutation.swift */; };
 		C9B676F121EDE14400A7D5C9 /* CwlAdapter+Signals.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B676F021EDE14400A7D5C9 /* CwlAdapter+Signals.swift */; };
 		C9B705EC20686CBD00B4CD29 /* CwlViewsTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		C9B705F92068758900B4CD29 /* CwlViewControllerTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B705F220686DAA00B4CD29 /* CwlViewControllerTesting.swift */; };
 		C9B705FA2068758F00B4CD29 /* CwlBindingParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B705F520686E3200B4CD29 /* CwlBindingParser.swift */; };
-		C9B705FE20687D7800B4CD29 /* CwlTableViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B705FD20687D7800B4CD29 /* CwlTableViewTesting.swift */; };
-		C9B70602206884B800B4CD29 /* CwlTableViewCellTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B70601206884B800B4CD29 /* CwlTableViewCellTesting.swift */; };
-		C9B706042068902B00B4CD29 /* CwlLabelTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B706032068902B00B4CD29 /* CwlLabelTesting.swift */; };
-		C9B70606206890FB00B4CD29 /* CwlViewTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B70605206890FB00B4CD29 /* CwlViewTesting.swift */; };
-		C9B706082068C81500B4CD29 /* CwlNavigationItemTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B706072068C81500B4CD29 /* CwlNavigationItemTesting.swift */; };
-		C9B7060A2068C86700B4CD29 /* CwlBarButtonItemTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B706092068C86700B4CD29 /* CwlBarButtonItemTesting.swift */; };
 		C9BFDF53220FFA38005F4009 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFDF52220FFA38005F4009 /* ButtonView.swift */; };
 		C9BFDF5A220FFA40005F4009 /* BarButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFDF50220FFA25005F4009 /* BarButtonView.swift */; };
 		C9BFDF5C220FFA4F005F4009 /* ControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFDF5B220FFA4F005F4009 /* ControlView.swift */; };
@@ -222,27 +294,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = C906528D2269EC02001C8DDB;
 			remoteInfo = iOSApp;
-		};
-		C90652E92269EC24001C8DDB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C90652922269EC02001C8DDB;
-			remoteInfo = CwlUtils_iOS;
-		};
-		C90652EB2269EC24001C8DDB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C90652942269EC02001C8DDB;
-			remoteInfo = CwlSignal_iOS;
-		};
-		C90652ED2269EC24001C8DDB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C90652972269EC02001C8DDB;
-			remoteInfo = CwlViews_iOS;
 		};
 		C90652EF2269EC24001C8DDB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -314,13 +365,6 @@
 			remoteGlobalIDString = C9B27E641E51CA9700265580;
 			remoteInfo = CwlViews_iOS;
 		};
-		C9B705FB20687A9A00B4CD29 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C9B27E641E51CA9700265580;
-			remoteInfo = CwlViews_iOS;
-		};
 		C9E4DB3B21624CDB00BD4A66 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C93FBC002160FCFF00DFCF0E /* CwlSignal.xcodeproj */;
@@ -371,6 +415,84 @@
 		C90CF7D02220E536001B4FAB /* CwlSubrangeMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSubrangeMutation.swift; sourceTree = "<group>"; };
 		C913073F1F66384200174902 /* CwlCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlCoder.swift; sourceTree = "<group>"; };
 		C91683FB203FC1BA00B4D40E /* CwlTabBar_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabBar_iOS.swift; sourceTree = "<group>"; };
+		C918FD03226B2A9B002C6308 /* CwlSearchBarTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSearchBarTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD04226B2A9B002C6308 /* CwlSliderTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSliderTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD05226B2A9B002C6308 /* CwlTextFieldTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextFieldTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD06226B2A9B002C6308 /* CwlTabBarTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTabBarTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD07226B2A9B002C6308 /* CwlScrollViewTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollViewTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD08226B2A9B002C6308 /* CwlLongPressGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLongPressGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD09226B2A9B002C6308 /* CwlSplitViewControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSplitViewControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD0A226B2A9C002C6308 /* CwlPageControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPageControl.swift; sourceTree = "<group>"; };
+		C918FD0B226B2A9C002C6308 /* CwlAlertActionTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertActionTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD0C226B2A9C002C6308 /* CwlControlTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlControlTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD0D226B2A9C002C6308 /* CwlToolbarTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlToolbarTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD0E226B2A9C002C6308 /* CwlLabelTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLabelTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD0F226B2A9C002C6308 /* CwlApplicationTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlApplicationTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD10226B2A9C002C6308 /* CwlPanGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPanGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD11226B2A9C002C6308 /* CwlTapGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTapGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD12226B2A9C002C6308 /* CwlTableViewTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableViewTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD13226B2A9D002C6308 /* CwlSwitchTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSwitchTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD14226B2A9D002C6308 /* CwlViewTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD15226B2A9D002C6308 /* CwlPageViewControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPageViewControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD16226B2A9D002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPinchGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD17226B2A9D002C6308 /* CwlNavigationControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD18226B2A9D002C6308 /* CwlBarItemTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBarItemTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD19226B2A9D002C6308 /* CwlTableViewCellTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableViewCellTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD1A226B2A9D002C6308 /* CwlBarButtonItemTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlBarButtonItemTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD1B226B2A9D002C6308 /* CwlTextInputTraitsTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextInputTraitsTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD1C226B2A9E002C6308 /* CwlViewControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD1D226B2A9E002C6308 /* CwlGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD1E226B2A9E002C6308 /* CwlExtendedViewControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlExtendedViewControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD1F226B2A9E002C6308 /* CwlTabBarControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTabBarControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD20226B2A9E002C6308 /* CwlTextViewTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextViewTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD21226B2A9E002C6308 /* CwlRotationGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlRotationGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD22226B2A9E002C6308 /* CwlWindowTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindowTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD23226B2A9E002C6308 /* CwlImageViewTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlImageViewTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD24226B2A9F002C6308 /* CwlScreenEdgePanGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScreenEdgePanGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD25226B2A9F002C6308 /* CwlAlertControllerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlAlertControllerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD26226B2A9F002C6308 /* CwlTabBarItemTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTabBarItemTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD27226B2A9F002C6308 /* CwlNavigationBarTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationBarTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD28226B2A9F002C6308 /* CwlNavigationItemTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlNavigationItemTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD29226B2A9F002C6308 /* CwlButtonTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlButtonTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD2A226B2A9F002C6308 /* CwlSwipeGestureRecognizerTesting_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSwipeGestureRecognizerTesting_iOS.swift; sourceTree = "<group>"; };
+		C918FD56226B51E7002C6308 /* CwlStackViewTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlStackViewTesting.swift; sourceTree = "<group>"; };
+		C918FD57226B51E7002C6308 /* CwlExtendedViewTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlExtendedViewTesting.swift; sourceTree = "<group>"; };
+		C918FD58226B51E7002C6308 /* CwlShapeLayerTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlShapeLayerTesting.swift; sourceTree = "<group>"; };
+		C918FD59226B51E7002C6308 /* CwlWebViewTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWebViewTesting.swift; sourceTree = "<group>"; };
+		C918FD5A226B51E7002C6308 /* CwlGradientLayerTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGradientLayerTesting.swift; sourceTree = "<group>"; };
+		C918FD5B226B51E7002C6308 /* CwlLayerTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlLayerTesting.swift; sourceTree = "<group>"; };
+		C918FD5D226B51E8002C6308 /* CwlScrollViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD5E226B51E8002C6308 /* CwlToolbarTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlToolbarTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD5F226B51E8002C6308 /* CwlSplitViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSplitViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD60226B51E8002C6308 /* CwlTextFieldTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextFieldTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD61226B51E8002C6308 /* CwlPopUpButtonTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPopUpButtonTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD62226B51E8002C6308 /* CwlViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD63226B51E8002C6308 /* CwlTabViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTabViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD64226B51E8002C6308 /* CwlTableRowViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableRowViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD65226B51E8002C6308 /* CwlSliderTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSliderTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD66226B51E8002C6308 /* CwlApplicationTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlApplicationTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD67226B51E8002C6308 /* CwlMagnificationGestureRecognizerTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMagnificationGestureRecognizerTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD68226B51E8002C6308 /* CwlPressGestureRecognizerTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPressGestureRecognizerTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD69226B51E8002C6308 /* CwlMenuTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMenuTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD6A226B51E8002C6308 /* CwlOutlineViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlOutlineViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD6B226B51E8002C6308 /* CwlTextViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTextViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD6C226B51E8002C6308 /* CwlTableHeaderViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableHeaderViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD6D226B51E8002C6308 /* CwlButtonTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlButtonTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD6E226B51E8002C6308 /* CwlRotationGestureRecognizerTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlRotationGestureRecognizerTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD6F226B51E8002C6308 /* CwlSegmentedControlTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSegmentedControlTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD70226B51E8002C6308 /* CwlImageViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlImageViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD71226B51E8002C6308 /* CwlWindowTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindowTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD72226B51E8002C6308 /* CwlClipViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlClipViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD73226B51E8002C6308 /* CwlMenuItemTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlMenuItemTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD74226B51E8002C6308 /* CwlClickGestureRecognizerTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlClickGestureRecognizerTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD75226B51E8002C6308 /* CwlTableViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD76226B51E8002C6308 /* CwlControlTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlControlTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD77226B51E8002C6308 /* CwlPanGestureRecognizerTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlPanGestureRecognizerTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD78226B51E8002C6308 /* CwlTabViewItemTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTabViewItemTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD79226B51E8002C6308 /* CwlTableColumnTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableColumnTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD7A226B51E8002C6308 /* CwlToolbarItemTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlToolbarItemTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD7B226B51E8002C6308 /* CwlTableCellViewTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableCellViewTesting_macOS.swift; sourceTree = "<group>"; };
+		C918FD7C226B51E8002C6308 /* CwlGestureRecognizerTesting_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlGestureRecognizerTesting_macOS.swift; sourceTree = "<group>"; };
 		C91CC2CF206F0DD7006FFF97 /* CwlBinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBinder.swift; sourceTree = "<group>"; };
 		C9216977218D55D700396AB0 /* CwlApplication_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlApplication_iOSTests.swift; sourceTree = "<group>"; };
 		C921698A218D5F0200396AB0 /* CwlViewsUnitTestHarness_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViewsUnitTestHarness_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -504,14 +626,7 @@
 		C9B705E820686CBD00B4CD29 /* CwlViewsTesting.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlViewsTesting.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CwlViewsTesting.h; sourceTree = "<group>"; };
 		C9B705EB20686CBD00B4CD29 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C9B705F220686DAA00B4CD29 /* CwlViewControllerTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViewControllerTesting.swift; sourceTree = "<group>"; };
 		C9B705F520686E3200B4CD29 /* CwlBindingParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBindingParser.swift; sourceTree = "<group>"; };
-		C9B705FD20687D7800B4CD29 /* CwlTableViewTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTableViewTesting.swift; sourceTree = "<group>"; };
-		C9B70601206884B800B4CD29 /* CwlTableViewCellTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTableViewCellTesting.swift; sourceTree = "<group>"; };
-		C9B706032068902B00B4CD29 /* CwlLabelTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlLabelTesting.swift; sourceTree = "<group>"; };
-		C9B70605206890FB00B4CD29 /* CwlViewTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlViewTesting.swift; sourceTree = "<group>"; };
-		C9B706072068C81500B4CD29 /* CwlNavigationItemTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlNavigationItemTesting.swift; sourceTree = "<group>"; };
-		C9B706092068C86700B4CD29 /* CwlBarButtonItemTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBarButtonItemTesting.swift; sourceTree = "<group>"; };
 		C9BDF5A91F3DD4F3001928B2 /* CwlAnimatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAnimatable.swift; sourceTree = "<group>"; };
 		C9BFDF50220FFA25005F4009 /* BarButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarButtonView.swift; sourceTree = "<group>"; };
 		C9BFDF52220FFA38005F4009 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
@@ -620,6 +735,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C918FD53226B2C92002C6308 /* CwlViews.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -646,9 +762,6 @@
 			isa = PBXGroup;
 			children = (
 				C90652E82269EC24001C8DDB /* iOSApp.app */,
-				C90652EA2269EC24001C8DDB /* CwlUtils.framework */,
-				C90652EC2269EC24001C8DDB /* CwlSignal.framework */,
-				C90652EE2269EC24001C8DDB /* CwlViews.framework */,
 				C90652F02269EC24001C8DDB /* iOSAppTests.xctest */,
 			);
 			name = Products;
@@ -657,6 +770,58 @@
 		C90652F12269EEC3001C8DDB /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		C918FD55226B51E7002C6308 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				C918FD57226B51E7002C6308 /* CwlExtendedViewTesting.swift */,
+				C918FD5A226B51E7002C6308 /* CwlGradientLayerTesting.swift */,
+				C918FD5B226B51E7002C6308 /* CwlLayerTesting.swift */,
+				C918FD58226B51E7002C6308 /* CwlShapeLayerTesting.swift */,
+				C918FD56226B51E7002C6308 /* CwlStackViewTesting.swift */,
+				C918FD59226B51E7002C6308 /* CwlWebViewTesting.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		C918FD5C226B51E8002C6308 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				C918FD66226B51E8002C6308 /* CwlApplicationTesting_macOS.swift */,
+				C918FD6D226B51E8002C6308 /* CwlButtonTesting_macOS.swift */,
+				C918FD74226B51E8002C6308 /* CwlClickGestureRecognizerTesting_macOS.swift */,
+				C918FD72226B51E8002C6308 /* CwlClipViewTesting_macOS.swift */,
+				C918FD76226B51E8002C6308 /* CwlControlTesting_macOS.swift */,
+				C918FD7C226B51E8002C6308 /* CwlGestureRecognizerTesting_macOS.swift */,
+				C918FD70226B51E8002C6308 /* CwlImageViewTesting_macOS.swift */,
+				C918FD67226B51E8002C6308 /* CwlMagnificationGestureRecognizerTesting_macOS.swift */,
+				C918FD73226B51E8002C6308 /* CwlMenuItemTesting_macOS.swift */,
+				C918FD69226B51E8002C6308 /* CwlMenuTesting_macOS.swift */,
+				C918FD6A226B51E8002C6308 /* CwlOutlineViewTesting_macOS.swift */,
+				C918FD77226B51E8002C6308 /* CwlPanGestureRecognizerTesting_macOS.swift */,
+				C918FD61226B51E8002C6308 /* CwlPopUpButtonTesting_macOS.swift */,
+				C918FD68226B51E8002C6308 /* CwlPressGestureRecognizerTesting_macOS.swift */,
+				C918FD6E226B51E8002C6308 /* CwlRotationGestureRecognizerTesting_macOS.swift */,
+				C918FD5D226B51E8002C6308 /* CwlScrollViewTesting_macOS.swift */,
+				C918FD6F226B51E8002C6308 /* CwlSegmentedControlTesting_macOS.swift */,
+				C918FD65226B51E8002C6308 /* CwlSliderTesting_macOS.swift */,
+				C918FD5F226B51E8002C6308 /* CwlSplitViewTesting_macOS.swift */,
+				C918FD7B226B51E8002C6308 /* CwlTableCellViewTesting_macOS.swift */,
+				C918FD79226B51E8002C6308 /* CwlTableColumnTesting_macOS.swift */,
+				C918FD6C226B51E8002C6308 /* CwlTableHeaderViewTesting_macOS.swift */,
+				C918FD64226B51E8002C6308 /* CwlTableRowViewTesting_macOS.swift */,
+				C918FD75226B51E8002C6308 /* CwlTableViewTesting_macOS.swift */,
+				C918FD78226B51E8002C6308 /* CwlTabViewItemTesting_macOS.swift */,
+				C918FD63226B51E8002C6308 /* CwlTabViewTesting_macOS.swift */,
+				C918FD60226B51E8002C6308 /* CwlTextFieldTesting_macOS.swift */,
+				C918FD6B226B51E8002C6308 /* CwlTextViewTesting_macOS.swift */,
+				C918FD7A226B51E8002C6308 /* CwlToolbarItemTesting_macOS.swift */,
+				C918FD5E226B51E8002C6308 /* CwlToolbarTesting_macOS.swift */,
+				C918FD62226B51E8002C6308 /* CwlViewTesting_macOS.swift */,
+				C918FD71226B51E8002C6308 /* CwlWindowTesting_macOS.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -1027,10 +1192,12 @@
 		C9B705F020686D2200B4CD29 /* CwlViewsTesting */ = {
 			isa = PBXGroup;
 			children = (
+				C918FD55226B51E7002C6308 /* Common */,
+				C9B705F420686DD300B4CD29 /* Core */,
 				C9B705EA20686CBD00B4CD29 /* CwlViewsTesting.h */,
 				C9B705EB20686CBD00B4CD29 /* Info.plist */,
-				C9B705F420686DD300B4CD29 /* Core */,
 				C9B705F120686D8600B4CD29 /* iOS */,
+				C918FD5C226B51E8002C6308 /* macOS */,
 				C90652F12269EEC3001C8DDB /* macOS */,
 			);
 			path = CwlViewsTesting;
@@ -1039,13 +1206,46 @@
 		C9B705F120686D8600B4CD29 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				C9B706092068C86700B4CD29 /* CwlBarButtonItemTesting.swift */,
-				C9B706032068902B00B4CD29 /* CwlLabelTesting.swift */,
-				C9B706072068C81500B4CD29 /* CwlNavigationItemTesting.swift */,
-				C9B70601206884B800B4CD29 /* CwlTableViewCellTesting.swift */,
-				C9B705FD20687D7800B4CD29 /* CwlTableViewTesting.swift */,
-				C9B705F220686DAA00B4CD29 /* CwlViewControllerTesting.swift */,
-				C9B70605206890FB00B4CD29 /* CwlViewTesting.swift */,
+				C918FD0B226B2A9C002C6308 /* CwlAlertActionTesting_iOS.swift */,
+				C918FD25226B2A9F002C6308 /* CwlAlertControllerTesting_iOS.swift */,
+				C918FD0F226B2A9C002C6308 /* CwlApplicationTesting_iOS.swift */,
+				C918FD1A226B2A9D002C6308 /* CwlBarButtonItemTesting_iOS.swift */,
+				C918FD18226B2A9D002C6308 /* CwlBarItemTesting_iOS.swift */,
+				C918FD29226B2A9F002C6308 /* CwlButtonTesting_iOS.swift */,
+				C918FD0C226B2A9C002C6308 /* CwlControlTesting_iOS.swift */,
+				C918FD1E226B2A9E002C6308 /* CwlExtendedViewControllerTesting_iOS.swift */,
+				C918FD1D226B2A9E002C6308 /* CwlGestureRecognizerTesting_iOS.swift */,
+				C918FD23226B2A9E002C6308 /* CwlImageViewTesting_iOS.swift */,
+				C918FD0E226B2A9C002C6308 /* CwlLabelTesting_iOS.swift */,
+				C918FD08226B2A9B002C6308 /* CwlLongPressGestureRecognizerTesting_iOS.swift */,
+				C918FD27226B2A9F002C6308 /* CwlNavigationBarTesting_iOS.swift */,
+				C918FD17226B2A9D002C6308 /* CwlNavigationControllerTesting_iOS.swift */,
+				C918FD28226B2A9F002C6308 /* CwlNavigationItemTesting_iOS.swift */,
+				C918FD0A226B2A9C002C6308 /* CwlPageControl.swift */,
+				C918FD15226B2A9D002C6308 /* CwlPageViewControllerTesting_iOS.swift */,
+				C918FD10226B2A9C002C6308 /* CwlPanGestureRecognizerTesting_iOS.swift */,
+				C918FD16226B2A9D002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift */,
+				C918FD21226B2A9E002C6308 /* CwlRotationGestureRecognizerTesting_iOS.swift */,
+				C918FD24226B2A9F002C6308 /* CwlScreenEdgePanGestureRecognizerTesting_iOS.swift */,
+				C918FD07226B2A9B002C6308 /* CwlScrollViewTesting_iOS.swift */,
+				C918FD03226B2A9B002C6308 /* CwlSearchBarTesting_iOS.swift */,
+				C918FD04226B2A9B002C6308 /* CwlSliderTesting_iOS.swift */,
+				C918FD09226B2A9B002C6308 /* CwlSplitViewControllerTesting_iOS.swift */,
+				C918FD2A226B2A9F002C6308 /* CwlSwipeGestureRecognizerTesting_iOS.swift */,
+				C918FD13226B2A9D002C6308 /* CwlSwitchTesting_iOS.swift */,
+				C918FD1F226B2A9E002C6308 /* CwlTabBarControllerTesting_iOS.swift */,
+				C918FD26226B2A9F002C6308 /* CwlTabBarItemTesting_iOS.swift */,
+				C918FD06226B2A9B002C6308 /* CwlTabBarTesting_iOS.swift */,
+				C918FD19226B2A9D002C6308 /* CwlTableViewCellTesting_iOS.swift */,
+				C918FD12226B2A9C002C6308 /* CwlTableViewTesting_iOS.swift */,
+				C918FD11226B2A9C002C6308 /* CwlTapGestureRecognizerTesting_iOS.swift */,
+				C918FD05226B2A9B002C6308 /* CwlTextFieldTesting_iOS.swift */,
+				C918FD1B226B2A9D002C6308 /* CwlTextInputTraitsTesting_iOS.swift */,
+				C918FD20226B2A9E002C6308 /* CwlTextViewTesting_iOS.swift */,
+				C918FD0D226B2A9C002C6308 /* CwlToolbarTesting_iOS.swift */,
+				C918FD1C226B2A9E002C6308 /* CwlViewControllerTesting_iOS.swift */,
+				C918FD14226B2A9D002C6308 /* CwlViewTesting_iOS.swift */,
+				C918FD22226B2A9E002C6308 /* CwlWindowTesting_iOS.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -1293,7 +1493,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				C9B705FC20687A9A00B4CD29 /* PBXTargetDependency */,
 			);
 			name = CwlViewsTesting;
 			productName = CwlViewsTesting_iOS;
@@ -1446,27 +1645,6 @@
 			fileType = wrapper.application;
 			path = iOSApp.app;
 			remoteRef = C90652E72269EC24001C8DDB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C90652EA2269EC24001C8DDB /* CwlUtils.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = CwlUtils.framework;
-			remoteRef = C90652E92269EC24001C8DDB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C90652EC2269EC24001C8DDB /* CwlSignal.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = CwlSignal.framework;
-			remoteRef = C90652EB2269EC24001C8DDB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C90652EE2269EC24001C8DDB /* CwlViews.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = CwlViews.framework;
-			remoteRef = C90652ED2269EC24001C8DDB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		C90652F02269EC24001C8DDB /* iOSAppTests.xctest */ = {
@@ -1768,14 +1946,85 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9B70606206890FB00B4CD29 /* CwlViewTesting.swift in Sources */,
+				C918FD40226B2A9F002C6308 /* CwlBarItemTesting_iOS.swift in Sources */,
+				C918FD82226B51E8002C6308 /* CwlLayerTesting.swift in Sources */,
+				C918FD95226B51E8002C6308 /* CwlSegmentedControlTesting_macOS.swift in Sources */,
+				C918FD81226B51E8002C6308 /* CwlGradientLayerTesting.swift in Sources */,
+				C918FD91226B51E8002C6308 /* CwlTextViewTesting_macOS.swift in Sources */,
+				C918FD84226B51E8002C6308 /* CwlToolbarTesting_macOS.swift in Sources */,
+				C918FD30226B2A9F002C6308 /* CwlLongPressGestureRecognizerTesting_iOS.swift in Sources */,
 				C9B705FA2068758F00B4CD29 /* CwlBindingParser.swift in Sources */,
-				C9B705FE20687D7800B4CD29 /* CwlTableViewTesting.swift in Sources */,
-				C9B70602206884B800B4CD29 /* CwlTableViewCellTesting.swift in Sources */,
-				C9B7060A2068C86700B4CD29 /* CwlBarButtonItemTesting.swift in Sources */,
-				C9B706082068C81500B4CD29 /* CwlNavigationItemTesting.swift in Sources */,
-				C9B706042068902B00B4CD29 /* CwlLabelTesting.swift in Sources */,
-				C9B705F92068758900B4CD29 /* CwlViewControllerTesting.swift in Sources */,
+				C918FD32226B2A9F002C6308 /* CwlPageControl.swift in Sources */,
+				C918FD9D226B51E8002C6308 /* CwlPanGestureRecognizerTesting_macOS.swift in Sources */,
+				C918FD3B226B2A9F002C6308 /* CwlSwitchTesting_iOS.swift in Sources */,
+				C918FD8B226B51E8002C6308 /* CwlSliderTesting_macOS.swift in Sources */,
+				C918FD94226B51E8002C6308 /* CwlRotationGestureRecognizerTesting_macOS.swift in Sources */,
+				C918FDA2226B51E8002C6308 /* CwlGestureRecognizerTesting_macOS.swift in Sources */,
+				C918FD8D226B51E8002C6308 /* CwlMagnificationGestureRecognizerTesting_macOS.swift in Sources */,
+				C918FD86226B51E8002C6308 /* CwlTextFieldTesting_macOS.swift in Sources */,
+				C918FDA1226B51E8002C6308 /* CwlTableCellViewTesting_macOS.swift in Sources */,
+				C918FD33226B2A9F002C6308 /* CwlAlertActionTesting_iOS.swift in Sources */,
+				C918FD51226B2A9F002C6308 /* CwlButtonTesting_iOS.swift in Sources */,
+				C918FD7F226B51E8002C6308 /* CwlShapeLayerTesting.swift in Sources */,
+				C918FD97226B51E8002C6308 /* CwlWindowTesting_macOS.swift in Sources */,
+				C918FD85226B51E8002C6308 /* CwlSplitViewTesting_macOS.swift in Sources */,
+				C918FD8A226B51E8002C6308 /* CwlTableRowViewTesting_macOS.swift in Sources */,
+				C918FD98226B51E8002C6308 /* CwlClipViewTesting_macOS.swift in Sources */,
+				C918FD4D226B2A9F002C6308 /* CwlAlertControllerTesting_iOS.swift in Sources */,
+				C918FD88226B51E8002C6308 /* CwlViewTesting_macOS.swift in Sources */,
+				C918FD50226B2A9F002C6308 /* CwlNavigationItemTesting_iOS.swift in Sources */,
+				C918FD3F226B2A9F002C6308 /* CwlNavigationControllerTesting_iOS.swift in Sources */,
+				C918FD34226B2A9F002C6308 /* CwlControlTesting_iOS.swift in Sources */,
+				C918FD80226B51E8002C6308 /* CwlWebViewTesting.swift in Sources */,
+				C918FD2B226B2A9F002C6308 /* CwlSearchBarTesting_iOS.swift in Sources */,
+				C918FD44226B2A9F002C6308 /* CwlViewControllerTesting_iOS.swift in Sources */,
+				C918FD3C226B2A9F002C6308 /* CwlViewTesting_iOS.swift in Sources */,
+				C918FD89226B51E8002C6308 /* CwlTabViewTesting_macOS.swift in Sources */,
+				C918FD4F226B2A9F002C6308 /* CwlNavigationBarTesting_iOS.swift in Sources */,
+				C918FD96226B51E8002C6308 /* CwlImageViewTesting_macOS.swift in Sources */,
+				C918FD48226B2A9F002C6308 /* CwlTextViewTesting_iOS.swift in Sources */,
+				C918FD52226B2A9F002C6308 /* CwlSwipeGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD45226B2A9F002C6308 /* CwlGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD3A226B2A9F002C6308 /* CwlTableViewTesting_iOS.swift in Sources */,
+				C918FD87226B51E8002C6308 /* CwlPopUpButtonTesting_macOS.swift in Sources */,
+				C918FD7D226B51E8002C6308 /* CwlStackViewTesting.swift in Sources */,
+				C918FD49226B2A9F002C6308 /* CwlRotationGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD90226B51E8002C6308 /* CwlOutlineViewTesting_macOS.swift in Sources */,
+				C918FD99226B51E8002C6308 /* CwlMenuItemTesting_macOS.swift in Sources */,
+				C918FD9A226B51E8002C6308 /* CwlClickGestureRecognizerTesting_macOS.swift in Sources */,
+				C918FD9B226B51E8002C6308 /* CwlTableViewTesting_macOS.swift in Sources */,
+				C918FD4A226B2A9F002C6308 /* CwlWindowTesting_iOS.swift in Sources */,
+				C918FD2D226B2A9F002C6308 /* CwlTextFieldTesting_iOS.swift in Sources */,
+				C918FD31226B2A9F002C6308 /* CwlSplitViewControllerTesting_iOS.swift in Sources */,
+				C918FD92226B51E8002C6308 /* CwlTableHeaderViewTesting_macOS.swift in Sources */,
+				C918FD46226B2A9F002C6308 /* CwlExtendedViewControllerTesting_iOS.swift in Sources */,
+				C918FD93226B51E8002C6308 /* CwlButtonTesting_macOS.swift in Sources */,
+				C918FD4B226B2A9F002C6308 /* CwlImageViewTesting_iOS.swift in Sources */,
+				C918FDA0226B51E8002C6308 /* CwlToolbarItemTesting_macOS.swift in Sources */,
+				C918FD2E226B2A9F002C6308 /* CwlTabBarTesting_iOS.swift in Sources */,
+				C918FD8C226B51E8002C6308 /* CwlApplicationTesting_macOS.swift in Sources */,
+				C918FD8E226B51E8002C6308 /* CwlPressGestureRecognizerTesting_macOS.swift in Sources */,
+				C918FD2F226B2A9F002C6308 /* CwlScrollViewTesting_iOS.swift in Sources */,
+				C918FD4C226B2A9F002C6308 /* CwlScreenEdgePanGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD36226B2A9F002C6308 /* CwlLabelTesting_iOS.swift in Sources */,
+				C918FD47226B2A9F002C6308 /* CwlTabBarControllerTesting_iOS.swift in Sources */,
+				C918FD38226B2A9F002C6308 /* CwlPanGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD39226B2A9F002C6308 /* CwlTapGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD8F226B51E8002C6308 /* CwlMenuTesting_macOS.swift in Sources */,
+				C918FD35226B2A9F002C6308 /* CwlToolbarTesting_iOS.swift in Sources */,
+				C918FD83226B51E8002C6308 /* CwlScrollViewTesting_macOS.swift in Sources */,
+				C918FD9F226B51E8002C6308 /* CwlTableColumnTesting_macOS.swift in Sources */,
+				C918FD7E226B51E8002C6308 /* CwlExtendedViewTesting.swift in Sources */,
+				C918FD2C226B2A9F002C6308 /* CwlSliderTesting_iOS.swift in Sources */,
+				C918FD9C226B51E8002C6308 /* CwlControlTesting_macOS.swift in Sources */,
+				C918FD9E226B51E8002C6308 /* CwlTabViewItemTesting_macOS.swift in Sources */,
+				C918FD3D226B2A9F002C6308 /* CwlPageViewControllerTesting_iOS.swift in Sources */,
+				C918FD3E226B2A9F002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift in Sources */,
+				C918FD43226B2A9F002C6308 /* CwlTextInputTraitsTesting_iOS.swift in Sources */,
+				C918FD41226B2A9F002C6308 /* CwlTableViewCellTesting_iOS.swift in Sources */,
+				C918FD42226B2A9F002C6308 /* CwlBarButtonItemTesting_iOS.swift in Sources */,
+				C918FD4E226B2A9F002C6308 /* CwlTabBarItemTesting_iOS.swift in Sources */,
+				C918FD37226B2A9F002C6308 /* CwlApplicationTesting_iOS.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1856,11 +2105,6 @@
 			isa = PBXTargetDependency;
 			target = C9B27E641E51CA9700265580 /* CwlViews */;
 			targetProxy = C9B27EA21E51D2E200265580 /* PBXContainerItemProxy */;
-		};
-		C9B705FC20687A9A00B4CD29 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C9B27E641E51CA9700265580 /* CwlViews */;
-			targetProxy = C9B705FB20687A9A00B4CD29 /* PBXContainerItemProxy */;
 		};
 		C9E4DB3C21624CDB00BD4A66 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

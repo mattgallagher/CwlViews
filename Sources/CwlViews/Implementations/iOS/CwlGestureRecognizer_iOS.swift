@@ -114,7 +114,7 @@ public extension GestureRecognizer.Preparer {
 		case .action(let x):
 			let target = SignalActionTarget()
 			instance.addTarget(target, action: SignalActionTarget.selector)
-			return target.source.cancellableBind(to: x)
+			return target.signal.cancellableBind(to: x)
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case .shouldBegin: return nil

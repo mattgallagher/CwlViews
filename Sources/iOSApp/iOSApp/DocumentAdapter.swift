@@ -6,7 +6,7 @@
 //  Copyright © 2019 Matt Gallagher. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 typealias DocumentAdapter = Adapter<ModelState<Document, Document.Change, Document.Notification>>
 extension Adapter where State == ModelState<Document, Document.Change, Document.Notification> {

@@ -414,7 +414,7 @@ public extension BindingName where Binding: TextViewBinding {
 	static var alignLeft: TextViewName<Signal<Void>> { return .name(TextView.Binding.alignLeft) }
 	static var alignRight: TextViewName<Signal<Void>> { return .name(TextView.Binding.alignRight) }
 	static var superscript: TextViewName<Signal<Void>> { return .name(TextView.Binding.superscript) }
-	static var `subscript`: TextViewName<Signal<Void>> { return .name(B.`subscript`) }
+	static var `subscript`: TextViewName<Signal<Void>> { return .name(TextView.Binding.`subscript`) }
 	static var unscript: TextViewName<Signal<Void>> { return .name(TextView.Binding.unscript) }
 	static var underline: TextViewName<Signal<Void>> { return .name(TextView.Binding.underline) }
 	static var checkSpelling: TextViewName<Signal<Void>> { return .name(TextView.Binding.checkSpelling) }

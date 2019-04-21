@@ -195,7 +195,7 @@ public extension TableView.Preparer {
 			)
 		case .visibleRowsChanged(let x):
 			rowsChanged = rowsChanged ?? Input().multicast()
-			rowsChanged?.source.bind(to: x)
+			rowsChanged?.signal.bind(to: x)
 			delegate().addMultiHandler3(
 				{ (tv: UITableView, _: IndexPath, _: UITableViewCell) -> Void in
 					_ = (tv.delegate as? Storage)?.notifyVisibleRowsChanged(in: tv)
@@ -305,7 +305,7 @@ public extension TableView.Preparer {
 			}
 			
 			// Use the output of the pair to apply the effects as normal
-			return pair.source.apply(instance) { i, v in
+			return pair.signal.apply(instance) { i, v in
 				// Remove the key value observing after the first value is received.
 				if let k = kvo {
 					k.invalidate()
@@ -449,7 +449,7 @@ extension TableView.Preparer {
 				cellInput = reusedView.associatedRowInput(valueType: RowData.self)
 			} else if let cc = cellConstructor {
 				let dataTuple = Input<RowData>().multicast()
-				let constructed = cc(identifier, dataTuple.source).uiTableViewCell(reuseIdentifier: identifier)
+				let constructed = cc(identifier, dataTuple.signal).uiTableViewCell(reuseIdentifier: identifier)
 				cellView = constructed
 				cellInput = dataTuple.input
 				constructed.setAssociatedRowInput(to: dataTuple.input)
@@ -493,6 +493,7 @@ extension TableView.Preparer {
 			if case .update = sectionMutation.kind {
 				for (mutationIndex, rowIndex) in sectionMutation.indexSet.enumerated() {
 					sectionMutation.values[mutationIndex].mapMetadata { _ in () }.apply(to: &sections.values![rowIndex].values!)
+					sectionMutation.values[mutationIndex].updateMetadata(&sections.values![rowIndex])
 				}
 			} else {
 				sectionMutation.mapValues { rowMutation -> TableRowState<RowData> in
@@ -842,6 +843,20 @@ public extension BindingName where Binding: TableViewBinding {
 			downcast: Binding.tableViewBinding
 		)
 	}
+	static func rowSelected(_ void: Void = ()) -> TableViewName<SignalInput<TableRow<Binding.RowDataType>>> {
+		return Binding.compositeName(
+			value: { input in { tableView, tableRow -> Void in input.send(value: tableRow) } },
+			binding: TableView.Binding.didSelectRow,
+			downcast: Binding.tableViewBinding
+		)
+	}
+	static func commit<Value>(_ keyPath: KeyPath<TableRowCommit<Binding.RowDataType>, Value>) -> TableViewName<SignalInput<Value>> {
+		return Binding.compositeName(
+			value: { input in { tableView, editingStyle, tableRow -> Void in input.send(value: TableRowCommit(style: editingStyle, tableRow: tableRow)[keyPath: keyPath]) } },
+			binding: TableView.Binding.commit,
+			downcast: Binding.tableViewBinding
+		)
+	}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
@@ -892,6 +907,24 @@ public typealias TableSectionAnimatable<Element> = Animatable<TableSectionMutati
 public typealias TableRowState<Element> = SubrangeState<Element, TableSectionMetadata>
 public typealias TableSectionState<Element> = SubrangeState<TableRowState<Element>, ()>
 
+public extension IndexedMutation where Metadata == Subrange<Void> {
+	func apply<RowData>(to sections: inout TableSectionState<RowData>) where Element == TableRowMutation<RowData> {
+		if case .update = kind {
+			for (mutationIndex, rowIndex) in indexSet.enumerated() {
+				values[mutationIndex].mapMetadata { _ in () }.apply(to: &sections.values![rowIndex].values!)
+				values[mutationIndex].updateMetadata(&sections.values![rowIndex])
+			}
+		} else {
+			self.mapValues { rowMutation -> TableRowState<RowData> in
+				var rowState = TableRowState<RowData>()
+				rowMutation.apply(toSubrange: &rowState)
+				return rowState
+				}.apply(toSubrange: &sections)
+		}
+		self.updateMetadata(&sections)
+	}
+}
+
 public struct TableScrollPosition {
 	public let indexPath: IndexPath
 	public let position: UITableView.ScrollPosition
@@ -914,6 +947,16 @@ public struct TableScrollPosition {
 	
 	public static func bottom(_ indexPath: IndexPath) -> TableScrollPosition {
 		return TableScrollPosition(indexPath: indexPath, position: .bottom)
+	}
+}
+
+public struct TableRowCommit<RowData> {
+	public let style: UITableViewCell.EditingStyle
+	public let tableRow: TableRow<RowData>
+
+	public init(style: UITableViewCell.EditingStyle, tableRow: TableRow<RowData>) {
+		self.style = style
+		self.tableRow = tableRow
 	}
 }
 

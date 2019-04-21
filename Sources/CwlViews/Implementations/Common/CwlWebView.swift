@@ -26,17 +26,19 @@ public class WebView: Binder, WebViewConvertible {
 		state = .pending(type: type, parameters: parameters, bindings: bindings)
 	}
 
-	public static func scrollEmbedded(type: WKWebView.Type = WKWebView.self, _ bindings: Binding...) -> ScrollView {
-		return ScrollView(
-			.borderType -- .noBorder,
-			.hasVerticalScroller -- true,
-			.hasHorizontalScroller -- true,
-			.autohidesScrollers -- true,
-			.contentView -- ClipView(
-				.documentView -- WebView(type: type, bindings: bindings)
+	#if os(macOS)
+		static func scrollEmbedded(type: WKWebView.Type = WKWebView.self, _ bindings: Binding...) -> ScrollView {
+			return ScrollView(
+				.borderType -- .noBorder,
+				.hasVerticalScroller -- true,
+				.hasHorizontalScroller -- true,
+				.autohidesScrollers -- true,
+				.contentView -- ClipView(
+					.documentView -- WebView(type: type, bindings: bindings)
+				)
 			)
-		)
-	}
+		}
+	#endif
 }
 
 // MARK: - Binder Part 2: Binding
@@ -49,14 +51,12 @@ public extension WebView {
 		case allowsInlineMediaPlayback(Constant<Bool>)
 		case allowsPictureInPictureForMediaPlayback(Constant<Bool>)
 		case applicationNameForUserAgent(Constant<String?>)
-		case dataDetectorTypes(Constant<WKDataDetectorTypes>)
 		case ignoresViewportScaleLimits(Constant<Bool>)
 		case javaScriptCanOpenWindowsAutomatically(Constant<Bool>)
 		case javaScriptEnabled(Constant<Bool>)
 		case mediaTypesRequiringUserActionForPlayback(Constant<WKAudiovisualMediaTypes>)
 		case minimumFontSize(Constant<CGFloat>)
 		case processPool(Constant<WKProcessPool>)
-		case selectionGranularity(Constant<WKSelectionGranularity>)
 		case suppressesIncrementalRendering(Constant<Bool>)
 		case urlSchemeHandlers(Constant<[String: WKURLSchemeHandler]>)
 		case userContentController(Constant<WKUserContentController>)
@@ -67,6 +67,8 @@ public extension WebView {
 		@available(macOS 10.12, *) @available(iOS, unavailable) case userInterfaceDirectionPolicy(Constant<WKUserInterfaceDirectionPolicy>)
 		@available(macOS, unavailable) @available(iOS 9, *) case allowsPictureInPictureMediaPlayback(Constant<Bool>)
 		@available(macOS, unavailable) @available(iOS 11, *) case scrollView(Constant<ScrollView>)
+		@available(macOS, unavailable) @available(iOS 11, *) case dataDetectorTypes(Constant<WKDataDetectorTypes>)
+		@available(macOS, unavailable) @available(iOS 11, *) case selectionGranularity(Constant<WKSelectionGranularity>)
 		
 		//	1. Value bindings may be applied at construction and may subsequently change.
 		case allowsBackForwardNavigationGestures(Dynamic<Bool>)
@@ -474,14 +476,12 @@ public extension BindingName where Binding: WebViewBinding {
 	static var allowsInlineMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsInlineMediaPlayback) }
 	static var allowsPictureInPictureForMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsPictureInPictureForMediaPlayback) }
 	static var applicationNameForUserAgent: WebViewName<Constant<String?>> { return .name(WebView.Binding.applicationNameForUserAgent) }
-	static var dataDetectorTypes: WebViewName<Constant<WebView.WKDataDetectorTypes>> { return .name(WebView.Binding.dataDetectorTypes) }
 	static var ignoresViewportScaleLimits: WebViewName<Constant<Bool>> { return .name(WebView.Binding.ignoresViewportScaleLimits) }
 	static var javaScriptCanOpenWindowsAutomatically: WebViewName<Constant<Bool>> { return .name(WebView.Binding.javaScriptCanOpenWindowsAutomatically) }
 	static var javaScriptEnabled: WebViewName<Constant<Bool>> { return .name(WebView.Binding.javaScriptEnabled) }
 	static var mediaTypesRequiringUserActionForPlayback: WebViewName<Constant<WKAudiovisualMediaTypes>> { return .name(WebView.Binding.mediaTypesRequiringUserActionForPlayback) }
 	static var minimumFontSize: WebViewName<Constant<CGFloat>> { return .name(WebView.Binding.minimumFontSize) }
 	static var processPool: WebViewName<Constant<WKProcessPool>> { return .name(WebView.Binding.processPool) }
-	static var selectionGranularity: WebViewName<Constant<WebView.WKSelectionGranularity>> { return .name(WebView.Binding.selectionGranularity) }
 	static var suppressesIncrementalRendering: WebViewName<Constant<Bool>> { return .name(WebView.Binding.suppressesIncrementalRendering) }
 	static var urlSchemeHandlers: WebViewName<Constant<[String: WKURLSchemeHandler]>> { return .name(WebView.Binding.urlSchemeHandlers) }
 	static var userContentController: WebViewName<Constant<WKUserContentController>> { return .name(WebView.Binding.userContentController) }
@@ -492,6 +492,8 @@ public extension BindingName where Binding: WebViewBinding {
 	@available(macOS 10.12, *) @available(iOS, unavailable) static var userInterfaceDirectionPolicy: WebViewName<Constant<WebView.WKUserInterfaceDirectionPolicy>> { return .name(WebView.Binding.userInterfaceDirectionPolicy) }
 	@available(macOS, unavailable) @available(iOS 9, *) static var allowsPictureInPictureMediaPlayback: WebViewName<Constant<Bool>> { return .name(WebView.Binding.allowsPictureInPictureMediaPlayback) }
 	@available(macOS, unavailable) @available(iOS 11, *) static var scrollView: WebViewName<Constant<ScrollView>> { return .name(WebView.Binding.scrollView) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var dataDetectorTypes: WebViewName<Constant<WebView.WKDataDetectorTypes>> { return .name(WebView.Binding.dataDetectorTypes) }
+	@available(macOS, unavailable) @available(iOS 11, *) static var selectionGranularity: WebViewName<Constant<WebView.WKSelectionGranularity>> { return .name(WebView.Binding.selectionGranularity) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
 	static var allowsBackForwardNavigationGestures: WebViewName<Dynamic<Bool>> { return .name(WebView.Binding.allowsBackForwardNavigationGestures) }

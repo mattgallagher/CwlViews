@@ -9,22 +9,22 @@
 import UIKit
 
 private let doc = DocumentAdapter(document: Document())
-private let viewState = Var(NavViewState())
+private let viewVar = Var(NavViewState())
 
 #if DEBUG
 let docLog = doc.logJson(prefix: "Document changed: ")
-let viewLog = viewState.logJson(prefix: "View-state changed: ")
+let viewLog = viewVar.logJson(prefix: "View-state changed: ")
 #endif
 
 applicationMain {
 	Application(
 		.window -- Window(
-			.rootViewController <-- viewState.map { navState in
+			.rootViewController <-- viewVar.map { navState in
 				navViewController(navState, doc)
 			}
 		),
-		.didEnterBackground --> Input().map { .save }.bind(to: doc),
-		.willEncodeRestorableState -- viewState.storeToArchive(),
-		.didDecodeRestorableState -- viewState.loadFromArchive()
+		.didEnterBackground -- { _ in doc.input.send(Document.Change.save) },
+		.willEncodeRestorableState -- viewVar.storeToArchive(),
+		.didDecodeRestorableState -- viewVar.loadFromArchive()
 	)
 }

@@ -114,10 +114,10 @@ public extension SplitViewController.Preparer {
 		case .willChangeDisplayMode(let x): delegate().addMultiHandler2(x, #selector(UISplitViewControllerDelegate.splitViewController(_:willChangeTo:)))
 		case .dismissedSecondary(let x):
 			dismissedSecondary = dismissedSecondary ?? Input().multicast()
-			dismissedSecondary?.source.bind(to: x)
+			dismissedSecondary?.signal.bind(to: x)
 		case .displayModeButton(let x):
 			displayModeButton = displayModeButton ?? Input().multicast()
-			displayModeButton?.source.bind(to: x)
+			displayModeButton?.signal.bind(to: x)
 		default: break
 		}
 	}

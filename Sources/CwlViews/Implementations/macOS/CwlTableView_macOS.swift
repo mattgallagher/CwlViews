@@ -733,6 +733,21 @@ public extension BindingName where Binding: TableViewBinding {
 			downcast: Binding.tableViewBinding
 		)
 	}
+	static func rowSelected(_ void: Void = ()) -> TableViewName<SignalInput<Binding.RowDataType?>> {
+		return Binding.compositeName(
+			value: { (input: SignalInput<Binding.RowDataType?>) in
+				{ (notification: Notification) -> Void in
+					guard let view = (notification.object as? NSTableView) else { return }
+					let storageType = TableView<Binding.RowDataType>.Preparer.Storage.self
+					guard let storage = view.associatedBinderStorage(subclass: storageType) else { return }
+					let row = storage.rowState.values?.at(view.selectedRow)
+					_ = input.send(value: row)
+				}
+			},
+			binding: TableView.Binding.selectionDidChange,
+			downcast: Binding.tableViewBinding
+		)
+	}
 	static func selectionChanged<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
 		return Binding.compositeName(
 			value: { (input: SignalInput<Value>) in

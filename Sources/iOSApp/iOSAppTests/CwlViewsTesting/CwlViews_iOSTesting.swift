@@ -27,6 +27,7 @@
 //   CwlViewControllerTesting.swift
 //   CwlViewTesting.swift
 
+@testable import iOSApp
 import UIKit
 
 struct BindingParser<AssociatedValue, Binding> {
@@ -42,16 +43,23 @@ enum BindingParserErrors: Error {
 	case unexpectedArgumentType
 }
 
-extension Binder {
-	static func consumeBindings(from possibleBinder: Any) throws -> [Self.Binding] {
-		if let b = possibleBinder as? Self {
-			return b.consumeBindings()
+extension Dynamic {
+	var values: [Value] {
+		switch self {
+		case .constant(let v): return [v]
+		case .dynamic(let s): return s.capture().values
 		}
-		throw BindingParserErrors.unexpectedArgumentType
+	}
+	
+	var signal: Signal<Value> {
+		switch self {
+		case .constant(let f): return Signal.just(f)
+		case .dynamic(let s): return s
+		}
 	}
 }
 
-extension BaseBinding {
+extension Binding {
 	static func value<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
 		var found: AssociatedValue? = nil
 		for b in bindings {
@@ -59,7 +67,7 @@ extension BaseBinding {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				found = v.captureValues().last
+				found = v.values.first
 			}
 		}
 		if let f = found {
@@ -75,7 +83,7 @@ extension BaseBinding {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				found = v.captureValues()
+				found = v.values
 			}
 		}
 		if let f = found {
@@ -107,7 +115,7 @@ extension BaseBinding {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				found = v.signal()
+				found = v.signal
 			}
 		}
 		if let f = found {
@@ -137,7 +145,7 @@ extension BindingParser where Binding == BarButtonItem.Binding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
-	static var barButtonSystemItem: BindingParser<Constant<UIBarButtonItem.SystemItem>, Binding> { return BindingParser<Constant<UIBarButtonItem.SystemItem>, Binding>(parse: { binding -> Optional<Constant<UIBarButtonItem.SystemItem>> in if case .barButtonSystemItem(let x) = binding { return x } else { return nil } }) }
+	static var barButtonSystemItem: BindingParser<Constant<UIBarButtonItem.SystemItem>, Binding> { return BindingParser<Constant<UIBarButtonItem.SystemItem>, Binding>(parse: { binding -> Optional<Constant<UIBarButtonItem.SystemItem>> in if case .systemItem(let x) = binding { return x } else { return nil } }) }
 	static var itemStyle: BindingParser<Dynamic<UIBarButtonItem.Style>, Binding> { return BindingParser<Dynamic<UIBarButtonItem.Style>, Binding>(parse: { binding -> Optional<Dynamic<UIBarButtonItem.Style>> in if case .itemStyle(let x) = binding { return x } else { return nil } }) }
 	static var possibleTitles: BindingParser<Dynamic<Set<String>?>, Binding> { return BindingParser<Dynamic<Set<String>?>, Binding>(parse: { binding -> Optional<Dynamic<Set<String>?>> in if case .possibleTitles(let x) = binding { return x } else { return nil } }) }
 	static var width: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .width(let x) = binding { return x } else { return nil } }) }
@@ -222,17 +230,17 @@ extension BindingParser where Binding == TableViewCell.Binding {
 }
 
 extension TableViewBinding {
-	static func tableStructure<S: Sequence>(in bindings: S) throws -> RangeMutationState<TableSectionState<RowDataType>> where S.Element == TableView<RowDataType>.Binding {
-		var found: RangeMutationState<TableSectionState<RowDataType>>? = nil
+	static func tableStructure<S: Sequence>(in bindings: S) throws -> TableSectionState<RowDataType> where S.Element == TableView<RowDataType>.Binding {
+		var found: TableSectionState<RowDataType>? = nil
 		for b in bindings {
 			if case .tableData(let x) = b {
 				if found != nil {
 					throw BindingParserErrors.multipleMatchesFound
 				}
-				let values = x.captureValues()
-				var sections = RangeMutationState<TableSectionState<RowDataType>>()
+				let values = x.values
+				var sections = TableSectionState<RowDataType>()
 				for v in values {
-					v.apply(to: &sections)
+					v.value.apply(to: &sections)
 				}
 				found = sections
 			}

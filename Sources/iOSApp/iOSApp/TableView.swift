@@ -40,13 +40,13 @@ func tableViewController(_ tableState: TableViewState, _ navState: NavViewState,
 				)
 			},
 			.tableData <-- doc.rowsSignal().tableData(),
-			.didSelectRow --> tableState.selection,
+			.rowSelected() --> tableState.selection,
 			.deselectRow <-- tableState.selection
 				.debounce(interval: .milliseconds(250), context: .main)
 				.map { .animate($0.indexPath) },
 			.isEditing <-- tableState.isEditing.animate(),
-			.commit --> Input()
-				.map { .removeAtIndex($0.row.indexPath.row) }
+			.commit(\.tableRow.indexPath.row) --> Input()
+				.map { .removeAtIndex($0) }
 				.bind(to: doc),
 			.userDidScrollToRow --> Input()
 				.map { $0.indexPath }

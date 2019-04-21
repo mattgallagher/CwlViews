@@ -17,7 +17,7 @@
 //  OF THIS SOFTWARE.
 //
 
-import Foundation
+import UIKit
 
 struct Document: Codable {
 	enum Change { case add, save, removeAtIndex(Int) }
@@ -33,11 +33,16 @@ struct Document: Codable {
 	
 	init() {
 		do {
-			self = try JSONDecoder().decode(Document.self, from: Data(contentsOf: Document.saveUrl()))
+			let url = try Document.saveUrl()
+			if FileManager.default.fileExists(atPath: url.path) {
+				self = try JSONDecoder().decode(Document.self, from: Data(contentsOf: url))
+				return
+			}
 		} catch {
-			lastAddedIndex = 3
-			rows = ["1", "2", "3"]
 		}
+		
+		lastAddedIndex = 3
+		rows = ["1", "2", "3"]
 	}
 	
 	static func saveUrl() throws -> URL {

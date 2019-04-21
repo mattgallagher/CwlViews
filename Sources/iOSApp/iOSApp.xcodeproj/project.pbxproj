@@ -14,9 +14,11 @@
 		C90652AA2269EC02001C8DDB /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652A92269EC02001C8DDB /* DocumentAdapter.swift */; };
 		C90652AC2269EC02001C8DDB /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652AB2269EC02001C8DDB /* Document.swift */; };
 		C90652BD2269EC02001C8DDB /* iOSAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652BC2269EC02001C8DDB /* iOSAppTests.swift */; };
-		C918FCE7226A9CAE002C6308 /* CwlSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCE2226A9CAE002C6308 /* CwlSignal.swift */; };
-		C918FCE8226A9CAE002C6308 /* CwlUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCE3226A9CAE002C6308 /* CwlUtils.swift */; };
-		C918FCED226A9CFA002C6308 /* CwlViews_iOSTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCEC226A9CFA002C6308 /* CwlViews_iOSTesting.swift */; };
+		C918FCFE226AFD12002C6308 /* CwlSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCE2226A9CAE002C6308 /* CwlSignal.swift */; };
+		C918FCFF226AFD12002C6308 /* CwlUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCE3226A9CAE002C6308 /* CwlUtils.swift */; };
+		C918FD00226AFD12002C6308 /* CwlViews_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCF2226AAB6F002C6308 /* CwlViews_iOS.swift */; };
+		C918FD01226AFD12002C6308 /* CwlViewsCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCF1226AAB6F002C6308 /* CwlViewsCore.swift */; };
+		C918FD02226AFE1A002C6308 /* CwlViews_iOSTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCEC226A9CFA002C6308 /* CwlViews_iOSTesting.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,10 +58,19 @@
 		C918FCE2226A9CAE002C6308 /* CwlSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSignal.swift; sourceTree = "<group>"; };
 		C918FCE3226A9CAE002C6308 /* CwlUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlUtils.swift; sourceTree = "<group>"; };
 		C918FCEC226A9CFA002C6308 /* CwlViews_iOSTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViews_iOSTesting.swift; sourceTree = "<group>"; };
+		C918FCF1226AAB6F002C6308 /* CwlViewsCore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewsCore.swift; sourceTree = "<group>"; };
+		C918FCF2226AAB6F002C6308 /* CwlViews_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViews_iOS.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C90652B52269EC02001C8DDB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C918FCF5226AB478002C6308 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -118,6 +129,8 @@
 			children = (
 				C918FCE2226A9CAE002C6308 /* CwlSignal.swift */,
 				C918FCE3226A9CAE002C6308 /* CwlUtils.swift */,
+				C918FCF2226AAB6F002C6308 /* CwlViews_iOS.swift */,
+				C918FCF1226AAB6F002C6308 /* CwlViewsCore.swift */,
 			);
 			path = CwlViews;
 			sourceTree = "<group>";
@@ -138,6 +151,7 @@
 			buildConfigurationList = C90652CA2269EC02001C8DDB /* Build configuration list for PBXNativeTarget "iOSApp" */;
 			buildPhases = (
 				C906528A2269EC02001C8DDB /* Sources */,
+				C918FCF5226AB478002C6308 /* Frameworks */,
 				C906528B2269EC02001C8DDB /* CopyFiles */,
 			);
 			buildRules = (
@@ -220,14 +234,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C918FCFF226AFD12002C6308 /* CwlUtils.swift in Sources */,
+				C918FD00226AFD12002C6308 /* CwlViews_iOS.swift in Sources */,
 				C90652A42269EC02001C8DDB /* NavView.swift in Sources */,
 				C90652A82269EC02001C8DDB /* DetailView.swift in Sources */,
+				C918FD01226AFD12002C6308 /* CwlViewsCore.swift in Sources */,
 				C90652AC2269EC02001C8DDB /* Document.swift in Sources */,
+				C918FCFE226AFD12002C6308 /* CwlSignal.swift in Sources */,
 				C90652A62269EC02001C8DDB /* TableView.swift in Sources */,
 				C90652A22269EC02001C8DDB /* main.swift in Sources */,
-				C918FCE7226A9CAE002C6308 /* CwlSignal.swift in Sources */,
 				C90652AA2269EC02001C8DDB /* DocumentAdapter.swift in Sources */,
-				C918FCE8226A9CAE002C6308 /* CwlUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,7 +251,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C918FCED226A9CFA002C6308 /* CwlViews_iOSTesting.swift in Sources */,
+				C918FD02226AFE1A002C6308 /* CwlViews_iOSTesting.swift in Sources */,
 				C90652BD2269EC02001C8DDB /* iOSAppTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

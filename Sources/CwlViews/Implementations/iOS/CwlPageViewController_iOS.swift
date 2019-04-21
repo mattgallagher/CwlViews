@@ -105,7 +105,7 @@ public extension PageViewController.Preparer {
 		case .pageSpacing(let x): pageSpacing = x.value
 		case .pageChanged(let x):
 			pageChanged = pageChanged ?? Input().multicast()
-			pageChanged?.source.bind(to: x)
+			pageChanged?.signal.bind(to: x)
 		case .willTransitionTo(let x): delegate().addMultiHandler2(x, #selector(UIPageViewControllerDelegate.pageViewController(_:willTransitionTo:)))
 		case .didFinishAnimating(let x): delegate().addMultiHandler4(x, #selector(UIPageViewControllerDelegate.pageViewController(_:didFinishAnimating:previousViewControllers:transitionCompleted:)))
 		case .spineLocationFor(let x): delegate().addSingleHandler2(x, #selector(UIPageViewControllerDelegate.pageViewController(_:spineLocationFor:)))

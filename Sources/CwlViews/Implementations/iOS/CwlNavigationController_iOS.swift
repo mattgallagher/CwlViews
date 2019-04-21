@@ -96,7 +96,7 @@ public extension NavigationController.Preparer {
 		case .didShow(let x): delegate().addMultiHandler3(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))
 		case .poppedToCount(let x):
 			popSignal = popSignal ?? Input().multicast()
-			popSignal?.source.bind(to: x)
+			popSignal?.signal.bind(to: x)
 		case .preferredInterfaceOrientation(let x): delegate().addSingleHandler1(x, #selector(UINavigationControllerDelegate.navigationControllerPreferredInterfaceOrientationForPresentation(_:)))
 		case .supportedInterfaceOrientations(let x): delegate().addSingleHandler1(x, #selector(UINavigationControllerDelegate.navigationControllerSupportedInterfaceOrientations(_:)))
 		case .willShow(let x): delegate().addMultiHandler3(x, #selector(UINavigationControllerDelegate.navigationController(_:willShow:animated:)))

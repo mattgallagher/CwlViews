@@ -92,6 +92,7 @@
 				C90652A02269EC02001C8DDB /* iOSApp */,
 				C90652BB2269EC02001C8DDB /* iOSAppTests */,
 				C906528E2269EC02001C8DDB /* Products */,
+				C9E37BCE226D53A600680F0C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -174,6 +175,13 @@
 				C9E37BB1226C8AEA00680F0C /* Services.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		C9E37BCE226D53A600680F0C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -378,7 +386,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG DEBUG_LOGGING";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

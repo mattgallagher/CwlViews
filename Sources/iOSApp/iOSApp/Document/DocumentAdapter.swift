@@ -14,7 +14,9 @@ extension Adapter where State == ModelState<Document, Document.Action, Document.
 		self.init(adapterState: ModelState(
 			async: true,
 			initial: document,
-			resumer: { model -> Document.Change? in .reload },
+			resumer: { model -> Document.Change? in
+				.reload
+			},
 			reducer: { model, message, feedback -> Document.Change? in try? model.apply(message) }
 		))
 	}

@@ -62,7 +62,7 @@ public extension Adapter {
 	func slice<Wrapped, Processed, M, N>(resume: N? = nil, _ processor: @escaping (Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
 		let s: Signal<State.Output>
 		if let r = resume {
-			s = combinedSignal.compactMapLatestActivation(context: executionContext) { ($0.state, r) }
+			s = combinedSignal.compactMapActivation(context: executionContext) { ($0.state, r) }
 		} else {
 			s = combinedSignal
 		}
@@ -83,7 +83,7 @@ public extension Adapter {
 	func slice<Value, Wrapped, Processed, M, N>(initial: Value, resume: N? = nil, _ processor: @escaping (inout Value, Wrapped, N) throws -> Signal<Processed>.Next) -> Signal<Processed> where ModelState<Wrapped, M, N> == State {
 		let s: Signal<State.Output>
 		if let r = resume {
-			s = combinedSignal.compactMapLatestActivation(context: executionContext) { ($0.state, r) }
+			s = combinedSignal.compactMapActivation(context: executionContext) { ($0.state, r) }
 		} else {
 			s = combinedSignal
 		}

@@ -129,14 +129,8 @@
 		C93C7E33220F0534000484E4 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93C7E32220F0534000484E4 /* AlertView.swift */; };
 		C93E06D5220E76D30028DCB2 /* CatalogTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93E06D4220E76D30028DCB2 /* CatalogTable.swift */; };
 		C93FBC132160FF2300DFCF0E /* CwlSignal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; };
-		C93FBC682161059D00DFCF0E /* CwlSignal.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C93FBC6B216105DB00DFCF0E /* CwlUtils.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C93FBC6C216105EF00DFCF0E /* CwlUtils.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C93FBC6E2161061600DFCF0E /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC642161055700DFCF0E /* CwlUtils.framework */; };
 		C94853CF1DC4E306009CC145 /* CwlApplication_macOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */; };
-		C94D2C0C2191BD1300B6D53B /* CwlViews.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; };
-		C94D2C0E2191BD2F00B6D53B /* CwlSignal.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C94D2C0F2191BD3500B6D53B /* CwlViews.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C952BB341F3DCAE200B61DF1 /* CwlLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD9A2D1ECFDC9E002170D9 /* CwlLayout.swift */; };
 		C95FABC221D49841007CCE78 /* CwlBinderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95FABC121D49841007CCE78 /* CwlBinderDelegate.swift */; };
 		C95FABC421D49AA3007CCE78 /* CwlBinderBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95FABC321D49AA3007CCE78 /* CwlBinderBase.swift */; };
@@ -262,7 +256,6 @@
 		C9C30216222529D8005B0FCD /* LayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C30215222529D8005B0FCD /* LayersView.swift */; };
 		C9C30218222529E5005B0FCD /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C30217222529E5005B0FCD /* WebView.swift */; };
 		C9C868611FEE83D200865A60 /* CwlTreeMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C8685F1FEE83D200865A60 /* CwlTreeMutation.swift */; };
-		C9CCD8B12181D75E00443079 /* CwlViews.framework in Copy frameworks */ = {isa = PBXBuildFile; fileRef = C9B27E651E51CA9700265580 /* CwlViews.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C9E4CEF6220C390B00D7165D /* SplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E4CEF4220C38E200D7165D /* SplitView.swift */; };
 		C9E4CEF9220C39D900D7165D /* TabbedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E4CEF7220C395000D7165D /* TabbedView.swift */; };
 		C9E50BA8224EDF6E004E3D4E /* CwlTabViewItem_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E50BA7224EDF6E004E3D4E /* CwlTabViewItem_macOS.swift */; };
@@ -301,13 +294,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = C90652B82269EC02001C8DDB;
 			remoteInfo = iOSAppTests;
-		};
-		C9216984218D5EA600396AB0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C9B27E7F1E51CAD100265580;
-			remoteInfo = CwlViewsHarness_iOS;
 		};
 		C921699C218D5FB700396AB0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -358,13 +344,6 @@
 			remoteGlobalIDString = C9B27E641E51CA9700265580;
 			remoteInfo = CwlViews;
 		};
-		C9B27EA21E51D2E200265580 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C9B27E641E51CA9700265580;
-			remoteInfo = CwlViews_iOS;
-		};
 		C9E4DB3B21624CDB00BD4A66 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C93FBC002160FCFF00DFCF0E /* CwlSignal.xcodeproj */;
@@ -373,35 +352,6 @@
 			remoteInfo = CwlSignalConcat;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		C948540B1DC4E4F7009CC145 /* Copy Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				C94D2C0F2191BD3500B6D53B /* CwlViews.framework in Copy Frameworks */,
-				C94D2C0E2191BD2F00B6D53B /* CwlSignal.framework in Copy Frameworks */,
-				C93FBC6C216105EF00DFCF0E /* CwlUtils.framework in Copy Frameworks */,
-			);
-			name = "Copy Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C9B27EA41E51D2FE00265580 /* Copy frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				C9CCD8B12181D75E00443079 /* CwlViews.framework in Copy frameworks */,
-				C93FBC682161059D00DFCF0E /* CwlSignal.framework in Copy frameworks */,
-				C93FBC6B216105DB00DFCF0E /* CwlUtils.framework in Copy frameworks */,
-			);
-			name = "Copy frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
@@ -533,7 +483,6 @@
 		C94853C91DC4E306009CC145 /* CwlViewsTests_macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViewsTests_macOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C94853CE1DC4E306009CC145 /* CwlApplication_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlApplication_macOSTests.swift; sourceTree = "<group>"; };
 		C94853D01DC4E306009CC145 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_macOSTestingSandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C948540E1DC4E8E1009CC145 /* CwlWindow_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlWindow_macOS.swift; sourceTree = "<group>"; };
 		C94854151DC59DFC009CC145 /* CwlView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlView_macOS.swift; sourceTree = "<group>"; };
 		C95193C81E8913CC00ED86D4 /* CwlTableView_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableView_iOS.swift; sourceTree = "<group>"; };
@@ -614,7 +563,6 @@
 		C9B27E651E51CA9700265580 /* CwlViews.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlViews.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9B27E6D1E51CA9700265580 /* CwlViewsTests_iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlViewsTests_iOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9B27E741E51CA9700265580 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C9B27E801E51CAD100265580 /* CwlViews_iOSTestingSandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CwlViews_iOSTestingSandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9B38DB11DD0087900913019 /* CwlScrollView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlScrollView_macOS.swift; sourceTree = "<group>"; };
 		C9B38DB71DD0160A00913019 /* CwlTableCellView_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableCellView_macOS.swift; sourceTree = "<group>"; };
 		C9B38DB81DD0160A00913019 /* CwlTableColumn_macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlTableColumn_macOS.swift; sourceTree = "<group>"; };
@@ -691,14 +639,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C94853ED1DC4E4EA009CC145 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C94D2C0C2191BD1300B6D53B /* CwlViews.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C9B02DEB2197A2EB00527843 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -721,13 +661,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9216983218D5A6300396AB0 /* CwlViews.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C9B27E7D1E51CAD100265580 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -890,10 +823,8 @@
 			children = (
 				C9B27E651E51CA9700265580 /* CwlViews.framework */,
 				C9B27E6D1E51CA9700265580 /* CwlViewsTests_iOS.xctest */,
-				C9B27E801E51CAD100265580 /* CwlViews_iOSTestingSandbox.app */,
 				C9B705E820686CBD00B4CD29 /* CwlViewsTesting.framework */,
 				C94853C91DC4E306009CC145 /* CwlViewsTests_macOS.xctest */,
-				C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */,
 				C921698A218D5F0200396AB0 /* CwlViewsUnitTestHarness_iOS.app */,
 				C9B02DEE2197A2EB00527843 /* CwlViewsUnitTestHarness_macOS.app */,
 				C9F9A32121DEF5A400026DC1 /* CwlViewsCatalog_macOS.app */,
@@ -1392,24 +1323,6 @@
 			productReference = C94853C91DC4E306009CC145 /* CwlViewsTests_macOS.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		C94853EF1DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C94854051DC4E4EA009CC145 /* Build configuration list for PBXNativeTarget "CwlViews_macOSTestingSandbox" */;
-			buildPhases = (
-				C94853EC1DC4E4EA009CC145 /* Sources */,
-				C94853ED1DC4E4EA009CC145 /* Frameworks */,
-				C94853EE1DC4E4EA009CC145 /* Resources */,
-				C948540B1DC4E4F7009CC145 /* Copy Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = CwlViews_macOSTestingSandbox;
-			productName = CwlViewsHarness;
-			productReference = C94853F01DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox.app */;
-			productType = "com.apple.product-type.application";
-		};
 		C9B02DED2197A2EB00527843 /* CwlViewsUnitTestHarness_macOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C9B02DF92197A2EC00527843 /* Build configuration list for PBXNativeTarget "CwlViewsUnitTestHarness_macOS" */;
@@ -1454,32 +1367,12 @@
 			buildRules = (
 			);
 			dependencies = (
-				C9216985218D5EA600396AB0 /* PBXTargetDependency */,
 				C921699D218D5FB700396AB0 /* PBXTargetDependency */,
 			);
 			name = CwlViewsTests_iOS;
 			productName = CwlViews_iOSTests;
 			productReference = C9B27E6D1E51CA9700265580 /* CwlViewsTests_iOS.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		C9B27E7F1E51CAD100265580 /* CwlViews_iOSTestingSandbox */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C9B27E9A1E51CAD100265580 /* Build configuration list for PBXNativeTarget "CwlViews_iOSTestingSandbox" */;
-			buildPhases = (
-				C9B27E7C1E51CAD100265580 /* Sources */,
-				C9B27E7D1E51CAD100265580 /* Frameworks */,
-				C9B27E7E1E51CAD100265580 /* Resources */,
-				C9B27EA41E51D2FE00265580 /* Copy frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C9B27EA31E51D2E200265580 /* PBXTargetDependency */,
-			);
-			name = CwlViews_iOSTestingSandbox;
-			productName = CwlViewsHarness_iOS;
-			productReference = C9B27E801E51CAD100265580 /* CwlViews_iOSTestingSandbox.app */;
-			productType = "com.apple.product-type.application";
 		};
 		C9B705E720686CBD00B4CD29 /* CwlViewsTesting */ = {
 			isa = PBXNativeTarget;
@@ -1553,10 +1446,6 @@
 						ProvisioningStyle = Manual;
 						TestTargetID = C9B02DED2197A2EB00527843;
 					};
-					C94853EF1DC4E4EA009CC145 = {
-						CreatedOnToolsVersion = 8.1;
-						ProvisioningStyle = Manual;
-					};
 					C9A3803F1EFF9C0B00BFF2E5 = {
 						CreatedOnToolsVersion = 9.0;
 					};
@@ -1573,11 +1462,6 @@
 						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 						TestTargetID = C9216989218D5F0200396AB0;
-					};
-					C9B27E7F1E51CAD100265580 = {
-						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0920;
-						ProvisioningStyle = Manual;
 					};
 					C9B705E720686CBD00B4CD29 = {
 						CreatedOnToolsVersion = 9.2;
@@ -1602,10 +1486,9 @@
 			};
 			buildConfigurationList = C94853BA1DC4E306009CC145 /* Build configuration list for PBXProject "CwlViews" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 			);
@@ -1632,8 +1515,6 @@
 				C9F9A32021DEF5A400026DC1 /* CwlViewsCatalog_macOS */,
 				C9216989218D5F0200396AB0 /* CwlViewsUnitTestHarness_iOS */,
 				C9B02DED2197A2EB00527843 /* CwlViewsUnitTestHarness_macOS */,
-				C9B27E7F1E51CAD100265580 /* CwlViews_iOSTestingSandbox */,
-				C94853EF1DC4E4EA009CC145 /* CwlViews_macOSTestingSandbox */,
 				C9A3803F1EFF9C0B00BFF2E5 /* CwlViewsConcat */,
 			);
 		};
@@ -1701,25 +1582,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C94853EE1DC4E4EA009CC145 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C9B02DEC2197A2EB00527843 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				C9B02DF32197A2EC00527843 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C9B27E7E1E51CAD100265580 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1784,13 +1651,6 @@
 				C94853CF1DC4E306009CC145 /* CwlApplication_macOSTests.swift in Sources */,
 				C9F0AC6B223635420051DD43 /* CwlUnanticipatedErrorTests.swift in Sources */,
 				C934D7C721F4624700BA719E /* CwlTestableBinder.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C94853EC1DC4E4EA009CC145 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1935,13 +1795,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C9B27E7C1E51CAD100265580 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C9B705E320686CBD00B4CD29 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2081,11 +1934,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		C9216985218D5EA600396AB0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C9B27E7F1E51CAD100265580 /* CwlViews_iOSTestingSandbox */;
-			targetProxy = C9216984218D5EA600396AB0 /* PBXContainerItemProxy */;
-		};
 		C921699D218D5FB700396AB0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = C9216989218D5F0200396AB0 /* CwlViewsUnitTestHarness_iOS */;
@@ -2100,11 +1948,6 @@
 			isa = PBXTargetDependency;
 			target = C9B27E641E51CA9700265580 /* CwlViews */;
 			targetProxy = C9B02DFE2197B1E000527843 /* PBXContainerItemProxy */;
-		};
-		C9B27EA31E51D2E200265580 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C9B27E641E51CA9700265580 /* CwlViews */;
-			targetProxy = C9B27EA21E51D2E200265580 /* PBXContainerItemProxy */;
 		};
 		C9E4DB3C21624CDB00BD4A66 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2323,44 +2166,6 @@
 			};
 			name = Release;
 		};
-		C94854061DC4E4EA009CC145 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTestingSandbox/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarness;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Debug;
-		};
-		C94854071DC4E4EA009CC145 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_macOSTestingSandbox/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_BUNDLE_IDENTIFIER = com.cocoawithlove.CwlViewsHarness;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Release;
-		};
 		C9A380401EFF9C0B00BFF2E5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2556,48 +2361,6 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CwlViewsUnitTestHarness_iOS.app/CwlViewsUnitTestHarness_iOS";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		C9B27E9B1E51CAD100265580 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTestingSandbox/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		C9B27E9C1E51CAD100265580 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = "$(SRCROOT)/Tests/CwlViews_iOSTestingSandbox/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlViewsHarness-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
-				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -2899,15 +2662,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C94854051DC4E4EA009CC145 /* Build configuration list for PBXNativeTarget "CwlViews_macOSTestingSandbox" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C94854061DC4E4EA009CC145 /* Debug */,
-				C94854071DC4E4EA009CC145 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		C9A380421EFF9C0B00BFF2E5 /* Build configuration list for PBXAggregateTarget "CwlViewsConcat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2940,15 +2694,6 @@
 			buildConfigurations = (
 				C9B27E7A1E51CA9700265580 /* Debug */,
 				C9B27E7B1E51CA9700265580 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C9B27E9A1E51CAD100265580 /* Build configuration list for PBXNativeTarget "CwlViews_iOSTestingSandbox" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C9B27E9B1E51CAD100265580 /* Debug */,
-				C9B27E9C1E51CAD100265580 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

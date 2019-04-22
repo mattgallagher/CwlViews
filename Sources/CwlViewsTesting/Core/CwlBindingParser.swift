@@ -46,6 +46,19 @@ public extension Dynamic {
 	}
 }
 
+extension Binder {
+	static func consume(from possibleBinder: Any) throws -> (type: Self.Preparer.Instance.Type, parameters: Self.Preparer.Parameters, bindings: [Self.Preparer.Binding]) {
+		if let b = possibleBinder as? Self {
+			return b.consume()
+		}
+		throw BindingParserErrors.unexpectedArgumentType
+	}
+	
+	static func consumeBindings(from possibleBinder: Any) throws -> [Self.Preparer.Binding] {
+		return try consume(from: possibleBinder).bindings
+	}
+}
+
 public extension Binding {
 	static func value<AssociatedValue, S: Sequence>(for parser: BindingParser<Dynamic<AssociatedValue>, Self>, in bindings: S) throws -> AssociatedValue where S.Element == Self {
 		var found: AssociatedValue? = nil

@@ -8,12 +8,13 @@
 
 import UIKit
 
-private let doc = DocumentAdapter(document: Document())
+private let services = Services(fileService: FileManager.default)
+private let doc = DocumentAdapter(document: Document(services: services))
 private let viewVar = Var(NavViewState())
 
 #if DEBUG
-let docLog = doc.logJson(prefix: "Document changed: ")
-let viewLog = viewVar.logJson(prefix: "View-state changed: ")
+	let docLog = doc.logJson(keyPath: \.contents, prefix: "Document changed: ")
+	let viewLog = viewVar.logJson(prefix: "View-state changed: ")
 #endif
 
 applicationMain {
@@ -23,7 +24,7 @@ applicationMain {
 				navViewController(navState, doc)
 			}
 		),
-		.didEnterBackground -- { _ in doc.input.send(Document.Change.save) },
+		.didEnterBackground -- { _ in doc.input.send(Document.Action.save) },
 		.willEncodeRestorableState -- viewVar.storeToArchive(),
 		.didDecodeRestorableState -- viewVar.loadFromArchive()
 	)

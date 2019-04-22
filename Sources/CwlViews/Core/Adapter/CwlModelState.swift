@@ -101,11 +101,11 @@ public extension Adapter {
 		}
 	}
 
-	func logJson<Wrapped, M, N>(prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime where State == ModelState<Wrapped, M, N>, Wrapped: Encodable {
+	func logJson<Wrapped, M, N, Value>(keyPath: KeyPath<Wrapped, Value>, prefix: String = "", formatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> Lifetime where State == ModelState<Wrapped, M, N>, Value: Encodable {
 		return combinedSignal.subscribeValues(context: executionContext) { (state, _) in
 			let enc = JSONEncoder()
 			enc.outputFormatting = formatting
-			if let data = try? enc.encode(state.wrapped), let string = String(data: data, encoding: .utf8) {
+			if let data = try? enc.encode(state.wrapped[keyPath: keyPath]), let string = String(data: data, encoding: .utf8) {
 				print("\(prefix)\(string)")
 			}
 		}

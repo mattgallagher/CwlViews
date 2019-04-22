@@ -13,12 +13,15 @@
 		C90652A82269EC02001C8DDB /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652A72269EC02001C8DDB /* DetailView.swift */; };
 		C90652AA2269EC02001C8DDB /* DocumentAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652A92269EC02001C8DDB /* DocumentAdapter.swift */; };
 		C90652AC2269EC02001C8DDB /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652AB2269EC02001C8DDB /* Document.swift */; };
-		C90652BD2269EC02001C8DDB /* iOSAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652BC2269EC02001C8DDB /* iOSAppTests.swift */; };
+		C90652BD2269EC02001C8DDB /* TableViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90652BC2269EC02001C8DDB /* TableViewTests.swift */; };
 		C918FCFE226AFD12002C6308 /* CwlSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCE2226A9CAE002C6308 /* CwlSignal.swift */; };
 		C918FCFF226AFD12002C6308 /* CwlUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCE3226A9CAE002C6308 /* CwlUtils.swift */; };
 		C918FD00226AFD12002C6308 /* CwlViews_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCF2226AAB6F002C6308 /* CwlViews_iOS.swift */; };
 		C918FD01226AFD12002C6308 /* CwlViewsCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCF1226AAB6F002C6308 /* CwlViewsCore.swift */; };
 		C918FD02226AFE1A002C6308 /* CwlViews_iOSTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C918FCEC226A9CFA002C6308 /* CwlViews_iOSTesting.swift */; };
+		C9E37B81226C837900680F0C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C90652B12269EC02001C8DDB /* LaunchScreen.storyboard */; };
+		C9E37BB2226C8AEA00680F0C /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E37BB1226C8AEA00680F0C /* Services.swift */; };
+		C9E37BB4226C8DD300680F0C /* MockServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E37BB3226C8DD300680F0C /* MockServices.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,13 +56,16 @@
 		C90652B22269EC02001C8DDB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C90652B32269EC02001C8DDB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C90652B82269EC02001C8DDB /* iOSAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C90652BC2269EC02001C8DDB /* iOSAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSAppTests.swift; sourceTree = "<group>"; };
+		C90652BC2269EC02001C8DDB /* TableViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewTests.swift; sourceTree = "<group>"; };
 		C90652BE2269EC02001C8DDB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C918FCE2226A9CAE002C6308 /* CwlSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlSignal.swift; sourceTree = "<group>"; };
 		C918FCE3226A9CAE002C6308 /* CwlUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlUtils.swift; sourceTree = "<group>"; };
 		C918FCEC226A9CFA002C6308 /* CwlViews_iOSTesting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViews_iOSTesting.swift; sourceTree = "<group>"; };
 		C918FCF1226AAB6F002C6308 /* CwlViewsCore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViewsCore.swift; sourceTree = "<group>"; };
 		C918FCF2226AAB6F002C6308 /* CwlViews_iOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CwlViews_iOS.swift; sourceTree = "<group>"; };
+		C9E37B7F226C82FF00680F0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C9E37BB1226C8AEA00680F0C /* Services.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
+		C9E37BB3226C8DD300680F0C /* MockServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockServices.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,15 +107,14 @@
 		C90652A02269EC02001C8DDB /* iOSApp */ = {
 			isa = PBXGroup;
 			children = (
+				C9E37B7F226C82FF00680F0C /* Assets.xcassets */,
 				C918FCE0226A9C9F002C6308 /* CwlViews */,
-				C90652A72269EC02001C8DDB /* DetailView.swift */,
-				C90652AB2269EC02001C8DDB /* Document.swift */,
-				C90652A92269EC02001C8DDB /* DocumentAdapter.swift */,
+				C9E37BAE226C8A9A00680F0C /* Document */,
 				C90652B32269EC02001C8DDB /* Info.plist */,
 				C90652B12269EC02001C8DDB /* LaunchScreen.storyboard */,
 				C90652A12269EC02001C8DDB /* main.swift */,
-				C90652A32269EC02001C8DDB /* NavView.swift */,
-				C90652A52269EC02001C8DDB /* TableView.swift */,
+				C9E37BB0226C8AB100680F0C /* Services */,
+				C9E37BAF226C8AA400680F0C /* Views */,
 			);
 			path = iOSApp;
 			sourceTree = "<group>";
@@ -119,7 +124,8 @@
 			children = (
 				C918FCEB226A9CFA002C6308 /* CwlViewsTesting */,
 				C90652BE2269EC02001C8DDB /* Info.plist */,
-				C90652BC2269EC02001C8DDB /* iOSAppTests.swift */,
+				C90652BC2269EC02001C8DDB /* TableViewTests.swift */,
+				C9E37BB3226C8DD300680F0C /* MockServices.swift */,
 			);
 			path = iOSAppTests;
 			sourceTree = "<group>";
@@ -143,6 +149,33 @@
 			path = CwlViewsTesting;
 			sourceTree = "<group>";
 		};
+		C9E37BAE226C8A9A00680F0C /* Document */ = {
+			isa = PBXGroup;
+			children = (
+				C90652AB2269EC02001C8DDB /* Document.swift */,
+				C90652A92269EC02001C8DDB /* DocumentAdapter.swift */,
+			);
+			path = Document;
+			sourceTree = "<group>";
+		};
+		C9E37BAF226C8AA400680F0C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C90652A72269EC02001C8DDB /* DetailView.swift */,
+				C90652A32269EC02001C8DDB /* NavView.swift */,
+				C90652A52269EC02001C8DDB /* TableView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C9E37BB0226C8AB100680F0C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C9E37BB1226C8AEA00680F0C /* Services.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -153,6 +186,7 @@
 				C906528A2269EC02001C8DDB /* Sources */,
 				C918FCF5226AB478002C6308 /* Frameworks */,
 				C906528B2269EC02001C8DDB /* CopyFiles */,
+				C9E37B80226C836A00680F0C /* Resources */,
 			);
 			buildRules = (
 			);
@@ -227,6 +261,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C9E37B80226C836A00680F0C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9E37B81226C837900680F0C /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -237,6 +279,7 @@
 				C918FCFF226AFD12002C6308 /* CwlUtils.swift in Sources */,
 				C918FD00226AFD12002C6308 /* CwlViews_iOS.swift in Sources */,
 				C90652A42269EC02001C8DDB /* NavView.swift in Sources */,
+				C9E37BB2226C8AEA00680F0C /* Services.swift in Sources */,
 				C90652A82269EC02001C8DDB /* DetailView.swift in Sources */,
 				C918FD01226AFD12002C6308 /* CwlViewsCore.swift in Sources */,
 				C90652AC2269EC02001C8DDB /* Document.swift in Sources */,
@@ -252,7 +295,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C918FD02226AFE1A002C6308 /* CwlViews_iOSTesting.swift in Sources */,
-				C90652BD2269EC02001C8DDB /* iOSAppTests.swift in Sources */,
+				C90652BD2269EC02001C8DDB /* TableViewTests.swift in Sources */,
+				C9E37BB4226C8DD300680F0C /* MockServices.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +446,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 37NVGY6YZT;
 				INFOPLIST_FILE = iOSApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -419,6 +464,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 37NVGY6YZT;
 				INFOPLIST_FILE = iOSApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

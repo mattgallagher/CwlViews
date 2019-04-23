@@ -301,7 +301,7 @@ public extension TableView.Preparer {
 			// Create a signal pair that will join the capture to the destination *after* the first `contentSize` change is observed
 			let pair = Signal<SetOrAnimate<TableScrollPosition>>.create()
 			var kvo: NSKeyValueObservation? = instance.observe(\.contentSize) { (i, change) in
-				_ = try? capture.bind(to: pair.input, resend: true)
+				_ = try? capture.bind(to: pair.input, resend: .all)
 			}
 			
 			// Use the output of the pair to apply the effects as normal

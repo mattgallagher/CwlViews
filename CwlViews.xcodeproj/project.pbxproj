@@ -23,7 +23,7 @@
 
 /* Begin PBXBuildFile section */
 		C9033CC221EB5C220077245D /* CwlAdapterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9033CC121EB5C220077245D /* CwlAdapterState.swift */; };
-		C9086A182196502A006DBD43 /* CwlBackingLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */; };
+		C9086A182196502A006DBD43 /* CwlLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlLayerTests.swift */; };
 		C909ACA6225CD036006F855D /* CwlImageView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */; };
 		C909ACAC225E0C51006F855D /* CwlSlider_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */; };
 		C90A04B1220989FB002ABE89 /* CwlImageDrawn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */; };
@@ -116,7 +116,7 @@
 		C921698D218D5F0200396AB0 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C921698C218D5F0200396AB0 /* main.swift */; };
 		C9216994218D5F0200396AB0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9216993218D5F0200396AB0 /* Assets.xcassets */; };
 		C9216997218D5F0200396AB0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C9216995218D5F0200396AB0 /* LaunchScreen.storyboard */; };
-		C92169C0218F083600396AB0 /* CwlBackingLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */; };
+		C92169C0218F083600396AB0 /* CwlLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlLayerTests.swift */; };
 		C9235FFE224897FA004711E4 /* CwlKeyValueObservationLifetime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9235FFD224897FA004711E4 /* CwlKeyValueObservationLifetime.swift */; };
 		C92360042248A718004711E4 /* CwlSegmentedControl_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92360032248A718004711E4 /* CwlSegmentedControl_macOS.swift */; };
 		C92360062248A75D004711E4 /* CwlTabView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92360052248A75D004711E4 /* CwlTabView_macOS.swift */; };
@@ -450,7 +450,7 @@
 		C9216993218D5F0200396AB0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C9216996218D5F0200396AB0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C9216998218D5F0200396AB0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlBackingLayerTests.swift; sourceTree = "<group>"; };
+		C92169BF218F083600396AB0 /* CwlLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlLayerTests.swift; sourceTree = "<group>"; };
 		C9235FFD224897FA004711E4 /* CwlKeyValueObservationLifetime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlKeyValueObservationLifetime.swift; sourceTree = "<group>"; };
 		C92360032248A718004711E4 /* CwlSegmentedControl_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSegmentedControl_macOS.swift; sourceTree = "<group>"; };
 		C92360052248A75D004711E4 /* CwlTabView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTabView_macOS.swift; sourceTree = "<group>"; };
@@ -773,7 +773,7 @@
 		C92169BE218EFD6200396AB0 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				C92169BF218F083600396AB0 /* CwlBackingLayerTests.swift */,
+				C92169BF218F083600396AB0 /* CwlLayerTests.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1647,7 +1647,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9086A182196502A006DBD43 /* CwlBackingLayerTests.swift in Sources */,
+				C9086A182196502A006DBD43 /* CwlLayerTests.swift in Sources */,
 				C94853CF1DC4E306009CC145 /* CwlApplication_macOSTests.swift in Sources */,
 				C9F0AC6B223635420051DD43 /* CwlUnanticipatedErrorTests.swift in Sources */,
 				C934D7C721F4624700BA719E /* CwlTestableBinder.swift in Sources */,
@@ -1788,7 +1788,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C92169C0218F083600396AB0 /* CwlBackingLayerTests.swift in Sources */,
+				C92169C0218F083600396AB0 /* CwlLayerTests.swift in Sources */,
 				C9216978218D55D700396AB0 /* CwlApplication_iOSTests.swift in Sources */,
 				C9F0AC6A223635410051DD43 /* CwlUnanticipatedErrorTests.swift in Sources */,
 				C934D7C621F4624700BA719E /* CwlTestableBinder.swift in Sources */,

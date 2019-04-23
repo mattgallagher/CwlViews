@@ -19,6 +19,7 @@
 
 #if os(macOS)
 
+import Foundation
 import CloudKit
 import simd
 
@@ -346,15 +347,15 @@ extension Application.Preparer {
 		}
 		
 		open func application(_ application: NSApplication, didUpdate userActivity: NSUserActivity) {
-			return singleHandler(application, userActivity)
+			return multiHandler(application, userActivity)
 		}
 		
 		open func application(_ application: NSApplication, willEncodeRestorableState coder: NSCoder) {
-			return singleHandler(application, coder as! NSKeyedArchiver)
+			return multiHandler(application, coder as! NSKeyedArchiver)
 		}
 		
 		open func application(_ application: NSApplication, didDecodeRestorableState coder: NSCoder) {
-			return singleHandler(application, coder as! NSKeyedUnarchiver)
+			return multiHandler(application, coder as! NSKeyedUnarchiver)
 		}
 		
 		open func application(_ application: NSApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
@@ -425,13 +426,9 @@ public extension BindingName where Binding: ApplicationBinding {
 	static var didBecomeActive: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didBecomeActive) }
 	static var didChangeOcclusionState: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didChangeOcclusionState) }
 	static var didChangeScreenParameters: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didChangeScreenParameters) }
-	static var didFailToContinueUserActivity: ApplicationName<(NSApplication, String, Error) -> Void> { return .name(Application.Binding.didFailToContinueUserActivity) }
-	static var didFailToRegisterForRemoteNotifications: ApplicationName<(NSApplication, Error) -> Void> { return .name(Application.Binding.didFailToRegisterForRemoteNotifications) }
 	static var didFinishLaunching: ApplicationName<SignalInput<[AnyHashable: Any]>> { return .name(Application.Binding.didFinishLaunching) }
 	static var didFinishRestoringWindows: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didFinishRestoringWindows) }
 	static var didHide: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didHide) }
-	static var didReceiveRemoteNotification: ApplicationName<(NSApplication, [String: Any]) -> Void> { return .name(Application.Binding.didReceiveRemoteNotification) }
-	static var didRegisterForRemoteNotifications: ApplicationName<(NSApplication, Data) -> Void> { return .name(Application.Binding.didRegisterForRemoteNotifications) }
 	static var didResignActive: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didResignActive) }
 	static var didUnhide: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didUnhide) }
 	static var didUpdate: ApplicationName<SignalInput<Void>> { return .name(Application.Binding.didUpdate) }
@@ -445,6 +442,10 @@ public extension BindingName where Binding: ApplicationBinding {
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 	static var continueUserActivity: ApplicationName<(_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool> { return .name(Application.Binding.continueUserActivity) }
 	static var didDecodeRestorableState: ApplicationName<(_ application: NSApplication, NSCoder) -> Void> { return .name(Application.Binding.didDecodeRestorableState) }
+	static var didFailToContinueUserActivity: ApplicationName<(NSApplication, String, Error) -> Void> { return .name(Application.Binding.didFailToContinueUserActivity) }
+	static var didFailToRegisterForRemoteNotifications: ApplicationName<(NSApplication, Error) -> Void> { return .name(Application.Binding.didFailToRegisterForRemoteNotifications) }
+	static var didReceiveRemoteNotification: ApplicationName<(NSApplication, [String: Any]) -> Void> { return .name(Application.Binding.didReceiveRemoteNotification) }
+	static var didRegisterForRemoteNotifications: ApplicationName<(NSApplication, Data) -> Void> { return .name(Application.Binding.didRegisterForRemoteNotifications) }
 	static var didUpdateUserActivity: ApplicationName<(_ application: NSApplication, NSUserActivity) -> Void> { return .name(Application.Binding.didUpdateUserActivity) }
 	static var openFile: ApplicationName<(_ application: NSApplication, _ filename: String) -> Bool> { return .name(Application.Binding.openFile) }
 	static var openFiles: ApplicationName<(_ application: NSApplication, _ filenames: [String]) -> Void> { return .name(Application.Binding.openFiles) }

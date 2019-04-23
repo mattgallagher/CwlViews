@@ -256,17 +256,27 @@ class CwlApplicationTests: XCTestCase {
 		)
 	}
 	func testDidFailToContinueUserActivity() {
-		Application.testActionBinding(
+		var received: Bool = false
+		let handler = { (_: NSApplication, _: String, _: Error) -> Void in
+			received = true
+		}
+		Application.testDelegateBinding(
 			name: .didFailToContinueUserActivity,
-			trigger: { $0.delegate?.application?($0, didFailToContinueUserActivityWithType: "asdf", error: undeclaredError()) },
-			validate: { (tuple: (userActivityType: String, error: Error)) in return tuple.userActivityType == "asdf" }
+			handler: handler,
+			trigger: { _ = $0.delegate?.application?($0, didFailToContinueUserActivityWithType: "asdf", error: undeclaredError()) },
+			validate: { received }
 		)
 	}
 	func testDidFailToRegisterForRemoteNotifications() {
-		Application.testActionBinding(
+		var received: Bool = false
+		let handler = { (_: NSApplication, _: Error) -> Void in
+			received = true
+		}
+		Application.testDelegateBinding(
 			name: .didFailToRegisterForRemoteNotifications,
-			trigger: { $0.delegate?.application?($0, didFailToRegisterForRemoteNotificationsWithError: undeclaredError()) },
-			validate: { _ in true }
+			handler: handler,
+			trigger: { _ = $0.delegate?.application?($0, didFailToRegisterForRemoteNotificationsWithError: undeclaredError()) },
+			validate: { received }
 		)
 	}
 	func testDidFinishLaunching() {
@@ -291,17 +301,27 @@ class CwlApplicationTests: XCTestCase {
 		)
 	}
 	func testDidReceiveRemoteNotification() {
-		Application.testActionBinding(
+		var received: Bool = false
+		let handler = { (_ application: NSApplication, _ notification: [String: Any]) -> Void in
+			received = true
+		}
+		Application.testDelegateBinding(
 			name: .didReceiveRemoteNotification,
-			trigger: { $0.delegate?.application?($0, didReceiveRemoteNotification: ["asdf": "qwer"]) },
-			validate: { $0 as? [String: String] == ["asdf": "qwer"] }
+			handler: handler,
+			trigger: { _ = $0.delegate?.application?($0, didReceiveRemoteNotification: ["asdf": "asdf"]) },
+			validate: { received }
 		)
 	}
 	func testDidRegisterForRemoteNotifications() {
-		Application.testActionBinding(
+		var received: Bool = false
+		let handler = { (_: NSApplication, _: Data) -> Void in
+			received = true
+		}
+		Application.testDelegateBinding(
 			name: .didRegisterForRemoteNotifications,
-			trigger: { $0.delegate?.application?($0, didRegisterForRemoteNotificationsWithDeviceToken: "asdf".data(using: .utf8)!) },
-			validate: { String(data: $0, encoding: .utf8) == "asdf" }
+			handler: handler,
+			trigger: { _ = $0.delegate?.application?($0, didRegisterForRemoteNotificationsWithDeviceToken: "asdf".data(using: .utf8)!) },
+			validate: { received }
 		)
 	}
 	func testDidResignActive() {
@@ -542,9 +562,9 @@ class CwlApplicationTests: XCTestCase {
 	}
 	func testShouldTerminate() {
 		var received: Bool = false
-		let handler = { (_: NSApplication) -> ApplicationTerminateReply in
+		let handler = { (_: NSApplication) -> NSApplication.TerminateReply in
 			received = true
-			return ApplicationTerminateReply.later(Signal.just(true))
+			return NSApplication.TerminateReply.terminateNow
 		}
 		Application.testDelegateBinding(
 			name: .shouldTerminate,

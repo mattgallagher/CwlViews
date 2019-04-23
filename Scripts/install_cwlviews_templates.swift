@@ -361,6 +361,14 @@ func binderContent() -> String {
 		}
 
 		// MARK: - Binder Part 9: Other supporting types
+		
+		// MARK: - Binder Part 10: Test support
+		extension BindingParser where Binding == Button.Binding {
+			// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
+			// Replace: case ([^\(]+)\((.+)\)$
+			// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+		
+		}
 		"""#
 }
 

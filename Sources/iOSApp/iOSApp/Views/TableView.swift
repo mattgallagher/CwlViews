@@ -68,14 +68,14 @@ func navItem(tableState: TableViewState, doc: DocumentAdapter) -> NavigationItem
 					.action --> Input()
 						.map { _ in !e }
 						.bind(to: tableState.isEditing)
-					)]
-		},
+				)]
+			},
 		.rightBarButtonItems() -- [BarButtonItem(
 			.systemItem -- .add,
 			.action --> Input()
 				.map { _ in .add }
 				.bind(to: doc)
-			)]
+		)]
 	)
 }
 

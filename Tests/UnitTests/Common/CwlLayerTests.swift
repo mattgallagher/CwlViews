@@ -50,16 +50,16 @@ class TestLayer: CALayer {
 	}
 }
 
-extension BackingLayer: TestableBinder {
-	static func constructor(binding: BackingLayer.Binding) -> Preparer.Instance {
+extension Layer: TestableBinder {
+	static func constructor(binding: Layer.Binding) -> Preparer.Instance {
 		let layer = TestLayer()
-		BackingLayer(binding).apply(to: layer)
+		Layer(binding).apply(to: layer)
 		return layer
 	}
 	static var shoudPerformReleaseCheck: Bool { return false }
 }
 
-class CwlBackingLayerTests: XCTestCase {
+class CwlLayerTests: XCTestCase {
 	
 	// MARK: - 0. Static bindings
 	
@@ -67,7 +67,7 @@ class CwlBackingLayerTests: XCTestCase {
 	
 	#if os(macOS)
 		func testAutoresizingMask() {
-			BackingLayer.testValueBinding(
+			Layer.testValueBinding(
 				name: .autoresizingMask,
 				inputs: (.layerMinXMargin, .layerMinYMargin),
 				outputs: ([], .layerMinXMargin, .layerMinYMargin),
@@ -76,7 +76,7 @@ class CwlBackingLayerTests: XCTestCase {
 		}
 	#endif
 	func testAffineTransform() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .affineTransform,
 			inputs: (CGAffineTransform(rotationAngle: 10), CGAffineTransform(scaleX: 2, y: 2)),
 			outputs: (CGAffineTransform.identity, CGAffineTransform(rotationAngle: 10), CGAffineTransform(scaleX: 2, y: 2)),
@@ -84,7 +84,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testAnchorPoint() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .anchorPoint,
 			inputs: (CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)),
 			outputs: (CGPoint(x: 0.5, y: 0.5), CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)),
@@ -92,7 +92,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testAnchorPointZ() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .anchorPointZ,
 			inputs: (1, -1),
 			outputs: (0, 1, -1),
@@ -104,7 +104,7 @@ class CwlBackingLayerTests: XCTestCase {
 		let input = Input<[AnyHashable: Any]?>().subscribeValuesUntilEnd {
 			lastValue = $0 as? [String: String]
 		}
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .actions,
 			inputs: (["a": input], ["b": input]),
 			outputs: (0, 1, 2),
@@ -122,16 +122,16 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testBackgroundColor() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .backgroundColor,
-			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
-			outputs: (nil, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])!, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])!),
+			outputs: (nil, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])!, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])!),
 			getter: { $0.backgroundColor }
 		)
 	}
 	#if os(macOS)
 		func testBackgroundFilters() {
-			BackingLayer.testValueBinding(
+			Layer.testValueBinding(
 				name: .backgroundFilters,
 				inputs: ([CIFilter(name: "CIGaussianBlur")!], [CIFilter(name: "CIBloom")!]),
 				outputs: (nil, "CIGaussianBlur", "CIBloom"),
@@ -140,15 +140,15 @@ class CwlBackingLayerTests: XCTestCase {
 		}
 	#endif
 	func testBorderColor() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .borderColor,
-			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
-			outputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
+			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])!, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])!),
+			outputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1])!, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1])!, CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])!),
 			getter: { $0.borderColor }
 		)
 	}
 	func testBorderWidth() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .borderWidth,
 			inputs: (1, -1),
 			outputs: (0, 1, -1),
@@ -156,7 +156,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testBounds() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .bounds,
 			inputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
 			outputs: (.zero, CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
@@ -165,7 +165,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 	#if os(macOS)
 		func testCompositingFilter() {
-			BackingLayer.testValueBinding(
+			Layer.testValueBinding(
 				name: .compositingFilter,
 				inputs: (CIFilter(name: "CIGaussianBlur"), CIFilter(name: "CIBloom")),
 				outputs: (nil, "CIGaussianBlur", "CIBloom"),
@@ -174,7 +174,7 @@ class CwlBackingLayerTests: XCTestCase {
 		}
 	#endif
 	func testContents() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .contents,
 			inputs: (1, 2),
 			outputs: (nil, 1, 2),
@@ -182,7 +182,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testContentsCenter() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .contentsCenter,
 			inputs: (CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
 			outputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
@@ -190,7 +190,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testContentsGravity() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .contentsGravity,
 			inputs: (.top, .bottom),
 			outputs: (.resize, .top, .bottom),
@@ -198,7 +198,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testContentsRect() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .contentsRect,
 			inputs: (CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
 			outputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 0, y: 0, width: 2, height: 2), CGRect(x: 1, y: 1, width: 3, height: 3)),
@@ -206,7 +206,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testContentsScale() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .contentsScale,
 			inputs: (1, -1),
 			outputs: (1, 1, -1),
@@ -214,7 +214,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testCornerRadius() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .cornerRadius,
 			inputs: (1, -1),
 			outputs: (0, 1, -1),
@@ -222,7 +222,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testIsDoubleSided() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .isDoubleSided,
 			inputs: (true, false),
 			outputs: (true, true, false),
@@ -230,7 +230,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testDrawsAsynchronously() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .drawsAsynchronously,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -238,7 +238,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testEdgeAntialiasingMask() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .edgeAntialiasingMask,
 			inputs: (CAEdgeAntialiasingMask.layerBottomEdge, CAEdgeAntialiasingMask.layerTopEdge),
 			outputs: ([.layerLeftEdge, .layerRightEdge, .layerBottomEdge, .layerTopEdge], CAEdgeAntialiasingMask.layerBottomEdge, CAEdgeAntialiasingMask.layerTopEdge),
@@ -247,7 +247,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 	#if os(macOS)
 		func testFilters() {
-			BackingLayer.testValueBinding(
+			Layer.testValueBinding(
 				name: .filters,
 				inputs: ([CIFilter(name: "CIGaussianBlur")!], [CIFilter(name: "CIBloom")!]),
 				outputs: (nil, "CIGaussianBlur", "CIBloom"),
@@ -256,7 +256,7 @@ class CwlBackingLayerTests: XCTestCase {
 		}
 	#endif
 	func testFrame() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .frame,
 			inputs: (CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
 			outputs: (.zero, CGRect(x: 0, y: 0, width: 1, height: 1), CGRect(x: 1, y: 1, width: 2, height: 2)),
@@ -264,7 +264,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testIsGeometryFlipped() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .isGeometryFlipped,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -272,7 +272,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testIsHidden() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .isHidden,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -280,7 +280,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testMagnificationFilter() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .magnificationFilter,
 			inputs: (CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
 			outputs: (CALayerContentsFilter.linear, CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
@@ -288,7 +288,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testMask() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .mask,
 			inputs: (Layer() as LayerConvertible?, Layer(.frame -- CGRect(x: 0, y: 0, width: 1, height: 1)) as LayerConvertible?),
 			outputs: (nil as CGRect?, CGRect.zero as CGRect?, CGRect(x: 0, y: 0, width: 1, height: 1) as CGRect?),
@@ -296,7 +296,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testMasksToBounds() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .masksToBounds,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -304,7 +304,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testMinificationFilter() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .minificationFilter,
 			inputs: (CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
 			outputs: (CALayerContentsFilter.linear, CALayerContentsFilter.nearest, CALayerContentsFilter.trilinear),
@@ -312,7 +312,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testMinificationFilterBias() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .minificationFilterBias,
 			inputs: (1, -1),
 			outputs: (0, 1, -1),
@@ -320,7 +320,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testName() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .name,
 			inputs: ("a", "b"),
 			outputs: (nil, "a", "b"),
@@ -328,7 +328,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testNeedsDisplayOnBoundsChange() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .needsDisplayOnBoundsChange,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -336,7 +336,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testOpacity() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .opacity,
 			inputs: (0, 0.5),
 			outputs: (1, 0, 0.5),
@@ -344,7 +344,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testIsOpaque() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .isOpaque,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -352,7 +352,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testPosition() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .position,
 			inputs: (CGPoint(x: 0.5, y: 0.5), CGPoint(x: 1, y: 1)),
 			outputs: (CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.5, y: 0.5), CGPoint(x: 1, y: 1)),
@@ -360,7 +360,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testRasterizationScale() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .rasterizationScale,
 			inputs: (3, 2),
 			outputs: (1, 3, 2),
@@ -368,7 +368,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testShadowColor() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .shadowColor,
 			inputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
 			outputs: (CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [1, 0, 0, 1]), CGColor(colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 1, 0, 1])),
@@ -376,7 +376,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testShadowOffset() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .shadowOffset,
 			inputs: (CGSize(width: 0, height: 0), CGSize(width: 1, height: 1)),
 			outputs: (CGSize(width: 0, height: -3), CGSize(width: 0, height: 0), CGSize(width: 1, height: 1)),
@@ -384,7 +384,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testShadowOpacity() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .shadowOpacity,
 			inputs: (1, 0.5),
 			outputs: (0, 1, 0.5),
@@ -392,7 +392,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testShadowPath() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .shadowPath,
 			inputs: (CGPath(rect: .zero, transform: nil) as CGPath?, CGPath(rect: CGRect(x: 0, y: 0, width: 1, height: 1), transform: nil) as CGPath?),
 			outputs: (nil, .zero, CGRect(x: 0, y: 0, width: 1, height: 1)),
@@ -400,7 +400,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testShadowRadius() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .shadowRadius,
 			inputs: (1, 2),
 			outputs: (3, 1, 2),
@@ -408,7 +408,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testShouldRasterize() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .shouldRasterize,
 			inputs: (true, false),
 			outputs: (false, true, false),
@@ -416,7 +416,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testStyle() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .style,
 			inputs: ([:], ["a": "b"]),
 			outputs: (nil, [:], ["a": "b"]),
@@ -424,7 +424,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testSublayers() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .sublayers,
 			inputs: ([Layer()], [Layer(.frame -- CGRect(x: 0, y: 0, width: 1, height: 1))]),
 			outputs: (nil, CGRect.zero, CGRect(x: 0, y: 0, width: 1, height: 1)),
@@ -432,7 +432,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testSublayerTransform() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .sublayerTransform,
 			inputs: (CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
 			outputs: (CATransform3DMakeScale(1, 1, 1), CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
@@ -440,7 +440,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testTransform() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .transform,
 			inputs: (CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
 			outputs: (CATransform3DMakeScale(1, 1, 1), CATransform3DMakeRotation(10, 1, 2, 3), CATransform3DMakeTranslation(1, 2, 3)),
@@ -448,7 +448,7 @@ class CwlBackingLayerTests: XCTestCase {
 		)
 	}
 	func testZPosition() {
-		BackingLayer.testValueBinding(
+		Layer.testValueBinding(
 			name: .zPosition,
 			inputs: (3, 2),
 			outputs: (0, 3, 2),
@@ -459,7 +459,7 @@ class CwlBackingLayerTests: XCTestCase {
 	// MARK: - 2. Signal bindings
 	
 	func testAddAnimation() {
-		BackingLayer.testSignalBinding(
+		Layer.testSignalBinding(
 			name: .addAnimation,
 			inputs: (AnimationForKey.fade, AnimationForKey.moveIn(from: .left)),
 			outputs: (nil, .fade, .moveIn),
@@ -468,7 +468,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 
 	func testNeedsDisplay() {
-		BackingLayer.testSignalBinding(
+		Layer.testSignalBinding(
 			name: .needsDisplay,
 			inputs: ((), ()),
 			outputs: (0, 1, 2),
@@ -477,7 +477,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 
 	func testNeedsDisplayInRect() {
-		BackingLayer.testSignalBinding(
+		Layer.testSignalBinding(
 			name: .needsDisplayInRect,
 			inputs: (CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
 			outputs: (CGRect.zero, CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
@@ -486,7 +486,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 
 	func testRemoveAllAnimations() {
-		BackingLayer.testSignalBinding(
+		Layer.testSignalBinding(
 			name: .removeAllAnimations,
 			inputs: ((), ()),
 			outputs: (0, 1, 2),
@@ -495,7 +495,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 
 	func testRemoveAnimationForKey() {
-		BackingLayer.testSignalBinding(
+		Layer.testSignalBinding(
 			name: .removeAnimationForKey,
 			inputs: ("a", "b"),
 			outputs: ([], ["a"], ["a", "b"]),
@@ -504,7 +504,7 @@ class CwlBackingLayerTests: XCTestCase {
 	}
 
 	func testScrollRectToVisible() {
-		BackingLayer.testSignalBinding(
+		Layer.testSignalBinding(
 			name: .scrollRectToVisible,
 			inputs: (CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),
 			outputs: (CGRect.zero, CGRect(x: 1, y: 1, width: 1, height: 1), CGRect(x: 2, y: 2, width: 2, height: 2)),

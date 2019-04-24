@@ -22,17 +22,40 @@
 import AppKit
 
 func run() {
-	let templates: Dictionary<String, (URL) throws -> Void> = [
-		"~/Library/Developer/Xcode/Templates/Project Templates/iOS/Application/CwlViews Application.xctemplate": installIosAppTemplate,
-		"~/Library/Developer/Xcode/Templates/Project Templates/Mac/Application/CwlViews Application.xctemplate": installMacAppTemplate,
-		"~/Library/Developer/Xcode/Templates/File Templates/Source/CwlViewsBinder.xctemplate": installCwlViewsTemplate,
+	guard let libraryDirectory = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first else {
+		fatalError("Unable to locate user library directory.")
+	}
+	let templates: Dictionary<URL, (URL, URL) throws -> Void> = [
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/iOS/Application/CwlViews Application Unit Tests.xctemplate"): installIosAppTestsTemplate,
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/Mac/Application/CwlViews Application Unit Tests.xctemplate"): installMacAppTestsTemplate,
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/iOS/Application/CwlViews Application.xctemplate"): installIosAppTemplate,
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/Mac/Application/CwlViews Application.xctemplate"): installMacAppTemplate,
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/File Templates/Source/CwlViewsBinder.xctemplate"): installCwlViewsTemplate
 	]
 
 	do {
-		for (destinationDirPath, installFunction) in templates {
-			// Expand the tilde
-			let destinationUrl = URL(fileURLWithPath: NSString(string: destinationDirPath).expandingTildeInPath)
-			
+		let temporaryLocation = try FileManager.default.url(
+			for: .itemReplacementDirectory,
+			in: .userDomainMask,
+			appropriateFor: libraryDirectory,
+			create: true
+		)
+		_ = launch("/usr/bin/xcodebuild", [
+			"-project",
+			"../CwlViews.xcodeproj",
+			"-scheme",
+			"CwlViewsConcat",
+			"-sdk",
+			"macosx",
+			"build",
+			"-derivedDataPath",
+			temporaryLocation.path,
+			"-configuration",
+			"Debug"
+		])
+		let cwlViewsProducts = temporaryLocation.appendingPathComponent("Build/Products/Debug/Concat_internal")
+
+		for (destinationUrl, installFunction) in templates {
 			// Create the parent directory, if necessary
 			try FileManager.default.createDirectory(at: destinationUrl.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 			
@@ -41,19 +64,35 @@ func run() {
 			// If the destination already exists, move it to the Trash
 			if FileManager.default.fileExists(atPath: destinationUrl.path) {
 				try removeDirectory(url: destinationUrl)
-				display = "Template at location:\n   \(destinationUrl.path)\nupdated successfully. Previous item has been moved to Trash."
+				display = "Installing template at location:\n   \(destinationUrl.path)\nPrevious item has been moved to Trash."
 			} else {
-				display = "Template installed at location:\n   \(destinationUrl.path)"
+				display = "Installing template at location:\n   \(destinationUrl.path)"
 			}
 			
 			// Create the destination director and install the template
-			try FileManager.default.createDirectory(at: destinationUrl, withIntermediateDirectories: false)
-			try installFunction(destinationUrl)
 			print(display)
+			try FileManager.default.createDirectory(at: destinationUrl, withIntermediateDirectories: false)
+			try installFunction(destinationUrl, cwlViewsProducts)
 		}
+		print("Completed successfully.")
 	} catch {
 		print("Failed with error: \(error)")
 	}
+}
+
+func launch(_ command: String, _ arguments: [String], directory: URL? = nil) -> String? {
+	print("Running command \(command) with arguments \(arguments)")
+	
+	let proc = Process()
+	proc.launchPath = command
+	proc.arguments = arguments
+	_ = directory.map { proc.currentDirectoryPath = $0.path }
+	let pipe = Pipe()
+	proc.standardOutput = pipe
+	proc.launch()
+	let result = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+	proc.waitUntilExit()
+	return proc.terminationStatus != 0 ? nil : result
 }
 
 func removeDirectory(url: URL) throws {
@@ -67,43 +106,41 @@ func removeDirectory(url: URL) throws {
 	}
 }
 
-func installIosAppTemplate(_ url: URL) throws {
-	try templateIconPng().write(to: url.appendingPathComponent("TemplateIcon.png"))
-	try templateIconPngAt2x().write(to: url.appendingPathComponent("TemplateIcon@2x.png"))
-	try PropertyListSerialization.data(fromPropertyList: iOSProjectTemplateInfo(), format: .xml, options: 0).write(to: url.appendingPathComponent("TemplateInfo.plist"))
-	try iOSLaunchScreenStoryboard().data(using: .utf8)!.write(to: url.appendingPathComponent("LaunchScreen.storyboard"))
+func installIosAppTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try templateIconPng().write(to: destination.appendingPathComponent("TemplateIcon.png"))
+	try templateIconPngAt2x().write(to: destination.appendingPathComponent("TemplateIcon@2x.png"))
+	try FileManager.default.createDirectory(at: destination.appendingPathComponent("Images.xcassets"), withIntermediateDirectories: true, attributes: nil)
+	try contentsJson().data(using: .utf8)!.write(to: destination.appendingPathComponent("Images.xcassets/Contents.json"))
+	try PropertyListSerialization.data(fromPropertyList: iOSProjectTemplateInfo(cwlViewsProducts), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
+	try iOSLaunchScreenStoryboard().data(using: .utf8)!.write(to: destination.appendingPathComponent("LaunchScreen.storyboard"))
 }
 
-func installMacAppTemplate(_ url: URL) throws {
-	try templateIconPng().write(to: url.appendingPathComponent("TemplateIcon.png"))
-	try templateIconPngAt2x().write(to: url.appendingPathComponent("TemplateIcon@2x.png"))
-	try PropertyListSerialization.data(fromPropertyList: macProjectTemplateInfo(), format: .xml, options: 0).write(to: url.appendingPathComponent("TemplateInfo.plist"))
+func installIosAppTestsTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try PropertyListSerialization.data(fromPropertyList: testTemplateInfo(cwlViewsProducts, .iOS), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
 }
 
-func installCwlViewsTemplate(_ url: URL) throws {
-	try templateIconPng().write(to: url.appendingPathComponent("TemplateIcon.png"))
-	try templateIconPngAt2x().write(to: url.appendingPathComponent("TemplateIcon@2x.png"))
-	try PropertyListSerialization.data(fromPropertyList: binderTemplateInfo(), format: .xml, options: 0).write(to: url.appendingPathComponent("TemplateInfo.plist"))
-	try FileManager.default.createDirectory(at: url.appendingPathComponent("Swift"), withIntermediateDirectories: false, attributes: nil)
-	try binderContent().data(using: .utf8)!.write(to: url.appendingPathComponent("Swift").appendingPathComponent("___FILEBASENAME___.swift"))
+func installMacAppTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try templateIconPng().write(to: destination.appendingPathComponent("TemplateIcon.png"))
+	try templateIconPngAt2x().write(to: destination.appendingPathComponent("TemplateIcon@2x.png"))
+	try PropertyListSerialization.data(fromPropertyList: macProjectTemplateInfo(), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
 }
 
-enum Platform {
+func installMacAppTestsTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try PropertyListSerialization.data(fromPropertyList: testTemplateInfo(cwlViewsProducts, .macOS), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
+}
+
+func installCwlViewsTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try templateIconPng().write(to: destination.appendingPathComponent("TemplateIcon.png"))
+	try templateIconPngAt2x().write(to: destination.appendingPathComponent("TemplateIcon@2x.png"))
+	try PropertyListSerialization.data(fromPropertyList: binderTemplateInfo(), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
+	try FileManager.default.createDirectory(at: destination.appendingPathComponent("Swift"), withIntermediateDirectories: false, attributes: nil)
+	try binderContent().data(using: .utf8)!.write(to: destination.appendingPathComponent("Swift").appendingPathComponent("___FILEBASENAME___.swift"))
+}
+
+enum Platform: String {
 	case macOS
 	case iOS
 	
-	var oldName: String {
-		switch self {
-		case .macOS: return "Mac"
-		case .iOS: return "iOS"
-		}
-	}
-	var newName: String {
-		switch self {
-		case .macOS: return "macOS"
-		case .iOS: return "iOS"
-		}
-	}
 	var isIos: Bool {
 		switch self {
 		case .macOS: return false
@@ -461,7 +498,7 @@ func binderTemplateInfo() -> [String: Any] {
 	] as [String: Any]
 }
 
-func macProjectTemplateInfo() -> [String: Any] {
+func macProjectTemplateInfo() throws -> [String: Any] {
 	return [
 		"Identifier": "com.cocoawithlove.views-app-macOS",
 		"Kind": "Xcode.Xcode3.ProjectTemplateUnitKind",
@@ -515,26 +552,49 @@ func macProjectTemplateInfo() -> [String: Any] {
 	] as [String: Any]
 }
 
-func iOSProjectTemplateInfo() -> [String: Any] {
+func testTemplateInfo(_ cwlViewsProducts: URL, _ platform: Platform) throws -> [String: Any] {
+	return [
+		"Kind": "Xcode.Xcode3.ProjectTemplateUnitKind",
+		"Identifier": "com.cocoawithlove.views-unit.cocoa\(platform.isIos ? "Touch" : "")ApplicationUnitTestBundle",
+		"Ancestors": [
+			"com.apple.dt.unit.\(platform.isIos ? "ios" : "osx")UnitTestBundleBase"
+		] as [Any],
+		"Targets": [
+			[
+				"TargetIdentifier": "com.apple.dt.cocoa\(platform.isIos ? "Touch" : "")ApplicationUnitTestBundleTarget",
+				"TargetIdentifierToBeTested": "com.apple.dt.cocoa\(platform.isIos ? "Touch" : "")ApplicationTarget",
+			] as [String: Any],
+		] as [Any],
+		"Nodes": [
+			"CwlViews_\(platform.rawValue)Testing.swift:comments",
+			"CwlViews_\(platform.rawValue)Testing.swift:imports:importProject",
+			"CwlViews_\(platform.rawValue)Testing.swift:content",
+			"MockServices.swift:comments",
+			"MockServices.swift:imports:importProject",
+			"MockServices.swift:content",
+			"TableViewTests.swift:comments",
+			"TableViewTests.swift:imports:importProject",
+			"TableViewTests.swift:content"
+		] as [Any],
+		"Definitions": [
+			"*:imports:importProject": "@testable import ___VARIABLE_productName:identifier___",
+			"CwlViews_\(platform.rawValue)Testing.swift:content": try cwlViewsTesting(cwlViewsProducts, platform),
+			"MockServices.swift:content": mockServices(),
+			"TableViewTests.swift:content": iOSTableViewTests()
+		] as [String: Any]
+	] as [String: Any]
+}
+
+func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 	return [
 		"Identifier": "com.cocoawithlove.views-app-iOS",
 		"Kind": "Xcode.Xcode3.ProjectTemplateUnitKind",
 		"Targets": projectTargets(.iOS),
 		"SortOrder": 1 as NSNumber,
-		"Project": [
-			"Configurations": [
-				"Release": [
-					"VALIDATE_PRODUCT": "YES"
-				] as [String: Any]
-			] as [String: Any],
-			"SDK": "iphoneos",
-			"SharedSettings": [
-				"IPHONEOS_DEPLOYMENT_TARGET": "latest_iphoneos",
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer"
-			] as [String: Any]
-		] as [String: Any],
 		"Ancestors": [
-			"com.apple.dt.unit.bundleBase"
+			"com.apple.dt.unit.applicationBase",
+			"com.apple.dt.unit.iosBase",
+			"com.apple.dt.unit.languageChoice"
 		] as [Any],
 		"Options": projectOptions(.iOS),
 		"Description": "Creates a Cocoa application using the CwlViews framework.",
@@ -543,36 +603,38 @@ func iOSProjectTemplateInfo() -> [String: Any] {
 			"Info.plist:iPhone",
 			"Info.plist:UIRequiredDeviceCapabilities:base",
 			"Info.plist:LaunchScreen",
+			"Assets.xcassets",
 			"main.swift:comments",
-			"main.swift:imports:importCwlViews",
+			"main.swift:imports:importUIKit",
 			"main.swift:content",
-			"NavView.swift:comments",
-			"NavView.swift:imports:importCwlViews",
-			"NavView.swift:content",
-			"TableView.swift:comments",
-			"TableView.swift:imports:importCwlViews",
-			"TableView.swift:content",
-			"DetailView.swift:comments",
-			"DetailView.swift:imports:importCwlViews",
-			"DetailView.swift:content",
-			"DocumentAdapter.swift:comments",
-			"DocumentAdapter.swift:imports:importCwlViews",
-			"DocumentAdapter.swift:content",
+			"Services.swift:comments",
+			"Services.swift:imports:importFoundation",
+			"Services.swift:content",
 			"Document.swift:comments",
 			"Document.swift:imports:importFoundation",
 			"Document.swift:content",
-			"CwlUtils.framework",
-			"CwlSignal.framework",
-			"CwlViews.framework"
+			"DocumentAdapter.swift:comments",
+			"DocumentAdapter.swift:imports:importUIKit",
+			"DocumentAdapter.swift:content",
+			"NavView.swift:comments",
+			"NavView.swift:imports:importUIKit",
+			"NavView.swift:content",
+			"TableView.swift:comments",
+			"TableView.swift:imports:importUIKit",
+			"TableView.swift:content",
+			"DetailView.swift:comments",
+			"DetailView.swift:imports:importUIKit",
+			"DetailView.swift:content",
+			"CwlUtils.swift",
+			"CwlSignal.swift",
+			"CwlViewsCore.swift",
+			"CwlViews_iOS.swift"
 		] as [Any],
 		"Concrete": 1 as NSNumber,
 		"Platforms": [
 			"com.apple.platform.iphoneos"
 		] as [Any],
 		"Definitions": [
-			"CwlUtils.framework": frameworkDefinition("CwlUtils", "com.apple.dt.cocoaTouchApplicationTarget"),
-			"CwlSignal.framework": frameworkDefinition("CwlSignal", "com.apple.dt.cocoaTouchApplicationTarget"),
-			"CwlViews.framework": frameworkDefinition("CwlViews", "com.apple.dt.cocoaTouchApplicationTarget"),
 			"Base.lproj/LaunchScreen.storyboard": [
 				"TargetIdentifiers": [],
 				"SortOrder": 101 as NSNumber,
@@ -629,20 +691,38 @@ func iOSProjectTemplateInfo() -> [String: Any] {
 				<string>LaunchScreen</string>
 				
 				""",
+			"Assets.xcassets": [
+				"Path": "Images.xcassets",
+				"AssetGeneration": [
+					[
+						"Type": "appicon",
+						"Name": "AppIcon",
+						"Platforms": [
+							"iOS": "true"
+						] as [String: Any]
+					] as [String: Any]
+				] as [Any],
+				"SortOrder": 100,
+			] as [String: Any],
 			"*:imports:importFoundation": "import Foundation",
-			"*:imports:importCwlViews": "import CwlViews",
+			"*:imports:importUIKit": "import UIKit",
 			"main.swift:content": iOSMainContent(),
 			"NavView.swift:content": iOSNavViewContent(),
 			"TableView.swift:content": iOSTableViewContent(),
 			"DetailView.swift:content": iOSDetailViewContent(),
 			"DocumentAdapter.swift:content": documentAdapterContent(),
-			"Document.swift:content": documentContent()
+			"Document.swift:content": documentContent(),
+			"Services.swift:content": servicesContent(),
+			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts),
+			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts),
+			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts),
+			"CwlViews_iOS.swift": try cwlViewsContent(cwlViewsProducts, .iOS)
 		] as [String: Any],
 	] as [String: Any]
 }
 
 func projectOptions(_ platform: Platform) -> [Any] {
-	var result = [
+	return [
 		[
 			"Description": "The implementation language",
 			"Identifier": "languageChoice",
@@ -666,7 +746,7 @@ func projectOptions(_ platform: Platform) -> [Any] {
 					"Components": [
 						[
 							"Name": "___PACKAGENAME___Tests",
-							"Identifier": "com.apple.dt.unit.cocoa\(platform.isIos ? "Touch" : "")ApplicationUnitTestBundle"
+							"Identifier": "com.cocoawithlove.views-unit.cocoa\(platform.isIos ? "Touch" : "")ApplicationUnitTestBundle"
 						] as [String: Any]
 					] as [Any]
 				] as [String: Any]
@@ -697,53 +777,6 @@ func projectOptions(_ platform: Platform) -> [Any] {
 			"Default": "true"
 		] as [String: Any]
 	] as [Any]
-	
-	if platform.isIos {
-		result.append([
-			"Description": "Which device family to create a project for",
-			"Units": [
-				"iPad": [
-					"Nodes": [
-						"Info.plist:UISupportedInterfaceOrientations~iPad"
-					] as [Any],
-					"Project": [
-						"SharedSettings": [
-							"TARGETED_DEVICE_FAMILY": "2"
-						] as [String: Any]
-					] as [String: Any]
-				] as [String: Any],
-				"Universal": [
-					"Nodes": [
-						"Info.plist:UISupportedInterfaceOrientations~iPhone",
-						"Info.plist:UISupportedInterfaceOrientations~iPad"
-					] as [Any],
-					"Definitions": [:],
-					"Project": [
-						"SharedSettings": [
-							"TARGETED_DEVICE_FAMILY": "1,2"
-						] as [String: Any]
-					] as [String: Any]
-				] as [String: Any],
-				"iPhone": [
-					"Nodes": [
-						"Info.plist:UISupportedInterfaceOrientations~iPhone"
-					] as [Any]
-				] as [String: Any]
-			] as [String: Any],
-			"Identifier": "universalDeviceFamily",
-			"Name": "Devices:",
-			"Values": [
-				"Universal",
-				"iPhone",
-				"iPad"
-			] as [Any],
-			"SortOrder": 1 as NSNumber,
-			"Type": "popup",
-			"Default": "Universal"
-		] as [String: Any])
-	}
-	
-	return result
 }
 
 func sharedSettings(_ platform: Platform, name: String) -> [String: Any] {
@@ -762,132 +795,48 @@ func sharedSettings(_ platform: Platform, name: String) -> [String: Any] {
 func projectTargets(_ platform: Platform) -> [Any] {
 	return [
 		[
-			"Dependencies": [
-				"com.cocoawithlove.CwlViews-\(platform.newName)"
-			] as [Any],
-			"BuildPhases": [
-				[
-					"Class": "Sources"
-				] as [String: Any],
-				[
-					"DstSubfolderSpec": 10 as NSNumber,
-					"Class": "CopyFiles"
-				] as [String: Any]
-			] as [Any],
-			"ProductType": "com.apple.product-type.application",
-			"TargetIdentifier":
-				platform.isIos ?
-					"com.apple.dt.cocoaTouchApplicationTarget" :
-					"com.apple.dt.cocoaApplicationTarget",
+			"TargetIdentifier": "com.apple.dt.cocoa\(platform.isIos ? "Touch" : "")ApplicationTarget",
 			"SharedSettings": [
 				"ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
 				"COMBINE_HIDPI_IMAGES": "YES",
-				"LD_RUNPATH_SEARCH_PATHS": "$(inherited) @executable_path/Frameworks"
+				"LD_RUNPATH_SEARCH_PATHS": "$(inherited) @executable_path/Frameworks",
+				"TARGETED_DEVICE_FAMILY": "1,2"
 			] as [String: Any]
-		] as [String: Any],
-		[
-			"TargetType": "Aggregate",
-			"BuildPhases": [
-				[
-					"Class": "ShellScript",
-					"InputFiles": [
-						"$(SRCROOT)/Package.swift"
-					] as [Any],
-					"ShellScript": packageFetchScript(),
-					"OutputFiles": [
-						"$(OBJROOT)/dependencies-state.json"
-					] as [Any],
-					"ShellPath": "/usr/bin/xcrun --sdk macosx swift"
-				] as [String: Any]
-			] as [Any],
-			"Name": "FetchDependencies",
-			"TargetIdentifier": "com.cocoawithlove.fetchdependencies",
-			"SharedSettings": [
-				"PRODUCT_NAME": "$(TARGET_NAME)"
-			] as [String: Any]
-		] as [String: Any],
-		[
-			"Name": "CwlUtils_\(platform.newName)",
-			"Dependencies": [
-				"com.cocoawithlove.CwlViews-\(platform.newName)"
-			] as [Any],
-			"ProductType": "com.apple.product-type.framework",
-			"TargetIdentifier": "com.cocoawithlove.CwlUtils-\(platform.newName)",
-			"SharedSettings": sharedSettings(platform, name: "CwlUtils")
-		] as [String: Any],
-		[
-			"Name": "CwlSignal_\(platform.newName)",
-			"Dependencies": [
-				"com.cocoawithlove.CwlViews-\(platform.newName)"
-			] as [Any],
-			"ProductType": "com.apple.product-type.framework",
-			"TargetIdentifier": "com.cocoawithlove.CwlSignal-\(platform.newName)",
-			"SharedSettings": sharedSettings(platform, name: "CwlSignal")
-		] as [String: Any],
-		[
-			"Name": "CwlViews_\(platform.newName)",
-			"Dependencies": [
-				"com.cocoawithlove.fetchdependencies"
-			] as [Any],
-			"BuildPhases": [
-				[
-					"Class": "ShellScript",
-					"InputFiles": [
-						"$(OBJROOT)/dependencies-state.json"
-					] as [Any],
-					"ShellScript": """
-						if [ "$CARTHAGE" == "YES" ]; then
-							cp -R "$SRCROOT/Carthage/Build/\(platform.oldName)/CwlUtils.framework" "$BUILT_PRODUCTS_DIR/"
-							cp -R "$SRCROOT/Carthage/Build/\(platform.oldName)/CwlSignal.framework" "$BUILT_PRODUCTS_DIR/"
-							cp -R "$SRCROOT/Carthage/Build/\(platform.oldName)/CwlViews.framework" "$BUILT_PRODUCTS_DIR/"
-							exit
-						fi
-						"$DEVELOPER_BIN_DIR/xcodebuild" -project "$OBJROOT/cwl_symlinks/CwlViews/CwlViews.xcodeproj" -target CwlViews_\(platform.newName) -sdk "$SDKROOT" -configuration "$CONFIGURATION" $ACTION SRCROOT="$SRCROOT" SYMROOT="$SYMROOT" OBJROOT="$OBJROOT" ARCHS="$ARCHS" ONLY_ACTIVE_ARCH="$ONLY_ACTIVE_ARCH" BITCODE_GENERATION_MODE="$BITCODE_GENERATION_MODE" MODULE_CACHE_DIR="$MODULE_CACHE_DIR" DSTROOT="$DSTROOT" CACHE_ROOT="$CACHE_ROOT"
-						
-						""",
-					"OutputFiles": [
-						"$(BUILT_PRODUCTS_DIR)/CwlViews.framework/CwlViews"
-					] as [Any],
-					"ShellPath": "/bin/sh"
-				] as [String: Any]
-			] as [Any],
-			"ProductType": "com.apple.product-type.framework",
-			"TargetIdentifier": "com.cocoawithlove.CwlViews-\(platform.newName)",
-			"SharedSettings": sharedSettings(platform, name: "CwlViews")
 		] as [String: Any]
 	] as [Any]
 }
 
 func iOSMainContent() -> String {
 	return """
-		private let doc = DocumentAdapter(document: Document())
-		private let viewState = Var(NavViewState())
-
-		#if DEBUG
-			let docLog = doc.stateSignal.logJson(prefix: "Document changed: ")
-			let viewLog = viewState.logJson(prefix: "View-state changed: ")
-		#endif
-
-		func application(_ viewState: Var<NavViewState>, _ doc: DocumentAdapter) -> Application {
+		func application(_ viewVar: Var<NavViewState>, _ doc: DocumentAdapter) -> Application {
 			return Application(
 				.window -- Window(
-					.rootViewController <-- viewState.map { navState in
+					.rootViewController <-- viewVar.map { navState in
 						navViewController(navState, doc)
 					}
 				),
-				.didEnterBackground --> Input().map { .save }.bind(to: doc),
-				.willEncodeRestorableState -- { $0.encodeLatest(from: viewState) },
-				.didDecodeRestorableState -- { $0.decodeSend(to: viewState) }
+				.didEnterBackground -- { _ in doc.input.send(Document.Action.save) },
+				.willEncodeRestorableState -- viewVar.storeToArchive(),
+				.didDecodeRestorableState -- viewVar.loadFromArchive()
 			)
 		}
 
-		applicationMain { application(viewState, doc) }
+		private let services = Services(fileService: FileManager.default)
+		private let doc = DocumentAdapter(document: Document(services: services))
+		private let viewVar = Var(NavViewState())
+
+		#if DEBUG
+			let docLog = doc.logJson(keyPath: \\.contents, prefix: "Document changed: ")
+			let viewLog = viewVar.logJson(prefix: "View-state changed: ")
+		#endif
+
+		applicationMain { application(viewVar, doc) }
 		"""
 }
 
 func iOSNavViewContent() -> String {
 	return """
-		typealias NavPathElement = MasterOrDetail<TableViewState, DetailViewState>
+		typealias NavPathElement = MasterDetail<TableViewState, DetailViewState>
 		struct NavViewState: CodableContainer {
 			let navStack: StackAdapter<NavPathElement>
 			init () {
@@ -906,7 +855,7 @@ func iOSNavViewContent() -> String {
 						return detailViewController(detailState, doc)
 					}
 				},
-				.poppedToCount --> navState.navStack.poppedToCount,
+				.poppedToCount --> navState.navStack.popToCount(),
 				.navigationBar -- NavigationBar(
 					.barTintColor -- .barTint,
 					.titleTextAttributes -- [.foregroundColor: UIColor.white],
@@ -928,7 +877,7 @@ func iOSTableViewContent() -> String {
 			let isEditing: Var<Bool>
 			let firstRow: Var<IndexPath>
 			let selection: TempVar<TableRow<String>>
-
+			
 			init() {
 				isEditing = Var(false)
 				firstRow = Var(IndexPath(row: 0, section: 0))
@@ -939,11 +888,11 @@ func iOSTableViewContent() -> String {
 
 		func tableViewController(_ tableState: TableViewState, _ navState: NavViewState, _ doc: DocumentAdapter) -> ViewControllerConvertible {
 			return ViewController(
-				.cancelOnClose -- [
+				.lifetimes -- [
 					tableState.selection
 						.compactMap { $0.data }
 						.map { .detail(DetailViewState(row: $0)) }
-						.cancellableBind(to: navState.navStack.pushInput)
+						.cancellableBind(to: navState.navStack.push())
 				],
 				.navigationItem -- navItem(tableState: tableState, doc: doc),
 				.view -- TableView<String>(
@@ -956,17 +905,17 @@ func iOSTableViewContent() -> String {
 						)
 					},
 					.tableData <-- doc.rowsSignal().tableData(),
-					.didSelectRow --> tableState.selection,
+					.rowSelected() --> tableState.selection,
 					.deselectRow <-- tableState.selection
 						.debounce(interval: .milliseconds(250), context: .main)
 						.map { .animate($0.indexPath) },
 					.isEditing <-- tableState.isEditing.animate(),
-					.commit --> Input()
-						.map { .removeAtIndex($0.row.indexPath.row) }
+					.commit(\\.tableRow.indexPath.row) --> Input()
+						.map { .removeAtIndex($0) }
 						.bind(to: doc),
 					.userDidScrollToRow --> Input()
 						.map { $0.indexPath }
-						.bind(to: tableState.firstRow.updatingInput),
+						.bind(to: tableState.firstRow.update()),
 					.scrollToRow <-- tableState.firstRow
 						.map { .set(.none($0)) },
 					.separatorInset -- UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
@@ -977,20 +926,21 @@ func iOSTableViewContent() -> String {
 		func navItem(tableState: TableViewState, doc: DocumentAdapter) -> NavigationItem {
 			return NavigationItem(
 				.title -- .helloWorld,
-				.leftBarButtonItems <-- tableState.isEditing.map { e in
-					[BarButtonItem(
-						.barButtonSystemItem -- e ? .done : .edit,
-						.action --> Input()
-							.map { !e }
-							.bind(to: tableState.isEditing)
-					)]
-				}.animate(),
-				.rightBarButtonItems -- .set([BarButtonItem(
-					.barButtonSystemItem -- .add,
+				.leftBarButtonItems() <-- tableState.isEditing
+					.map { e in
+						[BarButtonItem(
+							.systemItem -- e ? .done : .edit,
+							.action --> Input()
+								.map { _ in !e }
+								.bind(to: tableState.isEditing)
+							)]
+				},
+				.rightBarButtonItems() -- [BarButtonItem(
+					.systemItem -- .add,
 					.action --> Input()
-						.map { .add }
+						.map { _ in .add }
 						.bind(to: doc)
-				)])
+					)]
 			)
 		}
 
@@ -1033,37 +983,124 @@ func iOSDetailViewContent() -> String {
 		"""
 }
 
+func iOSTableViewTests() -> String {
+	return """
+		import XCTest
+		
+		class TableViewTests: XCTestCase {
+			
+			var services: Services!
+			var doc: DocumentAdapter!
+			var navState: NavViewState!
+			var tableState: TableViewState!
+			
+			var viewController: ViewControllerConvertible = ViewController()
+			var bindings: [ViewController.Binding] = []
+			var view: ViewConvertible = View()
+			var tableBindings: [TableView<String>.Binding] = []
+			
+			override func setUp() {
+				services = Services(fileService: MockFileService())
+				doc = DocumentAdapter(document: Document(services: services))
+				navState = NavViewState()
+				tableState = TableViewState()
+
+				viewController = tableViewController(tableState, navState, doc)
+				bindings = try! ViewController.consumeBindings(from: viewController)
+				view = try! ViewController.Binding.value(for: .view, in: bindings)
+				tableBindings = try! TableView<String>.consumeBindings(from: view)
+			}
+			
+			override func tearDown() {
+			}
+			
+			func testInitialTableRows() throws {
+				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
+				XCTAssertEqual(Array(tableState.values?.first?.values ?? []), Document.initialContents().rows)
+			}
+			
+			func testCreateRow() throws {
+				let navigationItem = try ViewController.Binding.value(for: .navigationItem, in: bindings)
+				let navigationItemBindings = try NavigationItem.consumeBindings(from: navigationItem)
+				let rightBarButtonItem = try NavigationItem.Binding.value(for: .rightBarButtonItems, in: navigationItemBindings).value.first!
+				let rightBarButtonBindings = try BarButtonItem.consumeBindings(from: rightBarButtonItem)
+				let targetAction = try BarButtonItem.Binding.argument(for: .action, in: rightBarButtonBindings)
+				
+				switch targetAction {
+				case .singleTarget(let input): input.send(nil)
+				default: fatalError()
+				}
+				
+				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
+				XCTAssertEqual(Array(tableState.values?.first?.values ?? []), Document.initialContents().rows + ["4"])
+			}
+			
+			func testDeleteRow() throws {
+				let commit = try TableView<String>.Binding.argument(for: .commit, in: tableBindings)
+				commit(UITableView(), .delete, TableRow<String>(indexPath: IndexPath(row: 0, section: 0), data: "1"))
+				
+				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
+				var expected = Document.initialContents().rows
+				expected.remove(at: 0)
+				XCTAssertEqual(Array(tableState.values?.first?.values ?? []), expected)
+			}
+		}
+		"""
+}
+
+func mockServices() -> String {
+	return """
+		import Foundation
+		
+		class MockFileService: FileService {
+			enum FileError: Error {
+				case notFound
+			}
+			static let appSupport = URL(fileURLWithPath: "/Application Support/")
+			var files: [URL: Data] = [:]
+			
+			func applicationSupportURL() throws -> URL {
+				return MockFileService.appSupport
+			}
+			
+			func data(contentsOf url: URL) throws -> Data {
+				guard let file = files[url] else { throw FileError.notFound }
+				return file
+			}
+			
+			func writeData(_ data: Data, to url: URL) throws {
+				files[url] = data
+			}
+			
+			func fileExists(at url: URL) -> Bool {
+				return files[url] != nil
+			}
+		}
+		"""
+}
+
 func documentAdapterContent() -> String {
 	return """
-		struct DocumentAdapter: SignalInputInterface {
-			enum Message {
-				case add
-				case removeAtIndex(Int)
-				case save
-			}
-			typealias InputValue = Message
-			
-			let adapter: FilteredAdapter<Message, Document, Document.Notification>
-			var input: SignalInput<Message> { return adapter.pair.input }
-			var stateSignal: Signal<Document> { return adapter.stateSignal }
-			
+		typealias DocumentAdapter = Adapter<ModelState<Document, Document.Action, Document.Change>>
+		extension Adapter where State == ModelState<Document, Document.Action, Document.Change> {
 			init(document: Document) {
-				self.adapter = FilteredAdapter(initialState: document) { (document: inout Document, change: Message) in
-					switch change {
-					case .add: return document.add()
-					case .removeAtIndex(let i): return document.remove(index: i)
-					case .save: return try document.save()
-					}
-				}
+				self.init(adapterState: ModelState(
+					async: true,
+					initial: document,
+					resumer: { model -> Document.Change? in
+						.reload
+				},
+					reducer: { model, message, feedback -> Document.Change? in try? model.apply(message) }
+				))
 			}
 			
-			func rowsSignal() -> Signal<ArrayMutation<String>> {
-				return adapter.filteredSignal { (document: Document, notification: Document.Notification?, next: SignalNext<ArrayMutation<String>>) in
-					switch notification ?? .reload {
-					case .addedRowIndex(let i): next.send(value: .inserted(document.rows[i], at: i))
-					case .removedRowIndex(let i): next.send(value: .deleted(at: i))
-					case .reload: next.send(value: .reload(document.rows))
-					case .none: break
+			func rowsSignal() -> Signal<TableRowMutation<String>> {
+				return slice(resume: .reload) { document, notification -> Signal<TableRowMutation<String>>.Next in
+					switch notification {
+					case .addedRowIndex(let i): return .value(.inserted(document.contents.rows[i], at: i))
+					case .removedRowIndex(let i): return .value(.deleted(at: i))
+					case .reload: return .value(.reload(document.contents.rows))
+					case .none: return .none
 					}
 				}
 			}
@@ -1073,54 +1110,137 @@ func documentAdapterContent() -> String {
 
 func documentContent() -> String {
 	return """
-		struct Document: Codable {
-			enum Notification {
+		struct Document {
+			struct Contents: Codable {
+				var rows: [String]
+				var lastAddedIndex: Int
+			}
+			
+			let services: Services
+			var contents: Contents
+		}
+
+		extension Document {
+			enum Action {
+				case add
+				case save
+				case removeAtIndex(Int)
+			}
+			enum Change {
 				case addedRowIndex(Int)
 				case removedRowIndex(Int)
 				case reload
 				case none
 			}
 			
-			var rows: [String]
-			var lastAddedIndex: Int
+			func save() throws {
+				try services.fileService.writeData(JSONEncoder().encode(contents), to: Document.saveUrl(services: services))	
+			}
 			
-			init() {
+			mutating func apply(_ change: Action) throws -> Change {
+				switch change {
+				case .add:
+					contents.lastAddedIndex += 1
+					contents.rows.append(String(describing: contents.lastAddedIndex))
+					return .addedRowIndex(contents.rows.count - 1)
+				case .removeAtIndex(let i):
+					if contents.rows.indices.contains(i) {
+						contents.rows.remove(at: i)
+						return .removedRowIndex(i)
+					}
+					return .none
+				case .save:
+					try save()
+					return .none
+				}
+			}
+		}
+
+		extension Document {
+			
+			init(services: Services) {
+				self.services = services
 				do {
-					self = try JSONDecoder().decode(Document.self, from: Data(contentsOf: Document.saveUrl()))
+					let url = try Document.saveUrl(services: services)
+					if services.fileService.fileExists(at: url) {
+						self.contents = try JSONDecoder().decode(Document.Contents.self, from: services.fileService.data(contentsOf: url))
+						return
+					}
 				} catch {
-					lastAddedIndex = 3
-					rows = ["1", "2", "3"]
 				}
+				
+				self.contents = Document.initialContents()
 			}
 			
-			static func saveUrl() throws -> URL {
-				return try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(.documentFileName)
+			static func initialContents() -> Document.Contents {
+				return Document.Contents(rows: ["1", "2", "3"], lastAddedIndex: 3)
 			}
 			
-			func save() throws -> Notification {
-				try JSONEncoder().encode(self).write(to: Document.saveUrl())
-				return .none
+			static func saveUrl(services: Services) throws -> URL {
+				return try services.fileService.applicationSupportURL().appendingPathComponent(.documentFileName)
 			}
 			
-			mutating func add() -> Notification {
-				lastAddedIndex += 1
-				rows.append(String(describing: lastAddedIndex))
-				return .addedRowIndex(rows.count - 1)
-			}
-			
-			mutating func remove(index: Int) -> Notification {
-				if rows.indices.contains(index) {
-					rows.remove(at: index)
-					return .removedRowIndex(index)
-				}
-				return .none
-			}
 		}
 
 		private extension String {
 			static let documentFileName = "document.json"
 		}
 		"""
+}
+
+func servicesContent() -> String {
+	return """
+		struct Services {
+			let fileService: FileService
+		}
+
+		protocol FileService {
+			func applicationSupportURL() throws -> URL
+			func data(contentsOf: URL) throws -> Data
+			func writeData(_ data: Data, to: URL) throws
+			func fileExists(at: URL) -> Bool
+		}
+
+		extension FileManager: FileService {
+			func applicationSupportURL() throws -> URL {
+				return try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+			}
+			
+			func data(contentsOf url: URL) throws -> Data {
+				return try Data(contentsOf: url)
+			}
+			
+			func writeData(_ data: Data, to url: URL) throws {
+				try data.write(to: url)
+			}
+			
+			func fileExists(at url: URL) -> Bool {
+				var isDirectory: ObjCBool = false
+				let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+				return exists && !isDirectory.boolValue
+			}
+		}
+		"""
+}
+
+func cwlUtilsContent(_ cwlViewsProducts: URL) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlUtils.swift"), encoding: .utf8)
+}
+
+func cwlSignalContent(_ cwlViewsProducts: URL) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlSignal.swift"), encoding: .utf8)
+}
+
+func cwlViewsCoreContent(_ cwlViewsProducts: URL) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlViewsCore.swift"), encoding: .utf8)
+}
+
+func cwlViewsContent(_ cwlViewsProducts: URL, _ platform: Platform) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlViews_\(platform.rawValue).swift"), encoding: .utf8)
+}
+
+func cwlViewsTesting(_ cwlViewsProducts: URL, _ platform: Platform) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlViewsTesting_\(platform.rawValue).swift"), encoding: .utf8)
 }
 
 func macMainContent() -> String {
@@ -2108,6 +2228,17 @@ func templateIconPngAt2x() -> Data {
 	4m898kgBwee1t/dBkYtCVB2TBH7lp6Og3arIF+CotugIPH1f7oFiF40QbH6ySfVDn67d4it4
 	LOdr2XY/XA/LSCLa3fN7WNsu3sf9P5XYkDLWyaqoAAAAAElFTkSuQmCC
 	""", options: .ignoreUnknownCharacters)!
+}
+
+func contentsJson() -> String {
+	return """
+		{
+		  "info" : {
+			 "version" : 1,
+			 "author" : "xcode"
+		  }
+		}
+		"""
 }
 
 run()

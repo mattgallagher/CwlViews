@@ -700,13 +700,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C90652F12269EEC3001C8DDB /* macOS */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = macOS;
-			sourceTree = "<group>";
-		};
 		C918FD55226B51E7002C6308 /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -1129,7 +1122,6 @@
 				C9B705EB20686CBD00B4CD29 /* Info.plist */,
 				C9B705F120686D8600B4CD29 /* iOS */,
 				C918FD5C226B51E8002C6308 /* macOS */,
-				C90652F12269EEC3001C8DDB /* macOS */,
 			);
 			path = CwlViewsTesting;
 			sourceTree = "<group>";
@@ -1630,7 +1622,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsCore.swift -t \"\" -t \"import Foundation\" -i \"$SRCROOT/Sources/CwlViews/Core\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOS.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViews/Implementations/Common\" -i \"$SRCROOT/Sources/CwlViews/Implementations/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOSTesting.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOS.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViews/Implementations/Common\" -i \"$SRCROOT/Sources/CwlViews/Implementations/macOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOSTesting.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/macOS\"\n";
+			shellScript = "/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsCore.swift -t \"\" -t \"import Foundation\" -i \"$SRCROOT/Sources/CwlViews/Core\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_iOS.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViews/Implementations/Common\" -i \"$SRCROOT/Sources/CwlViews/Implementations/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsTesting_iOS.swift -t \"\" -t \"import UIKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/iOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViews_macOS.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViews/Implementations/Common\" -i \"$SRCROOT/Sources/CwlViews/Implementations/macOS\"\n\n/usr/bin/xcrun --sdk macosx swift \"$SRCROOT/Dependencies/CwlSignal/Dependencies/CwlUtils/Scripts/CwlConcat/main.swift\" -f CwlViews -n CwlViewsTesting_macOS.swift -t \"\" -t \"import AppKit\" -i \"$SRCROOT/Sources/CwlViewsTesting/Core\" -i \"$SRCROOT/Sources/CwlViewsTesting/macOS\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

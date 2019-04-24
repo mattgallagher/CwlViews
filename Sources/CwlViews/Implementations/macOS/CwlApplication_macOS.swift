@@ -23,7 +23,7 @@ import Foundation
 import CloudKit
 import simd
 
-public func applicationMain(type: NSApplication.Type = NSApplication.self, application: @escaping () -> Application) {
+public func applicationMain(type: NSApplication.Type = NSApplication.self, _ application: @escaping () -> Application) {
 	let instance = type.shared
 	let bindings = application().consume().bindings
 	let (preparer, _, storage, lifetimes) = Application.Preparer.bind(bindings, to: { _ in instance })

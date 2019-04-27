@@ -1,4 +1,4 @@
-#!/usr/bin/swift -swift-version 4
+#!/usr/bin/swift
 //
 //  install_cwlviews_templates.swift
 //  CwlViews
@@ -555,42 +555,43 @@ func macProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 			"SDK": "macosx",
 		] as [String: Any],
 		"Options": projectOptions(.macOS),
-		"Description": "Creates a Cocoa application using the CwlViews framework.",
+		"Name": "CwlViews",
+		"Description": "Creates an AppKit Mac application using the CwlViews framework.",
 		"Concrete": 1 as NSNumber,
 		"Platforms": [
 			"com.apple.platform.macosx"
 		] as [Any],
 		"Nodes": [
+			"main.swift:comments",
+			"main.swift:imports:importAppKit",
+			"main.swift:content",
+			"Services.swift:comments",
+			"Services.swift:imports:importFoundation",
+			"Services.swift:content",
+			"Model/Document.swift:comments",
+			"Model/Document.swift:imports:importFoundation",
+			"Model/Document.swift:content",
+			"Model/DocumentAdapter.swift:comments",
+			"Model/DocumentAdapter.swift:imports:importFoundation",
+			"Model/DocumentAdapter.swift:content",
+			"View/Window.swift:comments",
+			"View/Window.swift:imports:importAppKit",
+			"View/Window.swift:content",
+			"View/DetailView.swift:comments",
+			"View/DetailView.swift:imports:importAppKit",
+			"View/DetailView.swift:content",
+			"View/MainMenu.swift:comments",
+			"View/MainMenu.swift:imports:importAppKit",
+			"View/MainMenu.swift:content",
+			"Dependencies/CwlUtils.swift",
+			"Dependencies/CwlSignal.swift",
+			"Dependencies/CwlViewsCore.swift",
+			"Dependencies/CwlViews_macOS.swift",
+			"Assets.xcassets",
 			"Info.plist:Icon",
 			"Info.plist:DeploymentTarget",
 			"Info.plist:PrincipalClass",
 			"Info.plist:NSHumanReadableCopyright",
-			"Assets.xcassets",
-			"main.swift:comments",
-			"main.swift:imports:importAppKit",
-			"main.swift:content",
-			"MainMenu.swift:comments",
-			"MainMenu.swift:imports:importAppKit",
-			"MainMenu.swift:content",
-			"Services.swift:comments",
-			"Services.swift:imports:importFoundation",
-			"Services.swift:content",
-			"Document.swift:comments",
-			"Document.swift:imports:importFoundation",
-			"Document.swift:content",
-			"DocumentAdapter.swift:comments",
-			"DocumentAdapter.swift:imports:importFoundation",
-			"DocumentAdapter.swift:content",
-			"Window.swift:comments",
-			"Window.swift:imports:importAppKit",
-			"Window.swift:content",
-			"Detail.swift:comments",
-			"Detail.swift:imports:importAppKit",
-			"Detail.swift:content",
-			"CwlUtils.swift",
-			"CwlSignal.swift",
-			"CwlViewsCore.swift",
-			"CwlViews_macOS.swift"
 		] as [Any],
 		"Definitions": [
 			"Assets.xcassets": [
@@ -613,16 +614,33 @@ func macProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 			"*:imports:importFoundation": "import Foundation",
 			"*:imports:importAppKit": "import AppKit",
 			"main.swift:content": macMainContent(),
-			"MainMenu.swift:content": macMainMenuContent(),
-			"DocumentAdapter.swift:content": documentAdapterContent(),
-			"Document.swift:content": documentContent(),
-			"Window.swift:content": macMainWindowContent(),
-			"Detail.swift:content": macDetailContent(),
+			"Model/DocumentAdapter.swift": ["Group": "Model"] as [String: Any],
+			"Model/DocumentAdapter.swift:content": documentAdapterContent(),
+			"Model/Document.swift": ["Group": "Model"] as [String: Any],
+			"Model/Document.swift:content": documentContent(),
+			"View/MainMenu.swift": ["Group": "View"] as [String: Any],
+			"View/MainMenu.swift:content": macMainMenuContent(),
+			"View/Window.swift": ["Group": "View"] as [String: Any],
+			"View/Window.swift:content": macMainWindowContent(),
+			"View/DetailView.swift": ["Group": "View"] as [String: Any],
+			"View/DetailView.swift:content": macDetailContent(),
 			"Services.swift:content": servicesContent(),
-			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts, internal: true),
-			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts, internal: true), 
-			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts, internal: true),
-			"CwlViews_macOS.swift": try cwlViewsContent(cwlViewsProducts, .macOS, internal: true)
+			"Dependencies/CwlUtils.swift": [
+				"Beginning": try cwlUtilsContent(cwlViewsProducts, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any],
+			"Dependencies/CwlSignal.swift": [
+				"Beginning": try cwlSignalContent(cwlViewsProducts, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any], 
+			"Dependencies/CwlViewsCore.swift": [
+				"Beginning": try cwlViewsCoreContent(cwlViewsProducts, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any],
+			"Dependencies/CwlViews_macOS.swift": [
+				"Beginning": try cwlViewsContent(cwlViewsProducts, .macOS, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any]
 		] as [String: Any]
 	] as [String: Any]
 }
@@ -689,38 +707,39 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 			"com.apple.dt.unit.iosBase"
 		] as [Any],
 		"Options": projectOptions(.iOS),
-		"Description": "Creates a Cocoa application using the CwlViews framework.",
+		"Name": "CwlViews",
+		"Description": "Creates a UIKit iOS application using the CwlViews framework.",
 		"Nodes": [
-			"Base.lproj/LaunchScreen.storyboard",
-			"Info.plist:iPhone",
-			"Info.plist:UIRequiredDeviceCapabilities:base",
-			"Info.plist:LaunchScreen",
-			"Assets.xcassets",
 			"main.swift:comments",
 			"main.swift:imports:importUIKit",
 			"main.swift:content",
 			"Services.swift:comments",
 			"Services.swift:imports:importFoundation",
 			"Services.swift:content",
-			"Document.swift:comments",
-			"Document.swift:imports:importFoundation",
-			"Document.swift:content",
-			"DocumentAdapter.swift:comments",
-			"DocumentAdapter.swift:imports:importUIKit",
-			"DocumentAdapter.swift:content",
-			"NavView.swift:comments",
-			"NavView.swift:imports:importUIKit",
-			"NavView.swift:content",
-			"TableView.swift:comments",
-			"TableView.swift:imports:importUIKit",
-			"TableView.swift:content",
-			"DetailView.swift:comments",
-			"DetailView.swift:imports:importUIKit",
-			"DetailView.swift:content",
-			"CwlUtils.swift",
-			"CwlSignal.swift",
-			"CwlViewsCore.swift",
-			"CwlViews_iOS.swift"
+			"Model/Document.swift:comments",
+			"Model/Document.swift:imports:importFoundation",
+			"Model/Document.swift:content",
+			"Model/DocumentAdapter.swift:comments",
+			"Model/DocumentAdapter.swift:imports:importUIKit",
+			"Model/DocumentAdapter.swift:content",
+			"View/NavView.swift:comments",
+			"View/NavView.swift:imports:importUIKit",
+			"View/NavView.swift:content",
+			"View/TableView.swift:comments",
+			"View/TableView.swift:imports:importUIKit",
+			"View/TableView.swift:content",
+			"View/DetailView.swift:comments",
+			"View/DetailView.swift:imports:importUIKit",
+			"View/DetailView.swift:content",
+			"Dependencies/CwlUtils.swift",
+			"Dependencies/CwlSignal.swift",
+			"Dependencies/CwlViewsCore.swift",
+			"Dependencies/CwlViews_iOS.swift",
+			"Base.lproj/LaunchScreen.storyboard",
+			"Assets.xcassets",
+			"Info.plist:iPhone",
+			"Info.plist:UIRequiredDeviceCapabilities:base",
+			"Info.plist:LaunchScreen",
 		] as [Any],
 		"Concrete": 1 as NSNumber,
 		"Platforms": [
@@ -729,9 +748,8 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 		"Definitions": [
 			"Base.lproj/LaunchScreen.storyboard": [
 				"TargetIdentifiers": [],
-				"SortOrder": 101 as NSNumber,
 				"Path": "LaunchScreen.storyboard"
-				] as [String: Any],
+			] as [String: Any],
 			"Info.plist:UIRequiredDeviceCapabilities": [
 				"End": "</array>",
 				"Beginning": """
@@ -748,7 +766,6 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 					<string>UIInterfaceOrientationLandscapeLeft</string>
 					<string>UIInterfaceOrientationLandscapeRight</string>
 				</array>
-				
 				""",
 			"Info.plist:UIRequiredDeviceCapabilities:base": "<string>armv7</string>",
 			"Info.plist:statusBarTintForNavBar": """
@@ -762,12 +779,10 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 						<false/>
 					</dict>
 				</dict>
-				
 				""",
 			"Info.plist:iPhone": """
 				<key>LSRequiresIPhoneOS</key>
 				<true/>
-				
 				""",
 			"Info.plist:UISupportedInterfaceOrientations~iPhone": """
 				<key>UISupportedInterfaceOrientations</key>
@@ -776,12 +791,10 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 					<string>UIInterfaceOrientationLandscapeLeft</string>
 					<string>UIInterfaceOrientationLandscapeRight</string>
 				</array>
-				
 				""",
 			"Info.plist:LaunchScreen": """
 				<key>UILaunchStoryboardName</key>
 				<string>LaunchScreen</string>
-				
 				""",
 			"Assets.xcassets": [
 				"Path": "Images.xcassets",
@@ -793,22 +806,38 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 							"iOS": "true"
 						] as [String: Any]
 					] as [String: Any]
-				] as [Any],
-				"SortOrder": 100,
+				] as [Any]
 			] as [String: Any],
 			"*:imports:importFoundation": "import Foundation",
 			"*:imports:importUIKit": "import UIKit",
 			"main.swift:content": iOSMainContent(),
-			"NavView.swift:content": iOSNavViewContent(),
-			"TableView.swift:content": iOSTableViewContent(),
-			"DetailView.swift:content": iOSDetailViewContent(),
-			"DocumentAdapter.swift:content": documentAdapterContent(),
-			"Document.swift:content": documentContent(),
 			"Services.swift:content": servicesContent(),
-			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts, internal: true),
-			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts, internal: true),
-			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts, internal: true),
-			"CwlViews_iOS.swift": try cwlViewsContent(cwlViewsProducts, .iOS, internal: true)
+			"View/NavView.swift": ["Group": "View"] as [String: Any],
+			"View/NavView.swift:content": iOSNavViewContent(),
+			"View/TableView.swift": ["Group": "View"] as [String: Any],
+			"View/TableView.swift:content": iOSTableViewContent(),
+			"View/DetailView.swift": ["Group": "View"] as [String: Any],
+			"View/DetailView.swift:content": iOSDetailViewContent(),
+			"Model/DocumentAdapter.swift": ["Group": "Model"] as [String: Any],
+			"Model/DocumentAdapter.swift:content": documentAdapterContent(),
+			"Model/Document.swift": ["Group": "Model"] as [String: Any],
+			"Model/Document.swift:content": documentContent(),
+			"Dependencies/CwlUtils.swift": [
+				"Beginning": try cwlUtilsContent(cwlViewsProducts, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any],
+			"Dependencies/CwlSignal.swift": [
+				"Beginning": try cwlSignalContent(cwlViewsProducts, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any], 
+			"Dependencies/CwlViewsCore.swift": [
+				"Beginning": try cwlViewsCoreContent(cwlViewsProducts, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any],
+			"Dependencies/CwlViews_iOS.swift": [
+				"Beginning": try cwlViewsContent(cwlViewsProducts, .iOS, internal: true),
+				"Group": "Dependencies"
+			] as [String: Any]
 		] as [String: Any],
 	] as [String: Any]
 }

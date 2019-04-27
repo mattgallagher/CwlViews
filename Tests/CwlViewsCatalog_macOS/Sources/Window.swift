@@ -12,17 +12,33 @@ struct WindowState: CodableContainer {
 	let appearance: TempVar<NSAppearance.Name>
 	let error: TempVar<Error>
 	let selectedTab: Var<Tabs>
-	let rowSelection: Var<CatalogViewState?>
+	let rowSelection: Adapter<SelectionState>
+	
 	init() {
 		appearance = TempVar()
 		error = TempVar()
 		selectedTab = Var(.left)
-		rowSelection = Var(nil)
+		rowSelection = Adapter(adapterState: SelectionState())
 	}
 	
 	var windowContentColor: Signal<CGColor> {
 		return appearance.map { name in
 			name == .darkAqua ? NSColor(white: 0.2, alpha: 1).cgColor : NSColor.white.cgColor
+		}
+	}
+}
+
+struct SelectionState: PersistentContainerAdapterState {
+	var value: CatalogViewState?
+	init(value: CatalogViewState? = nil) {
+		self.value = value
+	}
+
+	func reduce(message: CatalogViewState?, feedback: SignalMultiInput<CatalogViewState?>) throws -> (state: SelectionState, notification: CatalogViewState??) {
+		if message?.caseName != value?.caseName {
+			return (state: SelectionState(value: message), notification: message)
+		} else {
+			return (state: self, notification: nil)
 		}
 	}
 }

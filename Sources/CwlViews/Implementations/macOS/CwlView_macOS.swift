@@ -247,5 +247,15 @@ public extension View.Binding {
 }
 
 // MARK: - Binder Part 9: Other supporting types
+public extension ViewConvertible {
+	func nsView(frame: NSRect) -> Layout.View {
+		let v = nsView()
+		v.frame = frame
+		return v
+	}
+	func nsView(width: CGFloat, height: CGFloat) -> Layout.View {
+		return nsView(frame: NSRect(x: 0, y: 0, width: width, height: height))
+	}
+}
 
 #endif

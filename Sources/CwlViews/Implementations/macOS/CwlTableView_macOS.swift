@@ -745,6 +745,18 @@ public extension BindingName where Binding: TableViewBinding {
 			downcast: Binding.tableViewBinding
 		)
 	}
+	static func selectRow(_ void: Void = ()) -> TableViewName<Signal<Int?>> {
+		return Binding.compositeName(
+			value:
+				{ (input: Signal<Int?>) in
+					return input.map {
+						$0.map { (indexes: IndexSet(integer: $0), byExtendingSelection: false) } ?? (indexes: IndexSet(), byExtendingSelection: false)
+					}
+				},
+			binding: TableView.Binding.selectRows,
+			downcast: Binding.tableViewBinding
+		)
+	}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
@@ -793,18 +805,18 @@ public typealias TableRowAnimatable<Element> = Animatable<TableRowMutation<Eleme
 public typealias TableRowState<Element> = SubrangeState<Element, ()>
 
 public struct TableCell<RowData> {
-	public let row: Int
-	public let column: Int
-	public let columnIdentifier: NSUserInterfaceItemIdentifier
+	public let row: Int?
+	public let column: Int?
+	public let columnIdentifier: NSUserInterfaceItemIdentifier?
 	public let data: RowData?
 	
 	public init?(row: Int, column: Int, tableView: NSTableView) {
 		guard row >= 0 || column >= 0 else {
 			return nil
 		}
-		self.row = row
-		self.column = column
-		self.columnIdentifier = tableView.tableColumns[column].identifier
+		self.row = row > 0 ? row : nil
+		self.column = column > 0 ? column : nil
+		self.columnIdentifier = tableView.tableColumns.at(column)?.identifier
 		self.data = (tableView.delegate as? TableView<RowData>.Preparer.Storage)?.rowData(at: row)
 	}
 	

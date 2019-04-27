@@ -44,7 +44,7 @@ func sliderView(_ sliderViewState: SliderViewState) -> ViewConvertible {
 
 private extension Double {
 	static let min: Double = 0
-	static let max: Double = 0
+	static let max: Double = 500
 	static let initial: Double = 0
 }
 

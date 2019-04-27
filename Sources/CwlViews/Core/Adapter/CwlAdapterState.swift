@@ -45,10 +45,6 @@ public extension AdapterState {
 	static func initialize(message: Message, feedback: SignalMultiInput<Message>) throws -> Output? {
 		return nil
 	}
-	
-	func resume() -> Notification? {
-		return nil
-	}
 }
 
 public protocol NonPersistentAdapterState: AdapterState, Codable {
@@ -74,6 +70,12 @@ public protocol PersistentAdapterState: AdapterState, Codable {
 	associatedtype PersistentValue: Codable
 	init(value: PersistentValue)
 	var value: PersistentValue { get }
+}
+
+extension PersistentAdapterState where Notification == PersistentValue {
+	public func resume() -> Notification? {
+		return value
+	}
 }
 
 extension Adapter where State: PersistentAdapterState {
@@ -106,5 +108,17 @@ extension Adapter where State: PersistentAdapterState {
 					print("\(prefix)\(string)")
 				}
 		}
+	}
+}
+
+public protocol PersistentContainerAdapterState: PersistentAdapterState, CodableContainer where PersistentValue: CodableContainer {}
+
+extension PersistentContainerAdapterState {
+	public var childCodableContainers: [CodableContainer] {
+		return value.childCodableContainers
+	}
+	
+	public var codableValueChanged: Signal<Void> {
+		return value.codableValueChanged
 	}
 }

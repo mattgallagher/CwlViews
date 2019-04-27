@@ -30,7 +30,9 @@ func run() {
 		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/Mac/Application/CwlViews Application Unit Tests.xctemplate"): installMacAppTestsTemplate,
 		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/iOS/Application/CwlViews Application.xctemplate"): installIosAppTemplate,
 		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/Project Templates/Mac/Application/CwlViews Application.xctemplate"): installMacAppTemplate,
-		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/File Templates/Source/CwlViewsBinder.xctemplate"): installCwlViewsTemplate
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/File Templates/Source/CwlViewsBinder.xctemplate"): installCwlViewsTemplate,
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/File Templates/Playground/CwlViews Playground macOS.xctemplate"): installMacPlayground,
+		libraryDirectory.appendingPathComponent("Developer/Xcode/Templates/File Templates/Playground/CwlViews Playground iOS.xctemplate"): installIosPlayground
 	]
 
 	do {
@@ -53,7 +55,7 @@ func run() {
 			"-configuration",
 			"Debug"
 		])
-		let cwlViewsProducts = temporaryLocation.appendingPathComponent("Build/Products/Debug/Concat_internal")
+		let cwlViewsProducts = temporaryLocation.appendingPathComponent("Build/Products/Debug")
 
 		for (destinationUrl, installFunction) in templates {
 			// Create the parent directory, if necessary
@@ -141,6 +143,40 @@ func installCwlViewsTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws
 	try PropertyListSerialization.data(fromPropertyList: binderTemplateInfo(), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
 	try FileManager.default.createDirectory(at: destination.appendingPathComponent("Swift"), withIntermediateDirectories: false, attributes: nil)
 	try binderContent().data(using: .utf8)!.write(to: destination.appendingPathComponent("Swift").appendingPathComponent("___FILEBASENAME___.swift"))
+}
+
+func installMacPlayground(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try installIcons(destination)
+	try PropertyListSerialization.data(fromPropertyList: playgroundTemplateInfo(.macOS), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
+	
+	try FileManager.default.createDirectory(at: destination.appendingPathComponent("___FILEBASENAME___.playground"), withIntermediateDirectories: false, attributes: nil)
+	
+	let sources = destination.appendingPathComponent("___FILEBASENAME___.playground").appendingPathComponent("Sources")
+	try FileManager.default.createDirectory(at: sources, withIntermediateDirectories: false, attributes: nil)
+	try cwlUtilsContent(cwlViewsProducts, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlUtils.swift"))
+	try cwlSignalContent(cwlViewsProducts, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlSignal.swift"))
+	try cwlViewsCoreContent(cwlViewsProducts, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlViewsCore.swift"))
+	try cwlViewsContent(cwlViewsProducts, .macOS, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlViews_macOS.swift"))
+	
+	try macPlaygroundContent().data(using: .utf8)!.write(to: destination.appendingPathComponent("___FILEBASENAME___.playground").appendingPathComponent("Contents.swift"))
+	try xcplaygroundContent(.macOS).data(using: .utf8)!.write(to: destination.appendingPathComponent("___FILEBASENAME___.playground").appendingPathComponent("contents.xcplayground"))
+}
+
+func installIosPlayground(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try installIcons(destination)
+	try PropertyListSerialization.data(fromPropertyList: playgroundTemplateInfo(.iOS), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
+	
+	try FileManager.default.createDirectory(at: destination.appendingPathComponent("___FILEBASENAME___.playground"), withIntermediateDirectories: false, attributes: nil)
+	
+	let sources = destination.appendingPathComponent("___FILEBASENAME___.playground").appendingPathComponent("Sources")
+	try FileManager.default.createDirectory(at: sources, withIntermediateDirectories: false, attributes: nil)
+	try cwlUtilsContent(cwlViewsProducts, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlUtils.swift"))
+	try cwlSignalContent(cwlViewsProducts, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlSignal.swift"))
+	try cwlViewsCoreContent(cwlViewsProducts, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlViewsCore.swift"))
+	try cwlViewsContent(cwlViewsProducts, .iOS, internal: false).data(using: .utf8)!.write(to: sources.appendingPathComponent("CwlViews_iOS.swift"))
+	
+	try iOSPlaygroundContent().data(using: .utf8)!.write(to: destination.appendingPathComponent("___FILEBASENAME___.playground").appendingPathComponent("Contents.swift"))
+	try xcplaygroundContent(.iOS).data(using: .utf8)!.write(to: destination.appendingPathComponent("___FILEBASENAME___.playground").appendingPathComponent("contents.xcplayground"))
 }
 
 enum Platform: String {
@@ -583,12 +619,30 @@ func macProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 			"Window.swift:content": macMainWindowContent(),
 			"Detail.swift:content": macDetailContent(),
 			"Services.swift:content": servicesContent(),
-			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts),
-			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts), 
-			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts),
-			"CwlViews_macOS.swift": try cwlViewsContent(cwlViewsProducts, .macOS)
+			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts, internal: true),
+			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts, internal: true), 
+			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts, internal: true),
+			"CwlViews_macOS.swift": try cwlViewsContent(cwlViewsProducts, .macOS, internal: true)
 		] as [String: Any]
 	] as [String: Any]
+}
+
+func playgroundTemplateInfo(_ platform: Platform) throws -> [String: Any] {
+	return [
+		"Kind": "Xcode.IDEFoundation.TextSubstitutionPlaygroundTemplateKind",
+		"Name": "CwlViews",
+		"Summary": "An \(platform.isIos ? "iOS" : "macOS") Playground",
+		"Description": "An interactive environment for experimenting with CwlViews",
+		"SortOrder": "20",
+		"MainTemplateFile": "___FILEBASENAME___.playground",
+		"AllowedTypes": [
+			"com.apple.dt.playground"
+		] as [Any],
+		"DefaultCompletionName": "MyPlayground",
+		"Platforms": [
+			"com.apple.platform.\(platform.isIos ? "iphoneos" : "macosx")"
+		] as [Any]
+	]
 }
 
 func testTemplateInfo(_ cwlViewsProducts: URL, _ platform: Platform) throws -> [String: Any] {
@@ -617,7 +671,7 @@ func testTemplateInfo(_ cwlViewsProducts: URL, _ platform: Platform) throws -> [
 		] as [Any],
 		"Definitions": [
 			"*:imports:importProject": "@testable import ___VARIABLE_productName:identifier___",
-			"CwlViews_\(platform.rawValue)Testing.swift:content": try cwlViewsTesting(cwlViewsProducts, platform),
+			"CwlViews_\(platform.rawValue)Testing.swift:content": try cwlViewsTesting(cwlViewsProducts, platform, internal: false),
 			"MockServices.swift:content": mockServices(),
 			"TableViewTests.swift:content": platform.isIos ? iOSTableViewTests() : macOSTableViewTests()
 		] as [String: Any]
@@ -751,10 +805,10 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 			"DocumentAdapter.swift:content": documentAdapterContent(),
 			"Document.swift:content": documentContent(),
 			"Services.swift:content": servicesContent(),
-			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts),
-			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts),
-			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts),
-			"CwlViews_iOS.swift": try cwlViewsContent(cwlViewsProducts, .iOS)
+			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts, internal: true),
+			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts, internal: true),
+			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts, internal: true),
+			"CwlViews_iOS.swift": try cwlViewsContent(cwlViewsProducts, .iOS, internal: true)
 		] as [String: Any],
 	] as [String: Any]
 }
@@ -1314,24 +1368,24 @@ func servicesContent() -> String {
 		"""#
 }
 
-func cwlUtilsContent(_ cwlViewsProducts: URL) throws -> String {
-	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlUtils.swift"), encoding: .utf8)
+func cwlUtilsContent(_ cwlViewsProducts: URL, internal i: Bool) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent(i ? "Concat_internal" : "Concat_public").appendingPathComponent("CwlUtils.swift"), encoding: .utf8)
 }
 
-func cwlSignalContent(_ cwlViewsProducts: URL) throws -> String {
-	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlSignal.swift"), encoding: .utf8)
+func cwlSignalContent(_ cwlViewsProducts: URL, internal i: Bool) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent(i ? "Concat_internal" : "Concat_public").appendingPathComponent("CwlSignal.swift"), encoding: .utf8)
 }
 
-func cwlViewsCoreContent(_ cwlViewsProducts: URL) throws -> String {
-	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlViewsCore.swift"), encoding: .utf8)
+func cwlViewsCoreContent(_ cwlViewsProducts: URL, internal i: Bool) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent(i ? "Concat_internal" : "Concat_public").appendingPathComponent("CwlViewsCore.swift"), encoding: .utf8)
 }
 
-func cwlViewsContent(_ cwlViewsProducts: URL, _ platform: Platform) throws -> String {
-	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlViews_\(platform.rawValue).swift"), encoding: .utf8)
+func cwlViewsContent(_ cwlViewsProducts: URL, _ platform: Platform, internal i: Bool) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent(i ? "Concat_internal" : "Concat_public").appendingPathComponent("CwlViews_\(platform.rawValue).swift"), encoding: .utf8)
 }
 
-func cwlViewsTesting(_ cwlViewsProducts: URL, _ platform: Platform) throws -> String {
-	return try String(contentsOf: cwlViewsProducts.appendingPathComponent("CwlViewsTesting_\(platform.rawValue).swift"), encoding: .utf8)
+func cwlViewsTesting(_ cwlViewsProducts: URL, _ platform: Platform, internal i: Bool) throws -> String {
+	return try String(contentsOf: cwlViewsProducts.appendingPathComponent(i ? "Concat_internal" : "Concat_public").appendingPathComponent("CwlViewsTesting_\(platform.rawValue).swift"), encoding: .utf8)
 }
 
 func macMainContent() -> String {
@@ -2374,6 +2428,118 @@ func contentsJson() -> String {
 		  }
 		}
 		"""#
+}
+
+func macPlaygroundContent() -> String {
+	return #"""
+		import AppKit
+		import PlaygroundSupport
+		import NaturalLanguage
+
+		struct TextFieldViewState: CodableContainer {
+			var text: Var<String>
+			init() {
+				text = Var("")
+			}
+		}
+
+		func textFieldView(_ textFieldViewState: TextFieldViewState) -> ViewConvertible {
+			return View(
+				.layout -- .center(
+					.view(
+						TextField.wrappingLabel(
+							.font -- .preferredFont(forTextStyle: .label, size: .controlSmall, weight: .semibold),
+							.stringValue <-- textFieldViewState.text.allChanges().keyPath(\.statistics)
+						)
+					),
+					.space(),
+					.view(
+						breadth: .ratio(1.0, constant: -16),
+						TextField(
+							.stringValue <-- textFieldViewState.text,
+							.stringChanged() --> textFieldViewState.text.update()
+						)
+					)
+				)
+			)
+		}
+
+		private extension String {
+			var statistics: String {
+				let labelFormat = NSLocalizedString("Field contains %ld characters and %ld words.", comment: "")
+				let tokenizer = NLTokenizer(unit: .word)
+				tokenizer.string = self
+				let wordCount = tokenizer.tokens(for: startIndex..<endIndex).count
+				return .localizedStringWithFormat(labelFormat, count, wordCount)
+			}
+		}
+
+		PlaygroundPage.current.liveView = textFieldView(TextFieldViewState()).nsView(width: 400, height: 300)
+		"""#
+}
+
+func iOSPlaygroundContent() -> String {
+	return #"""
+		import UIKit
+		import PlaygroundSupport
+		import NaturalLanguage
+
+		struct TextFieldViewState: CodableContainer {
+			var text: Var<String>
+			init() {
+				text = Var("")
+			}
+		}
+
+		func textFieldView(_ textFieldViewState: TextFieldViewState) -> ViewControllerConvertible {
+			return ViewController(
+				.view -- View(
+					.backgroundColor -- .white,
+					.layout -- .center(
+						alignment: .center,
+						marginEdges: .allLayout,
+						breadth: .equalTo(ratio: 1.0),
+						.view(
+							Label(
+								.font -- UIFont.preferredFont(forTextStyle: .callout, weight: .semibold),
+								.text <-- textFieldViewState.text.allChanges().keyPath(\.statistics)
+							)
+						),
+						.space(),
+						.view(
+							breadth: .equalTo(ratio: 1.0),
+							TextField(
+								.text <-- textFieldViewState.text,
+								.textChanged() --> textFieldViewState.text.update(),
+								.borderStyle -- .roundedRect
+							)
+						)
+					)
+				)
+			)
+		}
+
+		private extension String {
+			var statistics: String {
+				let labelFormat = NSLocalizedString("Field contains %ld characters and %ld words.", comment: "")
+				let tokenizer = NLTokenizer(unit: .word)
+				tokenizer.string = self
+				let wordCount = tokenizer.tokens(for: startIndex..<endIndex).count
+				return .localizedStringWithFormat(labelFormat, count, wordCount)
+			}
+		}
+
+		PlaygroundPage.current.liveView = textFieldView(TextFieldViewState()).uiViewController()
+		"""#
+}
+
+func xcplaygroundContent(_ platform: Platform) -> String {
+	return """
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<playground version='5.0' target-platform='\(platform.isIos ? "ios" : "macos")' executeOnSourceChanges='false'>
+			 <timeline fileName='timeline.xctimeline'/>
+		</playground>
+		"""
 }
 
 run()

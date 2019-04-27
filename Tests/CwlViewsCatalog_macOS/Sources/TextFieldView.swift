@@ -21,7 +21,7 @@ func textFieldView(_ textFieldViewState: TextFieldViewState) -> ViewConvertible 
 		.layout -- .center(
 			.view(
 				TextField.wrappingLabel(
-					.font -- NSFont.preferredFont(forTextStyle: .label, size: .controlSmall, weight: .semibold),
+					.font -- .preferredFont(forTextStyle: .label, size: .controlSmall, weight: .semibold),
 					.stringValue <-- textFieldViewState.text.allChanges().map { text in
 						.localizedStringWithFormat(.labelFormat, text.count, text.wordCount)
 					}

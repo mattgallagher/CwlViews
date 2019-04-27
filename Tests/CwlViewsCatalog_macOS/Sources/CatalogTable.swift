@@ -26,6 +26,7 @@ func catalogTable(_ windowState: WindowState, tag: Int) -> ViewConvertible {
 		.rows -- CatalogViewState.CaseName.allCases.tableData(),
 		.focusRingType -- .none,
 		.usesAutomaticRowHeights -- true,
+		.selectRow() <-- windowState.rowSelection.map { $0?.index },
 		.columns -- [
 			TableColumn<CatalogViewState.CaseName>(
 				.cellConstructor { identifier, cellData -> TableCellViewConvertible in
@@ -59,6 +60,24 @@ extension CatalogViewState {
 		case textField
 		case textView
 		case webView
+	}
+
+	var caseName: CatalogViewState.CaseName {
+		switch self {
+		case .button: return .button
+		case .control: return .control
+		case .gestureRecognizer: return .gestureRecognizer
+		case .imageView: return .imageView
+		case .layers: return .layers
+		case .slider: return .slider
+		case .textField: return .textField
+		case .textView: return .textView
+		case .webView: return .webView
+		}
+	}
+	
+	var index: Int? {
+		return CaseName.allCases.firstIndex(of: caseName)
 	}
 }
 

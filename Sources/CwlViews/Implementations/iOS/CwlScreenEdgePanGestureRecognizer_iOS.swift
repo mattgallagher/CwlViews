@@ -127,14 +127,22 @@ public extension ScreenEdgePanGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ScreenEdgePanGestureRecognizerBinding: GestureRecognizerBinding {
 	static func screenEdgePanGestureRecognizerBinding(_ binding: ScreenEdgePanGestureRecognizer.Binding) -> Self
+	func asScreenEdgePanGestureRecognizerBinding() -> ScreenEdgePanGestureRecognizer.Binding?
 }
 public extension ScreenEdgePanGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return screenEdgePanGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ScreenEdgePanGestureRecognizerBinding where Preparer.Inherited.Binding: ScreenEdgePanGestureRecognizerBinding {
+	func asScreenEdgePanGestureRecognizerBinding() -> ScreenEdgePanGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asScreenEdgePanGestureRecognizerBinding()
+	}
+}
 public extension ScreenEdgePanGestureRecognizer.Binding {
 	typealias Preparer = ScreenEdgePanGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asScreenEdgePanGestureRecognizerBinding() -> ScreenEdgePanGestureRecognizer.Binding? { return self }
 	static func screenEdgePanGestureRecognizerBinding(_ binding: ScreenEdgePanGestureRecognizer.Binding) -> ScreenEdgePanGestureRecognizer.Binding {
 		return binding
 	}

@@ -110,14 +110,22 @@ public extension TableHeaderView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TableHeaderViewBinding: ViewBinding {
 	static func tableHeaderViewBinding(_ binding: TableHeaderView.Binding) -> Self
+	func asTableHeaderViewBinding() -> TableHeaderView.Binding?
 }
 public extension TableHeaderViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tableHeaderViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableHeaderViewBinding where Preparer.Inherited.Binding: TableHeaderViewBinding {
+	func asTableHeaderViewBinding() -> TableHeaderView.Binding? {
+		return asInheritedBinding()?.asTableHeaderViewBinding()
+	}
+}
 public extension TableHeaderView.Binding {
 	typealias Preparer = TableHeaderView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTableHeaderViewBinding() -> TableHeaderView.Binding? { return self }
 	static func tableHeaderViewBinding(_ binding: TableHeaderView.Binding) -> TableHeaderView.Binding {
 		return binding
 	}

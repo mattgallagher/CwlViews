@@ -224,15 +224,22 @@ public extension ExtendedViewController {
 public protocol ExtendedViewControllerBinding: ViewControllerBinding {
 	associatedtype SubclassType: UIViewController & ViewControllerWithDelegate & HasDelegate
 	static func extendedViewControllerBinding(_ binding: ExtendedViewController<SubclassType>.Binding) -> Self
-
+	func asExtendedViewControllerBinding() -> ExtendedViewController<SubclassType>.Binding?
 }
 public extension ExtendedViewControllerBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return extendedViewControllerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ExtendedViewControllerBinding where Preparer.Inherited.Binding: ExtendedViewControllerBinding, Preparer.Inherited.Binding.SubclassType == SubclassType {
+	func asExtendedViewControllerBinding() -> ExtendedViewController<SubclassType>.Binding? {
+		return asInheritedBinding()?.asExtendedViewControllerBinding()
+	}
+}
 public extension ExtendedViewController.Binding {
 	typealias Preparer = ExtendedViewController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asExtendedViewControllerBinding() -> ExtendedViewController.Binding? { return self }
 	static func extendedViewControllerBinding(_ binding: ExtendedViewController.Binding) -> ExtendedViewController.Binding {
 		return binding
 	}

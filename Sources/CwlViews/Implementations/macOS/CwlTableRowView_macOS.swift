@@ -151,14 +151,22 @@ extension TableRowView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TableRowViewBinding: ViewBinding {
 	static func tableRowViewBinding(_ binding: TableRowView.Binding) -> Self
+	func asTableRowViewBinding() -> TableRowView.Binding?
 }
 public extension TableRowViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tableRowViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableRowViewBinding where Preparer.Inherited.Binding: TableRowViewBinding {
+	func asTableRowViewBinding() -> TableRowView.Binding? {
+		return asInheritedBinding()?.asTableRowViewBinding()
+	}
+}
 public extension TableRowView.Binding {
 	typealias Preparer = TableRowView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTableRowViewBinding() -> TableRowView.Binding? { return self }
 	static func tableRowViewBinding(_ binding: TableRowView.Binding) -> TableRowView.Binding {
 		return binding
 	}

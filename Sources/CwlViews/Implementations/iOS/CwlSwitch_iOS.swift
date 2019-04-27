@@ -143,14 +143,22 @@ public extension Switch {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SwitchBinding: ControlBinding {
 	static func switchBinding(_ binding: Switch.Binding) -> Self
+	func asSwitchBinding() -> Switch.Binding?
 }
 public extension SwitchBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return switchBinding(.inheritedBinding(binding))
 	}
 }
+public extension SwitchBinding where Preparer.Inherited.Binding: SwitchBinding {
+	func asSwitchBinding() -> Switch.Binding? {
+		return asInheritedBinding()?.asSwitchBinding()
+	}
+}
 public extension Switch.Binding {
 	typealias Preparer = Switch.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSwitchBinding() -> Switch.Binding? { return self }
 	static func switchBinding(_ binding: Switch.Binding) -> Switch.Binding {
 		return binding
 	}

@@ -171,14 +171,22 @@ public extension ImageView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ImageViewBinding: ViewBinding {
 	static func imageViewBinding(_ binding: ImageView.Binding) -> Self
+	func asImageViewBinding() -> ImageView.Binding?
 }
 public extension ImageViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return imageViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ImageViewBinding where Preparer.Inherited.Binding: ImageViewBinding {
+	func asImageViewBinding() -> ImageView.Binding? {
+		return asInheritedBinding()?.asImageViewBinding()
+	}
+}
 public extension ImageView.Binding {
 	typealias Preparer = ImageView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asImageViewBinding() -> ImageView.Binding? { return self }
 	static func imageViewBinding(_ binding: ImageView.Binding) -> ImageView.Binding {
 		return binding
 	}

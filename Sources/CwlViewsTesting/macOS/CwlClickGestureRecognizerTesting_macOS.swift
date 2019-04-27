@@ -19,16 +19,16 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == ClickGestureRecognizer.Binding {
+extension BindingParser where Downcast: ClickGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, ClickGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asClickGestureRecognizerBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var buttonMask: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .buttonMask(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfClicksRequired: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfClicksRequired(let x) = binding { return x } else { return nil } }) }
+	public static var buttonMask: BindingParser<Dynamic<Int>, ClickGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .buttonMask(let x) = $0 { return x } else { return nil } }, upcast: { $0.asClickGestureRecognizerBinding() }) }
+	public static var numberOfClicksRequired: BindingParser<Dynamic<Int>, ClickGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .numberOfClicksRequired(let x) = $0 { return x } else { return nil } }, upcast: { $0.asClickGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

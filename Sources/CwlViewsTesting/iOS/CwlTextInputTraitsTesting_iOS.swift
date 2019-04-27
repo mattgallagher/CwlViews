@@ -19,23 +19,23 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == TextInputTraits.Binding {
+extension TextInputTraits.Binding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0 }) }
 	
-	public static var autocapitalizationType: BindingParser<Dynamic<UITextAutocapitalizationType>, Binding> { return BindingParser<Dynamic<UITextAutocapitalizationType>, Binding>(parse: { binding -> Optional<Dynamic<UITextAutocapitalizationType>> in if case .autocapitalizationType(let x) = binding { return x } else { return nil } }) }
-	public static var autocorrectionType: BindingParser<Dynamic<UITextAutocorrectionType>, Binding> { return BindingParser<Dynamic<UITextAutocorrectionType>, Binding>(parse: { binding -> Optional<Dynamic<UITextAutocorrectionType>> in if case .autocorrectionType(let x) = binding { return x } else { return nil } }) }
-	public static var enablesReturnKeyAutomatically: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .enablesReturnKeyAutomatically(let x) = binding { return x } else { return nil } }) }
-	public static var isSecureTextEntry: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isSecureTextEntry(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardAppearance: BindingParser<Dynamic<UIKeyboardAppearance>, Binding> { return BindingParser<Dynamic<UIKeyboardAppearance>, Binding>(parse: { binding -> Optional<Dynamic<UIKeyboardAppearance>> in if case .keyboardAppearance(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardType: BindingParser<Dynamic<UIKeyboardType>, Binding> { return BindingParser<Dynamic<UIKeyboardType>, Binding>(parse: { binding -> Optional<Dynamic<UIKeyboardType>> in if case .keyboardType(let x) = binding { return x } else { return nil } }) }
-	public static var returnKeyType: BindingParser<Dynamic<UIReturnKeyType>, Binding> { return BindingParser<Dynamic<UIReturnKeyType>, Binding>(parse: { binding -> Optional<Dynamic<UIReturnKeyType>> in if case .returnKeyType(let x) = binding { return x } else { return nil } }) }
-	public static var smartDashesType: BindingParser<Dynamic<UITextSmartDashesType>, Binding> { return BindingParser<Dynamic<UITextSmartDashesType>, Binding>(parse: { binding -> Optional<Dynamic<UITextSmartDashesType>> in if case .smartDashesType(let x) = binding { return x } else { return nil } }) }
-	public static var smartInsertDeleteType: BindingParser<Dynamic<UITextSmartInsertDeleteType>, Binding> { return BindingParser<Dynamic<UITextSmartInsertDeleteType>, Binding>(parse: { binding -> Optional<Dynamic<UITextSmartInsertDeleteType>> in if case .smartInsertDeleteType(let x) = binding { return x } else { return nil } }) }
-	public static var smartQuotesType: BindingParser<Dynamic<UITextSmartQuotesType>, Binding> { return BindingParser<Dynamic<UITextSmartQuotesType>, Binding>(parse: { binding -> Optional<Dynamic<UITextSmartQuotesType>> in if case .smartQuotesType(let x) = binding { return x } else { return nil } }) }
-	public static var spellCheckingType: BindingParser<Dynamic<UITextSpellCheckingType>, Binding> { return BindingParser<Dynamic<UITextSpellCheckingType>, Binding>(parse: { binding -> Optional<Dynamic<UITextSpellCheckingType>> in if case .spellCheckingType(let x) = binding { return x } else { return nil } }) }
-	public static var textContentType: BindingParser<Dynamic<UITextContentType>, Binding> { return BindingParser<Dynamic<UITextContentType>, Binding>(parse: { binding -> Optional<Dynamic<UITextContentType>> in if case .textContentType(let x) = binding { return x } else { return nil } }) }
+	public static var autocapitalizationType: BindingParser<Dynamic<UITextAutocapitalizationType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .autocapitalizationType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var autocorrectionType: BindingParser<Dynamic<UITextAutocorrectionType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .autocorrectionType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var enablesReturnKeyAutomatically: BindingParser<Dynamic<Bool>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .enablesReturnKeyAutomatically(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var isSecureTextEntry: BindingParser<Dynamic<Bool>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .isSecureTextEntry(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var keyboardAppearance: BindingParser<Dynamic<UIKeyboardAppearance>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .keyboardAppearance(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var keyboardType: BindingParser<Dynamic<UIKeyboardType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .keyboardType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var returnKeyType: BindingParser<Dynamic<UIReturnKeyType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .returnKeyType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var smartDashesType: BindingParser<Dynamic<UITextSmartDashesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .smartDashesType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var smartInsertDeleteType: BindingParser<Dynamic<UITextSmartInsertDeleteType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .smartInsertDeleteType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var smartQuotesType: BindingParser<Dynamic<UITextSmartQuotesType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .smartQuotesType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var spellCheckingType: BindingParser<Dynamic<UITextSpellCheckingType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .spellCheckingType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
+	public static var textContentType: BindingParser<Dynamic<UITextContentType>, TextInputTraits.Binding, TextInputTraits.Binding> { return .init(extract: { if case .textContentType(let x) = $0 { return x } else { return nil } }, upcast: { $0 }) }
 }
 
 #endif

@@ -344,14 +344,22 @@ public extension ViewController {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ViewControllerBinding: BinderBaseBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self
+	func asViewControllerBinding() -> ViewController.Binding?
 }
 public extension ViewControllerBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return viewControllerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ViewControllerBinding where Preparer.Inherited.Binding: ViewControllerBinding {
+	func asViewControllerBinding() -> ViewController.Binding? {
+		return asInheritedBinding()?.asViewControllerBinding()
+	}
+}
 public extension ViewController.Binding {
 	typealias Preparer = ViewController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asViewControllerBinding() -> ViewController.Binding? { return self }
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> ViewController.Binding {
 		return binding
 	}

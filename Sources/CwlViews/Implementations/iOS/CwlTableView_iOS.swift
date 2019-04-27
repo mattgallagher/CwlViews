@@ -877,14 +877,22 @@ public extension TableView {
 public protocol TableViewBinding: ScrollViewBinding {
 	associatedtype RowDataType
 	static func tableViewBinding(_ binding: TableView<RowDataType>.Binding) -> Self
+	func asTableViewBinding() -> TableView<RowDataType>.Binding?
 }
 public extension TableViewBinding {
 	static func scrollViewBinding(_ binding: ScrollView.Binding) -> Self {
 		return tableViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableViewBinding where Preparer.Inherited.Binding: TableViewBinding, Preparer.Inherited.Binding.RowDataType == RowDataType {
+	func asTableViewBinding() -> TableView<RowDataType>.Binding? {
+		return asInheritedBinding()?.asTableViewBinding()
+	}
+}
 public extension TableView.Binding {
 	typealias Preparer = TableView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTableViewBinding() -> TableView.Binding? { return self }
 	static func tableViewBinding(_ binding: TableView<RowDataType>.Binding) -> TableView<RowDataType>.Binding {
 		return binding
 	}

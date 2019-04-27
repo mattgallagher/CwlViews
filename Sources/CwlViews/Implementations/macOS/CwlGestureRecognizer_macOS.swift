@@ -197,14 +197,22 @@ public extension GestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol GestureRecognizerBinding: BinderBaseBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self
+	func asGestureRecognizerBinding() -> GestureRecognizer.Binding?
 }
 public extension GestureRecognizerBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return gestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension GestureRecognizerBinding where Preparer.Inherited.Binding: GestureRecognizerBinding {
+	func asGestureRecognizerBinding() -> GestureRecognizer.Binding? {
+		return asInheritedBinding()?.asGestureRecognizerBinding()
+	}
+}
 public extension GestureRecognizer.Binding {
 	typealias Preparer = GestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asGestureRecognizerBinding() -> GestureRecognizer.Binding? { return self }
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> GestureRecognizer.Binding {
 		return binding
 	}

@@ -280,14 +280,22 @@ public extension TabBar {
 public protocol TabBarBinding: ViewBinding {
 	associatedtype ItemIdentifierType: Hashable
 	static func tabBarBinding(_ binding: TabBar<ItemIdentifierType>.Binding) -> Self
+	func asTabBarBinding() -> TabBar<ItemIdentifierType>.Binding?
 }
 public extension TabBarBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tabBarBinding(TabBar<ItemIdentifierType>.Binding.inheritedBinding(binding))
 	}
 }
+public extension TabBarBinding where Preparer.Inherited.Binding: TabBarBinding, Preparer.Inherited.Binding.ItemIdentifierType == ItemIdentifierType {
+	func asTabBarBinding() -> TabBar<ItemIdentifierType>.Binding? {
+		return asInheritedBinding()?.asTabBarBinding()
+	}
+}
 public extension TabBar.Binding {
 	typealias Preparer = TabBar.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTabBarBinding() -> TabBar.Binding? { return self }
 	static func tabBarBinding(_ binding: TabBar<ItemIdentifierType>.Binding) -> TabBar.Binding {
 		return binding
 	}

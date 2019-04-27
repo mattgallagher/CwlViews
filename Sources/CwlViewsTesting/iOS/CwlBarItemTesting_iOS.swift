@@ -19,22 +19,22 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == BarItem.Binding {
+extension BindingParser where Downcast: BarItemBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, BarItem.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asBarItemBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	public static var image: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .image(let x) = binding { return x } else { return nil } }) }
-	public static var imageInsets: BindingParser<Dynamic<UIEdgeInsets>, Binding> { return BindingParser<Dynamic<UIEdgeInsets>, Binding>(parse: { binding -> Optional<Dynamic<UIEdgeInsets>> in if case .imageInsets(let x) = binding { return x } else { return nil } }) }
-	public static var isEnabled: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isEnabled(let x) = binding { return x } else { return nil } }) }
-	public static var landscapeImagePhone: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .landscapeImagePhone(let x) = binding { return x } else { return nil } }) }
-	public static var landscapeImagePhoneInsets: BindingParser<Dynamic<UIEdgeInsets>, Binding> { return BindingParser<Dynamic<UIEdgeInsets>, Binding>(parse: { binding -> Optional<Dynamic<UIEdgeInsets>> in if case .landscapeImagePhoneInsets(let x) = binding { return x } else { return nil } }) }
-	public static var tag: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .tag(let x) = binding { return x } else { return nil } }) }
-	public static var title: BindingParser<Dynamic<String>, Binding> { return BindingParser<Dynamic<String>, Binding>(parse: { binding -> Optional<Dynamic<String>> in if case .title(let x) = binding { return x } else { return nil } }) }
-	public static var titleTextAttributes: BindingParser<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>> in if case .titleTextAttributes(let x) = binding { return x } else { return nil } }) }
+	public static var image: BindingParser<Dynamic<UIImage?>, BarItem.Binding, Downcast> { return .init(extract: { if case .image(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var imageInsets: BindingParser<Dynamic<UIEdgeInsets>, BarItem.Binding, Downcast> { return .init(extract: { if case .imageInsets(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var isEnabled: BindingParser<Dynamic<Bool>, BarItem.Binding, Downcast> { return .init(extract: { if case .isEnabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var landscapeImagePhone: BindingParser<Dynamic<UIImage?>, BarItem.Binding, Downcast> { return .init(extract: { if case .landscapeImagePhone(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var landscapeImagePhoneInsets: BindingParser<Dynamic<UIEdgeInsets>, BarItem.Binding, Downcast> { return .init(extract: { if case .landscapeImagePhoneInsets(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var tag: BindingParser<Dynamic<Int>, BarItem.Binding, Downcast> { return .init(extract: { if case .tag(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var title: BindingParser<Dynamic<String>, BarItem.Binding, Downcast> { return .init(extract: { if case .title(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
+	public static var titleTextAttributes: BindingParser<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]>>, BarItem.Binding, Downcast> { return .init(extract: { if case .titleTextAttributes(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarItemBinding() }) }
 
 	//	2. Signal bindings are performed on the object after construction.
 

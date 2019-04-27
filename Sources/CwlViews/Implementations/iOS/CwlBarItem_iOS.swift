@@ -150,14 +150,22 @@ public extension BarItem {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol BarItemBinding: BinderBaseBinding {
 	static func barItemBinding(_ binding: BarItem.Binding) -> Self
+	func asBarItemBinding() -> BarItem.Binding?
 }
 public extension BarItemBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return barItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension BarItemBinding where Preparer.Inherited.Binding: BarItemBinding {
+	func asBarItemBinding() -> BarItem.Binding? {
+		return asInheritedBinding()?.asBarItemBinding()
+	}
+}
 public extension BarItem.Binding {
 	typealias Preparer = BarItem.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asBarItemBinding() -> BarItem.Binding? { return self }
 	static func barItemBinding(_ binding: BarItem.Binding) -> BarItem.Binding {
 		return binding
 	}

@@ -16,8 +16,8 @@ struct WebViewState: CodableContainer {
 func webView(_ webViewState: WebViewState) -> ViewConvertible {
 	return View(
 		.layer -- Layer(.backgroundColor -- NSColor.darkGray.cgColor),
-		.layout -- .fill(
-			WebView.scrollEmbedded(
+		.layout -- Layout.fill(
+			WebKitView.scrollEmbedded(
 				.minimumFontSize -- 12,
 				.loadHTMLString <-- Signal<(string: String, baseURL: URL?)>.just((.htmlString, nil)).ignoreCallback()
 			)

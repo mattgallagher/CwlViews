@@ -20,20 +20,20 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == Switch.Binding {
+extension BindingParser where Downcast: SwitchBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Switch.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asSwitchBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var isOn: BindingParser<Dynamic<SetOrAnimate<Bool>>, Binding> { return BindingParser<Dynamic<SetOrAnimate<Bool>>, Binding>(parse: { binding -> Optional<Dynamic<SetOrAnimate<Bool>>> in if case .isOn(let x) = binding { return x } else { return nil } }) }
-	public static var offImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .offImage(let x) = binding { return x } else { return nil } }) }
-	public static var onImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .onImage(let x) = binding { return x } else { return nil } }) }
-	public static var onTintColor: BindingParser<Dynamic<UIColor>, Binding> { return BindingParser<Dynamic<UIColor>, Binding>(parse: { binding -> Optional<Dynamic<UIColor>> in if case .onTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var thumbTintColor: BindingParser<Dynamic<UIColor>, Binding> { return BindingParser<Dynamic<UIColor>, Binding>(parse: { binding -> Optional<Dynamic<UIColor>> in if case .thumbTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var tintColor: BindingParser<Dynamic<UIColor>, Binding> { return BindingParser<Dynamic<UIColor>, Binding>(parse: { binding -> Optional<Dynamic<UIColor>> in if case .tintColor(let x) = binding { return x } else { return nil } }) }
+	public static var isOn: BindingParser<Dynamic<SetOrAnimate<Bool>>, Switch.Binding, Downcast> { return .init(extract: { if case .isOn(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwitchBinding() }) }
+	public static var offImage: BindingParser<Dynamic<UIImage?>, Switch.Binding, Downcast> { return .init(extract: { if case .offImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwitchBinding() }) }
+	public static var onImage: BindingParser<Dynamic<UIImage?>, Switch.Binding, Downcast> { return .init(extract: { if case .onImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwitchBinding() }) }
+	public static var onTintColor: BindingParser<Dynamic<UIColor>, Switch.Binding, Downcast> { return .init(extract: { if case .onTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwitchBinding() }) }
+	public static var thumbTintColor: BindingParser<Dynamic<UIColor>, Switch.Binding, Downcast> { return .init(extract: { if case .thumbTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwitchBinding() }) }
+	public static var tintColor: BindingParser<Dynamic<UIColor>, Switch.Binding, Downcast> { return .init(extract: { if case .tintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwitchBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

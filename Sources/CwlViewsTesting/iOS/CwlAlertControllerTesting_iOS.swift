@@ -19,19 +19,19 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == AlertController.Binding {
+extension BindingParser where Downcast: AlertControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, AlertController.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asAlertControllerBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	public static var actions: BindingParser<Constant<[AlertActionConvertible]>, Binding> { return BindingParser<Constant<[AlertActionConvertible]>, Binding>(parse: { binding -> Optional<Constant<[AlertActionConvertible]>> in if case .actions(let x) = binding { return x } else { return nil } }) }
-	public static var preferredStyle: BindingParser<Constant<UIAlertController.Style>, Binding> { return BindingParser<Constant<UIAlertController.Style>, Binding>(parse: { binding -> Optional<Constant<UIAlertController.Style>> in if case .preferredStyle(let x) = binding { return x } else { return nil } }) }
-	public static var textFields: BindingParser<Constant<[TextField]>, Binding> { return BindingParser<Constant<[TextField]>, Binding>(parse: { binding -> Optional<Constant<[TextField]>> in if case .textFields(let x) = binding { return x } else { return nil } }) }
+	public static var actions: BindingParser<Constant<[AlertActionConvertible]>, AlertController.Binding, Downcast> { return .init(extract: { if case .actions(let x) = $0 { return x } else { return nil } }, upcast: { $0.asAlertControllerBinding() }) }
+	public static var preferredStyle: BindingParser<Constant<UIAlertController.Style>, AlertController.Binding, Downcast> { return .init(extract: { if case .preferredStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asAlertControllerBinding() }) }
+	public static var textFields: BindingParser<Constant<[TextField]>, AlertController.Binding, Downcast> { return .init(extract: { if case .textFields(let x) = $0 { return x } else { return nil } }, upcast: { $0.asAlertControllerBinding() }) }
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var message: BindingParser<Dynamic<String?>, Binding> { return BindingParser<Dynamic<String?>, Binding>(parse: { binding -> Optional<Dynamic<String?>> in if case .message(let x) = binding { return x } else { return nil } }) }
-	public static var preferredActionIndex: BindingParser<Dynamic<Int?>, Binding> { return BindingParser<Dynamic<Int?>, Binding>(parse: { binding -> Optional<Dynamic<Int?>> in if case .preferredActionIndex(let x) = binding { return x } else { return nil } }) }
+	public static var message: BindingParser<Dynamic<String?>, AlertController.Binding, Downcast> { return .init(extract: { if case .message(let x) = $0 { return x } else { return nil } }, upcast: { $0.asAlertControllerBinding() }) }
+	public static var preferredActionIndex: BindingParser<Dynamic<Int?>, AlertController.Binding, Downcast> { return .init(extract: { if case .preferredActionIndex(let x) = $0 { return x } else { return nil } }, upcast: { $0.asAlertControllerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

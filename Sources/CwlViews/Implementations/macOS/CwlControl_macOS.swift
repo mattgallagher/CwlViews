@@ -246,14 +246,22 @@ public extension Control {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ControlBinding: ViewBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self
+	func asControlBinding() -> Control.Binding?
 }
 public extension ControlBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return controlBinding(.inheritedBinding(binding))
 	}
 }
+public extension ControlBinding where Preparer.Inherited.Binding: ControlBinding {
+	func asControlBinding() -> Control.Binding? {
+		return asInheritedBinding()?.asControlBinding()
+	}
+}
 public extension Control.Binding {
 	typealias Preparer = Control.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asControlBinding() -> Control.Binding? { return self }
 	static func controlBinding(_ binding: Control.Binding) -> Control.Binding {
 		return binding
 	}

@@ -19,24 +19,24 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == ImageView.Binding {
+extension BindingParser where Downcast: ImageViewBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, ImageView.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asImageViewBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var image: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .image(let x) = binding { return x } else { return nil } }) }
-	public static var highlightedImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .highlightedImage(let x) = binding { return x } else { return nil } }) }
-	public static var animationImages: BindingParser<Dynamic<[UIImage]?>, Binding> { return BindingParser<Dynamic<[UIImage]?>, Binding>(parse: { binding -> Optional<Dynamic<[UIImage]?>> in if case .animationImages(let x) = binding { return x } else { return nil } }) }
-	public static var highlightedAnimationImages: BindingParser<Dynamic<[UIImage]?>, Binding> { return BindingParser<Dynamic<[UIImage]?>, Binding>(parse: { binding -> Optional<Dynamic<[UIImage]?>> in if case .highlightedAnimationImages(let x) = binding { return x } else { return nil } }) }
-	public static var animationDuration: BindingParser<Dynamic<TimeInterval>, Binding> { return BindingParser<Dynamic<TimeInterval>, Binding>(parse: { binding -> Optional<Dynamic<TimeInterval>> in if case .animationDuration(let x) = binding { return x } else { return nil } }) }
-	public static var animationRepeatCount: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .animationRepeatCount(let x) = binding { return x } else { return nil } }) }
-	public static var isHighlighted: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isHighlighted(let x) = binding { return x } else { return nil } }) }
+	public static var image: BindingParser<Dynamic<UIImage?>, ImageView.Binding, Downcast> { return .init(extract: { if case .image(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var highlightedImage: BindingParser<Dynamic<UIImage?>, ImageView.Binding, Downcast> { return .init(extract: { if case .highlightedImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var animationImages: BindingParser<Dynamic<[UIImage]?>, ImageView.Binding, Downcast> { return .init(extract: { if case .animationImages(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var highlightedAnimationImages: BindingParser<Dynamic<[UIImage]?>, ImageView.Binding, Downcast> { return .init(extract: { if case .highlightedAnimationImages(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var animationDuration: BindingParser<Dynamic<TimeInterval>, ImageView.Binding, Downcast> { return .init(extract: { if case .animationDuration(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var animationRepeatCount: BindingParser<Dynamic<Int>, ImageView.Binding, Downcast> { return .init(extract: { if case .animationRepeatCount(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var isHighlighted: BindingParser<Dynamic<Bool>, ImageView.Binding, Downcast> { return .init(extract: { if case .isHighlighted(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var animating: BindingParser<Signal<Bool>, Binding> { return BindingParser<Signal<Bool>, Binding>(parse: { binding -> Optional<Signal<Bool>> in if case .animating(let x) = binding { return x } else { return nil } }) }
+	public static var animating: BindingParser<Signal<Bool>, ImageView.Binding, Downcast> { return .init(extract: { if case .animating(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	

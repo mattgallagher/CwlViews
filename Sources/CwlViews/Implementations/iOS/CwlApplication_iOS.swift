@@ -456,14 +456,22 @@ extension UIApplication: HasDelegate {}
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ApplicationBinding: BinderBaseBinding {
 	static func applicationBinding(_ binding: Application.Binding) -> Self
+	func asApplicationBinding() -> Application.Binding?
 }
 public extension ApplicationBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return applicationBinding(.inheritedBinding(binding))
 	}
 }
+public extension ApplicationBinding where Preparer.Inherited.Binding: ApplicationBinding {
+	func asApplicationBinding() -> Application.Binding? {
+		return asInheritedBinding()?.asApplicationBinding()
+	}
+}
 public extension Application.Binding {
 	typealias Preparer = Application.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asApplicationBinding() -> Application.Binding? { return self }
 	static func applicationBinding(_ binding: Application.Binding) -> Application.Binding {
 		return binding
 	}

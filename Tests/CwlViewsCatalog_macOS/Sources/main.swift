@@ -31,6 +31,8 @@ applicationMain {
 		.lifetimes <-- windowVar.map {[
 			window($0).nsWindow()
 		]},
+		.willEncodeRestorableState -- windowVar.storeToArchive(),
+		.didDecodeRestorableState -- windowVar.loadFromArchive(),
 		.shouldTerminateAfterLastWindowClosed() -- true
 	)
 }

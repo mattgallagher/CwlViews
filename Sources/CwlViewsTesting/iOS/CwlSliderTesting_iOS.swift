@@ -19,26 +19,26 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == Slider.Binding {
+extension BindingParser where Downcast: SliderBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Slider.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asSliderBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var isContinuous: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isContinuous(let x) = binding { return x } else { return nil } }) }
-	public static var maximumTrackImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIImage?>>> in if case .maximumTrackImage(let x) = binding { return x } else { return nil } }) }
-	public static var maximumTrackTintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .maximumTrackTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var maximumValue: BindingParser<Dynamic<Float>, Binding> { return BindingParser<Dynamic<Float>, Binding>(parse: { binding -> Optional<Dynamic<Float>> in if case .maximumValue(let x) = binding { return x } else { return nil } }) }
-	public static var maximumValueImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .maximumValueImage(let x) = binding { return x } else { return nil } }) }
-	public static var minimumTrackImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIImage?>>> in if case .minimumTrackImage(let x) = binding { return x } else { return nil } }) }
-	public static var minimumTrackTintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .minimumTrackTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var minimumValue: BindingParser<Dynamic<Float>, Binding> { return BindingParser<Dynamic<Float>, Binding>(parse: { binding -> Optional<Dynamic<Float>> in if case .minimumValue(let x) = binding { return x } else { return nil } }) }
-	public static var minimumValueImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .minimumValueImage(let x) = binding { return x } else { return nil } }) }
-	public static var thumbImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIImage?>>> in if case .thumbImage(let x) = binding { return x } else { return nil } }) }
-	public static var thumbTintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .thumbTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var value: BindingParser<Dynamic<SetOrAnimate<Float>>, Binding> { return BindingParser<Dynamic<SetOrAnimate<Float>>, Binding>(parse: { binding -> Optional<Dynamic<SetOrAnimate<Float>>> in if case .value(let x) = binding { return x } else { return nil } }) }
+	public static var isContinuous: BindingParser<Dynamic<Bool>, Slider.Binding, Downcast> { return .init(extract: { if case .isContinuous(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var maximumTrackImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Slider.Binding, Downcast> { return .init(extract: { if case .maximumTrackImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var maximumTrackTintColor: BindingParser<Dynamic<UIColor?>, Slider.Binding, Downcast> { return .init(extract: { if case .maximumTrackTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var maximumValue: BindingParser<Dynamic<Float>, Slider.Binding, Downcast> { return .init(extract: { if case .maximumValue(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var maximumValueImage: BindingParser<Dynamic<UIImage?>, Slider.Binding, Downcast> { return .init(extract: { if case .maximumValueImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var minimumTrackImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Slider.Binding, Downcast> { return .init(extract: { if case .minimumTrackImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var minimumTrackTintColor: BindingParser<Dynamic<UIColor?>, Slider.Binding, Downcast> { return .init(extract: { if case .minimumTrackTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var minimumValue: BindingParser<Dynamic<Float>, Slider.Binding, Downcast> { return .init(extract: { if case .minimumValue(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var minimumValueImage: BindingParser<Dynamic<UIImage?>, Slider.Binding, Downcast> { return .init(extract: { if case .minimumValueImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var thumbImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Slider.Binding, Downcast> { return .init(extract: { if case .thumbImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var thumbTintColor: BindingParser<Dynamic<UIColor?>, Slider.Binding, Downcast> { return .init(extract: { if case .thumbTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var value: BindingParser<Dynamic<SetOrAnimate<Float>>, Slider.Binding, Downcast> { return .init(extract: { if case .value(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

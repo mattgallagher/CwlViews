@@ -718,54 +718,27 @@ public extension BindingName where Binding: TableViewBinding {
 	static func doubleAction<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
 		return Binding.keyPathActionName(keyPath, TableView.Binding.doubleAction, Binding.tableViewBinding)
 	}
-	static func rowSelected<Value>(_ keyPath: KeyPath<Binding.RowDataType, Value>) -> TableViewName<SignalInput<Value?>> {
+	static func cellSelected<Value>(_ keyPath: KeyPath<TableCell<Binding.RowDataType>, Value>) -> TableViewName<SignalInput<Value?>> {
 		return Binding.compositeName(
 			value: { (input: SignalInput<Value?>) in
 				{ (notification: Notification) -> Void in
 					guard let view = (notification.object as? NSTableView) else { return }
-					let storageType = TableView<Binding.RowDataType>.Preparer.Storage.self
-					guard let storage = view.associatedBinderStorage(subclass: storageType) else { return }
-					let row = storage.rowState.values?.at(view.selectedRow)?[keyPath: keyPath]
-					_ = input.send(value: row)
+					let cell = TableCell<Binding.RowDataType>(row: view.selectedRow, column: view.selectedColumn, tableView: view)
+					let value = cell?[keyPath: keyPath]
+					_ = input.send(value: value)
 				}
 			},
 			binding: TableView.Binding.selectionDidChange,
 			downcast: Binding.tableViewBinding
 		)
 	}
-	static func rowSelected(_ void: Void = ()) -> TableViewName<SignalInput<Binding.RowDataType?>> {
+	static func cellSelected(_ void: Void = ()) -> TableViewName<SignalInput<TableCell<Binding.RowDataType>?>> {
 		return Binding.compositeName(
-			value: { (input: SignalInput<Binding.RowDataType?>) in
+			value: { (input: SignalInput<TableCell<Binding.RowDataType>?>) in
 				{ (notification: Notification) -> Void in
 					guard let view = (notification.object as? NSTableView) else { return }
-					let storageType = TableView<Binding.RowDataType>.Preparer.Storage.self
-					guard let storage = view.associatedBinderStorage(subclass: storageType) else { return }
-					let row = storage.rowState.values?.at(view.selectedRow)
-					_ = input.send(value: row)
-				}
-			},
-			binding: TableView.Binding.selectionDidChange,
-			downcast: Binding.tableViewBinding
-		)
-	}
-	static func selectionChanged<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
-		return Binding.compositeName(
-			value: { (input: SignalInput<Value>) in
-				{ (notification: Notification) -> Void in
-					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
-					_ = input.send(value: view[keyPath: keyPath])
-				}
-			},
-			binding: TableView.Binding.selectionDidChange,
-			downcast: Binding.tableViewBinding
-		)
-	}
-	static func selectRow<Value>(_ keyPath: KeyPath<Binding.Preparer.Instance, Value>) -> TableViewName<SignalInput<Value>> {
-		return Binding.compositeName(
-			value: { (input: SignalInput<Value>) in
-				{ (notification: Notification) -> Void in
-					guard let view = (notification.object as? Binding.Preparer.Instance) else { return }
-					_ = input.send(value: view[keyPath: keyPath])
+					let cell = TableCell<Binding.RowDataType>(row: view.selectedRow, column: view.selectedColumn, tableView: view)
+					_ = input.send(value: cell)
 				}
 			},
 			binding: TableView.Binding.selectionDidChange,
@@ -792,14 +765,22 @@ public extension TableView {
 public protocol TableViewBinding: ControlBinding {
 	associatedtype RowDataType
 	static func tableViewBinding(_ binding: TableView<RowDataType>.Binding) -> Self
+	func asTableViewBinding() -> TableView<RowDataType>.Binding?
 }
 public extension TableViewBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return tableViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableViewBinding where Preparer.Inherited.Binding: TableViewBinding, Preparer.Inherited.Binding.RowDataType == RowDataType {
+	func asTableViewBinding() -> TableView<RowDataType>.Binding? {
+		return asInheritedBinding()?.asTableViewBinding()
+	}
+}
 public extension TableView.Binding {
 	typealias Preparer = TableView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTableViewBinding() -> TableView.Binding? { return self }
 	static func tableViewBinding(_ binding: TableView<RowDataType>.Binding) -> TableView<RowDataType>.Binding {
 		return binding
 	}
@@ -817,18 +798,18 @@ public struct TableCell<RowData> {
 	public let columnIdentifier: NSUserInterfaceItemIdentifier
 	public let data: RowData?
 	
-	public init(row: Int, column: Int, tableView: NSTableView) {
+	public init?(row: Int, column: Int, tableView: NSTableView) {
+		guard row >= 0 || column >= 0 else {
+			return nil
+		}
 		self.row = row
 		self.column = column
 		self.columnIdentifier = tableView.tableColumns[column].identifier
 		self.data = (tableView.delegate as? TableView<RowData>.Preparer.Storage)?.rowData(at: row)
 	}
 	
-	public init(row: Int, column: NSTableColumn, tableView: NSTableView) {
-		self.row = row
-		self.column = tableView.column(withIdentifier: column.identifier)
-		self.columnIdentifier = column.identifier
-		self.data = (tableView.delegate as? TableView<RowData>.Preparer.Storage)?.rowData(at: row)
+	public init?(row: Int, column: NSTableColumn, tableView: NSTableView) {
+		self.init(row: row, column: tableView.column(withIdentifier: column.identifier), tableView: tableView)
 	}
 }
 

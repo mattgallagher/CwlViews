@@ -21,9 +21,12 @@ import Foundation
 
 public protocol Binding {
 	associatedtype Preparer: BinderPreparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding?
 }
 
 extension Binding {
+	public typealias Name<V> = BindingName<V, Self, Self>
+	
 	public static func compositeName<Value, Param, Intermediate>(value: @escaping (Value) -> Param, binding: @escaping (Param) -> Intermediate, downcast: @escaping (Intermediate) -> Self) -> BindingName<Value, Intermediate, Self> {
 		return BindingName<Value, Intermediate, Self>(
 			source: { v in binding(value(v)) },

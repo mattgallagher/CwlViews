@@ -127,14 +127,22 @@ public extension PinchGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol PinchGestureRecognizerBinding: GestureRecognizerBinding {
 	static func pinchGestureRecognizerBinding(_ binding: PinchGestureRecognizer.Binding) -> Self
+	func asPinchGestureRecognizerBinding() -> PinchGestureRecognizer.Binding?
 }
 public extension PinchGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return pinchGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension PinchGestureRecognizerBinding where Preparer.Inherited.Binding: PinchGestureRecognizerBinding {
+	func asPinchGestureRecognizerBinding() -> PinchGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asPinchGestureRecognizerBinding()
+	}
+}
 public extension PinchGestureRecognizer.Binding {
 	typealias Preparer = PinchGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asPinchGestureRecognizerBinding() -> PinchGestureRecognizer.Binding? { return self }
 	static func pinchGestureRecognizerBinding(_ binding: PinchGestureRecognizer.Binding) -> PinchGestureRecognizer.Binding {
 		return binding
 	}

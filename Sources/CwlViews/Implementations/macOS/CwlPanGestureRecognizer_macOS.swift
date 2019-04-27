@@ -127,14 +127,22 @@ public extension PanGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol PanGestureRecognizerBinding: GestureRecognizerBinding {
 	static func panGestureRecognizerBinding(_ binding: PanGestureRecognizer.Binding) -> Self
+	func asPanGestureRecognizerBinding() -> PanGestureRecognizer.Binding?
 }
 public extension PanGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return panGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension PanGestureRecognizerBinding where Preparer.Inherited.Binding: PanGestureRecognizerBinding {
+	func asPanGestureRecognizerBinding() -> PanGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asPanGestureRecognizerBinding()
+	}
+}
 public extension PanGestureRecognizer.Binding {
 	typealias Preparer = PanGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asPanGestureRecognizerBinding() -> PanGestureRecognizer.Binding? { return self }
 	static func panGestureRecognizerBinding(_ binding: PanGestureRecognizer.Binding) -> PanGestureRecognizer.Binding {
 		return binding
 	}

@@ -132,14 +132,22 @@ public extension ShapeLayer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ShapeLayerBinding: LayerBinding {
 	static func shapeLayerBinding(_ binding: ShapeLayer.Binding) -> Self
+	func asShapeLayerBinding() -> ShapeLayer.Binding?
 }
 public extension ShapeLayerBinding {
 	static func layerBinding(_ binding: Layer.Binding) -> Self {
 		return shapeLayerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ShapeLayerBinding where Preparer.Inherited.Binding: ShapeLayerBinding {
+	func asShapeLayerBinding() -> ShapeLayer.Binding? {
+		return asInheritedBinding()?.asShapeLayerBinding()
+	}
+}
 public extension ShapeLayer.Binding {
 	typealias Preparer = ShapeLayer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asShapeLayerBinding() -> ShapeLayer.Binding? { return self }
 	static func shapeLayerBinding(_ binding: ShapeLayer.Binding) -> ShapeLayer.Binding {
 		return binding
 	}

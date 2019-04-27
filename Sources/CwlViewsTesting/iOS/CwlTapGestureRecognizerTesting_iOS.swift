@@ -19,16 +19,16 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == TapGestureRecognizer.Binding {
+extension BindingParser where Downcast: TapGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, TapGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asTapGestureRecognizerBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var numberOfTapsRequired: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfTapsRequired(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfTouchesRequired: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfTouchesRequired(let x) = binding { return x } else { return nil } }) }
+	public static var numberOfTapsRequired: BindingParser<Dynamic<Int>, TapGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .numberOfTapsRequired(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTapGestureRecognizerBinding() }) }
+	public static var numberOfTouchesRequired: BindingParser<Dynamic<Int>, TapGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .numberOfTouchesRequired(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTapGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

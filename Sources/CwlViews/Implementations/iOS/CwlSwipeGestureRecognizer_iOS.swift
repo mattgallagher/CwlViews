@@ -130,14 +130,22 @@ public extension SwipeGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SwipeGestureRecognizerBinding: GestureRecognizerBinding {
 	static func swipeGestureRecognizerBinding(_ binding: SwipeGestureRecognizer.Binding) -> Self
+	func asSwipeGestureRecognizerBinding() -> SwipeGestureRecognizer.Binding?
 }
 public extension SwipeGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return swipeGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension SwipeGestureRecognizerBinding where Preparer.Inherited.Binding: SwipeGestureRecognizerBinding {
+	func asSwipeGestureRecognizerBinding() -> SwipeGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asSwipeGestureRecognizerBinding()
+	}
+}
 public extension SwipeGestureRecognizer.Binding {
 	typealias Preparer = SwipeGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSwipeGestureRecognizerBinding() -> SwipeGestureRecognizer.Binding? { return self }
 	static func swipeGestureRecognizerBinding(_ binding: SwipeGestureRecognizer.Binding) -> SwipeGestureRecognizer.Binding {
 		return binding
 	}

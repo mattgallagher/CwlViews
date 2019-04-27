@@ -279,6 +279,28 @@ public struct Layout {
 	func forEachView(_ visit: (View) -> Void) {
 		entities.forEach { $0.forEachView(visit) }
 	}
+	
+	// Used for finding the n-th subview, depth-first search order
+	func traverse(over remaining: inout Int) -> ViewConvertible? {
+		for e in entities {
+			if let match = e.traverse(over: &remaining) {
+				return match
+			}
+		}
+		return nil
+	}
+
+	/// A linear time search for the view at a given index. Current state is intended for testing-only.
+	///
+	/// - Parameter at: the view returned will be the `at`-th view encountered in a depth-first walk.
+	/// - Returns: the `at`-th view encountered or `nil` if never enountered
+	public func view(at: Int) -> ViewConvertible? {
+		if at < 0 {
+			return nil
+		}
+		var remaining = at
+		return traverse(over: &remaining)
+	}
 
 	/// The `Layout` describes a series of these `Entity`s which may be a space, a view or a sublayout. There is also a special `matched` layout which allows a series of "same length" entities.
 	///
@@ -290,7 +312,7 @@ public struct Layout {
 	public struct Entity {
 		enum Content {
 			case space(Dimension)
-			case sizedView(Layout.View, Size?)
+			case sizedView(ViewConvertible, Size?)
 			indirect case layout(Layout, size: Size?)
 			indirect case matched(Matched)
 		}
@@ -316,7 +338,40 @@ public struct Layout {
 					case .dependent(let dependent): dependent.entity.forEachView(visit)
 					}
 				}
-			default: break
+			case .space: break
+			}
+		}
+
+		func traverse(over remaining: inout Int) -> ViewConvertible? {
+			switch content {
+			case .sizedView(let v, _):
+				if remaining == 0 {
+					return v
+				} else {
+					remaining -= 1
+				}
+				return nil
+			case .layout(let l, _):
+				return l.traverse(over: &remaining)
+			case .matched(let matched):
+				if let v = matched.first.traverse(over: &remaining) {
+					return v
+				}
+				for s in matched.subsequent {
+					switch s {
+					case .free(let entity):
+						if let v = entity.traverse(over: &remaining) {
+							return v
+						}
+					case .dependent(let dependent):
+						if let v = dependent.entity.traverse(over: &remaining) {
+							return v
+						}
+					}
+				}
+				return nil
+			case .space:
+				return nil
 			}
 		}
 		
@@ -326,11 +381,7 @@ public struct Layout {
 		
 		public static func view(length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ view: ViewConvertible) -> Entity {
 			let size = Size(length: length, breadth: breadth, relativity: relativity)
-			#if os(macOS)
-				return Entity(.sizedView(view.nsView(), size))
-			#else
-				return Entity(.sizedView(view.uiView(), size))
-			#endif
+			return Entity(.sizedView(view, size))
 		}
 
 		public static func sublayout(axis: Axis, align: Alignment = .fill, length: Dimension? = nil, breadth: Dimension? = nil, relativity: Size.Relativity = .independent, _ entities: Entity...) -> Entity {

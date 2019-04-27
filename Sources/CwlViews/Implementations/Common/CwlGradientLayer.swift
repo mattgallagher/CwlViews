@@ -137,14 +137,22 @@ public extension GradientLayer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol GradientLayerBinding: LayerBinding {
 	static func gradientLayerBinding(_ binding: GradientLayer.Binding) -> Self
+	func asGradientLayerBinding() -> GradientLayer.Binding?
 }
 public extension GradientLayerBinding {
 	static func layerBinding(_ binding: Layer.Binding) -> Self {
 		return gradientLayerBinding(.inheritedBinding(binding))
 	}
 }
+public extension GradientLayerBinding where Preparer.Inherited.Binding: GradientLayerBinding {
+	func asGradientLayerBinding() -> GradientLayer.Binding? {
+		return asInheritedBinding()?.asGradientLayerBinding()
+	}
+}
 public extension GradientLayer.Binding {
 	typealias Preparer = GradientLayer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asGradientLayerBinding() -> GradientLayer.Binding? { return self }
 	static func gradientLayerBinding(_ binding: GradientLayer.Binding) -> GradientLayer.Binding {
 		return binding
 	}

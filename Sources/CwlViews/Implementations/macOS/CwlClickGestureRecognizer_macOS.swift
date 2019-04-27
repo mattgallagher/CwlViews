@@ -130,14 +130,22 @@ public extension ClickGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ClickGestureRecognizerBinding: GestureRecognizerBinding {
 	static func clickGestureRecognizerBinding(_ binding: ClickGestureRecognizer.Binding) -> Self
+	func asClickGestureRecognizerBinding() -> ClickGestureRecognizer.Binding?
 }
 public extension ClickGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return clickGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension ClickGestureRecognizerBinding where Preparer.Inherited.Binding: ClickGestureRecognizerBinding {
+	func asClickGestureRecognizerBinding() -> ClickGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asClickGestureRecognizerBinding()
+	}
+}
 public extension ClickGestureRecognizer.Binding {
 	typealias Preparer = ClickGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asClickGestureRecognizerBinding() -> ClickGestureRecognizer.Binding? { return self }
 	static func clickGestureRecognizerBinding(_ binding: ClickGestureRecognizer.Binding) -> ClickGestureRecognizer.Binding {
 		return binding
 	}

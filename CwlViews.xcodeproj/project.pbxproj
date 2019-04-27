@@ -281,20 +281,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		C90652E72269EC24001C8DDB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C906528D2269EC02001C8DDB;
-			remoteInfo = iOSApp;
-		};
-		C90652EF2269EC24001C8DDB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C90652B82269EC02001C8DDB;
-			remoteInfo = iOSAppTests;
-		};
 		C921699C218D5FB700396AB0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C94853B71DC4E306009CC145 /* Project object */;
@@ -355,7 +341,6 @@
 
 /* Begin PBXFileReference section */
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
-		C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = iOSApp.xcodeproj; path = iOSApp/iOSApp.xcodeproj; sourceTree = "<group>"; };
 		C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageView_macOS.swift; sourceTree = "<group>"; };
 		C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSlider_macOS.swift; sourceTree = "<group>"; };
 		C90A04B0220989FB002ABE89 /* CwlImageDrawn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageDrawn.swift; sourceTree = "<group>"; };
@@ -691,15 +676,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		C90652DF2269EC24001C8DDB /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				C90652E82269EC24001C8DDB /* iOSApp.app */,
-				C90652F02269EC24001C8DDB /* iOSAppTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		C918FD55226B51E7002C6308 /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -1029,7 +1005,6 @@
 			children = (
 				C94853C21DC4E306009CC145 /* CwlViews */,
 				C9B705F020686D2200B4CD29 /* CwlViewsTesting */,
-				C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -1492,10 +1467,6 @@
 					ProductGroup = C93FBC012160FCFF00DFCF0E /* Products */;
 					ProjectRef = C93FBC002160FCFF00DFCF0E /* CwlSignal.xcodeproj */;
 				},
-				{
-					ProductGroup = C90652DF2269EC24001C8DDB /* Products */;
-					ProjectRef = C90652DE2269EC24001C8DDB /* iOSApp.xcodeproj */;
-				},
 			);
 			projectRoot = "";
 			targets = (
@@ -1513,20 +1484,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		C90652E82269EC24001C8DDB /* iOSApp.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = iOSApp.app;
-			remoteRef = C90652E72269EC24001C8DDB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C90652F02269EC24001C8DDB /* iOSAppTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = iOSAppTests.xctest;
-			remoteRef = C90652EF2269EC24001C8DDB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		C93FBC0C2160FCFF00DFCF0E /* CwlSignal.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;

@@ -212,14 +212,22 @@ public extension Button {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ButtonBinding: ControlBinding {
 	static func buttonBinding(_ binding: Button.Binding) -> Self
+	func asButtonBinding() -> Button.Binding?
 }
 public extension ButtonBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return buttonBinding(.inheritedBinding(binding))
 	}
 }
+public extension ButtonBinding where Preparer.Inherited.Binding: ButtonBinding {
+	func asButtonBinding() -> Button.Binding? {
+		return asInheritedBinding()?.asButtonBinding()
+	}
+}
 public extension Button.Binding {
 	typealias Preparer = Button.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asButtonBinding() -> Button.Binding? { return self }
 	static func buttonBinding(_ binding: Button.Binding) -> Button.Binding {
 		return binding
 	}

@@ -129,14 +129,22 @@ public extension SegmentedControl {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SegmentedControlBinding: ControlBinding {
 	static func segmentedControlBinding(_ binding: SegmentedControl.Binding) -> Self
+	func asSegmentedControlBinding() -> SegmentedControl.Binding?
 }
 public extension SegmentedControlBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return segmentedControlBinding(.inheritedBinding(binding))
 	}
 }
+public extension SegmentedControlBinding where Preparer.Inherited.Binding: SegmentedControlBinding {
+	func asSegmentedControlBinding() -> SegmentedControl.Binding? {
+		return asInheritedBinding()?.asSegmentedControlBinding()
+	}
+}
 public extension SegmentedControl.Binding {
 	typealias Preparer = SegmentedControl.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSegmentedControlBinding() -> SegmentedControl.Binding? { return self }
 	static func segmentedControlBinding(_ binding: SegmentedControl.Binding) -> SegmentedControl.Binding {
 		return binding
 	}

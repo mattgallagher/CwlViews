@@ -136,14 +136,22 @@ public extension LongPressGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol LongPressGestureRecognizerBinding: GestureRecognizerBinding {
 	static func longPressGestureRecognizerBinding(_ binding: LongPressGestureRecognizer.Binding) -> Self
+	func asLongPressGestureRecognizerBinding() -> LongPressGestureRecognizer.Binding?
 }
 public extension LongPressGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return longPressGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension LongPressGestureRecognizerBinding where Preparer.Inherited.Binding: LongPressGestureRecognizerBinding {
+	func asLongPressGestureRecognizerBinding() -> LongPressGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asLongPressGestureRecognizerBinding()
+	}
+}
 public extension LongPressGestureRecognizer.Binding {
 	typealias Preparer = LongPressGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asLongPressGestureRecognizerBinding() -> LongPressGestureRecognizer.Binding? { return self }
 	static func longPressGestureRecognizerBinding(_ binding: LongPressGestureRecognizer.Binding) -> LongPressGestureRecognizer.Binding {
 		return binding
 	}

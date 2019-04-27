@@ -27,7 +27,7 @@ public class WebView: Binder, WebViewConvertible {
 	}
 
 	#if os(macOS)
-		static func scrollEmbedded(type: WKWebView.Type = WKWebView.self, _ bindings: Binding...) -> ScrollView {
+		public static func scrollEmbedded(type: WKWebView.Type = WKWebView.self, _ bindings: Binding...) -> ScrollView {
 			return ScrollView(
 				.borderType -- .noBorder,
 				.hasVerticalScroller -- true,
@@ -40,6 +40,9 @@ public class WebView: Binder, WebViewConvertible {
 		}
 	#endif
 }
+
+// On macOS, `WebView` refers to WebKit.WebView until 10.14. This typealias can be used on macOS (or cross-platform scenarios) instead of `WebKit` to disambiguate, until the deployment target is 10.14 or higher.
+public typealias WebKitView = WebView
 
 // MARK: - Binder Part 2: Binding
 public extension WebView {
@@ -567,14 +570,22 @@ public extension WebView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol WebViewBinding: ViewBinding {
 	static func webViewBinding(_ binding: WebView.Binding) -> Self
+	func asWebViewBinding() -> WebView.Binding?
 }
 public extension WebViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return webViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension WebViewBinding where Preparer.Inherited.Binding: WebViewBinding {
+	func asWebViewBinding() -> WebView.Binding? {
+		return asInheritedBinding()?.asWebViewBinding()
+	}
+}
 public extension WebView.Binding {
 	typealias Preparer = WebView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asWebViewBinding() -> WebView.Binding? { return self }
 	static func webViewBinding(_ binding: WebView.Binding) -> WebView.Binding {
 		return binding
 	}

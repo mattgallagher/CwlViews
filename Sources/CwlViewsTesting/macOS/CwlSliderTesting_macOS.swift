@@ -8,23 +8,23 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == Slider.Binding {
+extension BindingParser where Downcast: SliderBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Slider.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asSliderBinding() }) }
 		
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var allowsTickMarkValuesOnly: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .allowsTickMarkValuesOnly(let x) = binding { return x } else { return nil } }) }
-	public static var altIncrementValue: BindingParser<Dynamic<Double>, Binding> { return BindingParser<Dynamic<Double>, Binding>(parse: { binding -> Optional<Dynamic<Double>> in if case .altIncrementValue(let x) = binding { return x } else { return nil } }) }
-	public static var isVertical: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isVertical(let x) = binding { return x } else { return nil } }) }
-	public static var maxValue: BindingParser<Dynamic<Double>, Binding> { return BindingParser<Dynamic<Double>, Binding>(parse: { binding -> Optional<Dynamic<Double>> in if case .maxValue(let x) = binding { return x } else { return nil } }) }
-	public static var minValue: BindingParser<Dynamic<Double>, Binding> { return BindingParser<Dynamic<Double>, Binding>(parse: { binding -> Optional<Dynamic<Double>> in if case .minValue(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfTickMarks: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfTickMarks(let x) = binding { return x } else { return nil } }) }
-	public static var sliderType: BindingParser<Dynamic<NSSlider.SliderType>, Binding> { return BindingParser<Dynamic<NSSlider.SliderType>, Binding>(parse: { binding -> Optional<Dynamic<NSSlider.SliderType>> in if case .sliderType(let x) = binding { return x } else { return nil } }) }
-	public static var tickMarkPosition: BindingParser<Dynamic<NSSlider.TickMarkPosition>, Binding> { return BindingParser<Dynamic<NSSlider.TickMarkPosition>, Binding>(parse: { binding -> Optional<Dynamic<NSSlider.TickMarkPosition>> in if case .tickMarkPosition(let x) = binding { return x } else { return nil } }) }
-	public static var trackFillColor: BindingParser<Dynamic<NSColor?>, Binding> { return BindingParser<Dynamic<NSColor?>, Binding>(parse: { binding -> Optional<Dynamic<NSColor?>> in if case .trackFillColor(let x) = binding { return x } else { return nil } }) }
+	public static var allowsTickMarkValuesOnly: BindingParser<Dynamic<Bool>, Slider.Binding, Downcast> { return .init(extract: { if case .allowsTickMarkValuesOnly(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var altIncrementValue: BindingParser<Dynamic<Double>, Slider.Binding, Downcast> { return .init(extract: { if case .altIncrementValue(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var isVertical: BindingParser<Dynamic<Bool>, Slider.Binding, Downcast> { return .init(extract: { if case .isVertical(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var maxValue: BindingParser<Dynamic<Double>, Slider.Binding, Downcast> { return .init(extract: { if case .maxValue(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var minValue: BindingParser<Dynamic<Double>, Slider.Binding, Downcast> { return .init(extract: { if case .minValue(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var numberOfTickMarks: BindingParser<Dynamic<Int>, Slider.Binding, Downcast> { return .init(extract: { if case .numberOfTickMarks(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var sliderType: BindingParser<Dynamic<NSSlider.SliderType>, Slider.Binding, Downcast> { return .init(extract: { if case .sliderType(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var tickMarkPosition: BindingParser<Dynamic<NSSlider.TickMarkPosition>, Slider.Binding, Downcast> { return .init(extract: { if case .tickMarkPosition(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
+	public static var trackFillColor: BindingParser<Dynamic<NSColor?>, Slider.Binding, Downcast> { return .init(extract: { if case .trackFillColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSliderBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

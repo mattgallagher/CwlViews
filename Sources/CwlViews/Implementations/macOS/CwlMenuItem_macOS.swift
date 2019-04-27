@@ -183,14 +183,22 @@ public extension MenuItem {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol MenuItemBinding: BinderBaseBinding {
 	static func menuItemBinding(_ binding: MenuItem.Binding) -> Self
+	func asMenuItemBinding() -> MenuItem.Binding?
 }
 public extension MenuItemBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return menuItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension MenuItemBinding where Preparer.Inherited.Binding: MenuItemBinding {
+	func asMenuItemBinding() -> MenuItem.Binding? {
+		return asInheritedBinding()?.asMenuItemBinding()
+	}
+}
 public extension MenuItem.Binding {
 	typealias Preparer = MenuItem.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asMenuItemBinding() -> MenuItem.Binding? { return self }
 	static func menuItemBinding(_ binding: MenuItem.Binding) -> MenuItem.Binding {
 		return binding
 	}

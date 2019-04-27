@@ -291,14 +291,22 @@ public extension TextView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TextViewBinding: ScrollViewBinding {
 	static func textViewBinding(_ binding: TextView.Binding) -> Self
+	func asTextViewBinding() -> TextView.Binding?
 }
 public extension TextViewBinding {
 	static func scrollViewBinding(_ binding: ScrollView.Binding) -> Self {
 		return textViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TextViewBinding where Preparer.Inherited.Binding: TextViewBinding {
+	func asTextViewBinding() -> TextView.Binding? {
+		return asInheritedBinding()?.asTextViewBinding()
+	}
+}
 public extension TextView.Binding {
 	typealias Preparer = TextView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTextViewBinding() -> TextView.Binding? { return self }
 	static func textViewBinding(_ binding: TextView.Binding) -> TextView.Binding {
 		return binding
 	}

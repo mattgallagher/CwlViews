@@ -172,14 +172,22 @@ public extension NavigationItem {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol NavigationItemBinding: BinderBaseBinding {
 	static func navigationItemBinding(_ binding: NavigationItem.Binding) -> Self
+	func asNavigationItemBinding() -> NavigationItem.Binding?
 }
 public extension NavigationItemBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return navigationItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension NavigationItemBinding where Preparer.Inherited.Binding: NavigationItemBinding {
+	func asNavigationItemBinding() -> NavigationItem.Binding? {
+		return asInheritedBinding()?.asNavigationItemBinding()
+	}
+}
 public extension NavigationItem.Binding {
 	typealias Preparer = NavigationItem.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asNavigationItemBinding() -> NavigationItem.Binding? { return self }
 	static func navigationItemBinding(_ binding: NavigationItem.Binding) -> NavigationItem.Binding {
 		return binding
 	}

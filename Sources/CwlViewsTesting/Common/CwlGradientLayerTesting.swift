@@ -17,18 +17,18 @@
 //  OF THIS SOFTWARE.
 //
 
-extension BindingParser where Binding == GradientLayer.Binding {
+extension BindingParser where Downcast: GradientLayerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, GradientLayer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asGradientLayerBinding() }) }
 
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	public static var colors: BindingParser<Dynamic<[CGColor]>, Binding> { return BindingParser<Dynamic<[CGColor]>, Binding>(parse: { binding -> Optional<Dynamic<[CGColor]>> in if case .colors(let x) = binding { return x } else { return nil } }) }
-	public static var locations: BindingParser<Dynamic<[CGFloat]>, Binding> { return BindingParser<Dynamic<[CGFloat]>, Binding>(parse: { binding -> Optional<Dynamic<[CGFloat]>> in if case .locations(let x) = binding { return x } else { return nil } }) }
-	public static var endPoint: BindingParser<Dynamic<CGPoint>, Binding> { return BindingParser<Dynamic<CGPoint>, Binding>(parse: { binding -> Optional<Dynamic<CGPoint>> in if case .endPoint(let x) = binding { return x } else { return nil } }) }
-	public static var startPoint: BindingParser<Dynamic<CGPoint>, Binding> { return BindingParser<Dynamic<CGPoint>, Binding>(parse: { binding -> Optional<Dynamic<CGPoint>> in if case .startPoint(let x) = binding { return x } else { return nil } }) }
+	public static var colors: BindingParser<Dynamic<[CGColor]>, GradientLayer.Binding, Downcast> { return .init(extract: { if case .colors(let x) = $0 { return x } else { return nil } }, upcast: { $0.asGradientLayerBinding() }) }
+	public static var locations: BindingParser<Dynamic<[CGFloat]>, GradientLayer.Binding, Downcast> { return .init(extract: { if case .locations(let x) = $0 { return x } else { return nil } }, upcast: { $0.asGradientLayerBinding() }) }
+	public static var endPoint: BindingParser<Dynamic<CGPoint>, GradientLayer.Binding, Downcast> { return .init(extract: { if case .endPoint(let x) = $0 { return x } else { return nil } }, upcast: { $0.asGradientLayerBinding() }) }
+	public static var startPoint: BindingParser<Dynamic<CGPoint>, GradientLayer.Binding, Downcast> { return .init(extract: { if case .startPoint(let x) = $0 { return x } else { return nil } }, upcast: { $0.asGradientLayerBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

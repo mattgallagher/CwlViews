@@ -94,7 +94,7 @@ public extension Application {
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 		case continueUserActivity((_ application: NSApplication, _ userActivity: NSUserActivity, _ restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool)
-		case didDecodeRestorableState((_ application: NSApplication, NSKeyedUnarchiver) -> Void)
+		case didDecodeRestorableState((_ application: NSApplication, NSCoder) -> Void)
 		case didFailToContinueUserActivity((_ application: NSApplication, _ userActivityType: String, _ error: Error) -> Void)
 		case didFailToRegisterForRemoteNotifications((_ application: NSApplication, _ error: Error) -> Void)
 		case didReceiveRemoteNotification((_ application: NSApplication, _ notification: [String: Any]) -> Void)
@@ -113,7 +113,7 @@ public extension Application {
 		case shouldTerminateAfterLastWindowClosed((_ application: NSApplication) -> Bool)
 		case userDidAcceptCloudKitShare((_ application: NSApplication, CKShare.Metadata) -> Void)
 		case willContinueUserActivity((_ application: NSApplication, _ type: String) -> Bool)
-		case willEncodeRestorableState((_ application: NSApplication, NSKeyedArchiver) -> Void)
+		case willEncodeRestorableState((_ application: NSApplication, NSCoder) -> Void)
 		case willPresentError((_ application: NSApplication, Error) -> Error)
 		case willTerminate((_ notification: Notification) -> Void)
 	}
@@ -351,11 +351,11 @@ extension Application.Preparer {
 		}
 		
 		open func application(_ application: NSApplication, willEncodeRestorableState coder: NSCoder) {
-			return multiHandler(application, coder as! NSKeyedArchiver)
+			return multiHandler(application, coder)
 		}
 		
 		open func application(_ application: NSApplication, didDecodeRestorableState coder: NSCoder) {
-			return multiHandler(application, coder as! NSKeyedUnarchiver)
+			return multiHandler(application, coder)
 		}
 		
 		open func application(_ application: NSApplication, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
@@ -481,14 +481,22 @@ extension NSApplication: HasDelegate {}
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ApplicationBinding: BinderBaseBinding {
 	static func applicationBinding(_ binding: Application.Binding) -> Self
+	func asApplicationBinding() -> Application.Binding?
 }
 public extension ApplicationBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return applicationBinding(.inheritedBinding(binding))
 	}
 }
+public extension ApplicationBinding where Preparer.Inherited.Binding: ApplicationBinding {
+	func asApplicationBinding() -> Application.Binding? {
+		return asInheritedBinding()?.asApplicationBinding()
+	}
+}
 public extension Application.Binding {
 	typealias Preparer = Application.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asApplicationBinding() -> Application.Binding? { return self }
 	static func applicationBinding(_ binding: Application.Binding) -> Application.Binding {
 		return binding
 	}

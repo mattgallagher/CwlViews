@@ -158,14 +158,22 @@ public extension TabBarItem {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TabBarItemBinding: BarItemBinding {
 	static func tabBarItemBinding(_ binding: TabBarItem.Binding) -> Self
+	func asTabBarItemBinding() -> TabBarItem.Binding?
 }
 public extension TabBarItemBinding {
 	static func barItemBinding(_ binding: BarItem.Binding) -> Self {
 		return tabBarItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension TabBarItemBinding where Preparer.Inherited.Binding: TabBarItemBinding {
+	func asTabBarItemBinding() -> TabBarItem.Binding? {
+		return asInheritedBinding()?.asTabBarItemBinding()
+	}
+}
 public extension TabBarItem.Binding {
 	typealias Preparer = TabBarItem.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTabBarItemBinding() -> TabBarItem.Binding? { return self }
 	static func tabBarItemBinding(_ binding: TabBarItem.Binding) -> TabBarItem.Binding {
 		return binding
 	}

@@ -982,14 +982,22 @@ public extension OutlineView {
 public protocol OutlineViewBinding: ControlBinding {
 	associatedtype NodeDataType
 	static func outlineViewBinding(_ binding: OutlineView<NodeDataType>.Binding) -> Self
+	func asOutlineViewBinding() -> OutlineView<NodeDataType>.Binding?
 }
 public extension OutlineViewBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return outlineViewBinding(OutlineView<NodeDataType>.Binding.inheritedBinding(binding))
 	}
 }
+public extension OutlineViewBinding where Preparer.Inherited.Binding: OutlineViewBinding, Preparer.Inherited.Binding.NodeDataType == NodeDataType {
+	func asOutlineViewBinding() -> OutlineView<NodeDataType>.Binding? {
+		return asInheritedBinding()?.asOutlineViewBinding()
+	}
+}
 public extension OutlineView.Binding {
 	typealias Preparer = OutlineView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asOutlineViewBinding() -> OutlineView.Binding? { return self }
 	static func outlineViewBinding(_ binding: OutlineView<NodeDataType>.Binding) -> OutlineView<NodeDataType>.Binding {
 		return binding
 	}

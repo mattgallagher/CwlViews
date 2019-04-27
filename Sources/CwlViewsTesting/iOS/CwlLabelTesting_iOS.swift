@@ -19,31 +19,31 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == Label.Binding {
+extension BindingParser where Downcast: LabelBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Label.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asLabelBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var adjustsFontSizeToFitWidth: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .adjustsFontSizeToFitWidth(let x) = binding { return x } else { return nil } }) }
-	public static var allowsDefaultTighteningForTruncation: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .allowsDefaultTighteningForTruncation(let x) = binding { return x } else { return nil } }) }
-	public static var attributedText: BindingParser<Dynamic<NSAttributedString?>, Binding> { return BindingParser<Dynamic<NSAttributedString?>, Binding>(parse: { binding -> Optional<Dynamic<NSAttributedString?>> in if case .attributedText(let x) = binding { return x } else { return nil } }) }
-	public static var baselineAdjustment: BindingParser<Dynamic<UIBaselineAdjustment>, Binding> { return BindingParser<Dynamic<UIBaselineAdjustment>, Binding>(parse: { binding -> Optional<Dynamic<UIBaselineAdjustment>> in if case .baselineAdjustment(let x) = binding { return x } else { return nil } }) }
-	public static var font: BindingParser<Dynamic<UIFont>, Binding> { return BindingParser<Dynamic<UIFont>, Binding>(parse: { binding -> Optional<Dynamic<UIFont>> in if case .font(let x) = binding { return x } else { return nil } }) }
-	public static var highlightedTextColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .highlightedTextColor(let x) = binding { return x } else { return nil } }) }
-	public static var isEnabled: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isEnabled(let x) = binding { return x } else { return nil } }) }
-	public static var isHighlighted: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isHighlighted(let x) = binding { return x } else { return nil } }) }
-	public static var lineBreakMode: BindingParser<Dynamic<NSLineBreakMode>, Binding> { return BindingParser<Dynamic<NSLineBreakMode>, Binding>(parse: { binding -> Optional<Dynamic<NSLineBreakMode>> in if case .lineBreakMode(let x) = binding { return x } else { return nil } }) }
-	public static var minimumScaleFactor: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .minimumScaleFactor(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfLines: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfLines(let x) = binding { return x } else { return nil } }) }
-	public static var preferredMaxLayoutWidth: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .preferredMaxLayoutWidth(let x) = binding { return x } else { return nil } }) }
-	public static var shadowColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .shadowColor(let x) = binding { return x } else { return nil } }) }
-	public static var shadowOffset: BindingParser<Dynamic<CGSize>, Binding> { return BindingParser<Dynamic<CGSize>, Binding>(parse: { binding -> Optional<Dynamic<CGSize>> in if case .shadowOffset(let x) = binding { return x } else { return nil } }) }
-	public static var text: BindingParser<Dynamic<String>, Binding> { return BindingParser<Dynamic<String>, Binding>(parse: { binding -> Optional<Dynamic<String>> in if case .text(let x) = binding { return x } else { return nil } }) }
-	public static var textAlignment: BindingParser<Dynamic<NSTextAlignment>, Binding> { return BindingParser<Dynamic<NSTextAlignment>, Binding>(parse: { binding -> Optional<Dynamic<NSTextAlignment>> in if case .textAlignment(let x) = binding { return x } else { return nil } }) }
-	public static var textColor: BindingParser<Dynamic<UIColor>, Binding> { return BindingParser<Dynamic<UIColor>, Binding>(parse: { binding -> Optional<Dynamic<UIColor>> in if case .textColor(let x) = binding { return x } else { return nil } }) }
+	public static var adjustsFontSizeToFitWidth: BindingParser<Dynamic<Bool>, Label.Binding, Downcast> { return .init(extract: { if case .adjustsFontSizeToFitWidth(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var allowsDefaultTighteningForTruncation: BindingParser<Dynamic<Bool>, Label.Binding, Downcast> { return .init(extract: { if case .allowsDefaultTighteningForTruncation(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var attributedText: BindingParser<Dynamic<NSAttributedString?>, Label.Binding, Downcast> { return .init(extract: { if case .attributedText(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var baselineAdjustment: BindingParser<Dynamic<UIBaselineAdjustment>, Label.Binding, Downcast> { return .init(extract: { if case .baselineAdjustment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var font: BindingParser<Dynamic<UIFont>, Label.Binding, Downcast> { return .init(extract: { if case .font(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var highlightedTextColor: BindingParser<Dynamic<UIColor?>, Label.Binding, Downcast> { return .init(extract: { if case .highlightedTextColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var isEnabled: BindingParser<Dynamic<Bool>, Label.Binding, Downcast> { return .init(extract: { if case .isEnabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var isHighlighted: BindingParser<Dynamic<Bool>, Label.Binding, Downcast> { return .init(extract: { if case .isHighlighted(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var lineBreakMode: BindingParser<Dynamic<NSLineBreakMode>, Label.Binding, Downcast> { return .init(extract: { if case .lineBreakMode(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var minimumScaleFactor: BindingParser<Dynamic<CGFloat>, Label.Binding, Downcast> { return .init(extract: { if case .minimumScaleFactor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var numberOfLines: BindingParser<Dynamic<Int>, Label.Binding, Downcast> { return .init(extract: { if case .numberOfLines(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var preferredMaxLayoutWidth: BindingParser<Dynamic<CGFloat>, Label.Binding, Downcast> { return .init(extract: { if case .preferredMaxLayoutWidth(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var shadowColor: BindingParser<Dynamic<UIColor?>, Label.Binding, Downcast> { return .init(extract: { if case .shadowColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var shadowOffset: BindingParser<Dynamic<CGSize>, Label.Binding, Downcast> { return .init(extract: { if case .shadowOffset(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var text: BindingParser<Dynamic<String>, Label.Binding, Downcast> { return .init(extract: { if case .text(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var textAlignment: BindingParser<Dynamic<NSTextAlignment>, Label.Binding, Downcast> { return .init(extract: { if case .textAlignment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
+	public static var textColor: BindingParser<Dynamic<UIColor>, Label.Binding, Downcast> { return .init(extract: { if case .textColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLabelBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

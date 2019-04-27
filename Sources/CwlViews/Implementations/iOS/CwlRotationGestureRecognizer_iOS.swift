@@ -127,14 +127,22 @@ public extension RotationGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol RotationGestureRecognizerBinding: GestureRecognizerBinding {
 	static func rotationGestureRecognizerBinding(_ binding: RotationGestureRecognizer.Binding) -> Self
+	func asRotationGestureRecognizerBinding() -> RotationGestureRecognizer.Binding?
 }
 public extension RotationGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return rotationGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension RotationGestureRecognizerBinding where Preparer.Inherited.Binding: RotationGestureRecognizerBinding {
+	func asRotationGestureRecognizerBinding() -> RotationGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asRotationGestureRecognizerBinding()
+	}
+}
 public extension RotationGestureRecognizer.Binding {
 	typealias Preparer = RotationGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asRotationGestureRecognizerBinding() -> RotationGestureRecognizer.Binding? { return self }
 	static func rotationGestureRecognizerBinding(_ binding: RotationGestureRecognizer.Binding) -> RotationGestureRecognizer.Binding {
 		return binding
 	}

@@ -19,33 +19,33 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == Window.Binding {
+extension BindingParser where Downcast: WindowBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Window.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asWindowBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var frame: BindingParser<Dynamic<CGRect>, Binding> { return BindingParser<Dynamic<CGRect>, Binding>(parse: { binding -> Optional<Dynamic<CGRect>> in if case .frame(let x) = binding { return x } else { return nil } }) }
-	public static var rootViewController: BindingParser<Dynamic<ViewControllerConvertible>, Binding> { return BindingParser<Dynamic<ViewControllerConvertible>, Binding>(parse: { binding -> Optional<Dynamic<ViewControllerConvertible>> in if case .rootViewController(let x) = binding { return x } else { return nil } }) }
-	public static var screen: BindingParser<Dynamic<UIScreen>, Binding> { return BindingParser<Dynamic<UIScreen>, Binding>(parse: { binding -> Optional<Dynamic<UIScreen>> in if case .screen(let x) = binding { return x } else { return nil } }) }
-	public static var windowLevel: BindingParser<Dynamic<UIWindow.Level>, Binding> { return BindingParser<Dynamic<UIWindow.Level>, Binding>(parse: { binding -> Optional<Dynamic<UIWindow.Level>> in if case .windowLevel(let x) = binding { return x } else { return nil } }) }
+	public static var frame: BindingParser<Dynamic<CGRect>, Window.Binding, Downcast> { return .init(extract: { if case .frame(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var rootViewController: BindingParser<Dynamic<ViewControllerConvertible>, Window.Binding, Downcast> { return .init(extract: { if case .rootViewController(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var screen: BindingParser<Dynamic<UIScreen>, Window.Binding, Downcast> { return .init(extract: { if case .screen(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var windowLevel: BindingParser<Dynamic<UIWindow.Level>, Window.Binding, Downcast> { return .init(extract: { if case .windowLevel(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var makeKey: BindingParser<Signal<Void>, Binding> { return BindingParser<Signal<Void>, Binding>(parse: { binding -> Optional<Signal<Void>> in if case .makeKey(let x) = binding { return x } else { return nil } }) }
+	public static var makeKey: BindingParser<Signal<Void>, Window.Binding, Downcast> { return .init(extract: { if case .makeKey(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
 	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var didBecomeVisible: BindingParser<SignalInput<Void>, Binding> { return BindingParser<SignalInput<Void>, Binding>(parse: { binding -> Optional<SignalInput<Void>> in if case .didBecomeVisible(let x) = binding { return x } else { return nil } }) }
-	public static var didBecomeHidden: BindingParser<SignalInput<Void>, Binding> { return BindingParser<SignalInput<Void>, Binding>(parse: { binding -> Optional<SignalInput<Void>> in if case .didBecomeHidden(let x) = binding { return x } else { return nil } }) }
-	public static var didBecomeKey: BindingParser<SignalInput<Void>, Binding> { return BindingParser<SignalInput<Void>, Binding>(parse: { binding -> Optional<SignalInput<Void>> in if case .didBecomeKey(let x) = binding { return x } else { return nil } }) }
-	public static var didResignKey: BindingParser<SignalInput<Void>, Binding> { return BindingParser<SignalInput<Void>, Binding>(parse: { binding -> Optional<SignalInput<Void>> in if case .didResignKey(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardWillShow: BindingParser<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingParser<SignalInput<[AnyHashable: Any]?>, Binding>(parse: { binding -> Optional<SignalInput<[AnyHashable: Any]?>> in if case .keyboardWillShow(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardDidShow: BindingParser<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingParser<SignalInput<[AnyHashable: Any]?>, Binding>(parse: { binding -> Optional<SignalInput<[AnyHashable: Any]?>> in if case .keyboardDidShow(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardWillHide: BindingParser<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingParser<SignalInput<[AnyHashable: Any]?>, Binding>(parse: { binding -> Optional<SignalInput<[AnyHashable: Any]?>> in if case .keyboardWillHide(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardDidHide: BindingParser<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingParser<SignalInput<[AnyHashable: Any]?>, Binding>(parse: { binding -> Optional<SignalInput<[AnyHashable: Any]?>> in if case .keyboardDidHide(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardWillChangeFrame: BindingParser<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingParser<SignalInput<[AnyHashable: Any]?>, Binding>(parse: { binding -> Optional<SignalInput<[AnyHashable: Any]?>> in if case .keyboardWillChangeFrame(let x) = binding { return x } else { return nil } }) }
-	public static var keyboardDidChangeFrame: BindingParser<SignalInput<[AnyHashable: Any]?>, Binding> { return BindingParser<SignalInput<[AnyHashable: Any]?>, Binding>(parse: { binding -> Optional<SignalInput<[AnyHashable: Any]?>> in if case .keyboardDidChangeFrame(let x) = binding { return x } else { return nil } }) }
+	public static var didBecomeVisible: BindingParser<SignalInput<Void>, Window.Binding, Downcast> { return .init(extract: { if case .didBecomeVisible(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var didBecomeHidden: BindingParser<SignalInput<Void>, Window.Binding, Downcast> { return .init(extract: { if case .didBecomeHidden(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var didBecomeKey: BindingParser<SignalInput<Void>, Window.Binding, Downcast> { return .init(extract: { if case .didBecomeKey(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var didResignKey: BindingParser<SignalInput<Void>, Window.Binding, Downcast> { return .init(extract: { if case .didResignKey(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var keyboardWillShow: BindingParser<SignalInput<[AnyHashable: Any]?>, Window.Binding, Downcast> { return .init(extract: { if case .keyboardWillShow(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var keyboardDidShow: BindingParser<SignalInput<[AnyHashable: Any]?>, Window.Binding, Downcast> { return .init(extract: { if case .keyboardDidShow(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var keyboardWillHide: BindingParser<SignalInput<[AnyHashable: Any]?>, Window.Binding, Downcast> { return .init(extract: { if case .keyboardWillHide(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var keyboardDidHide: BindingParser<SignalInput<[AnyHashable: Any]?>, Window.Binding, Downcast> { return .init(extract: { if case .keyboardDidHide(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var keyboardWillChangeFrame: BindingParser<SignalInput<[AnyHashable: Any]?>, Window.Binding, Downcast> { return .init(extract: { if case .keyboardWillChangeFrame(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
+	public static var keyboardDidChangeFrame: BindingParser<SignalInput<[AnyHashable: Any]?>, Window.Binding, Downcast> { return .init(extract: { if case .keyboardDidChangeFrame(let x) = $0 { return x } else { return nil } }, upcast: { $0.asWindowBinding() }) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

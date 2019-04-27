@@ -19,10 +19,10 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == Window.Binding {
+extension BindingParser where Downcast: TableHeaderViewBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, TableHeaderView.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asTableHeaderViewBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	

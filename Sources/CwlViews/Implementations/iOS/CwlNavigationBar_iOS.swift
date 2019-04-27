@@ -233,14 +233,22 @@ public extension NavigationBar {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol NavigationBarBinding: ViewBinding {
 	static func scrollViewBinding(_ binding: NavigationBar.Binding) -> Self
+	func asNavigationBarBinding() -> NavigationBar.Binding?
 }
 public extension NavigationBarBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return scrollViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension NavigationBarBinding where Preparer.Inherited.Binding: NavigationBarBinding {
+	func asNavigationBarBinding() -> NavigationBar.Binding? {
+		return asInheritedBinding()?.asNavigationBarBinding()
+	}
+}
 public extension NavigationBar.Binding {
 	typealias Preparer = NavigationBar.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asNavigationBarBinding() -> NavigationBar.Binding? { return self }
 	static func scrollViewBinding(_ binding: NavigationBar.Binding) -> NavigationBar.Binding {
 		return binding
 	}

@@ -19,23 +19,23 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == TableRowView.Binding {
+extension BindingParser where Downcast: TableRowViewBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, TableRowView.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asTableRowViewBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var backgroundColor: BindingParser<Dynamic<NSColor>, Binding> { return BindingParser<Dynamic<NSColor>, Binding>(parse: { binding -> Optional<Dynamic<NSColor>> in if case .backgroundColor(let x) = binding { return x } else { return nil } }) }
-	public static var draggingDestinationFeedbackStyle: BindingParser<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>, Binding> { return BindingParser<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>, Binding>(parse: { binding -> Optional<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>> in if case .draggingDestinationFeedbackStyle(let x) = binding { return x } else { return nil } }) }
-	public static var indentationForDropOperation: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .indentationForDropOperation(let x) = binding { return x } else { return nil } }) }
-	public static var isEmphasized: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isEmphasized(let x) = binding { return x } else { return nil } }) }
-	public static var isFloating: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isFloating(let x) = binding { return x } else { return nil } }) }
-	public static var isGroupRowStyle: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isGroupRowStyle(let x) = binding { return x } else { return nil } }) }
-	public static var isSelected: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isSelected(let x) = binding { return x } else { return nil } }) }
-	public static var isTargetForDropOperation: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isTargetForDropOperation(let x) = binding { return x } else { return nil } }) }
-	public static var selectionHighlightStyle: BindingParser<Dynamic<NSTableView.SelectionHighlightStyle>, Binding> { return BindingParser<Dynamic<NSTableView.SelectionHighlightStyle>, Binding>(parse: { binding -> Optional<Dynamic<NSTableView.SelectionHighlightStyle>> in if case .selectionHighlightStyle(let x) = binding { return x } else { return nil } }) }
+	public static var backgroundColor: BindingParser<Dynamic<NSColor>, TableRowView.Binding, Downcast> { return .init(extract: { if case .backgroundColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var draggingDestinationFeedbackStyle: BindingParser<Dynamic<NSTableView.DraggingDestinationFeedbackStyle>, TableRowView.Binding, Downcast> { return .init(extract: { if case .draggingDestinationFeedbackStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var indentationForDropOperation: BindingParser<Dynamic<CGFloat>, TableRowView.Binding, Downcast> { return .init(extract: { if case .indentationForDropOperation(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var isEmphasized: BindingParser<Dynamic<Bool>, TableRowView.Binding, Downcast> { return .init(extract: { if case .isEmphasized(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var isFloating: BindingParser<Dynamic<Bool>, TableRowView.Binding, Downcast> { return .init(extract: { if case .isFloating(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var isGroupRowStyle: BindingParser<Dynamic<Bool>, TableRowView.Binding, Downcast> { return .init(extract: { if case .isGroupRowStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var isSelected: BindingParser<Dynamic<Bool>, TableRowView.Binding, Downcast> { return .init(extract: { if case .isSelected(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var isTargetForDropOperation: BindingParser<Dynamic<Bool>, TableRowView.Binding, Downcast> { return .init(extract: { if case .isTargetForDropOperation(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
+	public static var selectionHighlightStyle: BindingParser<Dynamic<NSTableView.SelectionHighlightStyle>, TableRowView.Binding, Downcast> { return .init(extract: { if case .selectionHighlightStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableRowViewBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

@@ -19,15 +19,15 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == PinchGestureRecognizer.Binding {
+extension BindingParser where Downcast: PinchGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, PinchGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asPinchGestureRecognizerBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var scale: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .scale(let x) = binding { return x } else { return nil } }) }
+	public static var scale: BindingParser<Dynamic<CGFloat>, PinchGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .scale(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPinchGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

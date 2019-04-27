@@ -19,22 +19,22 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == PageControl.Binding {
+extension BindingParser where Downcast: PageControlBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, PageControl.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asPageControlBinding() }) }
 	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var currentPage: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .currentPage(let x) = binding { return x } else { return nil } }) }
-	public static var currentPageIndicatorTintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .currentPageIndicatorTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var defersCurrentPageDisplay: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .defersCurrentPageDisplay(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfPages: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfPages(let x) = binding { return x } else { return nil } }) }
-	public static var pageIndicatorTintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .pageIndicatorTintColor(let x) = binding { return x } else { return nil } }) }
-
+	public static var currentPage: BindingParser<Dynamic<Int>, PageControl.Binding, Downcast> { return .init(extract: { if case .currentPage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPageControlBinding() }) }
+	public static var currentPageIndicatorTintColor: BindingParser<Dynamic<UIColor?>, PageControl.Binding, Downcast> { return .init(extract: { if case .currentPageIndicatorTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPageControlBinding() }) }
+	public static var defersCurrentPageDisplay: BindingParser<Dynamic<Bool>, PageControl.Binding, Downcast> { return .init(extract: { if case .defersCurrentPageDisplay(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPageControlBinding() }) }
+	public static var numberOfPages: BindingParser<Dynamic<Int>, PageControl.Binding, Downcast> { return .init(extract: { if case .numberOfPages(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPageControlBinding() }) }
+	public static var pageIndicatorTintColor: BindingParser<Dynamic<UIColor?>, PageControl.Binding, Downcast> { return .init(extract: { if case .pageIndicatorTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPageControlBinding() }) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var updateCurrentPageDisplay: BindingParser<Signal<Void>, Binding> { return BindingParser<Signal<Void>, Binding>(parse: { binding -> Optional<Signal<Void>> in if case .updateCurrentPageDisplay(let x) = binding { return x } else { return nil } }) }
+	public static var updateCurrentPageDisplay: BindingParser<Signal<Void>, PageControl.Binding, Downcast> { return .init(extract: { if case .updateCurrentPageDisplay(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPageControlBinding() }) }
 
 	// 3. Action bindings are triggered by the object after construction.
 

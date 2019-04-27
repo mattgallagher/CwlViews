@@ -159,14 +159,22 @@ public extension PopUpButton {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol PopUpButtonBinding: ButtonBinding {
 	static func popUpButtonBinding(_ binding: PopUpButton.Binding) -> Self
+	func asPopUpButtonBinding() -> PopUpButton.Binding?
 }
 public extension PopUpButtonBinding {
 	static func buttonBinding(_ binding: Button.Binding) -> Self {
 		return popUpButtonBinding(.inheritedBinding(binding))
 	}
 }
+public extension PopUpButtonBinding where Preparer.Inherited.Binding: PopUpButtonBinding {
+	func asPopUpButtonBinding() -> PopUpButton.Binding? {
+		return asInheritedBinding()?.asPopUpButtonBinding()
+	}
+}
 public extension PopUpButton.Binding {
 	typealias Preparer = PopUpButton.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asPopUpButtonBinding() -> PopUpButton.Binding? { return self }
 	static func popUpButtonBinding(_ binding: PopUpButton.Binding) -> PopUpButton.Binding {
 		return binding
 	}

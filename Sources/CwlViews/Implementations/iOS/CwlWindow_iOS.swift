@@ -199,14 +199,22 @@ public extension Window {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol WindowBinding: ViewBinding {
 	static func windowBinding(_ binding: Window.Binding) -> Self
+	func asWindowBinding() -> Window.Binding?
 }
 public extension WindowBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return windowBinding(.inheritedBinding(binding))
 	}
 }
+public extension WindowBinding where Preparer.Inherited.Binding: WindowBinding {
+	func asWindowBinding() -> Window.Binding? {
+		return asInheritedBinding()?.asWindowBinding()
+	}
+}
 public extension Window.Binding {
 	typealias Preparer = Window.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asWindowBinding() -> Window.Binding? { return self }
 	static func windowBinding(_ binding: Window.Binding) -> Window.Binding {
 		return binding
 	}

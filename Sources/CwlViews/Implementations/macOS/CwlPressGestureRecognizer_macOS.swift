@@ -133,14 +133,22 @@ public extension PressGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol PressGestureRecognizerBinding: GestureRecognizerBinding {
 	static func pressGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> Self
+	func asPressGestureRecognizerBinding() -> PressGestureRecognizer.Binding?
 }
 public extension PressGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return pressGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension PressGestureRecognizerBinding where Preparer.Inherited.Binding: PressGestureRecognizerBinding {
+	func asPressGestureRecognizerBinding() -> PressGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asPressGestureRecognizerBinding()
+	}
+}
 public extension PressGestureRecognizer.Binding {
 	typealias Preparer = PressGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asPressGestureRecognizerBinding() -> PressGestureRecognizer.Binding? { return self }
 	static func pressGestureRecognizerBinding(_ binding: PressGestureRecognizer.Binding) -> PressGestureRecognizer.Binding {
 		return binding
 	}

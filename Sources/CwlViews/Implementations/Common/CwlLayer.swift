@@ -384,14 +384,22 @@ public extension Layer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol LayerBinding: BinderBaseBinding {
 	static func layerBinding(_ binding: Layer.Binding) -> Self
+	func asLayerBinding() -> Layer.Binding?
 }
 public extension LayerBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return layerBinding(.inheritedBinding(binding))
 	}
 }
+public extension LayerBinding where Preparer.Inherited.Binding: LayerBinding {
+	func asLayerBinding() -> Layer.Binding? {
+		return asInheritedBinding()?.asLayerBinding()
+	}
+}
 public extension Layer.Binding {
 	typealias Preparer = Layer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asLayerBinding() -> Layer.Binding? { return self }
 	static func layerBinding(_ binding: Layer.Binding) -> Layer.Binding {
 		return binding
 	}

@@ -19,18 +19,18 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == LongPressGestureRecognizer.Binding {
+extension BindingParser where Downcast: LongPressGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, LongPressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asLongPressGestureRecognizerBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var allowableMovement: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .allowableMovement(let x) = binding { return x } else { return nil } }) }
-	public static var minimumPressDuration: BindingParser<Dynamic<CFTimeInterval>, Binding> { return BindingParser<Dynamic<CFTimeInterval>, Binding>(parse: { binding -> Optional<Dynamic<CFTimeInterval>> in if case .minimumPressDuration(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfTapsRequired: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfTapsRequired(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfTouchesRequired: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfTouchesRequired(let x) = binding { return x } else { return nil } }) }
+	public static var allowableMovement: BindingParser<Dynamic<CGFloat>, LongPressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .allowableMovement(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLongPressGestureRecognizerBinding() }) }
+	public static var minimumPressDuration: BindingParser<Dynamic<CFTimeInterval>, LongPressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .minimumPressDuration(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLongPressGestureRecognizerBinding() }) }
+	public static var numberOfTapsRequired: BindingParser<Dynamic<Int>, LongPressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .numberOfTapsRequired(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLongPressGestureRecognizerBinding() }) }
+	public static var numberOfTouchesRequired: BindingParser<Dynamic<Int>, LongPressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .numberOfTouchesRequired(let x) = $0 { return x } else { return nil } }, upcast: { $0.asLongPressGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

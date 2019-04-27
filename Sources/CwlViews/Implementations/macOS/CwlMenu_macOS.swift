@@ -95,14 +95,13 @@ public extension Menu.Preparer {
 		if let sn = systemName {
 			let name = sn.rawValue
 			let codingProxy = MenuCodingProxy(name: name)
-			let data = NSMutableData()
-			let archiver = NSKeyedArchiver(forWritingWith: data)
+			let archiver = NSKeyedArchiver(requiringSecureCoding: false)
 			archiver.setClassName(NSStringFromClass(type), for: MenuCodingProxy.self)
 			archiver.outputFormat = .binary
 			archiver.encode(codingProxy, forKey: NSKeyedArchiveRootObjectKey)
 			archiver.finishEncoding()
-			
-			x = NSKeyedUnarchiver.unarchiveObject(with: data as Data) as? NSMenu ?? NSMenu()
+
+			x = (try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(archiver.encodedData) as? NSMenu) ?? NSMenu()
 		} else {
 			x = type.init()
 		}
@@ -266,14 +265,22 @@ public extension Menu {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol MenuBinding: BinderBaseBinding {
 	static func menuBinding(_ binding: Menu.Binding) -> Self
+	func asMenuBinding() -> Menu.Binding?
 }
 public extension MenuBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return menuBinding(.inheritedBinding(binding))
 	}
 }
+public extension MenuBinding where Preparer.Inherited.Binding: MenuBinding {
+	func asMenuBinding() -> Menu.Binding? {
+		return asInheritedBinding()?.asMenuBinding()
+	}
+}
 public extension Menu.Binding {
 	typealias Preparer = Menu.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asMenuBinding() -> Menu.Binding? { return self }
 	static func menuBinding(_ binding: Menu.Binding) -> Menu.Binding {
 		return binding
 	}

@@ -130,14 +130,22 @@ public extension TapGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TapGestureRecognizerBinding: GestureRecognizerBinding {
 	static func tapGestureRecognizerBinding(_ binding: TapGestureRecognizer.Binding) -> Self
+	func asTapGestureRecognizerBinding() -> TapGestureRecognizer.Binding?
 }
 public extension TapGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return tapGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension TapGestureRecognizerBinding where Preparer.Inherited.Binding: TapGestureRecognizerBinding {
+	func asTapGestureRecognizerBinding() -> TapGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asTapGestureRecognizerBinding()
+	}
+}
 public extension TapGestureRecognizer.Binding {
 	typealias Preparer = TapGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTapGestureRecognizerBinding() -> TapGestureRecognizer.Binding? { return self }
 	static func tapGestureRecognizerBinding(_ binding: TapGestureRecognizer.Binding) -> TapGestureRecognizer.Binding {
 		return binding
 	}

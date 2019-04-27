@@ -65,12 +65,10 @@ public extension Window {
 		case hasShadow(Dynamic<Bool>)
 		case hidesOnDeactivate(Dynamic<Bool>)
 		case ignoresMouseEvents(Dynamic<Bool>)
-		case isAutodisplay(Dynamic<Bool>)
 		case isDocumentEdited(Dynamic<Bool>)
 		case isExcludedFromWindowsMenu(Dynamic<Bool>)
 		case isMovable(Dynamic<Bool>)
 		case isMovableByWindowBackground(Dynamic<Bool>)
-		case isOneShot(Dynamic<Bool>)
 		case isOpaque(Dynamic<Bool>)
 		case isRestorable(Dynamic<Bool>)
 		case key(Dynamic<Bool>)
@@ -81,7 +79,6 @@ public extension Window {
 		case miniwindowImage(Dynamic<NSImage?>)
 		case miniwindowTitle(Dynamic<String>)
 		case order(Dynamic<WindowOrder>)
-		case preferredBackingLocation(Dynamic<NSWindow.BackingLocation>)
 		case preservesContentDuringLiveResize(Dynamic<Bool>)
 		case preventsApplicationTerminationWhenModal(Dynamic<Bool>)
 		case representedURL(Dynamic<URL?>)
@@ -310,12 +307,10 @@ public extension Window.Preparer {
 		case .hasShadow(let x): return x.apply(instance) { i, v in i.hasShadow = v }
 		case .hidesOnDeactivate(let x): return x.apply(instance) { i, v in i.hidesOnDeactivate = v }
 		case .ignoresMouseEvents(let x): return x.apply(instance) { i, v in i.ignoresMouseEvents = v }
-		case .isAutodisplay(let x): return x.apply(instance) { i, v in i.isAutodisplay = v }
 		case .isDocumentEdited(let x): return x.apply(instance) { i, v in i.isDocumentEdited = v }
 		case .isExcludedFromWindowsMenu(let x): return x.apply(instance) { i, v in i.isExcludedFromWindowsMenu = v }
 		case .isMovable(let x): return x.apply(instance) { i, v in i.isMovable = v }
 		case .isMovableByWindowBackground(let x): return x.apply(instance) { i, v in i.isMovableByWindowBackground = v }
-		case .isOneShot(let x): return x.apply(instance) { i, v in i.isOneShot = v }
 		case .isOpaque(let x): return x.apply(instance) { i, v in i.isOpaque = v }
 		case .isRestorable(let x): return x.apply(instance) { i, v in i.isRestorable = v }
 		case .initialFirstResponderTag: return nil
@@ -327,7 +322,6 @@ public extension Window.Preparer {
 		case .miniwindowTitle(let x): return x.apply(instance) { i, v in i.miniwindowTitle = v }
 		case .maxFullScreenContentSize(let x): return x.apply(instance) { i, v in i.maxFullScreenContentSize = v }
 		case .order: return nil
-		case .preferredBackingLocation(let x): return x.apply(instance) { i, v in i.preferredBackingLocation = v }
 		case .preservesContentDuringLiveResize(let x): return x.apply(instance) { i, v in i.preservesContentDuringLiveResize = v }
 		case .preventsApplicationTerminationWhenModal(let x): return x.apply(instance) { i, v in i.preventsApplicationTerminationWhenModal = v }
 		case .representedURL(let x): return x.apply(instance) { i, v in i.representedURL = v }
@@ -596,12 +590,10 @@ public extension BindingName where Binding: WindowBinding {
 	static var hasShadow: WindowName<Dynamic<Bool>> { return .name(Window.Binding.hasShadow) }
 	static var hidesOnDeactivate: WindowName<Dynamic<Bool>> { return .name(Window.Binding.hidesOnDeactivate) }
 	static var ignoresMouseEvents: WindowName<Dynamic<Bool>> { return .name(Window.Binding.ignoresMouseEvents) }
-	static var isAutodisplay: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isAutodisplay) }
 	static var isDocumentEdited: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isDocumentEdited) }
 	static var isExcludedFromWindowsMenu: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isExcludedFromWindowsMenu) }
 	static var isMovable: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isMovable) }
 	static var isMovableByWindowBackground: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isMovableByWindowBackground) }
-	static var isOneShot: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isOneShot) }
 	static var isOpaque: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isOpaque) }
 	static var isRestorable: WindowName<Dynamic<Bool>> { return .name(Window.Binding.isRestorable) }
 	static var key: WindowName<Dynamic<Bool>> { return .name(Window.Binding.key) }
@@ -612,7 +604,6 @@ public extension BindingName where Binding: WindowBinding {
 	static var miniwindowImage: WindowName<Dynamic<NSImage?>> { return .name(Window.Binding.miniwindowImage) }
 	static var miniwindowTitle: WindowName<Dynamic<String>> { return .name(Window.Binding.miniwindowTitle) }
 	static var order: WindowName<Dynamic<WindowOrder>> { return .name(Window.Binding.order) }
-	static var preferredBackingLocation: WindowName<Dynamic<NSWindow.BackingLocation>> { return .name(Window.Binding.preferredBackingLocation) }
 	static var preservesContentDuringLiveResize: WindowName<Dynamic<Bool>> { return .name(Window.Binding.preservesContentDuringLiveResize) }
 	static var preventsApplicationTerminationWhenModal: WindowName<Dynamic<Bool>> { return .name(Window.Binding.preventsApplicationTerminationWhenModal) }
 	static var representedURL: WindowName<Dynamic<URL?>> { return .name(Window.Binding.representedURL) }
@@ -701,14 +692,22 @@ public extension Window {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol WindowBinding: BinderBaseBinding {
 	static func windowBinding(_ binding: Window.Binding) -> Self
+	func asWindowBinding() -> Window.Binding?
 }
 public extension WindowBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return windowBinding(.inheritedBinding(binding))
 	}
 }
+public extension WindowBinding where Preparer.Inherited.Binding: WindowBinding {
+	func asWindowBinding() -> Window.Binding? {
+		return asInheritedBinding()?.asWindowBinding()
+	}
+}
 public extension Window.Binding {
 	typealias Preparer = Window.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asWindowBinding() -> Window.Binding? { return self }
 	static func windowBinding(_ binding: Window.Binding) -> Window.Binding {
 		return binding
 	}

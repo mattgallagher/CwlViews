@@ -341,14 +341,22 @@ public extension PageViewController {
 public protocol PageViewControllerBinding: ViewControllerBinding {
 	associatedtype PageDataType
 	static func pageViewControllerBinding(_ binding: PageViewController<PageDataType>.Binding) -> Self
+	func asPageViewControllerBinding() -> PageViewController<PageDataType>.Binding?
 }
 public extension PageViewControllerBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return pageViewControllerBinding(PageViewController<PageDataType>.Binding.inheritedBinding(binding))
 	}
 }
+public extension PageViewControllerBinding where Preparer.Inherited.Binding: PageViewControllerBinding, Preparer.Inherited.Binding.PageDataType == PageDataType {
+	func asPageViewControllerBinding() -> PageViewController<PageDataType>.Binding? {
+		return asInheritedBinding()?.asPageViewControllerBinding()
+	}
+}
 public extension PageViewController.Binding {
 	typealias Preparer = PageViewController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asPageViewControllerBinding() -> PageViewController.Binding? { return self }
 	static func pageViewControllerBinding(_ binding: PageViewController<PageDataType>.Binding) -> PageViewController.Binding {
 		return binding
 	}

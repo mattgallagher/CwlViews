@@ -19,36 +19,36 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == NavigationBar.Binding {
+extension BindingParser where Downcast: NavigationBarBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, NavigationBar.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asNavigationBarBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var backgroundImage: BindingParser<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>> in if case .backgroundImage(let x) = binding { return x } else { return nil } }) }
-	public static var backIndicatorImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .backIndicatorImage(let x) = binding { return x } else { return nil } }) }
-	public static var backIndicatorTransitionMaskImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .backIndicatorTransitionMaskImage(let x) = binding { return x } else { return nil } }) }
-	public static var barStyle: BindingParser<Dynamic<UIBarStyle>, Binding> { return BindingParser<Dynamic<UIBarStyle>, Binding>(parse: { binding -> Optional<Dynamic<UIBarStyle>> in if case .barStyle(let x) = binding { return x } else { return nil } }) }
-	public static var barTintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .barTintColor(let x) = binding { return x } else { return nil } }) }
-	public static var isTranslucent: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isTranslucent(let x) = binding { return x } else { return nil } }) }
-	public static var items: BindingParser<Dynamic<StackMutation<NavigationItemConvertible>>, Binding> { return BindingParser<Dynamic<StackMutation<NavigationItemConvertible>>, Binding>(parse: { binding -> Optional<Dynamic<StackMutation<NavigationItemConvertible>>> in if case .items(let x) = binding { return x } else { return nil } }) }
-	public static var shadowImage: BindingParser<Dynamic<UIImage?>, Binding> { return BindingParser<Dynamic<UIImage?>, Binding>(parse: { binding -> Optional<Dynamic<UIImage?>> in if case .shadowImage(let x) = binding { return x } else { return nil } }) }
-	public static var tintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .tintColor(let x) = binding { return x } else { return nil } }) }
-	public static var titleTextAttributes: BindingParser<Dynamic<[NSAttributedString.Key: Any]>, Binding> { return BindingParser<Dynamic<[NSAttributedString.Key: Any]>, Binding>(parse: { binding -> Optional<Dynamic<[NSAttributedString.Key: Any]>> in if case .titleTextAttributes(let x) = binding { return x } else { return nil } }) }
-	public static var titleVerticalPositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> in if case .titleVerticalPositionAdjustment(let x) = binding { return x } else { return nil } }) }
+	public static var backgroundImage: BindingParser<Dynamic<ScopedValues<PositionAndMetrics, UIImage?>>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .backgroundImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var backIndicatorImage: BindingParser<Dynamic<UIImage?>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .backIndicatorImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var backIndicatorTransitionMaskImage: BindingParser<Dynamic<UIImage?>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .backIndicatorTransitionMaskImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var barStyle: BindingParser<Dynamic<UIBarStyle>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .barStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var barTintColor: BindingParser<Dynamic<UIColor?>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .barTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var isTranslucent: BindingParser<Dynamic<Bool>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .isTranslucent(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var items: BindingParser<Dynamic<StackMutation<NavigationItemConvertible>>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .items(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var shadowImage: BindingParser<Dynamic<UIImage?>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .shadowImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var tintColor: BindingParser<Dynamic<UIColor?>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .tintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var titleTextAttributes: BindingParser<Dynamic<[NSAttributedString.Key: Any]>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .titleTextAttributes(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var titleVerticalPositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, NavigationBar.Binding, Downcast> { return .init(extract: { if case .titleVerticalPositionAdjustment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var didPop: BindingParser<(UINavigationBar, UINavigationItem) -> Void, Binding> { return BindingParser<(UINavigationBar, UINavigationItem) -> Void, Binding>(parse: { binding -> Optional<(UINavigationBar, UINavigationItem) -> Void> in if case .didPop(let x) = binding { return x } else { return nil } }) }
-	public static var didPush: BindingParser<(UINavigationBar, UINavigationItem) -> Void, Binding> { return BindingParser<(UINavigationBar, UINavigationItem) -> Void, Binding>(parse: { binding -> Optional<(UINavigationBar, UINavigationItem) -> Void> in if case .didPush(let x) = binding { return x } else { return nil } }) }
-	public static var position: BindingParser<(UIBarPositioning) -> UIBarPosition, Binding> { return BindingParser<(UIBarPositioning) -> UIBarPosition, Binding>(parse: { binding -> Optional<(UIBarPositioning) -> UIBarPosition> in if case .position(let x) = binding { return x } else { return nil } }) }
-	public static var shouldPop: BindingParser<(UINavigationBar, UINavigationItem) -> Bool, Binding> { return BindingParser<(UINavigationBar, UINavigationItem) -> Bool, Binding>(parse: { binding -> Optional<(UINavigationBar, UINavigationItem) -> Bool> in if case .shouldPop(let x) = binding { return x } else { return nil } }) }
-	public static var shouldPush: BindingParser<(UINavigationBar, UINavigationItem) -> Bool, Binding> { return BindingParser<(UINavigationBar, UINavigationItem) -> Bool, Binding>(parse: { binding -> Optional<(UINavigationBar, UINavigationItem) -> Bool> in if case .shouldPush(let x) = binding { return x } else { return nil } }) }
+	public static var didPop: BindingParser<(UINavigationBar, UINavigationItem) -> Void, NavigationBar.Binding, Downcast> { return .init(extract: { if case .didPop(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var didPush: BindingParser<(UINavigationBar, UINavigationItem) -> Void, NavigationBar.Binding, Downcast> { return .init(extract: { if case .didPush(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var position: BindingParser<(UIBarPositioning) -> UIBarPosition, NavigationBar.Binding, Downcast> { return .init(extract: { if case .position(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var shouldPop: BindingParser<(UINavigationBar, UINavigationItem) -> Bool, NavigationBar.Binding, Downcast> { return .init(extract: { if case .shouldPop(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
+	public static var shouldPush: BindingParser<(UINavigationBar, UINavigationItem) -> Bool, NavigationBar.Binding, Downcast> { return .init(extract: { if case .shouldPush(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationBarBinding() }) }
 }
 
 #endif

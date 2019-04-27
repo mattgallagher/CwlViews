@@ -63,7 +63,6 @@ public extension View {
 		// 3. Action bindings are triggered by the object after construction.
 		case boundsDidChange(SignalInput<NSRect>)
 		case frameDidChange(SignalInput<NSRect>)
-		case globalFrameDidChange(SignalInput<NSRect>)
 		
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
 	}
@@ -97,7 +96,6 @@ public extension View.Preparer {
 		case .layer(let x): backingLayer = x.value
 		case .boundsDidChange: postsFrameChangedNotifications = true 
 		case .frameDidChange: postsFrameChangedNotifications = true
-		case .globalFrameDidChange: postsFrameChangedNotifications = true
 		default: break
 		}
 	}
@@ -157,9 +155,6 @@ public extension View.Preparer {
 		case .frameDidChange(let x):
 			instance.postsFrameChangedNotifications = true
 			return Signal.notifications(name: NSView.frameDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.frame }.cancellableBind(to: x)
-		case .globalFrameDidChange(let x):
-			instance.postsFrameChangedNotifications = true
-			return Signal.notifications(name: NSView.globalFrameDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.frame }.cancellableBind(to: x)
 		case .boundsDidChange(let x):
 			instance.postsBoundsChangedNotifications = true
 			return Signal.notifications(name: NSView.boundsDidChangeNotification, object: instance).compactMap { notification -> NSRect? in (notification.object as? NSView)?.bounds }.cancellableBind(to: x)
@@ -217,7 +212,6 @@ public extension BindingName where Binding: ViewBinding {
 	// 3. Action bindings are triggered by the object after construction.
 	static var boundsDidChange: ViewName<SignalInput<NSRect>> { return .name(View.Binding.boundsDidChange) }
 	static var frameDidChange: ViewName<SignalInput<NSRect>> { return .name(View.Binding.frameDidChange) }
-	static var globalFrameDidChange: ViewName<SignalInput<NSRect>> { return .name(View.Binding.globalFrameDidChange) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
@@ -231,14 +225,22 @@ public extension View {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ViewBinding: BinderBaseBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self
+	func asViewBinding() -> View.Binding?
 }
 public extension ViewBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return viewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ViewBinding where Preparer.Inherited.Binding: ViewBinding {
+	func asViewBinding() -> View.Binding? {
+		return asInheritedBinding()?.asViewBinding()
+	}
+}
 public extension View.Binding {
 	typealias Preparer = View.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asViewBinding() -> View.Binding? { return self }
 	static func viewBinding(_ binding: View.Binding) -> View.Binding {
 		return binding
 	}

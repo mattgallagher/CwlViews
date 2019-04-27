@@ -175,14 +175,22 @@ public extension Label {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol LabelBinding: ViewBinding {
 	static func windowBinding(_ binding: Label.Binding) -> Self
+	func asLabelBinding() -> Label.Binding?
 }
 public extension LabelBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return windowBinding(.inheritedBinding(binding))
 	}
 }
+public extension LabelBinding where Preparer.Inherited.Binding: LabelBinding {
+	func asLabelBinding() -> Label.Binding? {
+		return asInheritedBinding()?.asLabelBinding()
+	}
+}
 public extension Label.Binding {
 	typealias Preparer = Label.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asLabelBinding() -> Label.Binding? { return self }
 	static func windowBinding(_ binding: Label.Binding) -> Label.Binding {
 		return binding
 	}

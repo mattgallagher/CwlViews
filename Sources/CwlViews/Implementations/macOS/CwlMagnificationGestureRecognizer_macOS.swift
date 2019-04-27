@@ -127,14 +127,22 @@ public extension MagnificationGestureRecognizer {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol MagnificationGestureRecognizerBinding: GestureRecognizerBinding {
 	static func magnificationGestureRecognizerBinding(_ binding: MagnificationGestureRecognizer.Binding) -> Self
+	func asMagnificationGestureRecognizerBinding() -> MagnificationGestureRecognizer.Binding?
 }
 public extension MagnificationGestureRecognizerBinding {
 	static func gestureRecognizerBinding(_ binding: GestureRecognizer.Binding) -> Self {
 		return magnificationGestureRecognizerBinding(.inheritedBinding(binding))
 	}
 }
+public extension MagnificationGestureRecognizerBinding where Preparer.Inherited.Binding: MagnificationGestureRecognizerBinding {
+	func asMagnificationGestureRecognizerBinding() -> MagnificationGestureRecognizer.Binding? {
+		return asInheritedBinding()?.asMagnificationGestureRecognizerBinding()
+	}
+}
 public extension MagnificationGestureRecognizer.Binding {
 	typealias Preparer = MagnificationGestureRecognizer.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asMagnificationGestureRecognizerBinding() -> MagnificationGestureRecognizer.Binding? { return self }
 	static func magnificationGestureRecognizerBinding(_ binding: MagnificationGestureRecognizer.Binding) -> MagnificationGestureRecognizer.Binding {
 		return binding
 	}

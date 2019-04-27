@@ -32,13 +32,10 @@ public extension TabViewItem {
 		case view(Dynamic<ViewConvertible>)
 
 		// 2. Signal bindings are performed on the object after construction.
-		/* case someFunction(Signal<FunctionParametersAsTuple>) */
 
 		// 3. Action bindings are triggered by the object after construction.
-		/* case someAction(SignalInput<CallbackParameters>) */
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		/* case someDelegateFunction((Param) -> Result)) */
 	}
 }
 
@@ -140,14 +137,22 @@ public extension TabViewItem {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TabViewItemBinding: BinderBaseBinding {
 	static func tabViewItemBinding(_ binding: TabViewItem.Binding) -> Self
+	func asTabViewItemBinding() -> TabViewItem.Binding?
 }
 public extension TabViewItemBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return tabViewItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension TabViewItemBinding where Preparer.Inherited.Binding: TabViewItemBinding {
+	func asTabViewItemBinding() -> TabViewItem.Binding? {
+		return asInheritedBinding()?.asTabViewItemBinding()
+	}
+}
 public extension TabViewItem.Binding {
 	typealias Preparer = TabViewItem.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTabViewItemBinding() -> TabViewItem.Binding? { return self }
 	static func tabViewItemBinding(_ binding: TabViewItem.Binding) -> TabViewItem.Binding {
 		return binding
 	}

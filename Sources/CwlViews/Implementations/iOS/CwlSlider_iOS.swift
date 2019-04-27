@@ -165,14 +165,22 @@ public extension Slider {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SliderBinding: ControlBinding {
 	static func sliderBinding(_ binding: Slider.Binding) -> Self
+	func asSliderBinding() -> Slider.Binding?
 }
 public extension SliderBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return sliderBinding(.inheritedBinding(binding))
 	}
 }
+public extension SliderBinding where Preparer.Inherited.Binding: SliderBinding {
+	func asSliderBinding() -> Slider.Binding? {
+		return asInheritedBinding()?.asSliderBinding()
+	}
+}
 public extension Slider.Binding {
 	typealias Preparer = Slider.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSliderBinding() -> Slider.Binding? { return self }
 	static func sliderBinding(_ binding: Slider.Binding) -> Slider.Binding {
 		return binding
 	}

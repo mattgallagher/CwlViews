@@ -19,16 +19,16 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == TableCellView.Binding {
+extension BindingParser where Downcast: TableCellViewBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, TableCellView.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asTableCellViewBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var backgroundStyle: BindingParser<Dynamic<NSView.BackgroundStyle>, Binding> { return BindingParser<Dynamic<NSView.BackgroundStyle>, Binding>(parse: { binding -> Optional<Dynamic<NSView.BackgroundStyle>> in if case .backgroundStyle(let x) = binding { return x } else { return nil } }) }
-	public static var rowSizeStyle: BindingParser<Dynamic<NSTableView.RowSizeStyle>, Binding> { return BindingParser<Dynamic<NSTableView.RowSizeStyle>, Binding>(parse: { binding -> Optional<Dynamic<NSTableView.RowSizeStyle>> in if case .rowSizeStyle(let x) = binding { return x } else { return nil } }) }
+	public static var backgroundStyle: BindingParser<Dynamic<NSView.BackgroundStyle>, TableCellView.Binding, Downcast> { return .init(extract: { if case .backgroundStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableCellViewBinding() }) }
+	public static var rowSizeStyle: BindingParser<Dynamic<NSTableView.RowSizeStyle>, TableCellView.Binding, Downcast> { return .init(extract: { if case .rowSizeStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asTableCellViewBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

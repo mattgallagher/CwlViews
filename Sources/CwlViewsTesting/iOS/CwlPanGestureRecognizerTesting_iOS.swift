@@ -19,17 +19,17 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == PanGestureRecognizer.Binding {
+extension BindingParser where Downcast: PanGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, PanGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asPanGestureRecognizerBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var maximumNumberOfTouches: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .maximumNumberOfTouches(let x) = binding { return x } else { return nil } }) }
-	public static var minimumNumberOfTouches: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .minimumNumberOfTouches(let x) = binding { return x } else { return nil } }) }
-	public static var translation: BindingParser<Dynamic<CGPoint>, Binding> { return BindingParser<Dynamic<CGPoint>, Binding>(parse: { binding -> Optional<Dynamic<CGPoint>> in if case .translation(let x) = binding { return x } else { return nil } }) }
+	public static var maximumNumberOfTouches: BindingParser<Dynamic<Int>, PanGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .maximumNumberOfTouches(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPanGestureRecognizerBinding() }) }
+	public static var minimumNumberOfTouches: BindingParser<Dynamic<Int>, PanGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .minimumNumberOfTouches(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPanGestureRecognizerBinding() }) }
+	public static var translation: BindingParser<Dynamic<CGPoint>, PanGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .translation(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPanGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

@@ -222,14 +222,22 @@ public extension TableViewCell {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TableViewCellBinding: ViewBinding {
 	static func tableViewCellBinding(_ binding: TableViewCell.Binding) -> Self
+	func asTableViewCellBinding() -> TableViewCell.Binding?
 }
 public extension TableViewCellBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tableViewCellBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableViewCellBinding where Preparer.Inherited.Binding: TableViewCellBinding {
+	func asTableViewCellBinding() -> TableViewCell.Binding? {
+		return asInheritedBinding()?.asTableViewCellBinding()
+	}
+}
 public extension TableViewCell.Binding {
 	typealias Preparer = TableViewCell.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTableViewCellBinding() -> TableViewCell.Binding? { return self }
 	static func tableViewCellBinding(_ binding: TableViewCell.Binding) -> TableViewCell.Binding {
 		return binding
 	}

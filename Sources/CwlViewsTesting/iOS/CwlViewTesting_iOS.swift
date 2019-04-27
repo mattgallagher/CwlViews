@@ -19,44 +19,44 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == View.Binding {
+extension BindingParser where Downcast: ViewBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, View.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asViewBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	public static var layer: BindingParser<Constant<Layer>, Binding> { return BindingParser<Constant<Layer>, Binding>(parse: { binding -> Optional<Constant<Layer>> in if case .layer(let x) = binding { return x } else { return nil } }) }
-
+	public static var layer: BindingParser<Constant<Layer>, View.Binding, Downcast> { return .init(extract: { if case .layer(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var alpha: BindingParser<Dynamic<(CGFloat)>, Binding> { return BindingParser<Dynamic<(CGFloat)>, Binding>(parse: { binding -> Optional<Dynamic<(CGFloat)>> in if case .alpha(let x) = binding { return x } else { return nil } }) }
-	public static var backgroundColor: BindingParser<Dynamic<(UIColor?)>, Binding> { return BindingParser<Dynamic<(UIColor?)>, Binding>(parse: { binding -> Optional<Dynamic<(UIColor?)>> in if case .backgroundColor(let x) = binding { return x } else { return nil } }) }
-	public static var clearsContextBeforeDrawing: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .clearsContextBeforeDrawing(let x) = binding { return x } else { return nil } }) }
-	public static var clipsToBounds: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .clipsToBounds(let x) = binding { return x } else { return nil } }) }
-	public static var contentMode: BindingParser<Dynamic<(UIView.ContentMode)>, Binding> { return BindingParser<Dynamic<(UIView.ContentMode)>, Binding>(parse: { binding -> Optional<Dynamic<(UIView.ContentMode)>> in if case .contentMode(let x) = binding { return x } else { return nil } }) }
-	public static var gestureRecognizers: BindingParser<Dynamic<[GestureRecognizerConvertible]>, Binding> { return BindingParser<Dynamic<[GestureRecognizerConvertible]>, Binding>(parse: { binding -> Optional<Dynamic<[GestureRecognizerConvertible]>> in if case .gestureRecognizers(let x) = binding { return x } else { return nil } }) }
-	public static var horizontalContentCompressionResistancePriority: BindingParser<Dynamic<UILayoutPriority>, Binding> { return BindingParser<Dynamic<UILayoutPriority>, Binding>(parse: { binding -> Optional<Dynamic<UILayoutPriority>> in if case .horizontalContentCompressionResistancePriority(let x) = binding { return x } else { return nil } }) }
-	public static var horizontalContentHuggingPriority: BindingParser<Dynamic<UILayoutPriority>, Binding> { return BindingParser<Dynamic<UILayoutPriority>, Binding>(parse: { binding -> Optional<Dynamic<UILayoutPriority>> in if case .horizontalContentHuggingPriority(let x) = binding { return x } else { return nil } }) }
-	public static var isExclusiveTouch: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .isExclusiveTouch(let x) = binding { return x } else { return nil } }) }
-	public static var isHidden: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .isHidden(let x) = binding { return x } else { return nil } }) }
-	public static var isMultipleTouchEnabled: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .isMultipleTouchEnabled(let x) = binding { return x } else { return nil } }) }
-	public static var isOpaque: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .isOpaque(let x) = binding { return x } else { return nil } }) }
-	public static var isUserInteractionEnabled: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .isUserInteractionEnabled(let x) = binding { return x } else { return nil } }) }
-	public static var layout: BindingParser<Dynamic<Layout>, Binding> { return BindingParser<Dynamic<Layout>, Binding>(parse: { binding -> Optional<Dynamic<Layout>> in if case .layout(let x) = binding { return x } else { return nil } }) }
-	public static var layoutMargins: BindingParser<Dynamic<(UIEdgeInsets)>, Binding> { return BindingParser<Dynamic<(UIEdgeInsets)>, Binding>(parse: { binding -> Optional<Dynamic<(UIEdgeInsets)>> in if case .layoutMargins(let x) = binding { return x } else { return nil } }) }
-	public static var mask: BindingParser<Dynamic<(ViewConvertible?)>, Binding> { return BindingParser<Dynamic<(ViewConvertible?)>, Binding>(parse: { binding -> Optional<Dynamic<(ViewConvertible?)>> in if case .mask(let x) = binding { return x } else { return nil } }) }
-	public static var motionEffects: BindingParser<Dynamic<([UIMotionEffect])>, Binding> { return BindingParser<Dynamic<([UIMotionEffect])>, Binding>(parse: { binding -> Optional<Dynamic<([UIMotionEffect])>> in if case .motionEffects(let x) = binding { return x } else { return nil } }) }
-	public static var preservesSuperviewLayoutMargins: BindingParser<Dynamic<(Bool)>, Binding> { return BindingParser<Dynamic<(Bool)>, Binding>(parse: { binding -> Optional<Dynamic<(Bool)>> in if case .preservesSuperviewLayoutMargins(let x) = binding { return x } else { return nil } }) }
-	public static var restorationIdentifier: BindingParser<Dynamic<String?>, Binding> { return BindingParser<Dynamic<String?>, Binding>(parse: { binding -> Optional<Dynamic<String?>> in if case .restorationIdentifier(let x) = binding { return x } else { return nil } }) }
-	public static var semanticContentAttribute: BindingParser<Dynamic<(UISemanticContentAttribute)>, Binding> { return BindingParser<Dynamic<(UISemanticContentAttribute)>, Binding>(parse: { binding -> Optional<Dynamic<(UISemanticContentAttribute)>> in if case .semanticContentAttribute(let x) = binding { return x } else { return nil } }) }
-	public static var tag: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .tag(let x) = binding { return x } else { return nil } }) }
-	public static var tintAdjustmentMode: BindingParser<Dynamic<(UIView.TintAdjustmentMode)>, Binding> { return BindingParser<Dynamic<(UIView.TintAdjustmentMode)>, Binding>(parse: { binding -> Optional<Dynamic<(UIView.TintAdjustmentMode)>> in if case .tintAdjustmentMode(let x) = binding { return x } else { return nil } }) }
-	public static var tintColor: BindingParser<Dynamic<(UIColor)>, Binding> { return BindingParser<Dynamic<(UIColor)>, Binding>(parse: { binding -> Optional<Dynamic<(UIColor)>> in if case .tintColor(let x) = binding { return x } else { return nil } }) }
-	public static var verticalContentCompressionResistancePriority: BindingParser<Dynamic<UILayoutPriority>, Binding> { return BindingParser<Dynamic<UILayoutPriority>, Binding>(parse: { binding -> Optional<Dynamic<UILayoutPriority>> in if case .verticalContentCompressionResistancePriority(let x) = binding { return x } else { return nil } }) }
-	public static var verticalContentHuggingPriority: BindingParser<Dynamic<UILayoutPriority>, Binding> { return BindingParser<Dynamic<UILayoutPriority>, Binding>(parse: { binding -> Optional<Dynamic<UILayoutPriority>> in if case .verticalContentHuggingPriority(let x) = binding { return x } else { return nil } }) }
-
+	public static var alpha: BindingParser<Dynamic<(CGFloat)>, View.Binding, Downcast> { return .init(extract: { if case .alpha(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var backgroundColor: BindingParser<Dynamic<(UIColor?)>, View.Binding, Downcast> { return .init(extract: { if case .backgroundColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var clearsContextBeforeDrawing: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .clearsContextBeforeDrawing(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var clipsToBounds: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .clipsToBounds(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var contentMode: BindingParser<Dynamic<(UIView.ContentMode)>, View.Binding, Downcast> { return .init(extract: { if case .contentMode(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var gestureRecognizers: BindingParser<Dynamic<[GestureRecognizerConvertible]>, View.Binding, Downcast> { return .init(extract: { if case .gestureRecognizers(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var horizontalContentCompressionResistancePriority: BindingParser<Dynamic<UILayoutPriority>, View.Binding, Downcast> { return .init(extract: { if case .horizontalContentCompressionResistancePriority(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var horizontalContentHuggingPriority: BindingParser<Dynamic<UILayoutPriority>, View.Binding, Downcast> { return .init(extract: { if case .horizontalContentHuggingPriority(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var isExclusiveTouch: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .isExclusiveTouch(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var isHidden: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .isHidden(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var isMultipleTouchEnabled: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .isMultipleTouchEnabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var isOpaque: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .isOpaque(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var isUserInteractionEnabled: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .isUserInteractionEnabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var layout: BindingParser<Dynamic<Layout>, View.Binding, Downcast> { return .init(extract: { if case .layout(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var layoutMargins: BindingParser<Dynamic<(UIEdgeInsets)>, View.Binding, Downcast> { return .init(extract: { if case .layoutMargins(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var mask: BindingParser<Dynamic<(ViewConvertible?)>, View.Binding, Downcast> { return .init(extract: { if case .mask(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var motionEffects: BindingParser<Dynamic<([UIMotionEffect])>, View.Binding, Downcast> { return .init(extract: { if case .motionEffects(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var preservesSuperviewLayoutMargins: BindingParser<Dynamic<(Bool)>, View.Binding, Downcast> { return .init(extract: { if case .preservesSuperviewLayoutMargins(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var restorationIdentifier: BindingParser<Dynamic<String?>, View.Binding, Downcast> { return .init(extract: { if case .restorationIdentifier(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var semanticContentAttribute: BindingParser<Dynamic<(UISemanticContentAttribute)>, View.Binding, Downcast> { return .init(extract: { if case .semanticContentAttribute(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var tag: BindingParser<Dynamic<Int>, View.Binding, Downcast> { return .init(extract: { if case .tag(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var tintAdjustmentMode: BindingParser<Dynamic<(UIView.TintAdjustmentMode)>, View.Binding, Downcast> { return .init(extract: { if case .tintAdjustmentMode(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var tintColor: BindingParser<Dynamic<(UIColor)>, View.Binding, Downcast> { return .init(extract: { if case .tintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var verticalContentCompressionResistancePriority: BindingParser<Dynamic<UILayoutPriority>, View.Binding, Downcast> { return .init(extract: { if case .verticalContentCompressionResistancePriority(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var verticalContentHuggingPriority: BindingParser<Dynamic<UILayoutPriority>, View.Binding, Downcast> { return .init(extract: { if case .verticalContentHuggingPriority(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-	public static var becomeFirstResponder: BindingParser<Signal<Void>, Binding> { return BindingParser<Signal<Void>, Binding>(parse: { binding -> Optional<Signal<Void>> in if case .becomeFirstResponder(let x) = binding { return x } else { return nil } }) }
-	public static var endEditing: BindingParser<Signal<Bool>, Binding> { return BindingParser<Signal<Bool>, Binding>(parse: { binding -> Optional<Signal<Bool>> in if case .endEditing(let x) = binding { return x } else { return nil } }) }
+	public static var becomeFirstResponder: BindingParser<Signal<Void>, View.Binding, Downcast> { return .init(extract: { if case .becomeFirstResponder(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
+	public static var endEditing: BindingParser<Signal<Bool>, View.Binding, Downcast> { return .init(extract: { if case .endEditing(let x) = $0 { return x } else { return nil } }, upcast: { $0.asViewBinding() }) }
 	
 	// 3. Action bindings are triggered by the object after construction.
 	

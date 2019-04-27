@@ -238,14 +238,22 @@ public extension TabView {
 public protocol TabViewBinding: ViewBinding {
 	associatedtype IdentifierType: Equatable
 	static func tabViewBinding(_ binding: TabView<IdentifierType>.Binding) -> Self
+	func asTabViewBinding() -> TabView<IdentifierType>.Binding?
 }
 public extension TabViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return tabViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension TabViewBinding where Preparer.Inherited.Binding: TabViewBinding, Preparer.Inherited.Binding.IdentifierType == IdentifierType {
+	func asTabViewBinding() -> TabView<IdentifierType>.Binding? {
+		return asInheritedBinding()?.asTabViewBinding()
+	}
+}
 public extension TabView.Binding {
 	typealias Preparer = TabView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTabViewBinding() -> TabView.Binding? { return self }
 	static func tabViewBinding(_ binding: TabView<IdentifierType>.Binding) -> TabView<IdentifierType>.Binding {
 		return binding
 	}

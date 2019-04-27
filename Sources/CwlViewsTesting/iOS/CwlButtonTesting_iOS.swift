@@ -19,29 +19,29 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == Button.Binding {
+extension BindingParser where Downcast: ButtonBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Button.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asButtonBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	public static var imageView: BindingParser<Constant<ImageView>, Binding> { return BindingParser<Constant<ImageView>, Binding>(parse: { binding -> Optional<Constant<ImageView>> in if case .imageView(let x) = binding { return x } else { return nil } }) }
-	public static var titleLabel: BindingParser<Constant<Label>, Binding> { return BindingParser<Constant<Label>, Binding>(parse: { binding -> Optional<Constant<Label>> in if case .titleLabel(let x) = binding { return x } else { return nil } }) }
-	public static var type: BindingParser<Constant<UIButton.ButtonType>, Binding> { return BindingParser<Constant<UIButton.ButtonType>, Binding>(parse: { binding -> Optional<Constant<UIButton.ButtonType>> in if case .type(let x) = binding { return x } else { return nil } }) }
-
+	public static var imageView: BindingParser<Constant<ImageView>, Button.Binding, Downcast> { return .init(extract: { if case .imageView(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var titleLabel: BindingParser<Constant<Label>, Button.Binding, Downcast> { return .init(extract: { if case .titleLabel(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var type: BindingParser<Constant<UIButton.ButtonType>, Button.Binding, Downcast> { return .init(extract: { if case .type(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var adjustsImageWhenDisabled: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .adjustsImageWhenDisabled(let x) = binding { return x } else { return nil } }) }
-	public static var adjustsImageWhenHighlighted: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .adjustsImageWhenHighlighted(let x) = binding { return x } else { return nil } }) }
-	public static var attributedTitle: BindingParser<Dynamic<ScopedValues<UIControl.State, NSAttributedString?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, NSAttributedString?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, NSAttributedString?>>> in if case .attributedTitle(let x) = binding { return x } else { return nil } }) }
-	public static var backgroundImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIImage?>>> in if case .backgroundImage(let x) = binding { return x } else { return nil } }) }
-	public static var contentEdgeInsets: BindingParser<Dynamic<UIEdgeInsets>, Binding> { return BindingParser<Dynamic<UIEdgeInsets>, Binding>(parse: { binding -> Optional<Dynamic<UIEdgeInsets>> in if case .contentEdgeInsets(let x) = binding { return x } else { return nil } }) }
-	public static var image: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIImage?>>> in if case .image(let x) = binding { return x } else { return nil } }) }
-	public static var imageEdgeInsets: BindingParser<Dynamic<UIEdgeInsets>, Binding> { return BindingParser<Dynamic<UIEdgeInsets>, Binding>(parse: { binding -> Optional<Dynamic<UIEdgeInsets>> in if case .imageEdgeInsets(let x) = binding { return x } else { return nil } }) }
-	public static var showsTouchWhenHighlighted: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .showsTouchWhenHighlighted(let x) = binding { return x } else { return nil } }) }
-	public static var title: BindingParser<Dynamic<ScopedValues<UIControl.State, String?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, String?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, String?>>> in if case .title(let x) = binding { return x } else { return nil } }) }
-	public static var titleColor: BindingParser<Dynamic<ScopedValues<UIControl.State, UIColor?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIColor?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIColor?>>> in if case .titleColor(let x) = binding { return x } else { return nil } }) }
-	public static var titleEdgeInsets: BindingParser<Dynamic<UIEdgeInsets>, Binding> { return BindingParser<Dynamic<UIEdgeInsets>, Binding>(parse: { binding -> Optional<Dynamic<UIEdgeInsets>> in if case .titleEdgeInsets(let x) = binding { return x } else { return nil } }) }
-	public static var titleShadowColor: BindingParser<Dynamic<ScopedValues<UIControl.State, UIColor?>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIControl.State, UIColor?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIControl.State, UIColor?>>> in if case .titleShadowColor(let x) = binding { return x } else { return nil } }) }
+	public static var adjustsImageWhenDisabled: BindingParser<Dynamic<Bool>, Button.Binding, Downcast> { return .init(extract: { if case .adjustsImageWhenDisabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var adjustsImageWhenHighlighted: BindingParser<Dynamic<Bool>, Button.Binding, Downcast> { return .init(extract: { if case .adjustsImageWhenHighlighted(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var attributedTitle: BindingParser<Dynamic<ScopedValues<UIControl.State, NSAttributedString?>>, Button.Binding, Downcast> { return .init(extract: { if case .attributedTitle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var backgroundImage: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Button.Binding, Downcast> { return .init(extract: { if case .backgroundImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var contentEdgeInsets: BindingParser<Dynamic<UIEdgeInsets>, Button.Binding, Downcast> { return .init(extract: { if case .contentEdgeInsets(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var image: BindingParser<Dynamic<ScopedValues<UIControl.State, UIImage?>>, Button.Binding, Downcast> { return .init(extract: { if case .image(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var imageEdgeInsets: BindingParser<Dynamic<UIEdgeInsets>, Button.Binding, Downcast> { return .init(extract: { if case .imageEdgeInsets(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var showsTouchWhenHighlighted: BindingParser<Dynamic<Bool>, Button.Binding, Downcast> { return .init(extract: { if case .showsTouchWhenHighlighted(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var title: BindingParser<Dynamic<ScopedValues<UIControl.State, String?>>, Button.Binding, Downcast> { return .init(extract: { if case .title(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var titleColor: BindingParser<Dynamic<ScopedValues<UIControl.State, UIColor?>>, Button.Binding, Downcast> { return .init(extract: { if case .titleColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var titleEdgeInsets: BindingParser<Dynamic<UIEdgeInsets>, Button.Binding, Downcast> { return .init(extract: { if case .titleEdgeInsets(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
+	public static var titleShadowColor: BindingParser<Dynamic<ScopedValues<UIControl.State, UIColor?>>, Button.Binding, Downcast> { return .init(extract: { if case .titleShadowColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asButtonBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

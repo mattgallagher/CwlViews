@@ -274,14 +274,22 @@ public extension NavigationController {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol NavigationControllerBinding: ViewControllerBinding {
 	static func navigationControllerBinding(_ binding: NavigationController.Binding) -> Self
+	func asNavigationControllerBinding() -> NavigationController.Binding?
 }
 public extension NavigationControllerBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return navigationControllerBinding(.inheritedBinding(binding))
 	}
 }
+public extension NavigationControllerBinding where Preparer.Inherited.Binding: NavigationControllerBinding {
+	func asNavigationControllerBinding() -> NavigationController.Binding? {
+		return asInheritedBinding()?.asNavigationControllerBinding()
+	}
+}
 public extension NavigationController.Binding {
 	typealias Preparer = NavigationController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asNavigationControllerBinding() -> NavigationController.Binding? { return self }
 	static func navigationControllerBinding(_ binding: NavigationController.Binding) -> NavigationController.Binding {
 		return binding
 	}

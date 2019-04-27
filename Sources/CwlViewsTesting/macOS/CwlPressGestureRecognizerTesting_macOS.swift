@@ -19,17 +19,17 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == PressGestureRecognizer.Binding {
+extension BindingParser where Downcast: PressGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, PressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asPressGestureRecognizerBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var allowableMovement: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .allowableMovement(let x) = binding { return x } else { return nil } }) }
-	public static var buttonMask: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .buttonMask(let x) = binding { return x } else { return nil } }) }
-	public static var minimumPressDuration: BindingParser<Dynamic<TimeInterval>, Binding> { return BindingParser<Dynamic<TimeInterval>, Binding>(parse: { binding -> Optional<Dynamic<TimeInterval>> in if case .minimumPressDuration(let x) = binding { return x } else { return nil } }) }
+	public static var allowableMovement: BindingParser<Dynamic<CGFloat>, PressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .allowableMovement(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPressGestureRecognizerBinding() }) }
+	public static var buttonMask: BindingParser<Dynamic<Int>, PressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .buttonMask(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPressGestureRecognizerBinding() }) }
+	public static var minimumPressDuration: BindingParser<Dynamic<TimeInterval>, PressGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .minimumPressDuration(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPressGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

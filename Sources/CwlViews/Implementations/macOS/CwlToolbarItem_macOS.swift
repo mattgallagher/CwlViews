@@ -194,14 +194,22 @@ public extension ToolbarItem {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ToolbarItemBinding: BinderBaseBinding {
 	static func toolbarItemBinding(_ binding: ToolbarItem.Binding) -> Self
+	func asToolbarItemBinding() -> ToolbarItem.Binding?
 }
 public extension ToolbarItemBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return toolbarItemBinding(.inheritedBinding(binding))
 	}
 }
+public extension ToolbarItemBinding where Preparer.Inherited.Binding: ToolbarItemBinding {
+	func asToolbarItemBinding() -> ToolbarItem.Binding? {
+		return asInheritedBinding()?.asToolbarItemBinding()
+	}
+}
 public extension ToolbarItem.Binding {
 	typealias Preparer = ToolbarItem.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asToolbarItemBinding() -> ToolbarItem.Binding? { return self }
 	static func toolbarItemBinding(_ binding: ToolbarItem.Binding) -> ToolbarItem.Binding {
 		return binding
 	}

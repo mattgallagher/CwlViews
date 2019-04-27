@@ -19,16 +19,16 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == SwipeGestureRecognizer.Binding {
+extension BindingParser where Downcast: SwipeGestureRecognizerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, SwipeGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asSwipeGestureRecognizerBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var direction: BindingParser<Dynamic<UISwipeGestureRecognizer.Direction>, Binding> { return BindingParser<Dynamic<UISwipeGestureRecognizer.Direction>, Binding>(parse: { binding -> Optional<Dynamic<UISwipeGestureRecognizer.Direction>> in if case .direction(let x) = binding { return x } else { return nil } }) }
-	public static var numberOfTouchesRequired: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .numberOfTouchesRequired(let x) = binding { return x } else { return nil } }) }
+	public static var direction: BindingParser<Dynamic<UISwipeGestureRecognizer.Direction>, SwipeGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .direction(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwipeGestureRecognizerBinding() }) }
+	public static var numberOfTouchesRequired: BindingParser<Dynamic<Int>, SwipeGestureRecognizer.Binding, Downcast> { return .init(extract: { if case .numberOfTouchesRequired(let x) = $0 { return x } else { return nil } }, upcast: { $0.asSwipeGestureRecognizerBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	

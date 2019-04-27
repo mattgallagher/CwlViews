@@ -106,11 +106,19 @@ func removeDirectory(url: URL) throws {
 	}
 }
 
-func installIosAppTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+func installIcons(_ destination: URL) throws {
 	try templateIconPng().write(to: destination.appendingPathComponent("TemplateIcon.png"))
 	try templateIconPngAt2x().write(to: destination.appendingPathComponent("TemplateIcon@2x.png"))
+}
+
+func installAssets(_ destination: URL) throws {
+	try installIcons(destination)
 	try FileManager.default.createDirectory(at: destination.appendingPathComponent("Images.xcassets"), withIntermediateDirectories: true, attributes: nil)
 	try contentsJson().data(using: .utf8)!.write(to: destination.appendingPathComponent("Images.xcassets/Contents.json"))
+}
+
+func installIosAppTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
+	try installAssets(destination)
 	try PropertyListSerialization.data(fromPropertyList: iOSProjectTemplateInfo(cwlViewsProducts), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
 	try iOSLaunchScreenStoryboard().data(using: .utf8)!.write(to: destination.appendingPathComponent("LaunchScreen.storyboard"))
 }
@@ -120,9 +128,8 @@ func installIosAppTestsTemplate(_ destination: URL, _ cwlViewsProducts: URL) thr
 }
 
 func installMacAppTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
-	try templateIconPng().write(to: destination.appendingPathComponent("TemplateIcon.png"))
-	try templateIconPngAt2x().write(to: destination.appendingPathComponent("TemplateIcon@2x.png"))
-	try PropertyListSerialization.data(fromPropertyList: macProjectTemplateInfo(), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
+	try installAssets(destination)
+	try PropertyListSerialization.data(fromPropertyList: macProjectTemplateInfo(cwlViewsProducts), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
 }
 
 func installMacAppTestsTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
@@ -130,8 +137,7 @@ func installMacAppTestsTemplate(_ destination: URL, _ cwlViewsProducts: URL) thr
 }
 
 func installCwlViewsTemplate(_ destination: URL, _ cwlViewsProducts: URL) throws {
-	try templateIconPng().write(to: destination.appendingPathComponent("TemplateIcon.png"))
-	try templateIconPngAt2x().write(to: destination.appendingPathComponent("TemplateIcon@2x.png"))
+	try installIcons(destination)
 	try PropertyListSerialization.data(fromPropertyList: binderTemplateInfo(), format: .xml, options: 0).write(to: destination.appendingPathComponent("TemplateInfo.plist"))
 	try FileManager.default.createDirectory(at: destination.appendingPathComponent("Swift"), withIntermediateDirectories: false, attributes: nil)
 	try binderContent().data(using: .utf8)!.write(to: destination.appendingPathComponent("Swift").appendingPathComponent("___FILEBASENAME___.swift"))
@@ -150,7 +156,7 @@ enum Platform: String {
 }
 
 func iOSLaunchScreenStoryboard() -> String {
-	return """
+	return #"""
 		<?xml version="1.0" encoding="UTF-8"?>
 		<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13189.4" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
 			 <device id="retina4_7" orientation="portrait">
@@ -211,7 +217,7 @@ func iOSLaunchScreenStoryboard() -> String {
 					</scene>
 			 </scenes>
 		</document>
-		"""
+		"""#
 }
 
 func frameworkDefinition(_ name: String, _ targetIdentifier: String) -> [String: Any] {
@@ -384,6 +390,7 @@ func binderContent() -> String {
 		// MARK: - Binder Part 8: Downcast protocols
 		public protocol ___VARIABLE_basename___Binding: ___VARIABLE_linkedBasename___Binding {
 			static func ___VARIABLE_lowercaseBasename___Binding(_ binding: ___VARIABLE_basename___.Binding) -> Self
+			func as___VARIABLE_basename___Binding() -> ___VARIABLE_basename___.Binding?
 		}
 		public extension ___VARIABLE_basename___Binding {
 			static func ___VARIABLE_lowercaseLinkedBasename___Binding(_ binding: ___VARIABLE_linkedBasename___.Binding) -> Self {
@@ -400,10 +407,10 @@ func binderContent() -> String {
 		// MARK: - Binder Part 9: Other supporting types
 		
 		// MARK: - Binder Part 10: Test support
-		extension BindingParser where Binding == Button.Binding {
+		extension BindingParser where Downcast: ___VARIABLE_basename___Binding {
 			// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 			// Replace: case ([^\(]+)\((.+)\)$
-			// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+			// With:    public static var $1: BindingParser<$2, ___VARIABLE_basename___.Binding, Downcast> { return BindingParser(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.as___VARIABLE_basename___Binding() }) }
 		
 		}
 		"""#
@@ -498,56 +505,88 @@ func binderTemplateInfo() -> [String: Any] {
 	] as [String: Any]
 }
 
-func macProjectTemplateInfo() throws -> [String: Any] {
+func macProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 	return [
-		"Identifier": "com.cocoawithlove.views-app-macOS",
 		"Kind": "Xcode.Xcode3.ProjectTemplateUnitKind",
+		"Identifier": "com.cocoawithlove.views-app-macOS",
+		"Ancestors": [
+			"com.apple.dt.unit.cocoaApplicationBase",
+			"com.apple.dt.unit.osxBase"
+		] as [Any],
 		"Targets": projectTargets(.macOS),
 		"SortOrder": 1 as NSNumber,
 		"Project": [
 			"SDK": "macosx",
 		] as [String: Any],
-		"Ancestors": [
-			"com.apple.dt.unit.bundleBase"
-		] as [Any],
 		"Options": projectOptions(.macOS),
 		"Description": "Creates a Cocoa application using the CwlViews framework.",
 		"Concrete": 1 as NSNumber,
 		"Platforms": [
 			"com.apple.platform.macosx"
-			] as [Any],
+		] as [Any],
 		"Nodes": [
+			"Info.plist:Icon",
+			"Info.plist:DeploymentTarget",
+			"Info.plist:PrincipalClass",
+			"Info.plist:NSHumanReadableCopyright",
+			"Assets.xcassets",
 			"main.swift:comments",
-			"main.swift:imports:importCwlViews",
-			"main.swift:ApplicationModel",
-			"main.swift:appModel",
-			"main.swift:ApplicationRun",
-			"MainWindow.swift:comments",
-			"MainWindow.swift:imports:importCwlViews",
-			"MainWindow.swift:content",
+			"main.swift:imports:importAppKit",
+			"main.swift:content",
 			"MainMenu.swift:comments",
-			"MainMenu.swift:imports:importCwlViews",
+			"MainMenu.swift:imports:importAppKit",
 			"MainMenu.swift:content",
-			"CwlUtils.framework",
-			"CwlSignal.framework",
-			"CwlViews.framework"
+			"Services.swift:comments",
+			"Services.swift:imports:importFoundation",
+			"Services.swift:content",
+			"Document.swift:comments",
+			"Document.swift:imports:importFoundation",
+			"Document.swift:content",
+			"DocumentAdapter.swift:comments",
+			"DocumentAdapter.swift:imports:importFoundation",
+			"DocumentAdapter.swift:content",
+			"Window.swift:comments",
+			"Window.swift:imports:importAppKit",
+			"Window.swift:content",
+			"Detail.swift:comments",
+			"Detail.swift:imports:importAppKit",
+			"Detail.swift:content",
+			"CwlUtils.swift",
+			"CwlSignal.swift",
+			"CwlViewsCore.swift",
+			"CwlViews_macOS.swift"
 		] as [Any],
 		"Definitions": [
-			"CwlViews.framework": frameworkDefinition("CwlViews", "com.apple.dt.cocoaApplicationTarget"),
-			"CwlSignal.framework": frameworkDefinition("CwlSignal", "com.apple.dt.cocoaApplicationTarget"),
-			"CwlUtils.framework": frameworkDefinition("CwlUtils", "com.apple.dt.cocoaApplicationTarget"),
-
-			"*:imports:importCwlViews": "import CwlViews",
-			"main.swift:ApplicationModel": """
-				struct ApplicationModel {
-					init() {}
-					let (terminateInput, terminateSignal) = Signal<Void>.collectorAndSignal { s in s.multicast() }
-				}
-				
-				""",
-			"MainWindow.swift:content": macMainWindowContents(),
+			"Assets.xcassets": [
+				"Path": "Images.xcassets",
+				"AssetGeneration": [
+					[
+						"Type": "appicon",
+						"Name": "AppIcon",
+						"Platforms": [
+							"macOS": "true"
+							] as [String: Any]
+						] as [String: Any]
+					] as [Any],
+				"SortOrder": 100,
+				] as [String: Any],
+			"Info.plist:DeploymentTarget": "<key>LSMinimumSystemVersion</key><string>$(MACOSX_DEPLOYMENT_TARGET)</string>",
+			"Info.plist:PrincipalClass": "<key>NSPrincipalClass</key><string>NSApplication</string>",
+			"Info.plist:Icon": "<key>CFBundleIconFile</key><string>NSApplication</string>",
+			"Info.plist:MainNib": "",
+			"*:imports:importFoundation": "import Foundation",
+			"*:imports:importAppKit": "import AppKit",
+			"main.swift:content": macMainContent(),
 			"MainMenu.swift:content": macMainMenuContent(),
-			"main.swift:content": macMainContent()
+			"DocumentAdapter.swift:content": documentAdapterContent(),
+			"Document.swift:content": documentContent(),
+			"Window.swift:content": macMainWindowContent(),
+			"Detail.swift:content": macDetailContent(),
+			"Services.swift:content": servicesContent(),
+			"CwlUtils.swift": try cwlUtilsContent(cwlViewsProducts),
+			"CwlSignal.swift": try cwlSignalContent(cwlViewsProducts), 
+			"CwlViewsCore.swift": try cwlViewsCoreContent(cwlViewsProducts),
+			"CwlViews_macOS.swift": try cwlViewsContent(cwlViewsProducts, .macOS)
 		] as [String: Any]
 	] as [String: Any]
 }
@@ -580,7 +619,7 @@ func testTemplateInfo(_ cwlViewsProducts: URL, _ platform: Platform) throws -> [
 			"*:imports:importProject": "@testable import ___VARIABLE_productName:identifier___",
 			"CwlViews_\(platform.rawValue)Testing.swift:content": try cwlViewsTesting(cwlViewsProducts, platform),
 			"MockServices.swift:content": mockServices(),
-			"TableViewTests.swift:content": iOSTableViewTests()
+			"TableViewTests.swift:content": platform.isIos ? iOSTableViewTests() : macOSTableViewTests()
 		] as [String: Any]
 	] as [String: Any]
 }
@@ -593,8 +632,7 @@ func iOSProjectTemplateInfo(_ cwlViewsProducts: URL) throws -> [String: Any] {
 		"SortOrder": 1 as NSNumber,
 		"Ancestors": [
 			"com.apple.dt.unit.applicationBase",
-			"com.apple.dt.unit.iosBase",
-			"com.apple.dt.unit.languageChoice"
+			"com.apple.dt.unit.iosBase"
 		] as [Any],
 		"Options": projectOptions(.iOS),
 		"Description": "Creates a Cocoa application using the CwlViews framework.",
@@ -779,19 +817,6 @@ func projectOptions(_ platform: Platform) -> [Any] {
 	] as [Any]
 }
 
-func sharedSettings(_ platform: Platform, name: String) -> [String: Any] {
-	if platform.isIos {
-		return [
-			"IPHONEOS_DEPLOYMENT_TARGET": "latest_iphoneos",
-			"PRODUCT_NAME": name
-		] as [String: Any]
-	} else {
-		return [
-			"PRODUCT_NAME": name
-		] as [String: Any]
-	}
-}
-
 func projectTargets(_ platform: Platform) -> [Any] {
 	return [
 		[
@@ -807,7 +832,7 @@ func projectTargets(_ platform: Platform) -> [Any] {
 }
 
 func iOSMainContent() -> String {
-	return """
+	return #"""
 		func application(_ viewVar: Var<NavViewState>, _ doc: DocumentAdapter) -> Application {
 			return Application(
 				.window -- Window(
@@ -826,16 +851,16 @@ func iOSMainContent() -> String {
 		private let viewVar = Var(NavViewState())
 
 		#if DEBUG
-			let docLog = doc.logJson(keyPath: \\.contents, prefix: "Document changed: ")
+			let docLog = doc.logJson(keyPath: \.contents, prefix: "Document changed: ")
 			let viewLog = viewVar.logJson(prefix: "View-state changed: ")
 		#endif
 
 		applicationMain { application(viewVar, doc) }
-		"""
+		"""#
 }
 
 func iOSNavViewContent() -> String {
-	return """
+	return #"""
 		typealias NavPathElement = MasterDetail<TableViewState, DetailViewState>
 		struct NavViewState: CodableContainer {
 			let navStack: StackAdapter<NavPathElement>
@@ -868,11 +893,11 @@ func iOSNavViewContent() -> String {
 			static let barTint = UIColor(red: 0.521, green: 0.368, blue: 0.306, alpha: 1)
 			static let barText = UIColor(red: 0.244, green: 0.254, blue: 0.330, alpha: 1)
 		}
-		"""
+		"""#
 }
 
 func iOSTableViewContent() -> String {
-	return """
+	return #"""
 		struct TableViewState: CodableContainer {
 			let isEditing: Var<Bool>
 			let firstRow: Var<IndexPath>
@@ -910,7 +935,7 @@ func iOSTableViewContent() -> String {
 						.debounce(interval: .milliseconds(250), context: .main)
 						.map { .animate($0.indexPath) },
 					.isEditing <-- tableState.isEditing.animate(),
-					.commit(\\.tableRow.indexPath.row) --> Input()
+					.commit(\.tableRow.indexPath.row) --> Input()
 						.map { .removeAtIndex($0) }
 						.bind(to: doc),
 					.userDidScrollToRow --> Input()
@@ -949,11 +974,11 @@ func iOSTableViewContent() -> String {
 			static let rowText = NSLocalizedString("This is row #%@", comment: "")
 			static let helloWorld = NSLocalizedString("Hello, world!", comment: "")
 		}
-		"""
+		"""#
 }
 
 func iOSDetailViewContent() -> String {
-	return """
+	return #"""
 		struct DetailViewState: CodableContainer {
 			let row: String
 		}
@@ -980,13 +1005,13 @@ func iOSDetailViewContent() -> String {
 			static let titleText = NSLocalizedString("Row #%@", comment: "")
 			static let detailText = NSLocalizedString("Detail view for row #%@", comment: "")
 		}
-		"""
+		"""#
 }
 
 func iOSTableViewTests() -> String {
-	return """
+	return #"""
 		import XCTest
-		
+
 		class TableViewTests: XCTestCase {
 			
 			var services: Services!
@@ -994,10 +1019,8 @@ func iOSTableViewTests() -> String {
 			var navState: NavViewState!
 			var tableState: TableViewState!
 			
-			var viewController: ViewControllerConvertible = ViewController()
-			var bindings: [ViewController.Binding] = []
-			var view: ViewConvertible = View()
 			var tableBindings: [TableView<String>.Binding] = []
+			var rightBarButtonBindings: [BarButtonItem.Binding] = []
 			
 			override func setUp() {
 				services = Services(fileService: MockFileService())
@@ -1005,10 +1028,10 @@ func iOSTableViewTests() -> String {
 				navState = NavViewState()
 				tableState = TableViewState()
 
-				viewController = tableViewController(tableState, navState, doc)
-				bindings = try! ViewController.consumeBindings(from: viewController)
-				view = try! ViewController.Binding.value(for: .view, in: bindings)
-				tableBindings = try! TableView<String>.consumeBindings(from: view)
+				let viewControllerBindings = try! ViewController.consumeBindings(from: tableViewController(tableState, navState, doc))
+				let navigationItemBindings = try! NavigationItem.consumeBindings(from: ViewController.constantValue(for: .navigationItem, in: viewControllerBindings))
+				rightBarButtonBindings = try! BarButtonItem.consumeBindings(from: NavigationItem.dynamicValue(for: .rightBarButtonItems, in: navigationItemBindings).value.first!)
+				tableBindings = try! TableView<String>.consumeBindings(from: ViewController.dynamicValue(for: .view, in: viewControllerBindings))
 			}
 			
 			override func tearDown() {
@@ -1020,11 +1043,7 @@ func iOSTableViewTests() -> String {
 			}
 			
 			func testCreateRow() throws {
-				let navigationItem = try ViewController.Binding.value(for: .navigationItem, in: bindings)
-				let navigationItemBindings = try NavigationItem.consumeBindings(from: navigationItem)
-				let rightBarButtonItem = try NavigationItem.Binding.value(for: .rightBarButtonItems, in: navigationItemBindings).value.first!
-				let rightBarButtonBindings = try BarButtonItem.consumeBindings(from: rightBarButtonItem)
-				let targetAction = try BarButtonItem.Binding.argument(for: .action, in: rightBarButtonBindings)
+				let targetAction = try BarButtonItem.argument(for: .action, in: rightBarButtonBindings)
 				
 				switch targetAction {
 				case .singleTarget(let input): input.send(nil)
@@ -1036,7 +1055,7 @@ func iOSTableViewTests() -> String {
 			}
 			
 			func testDeleteRow() throws {
-				let commit = try TableView<String>.Binding.argument(for: .commit, in: tableBindings)
+				let commit = try TableView<String>.argument(for: .commit, in: tableBindings)
 				commit(UITableView(), .delete, TableRow<String>(indexPath: IndexPath(row: 0, section: 0), data: "1"))
 				
 				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
@@ -1045,11 +1064,83 @@ func iOSTableViewTests() -> String {
 				XCTAssertEqual(Array(tableState.values?.first?.values ?? []), expected)
 			}
 		}
-		"""
+		"""#
+}
+
+func macOSTableViewTests() -> String {
+	return #"""
+		import XCTest
+
+		class TableViewTests: XCTestCase {
+			
+			var services: Services!
+			var doc: DocumentAdapter!
+			var windowState: WindowState!
+			
+			var tableBindings: [TableView<String>.Binding] = []
+			var addButtonBindings: [Button.Binding] = []
+			var removeButtonBindings: [Button.Binding] = []
+			
+			override func setUp() {
+				services = Services(fileService: MockFileService())
+				doc = DocumentAdapter(document: Document(services: services))
+				windowState = WindowState()
+
+				let windowBindings = try! Window.consumeBindings(from: window(windowState, doc))
+				let splitViewBindings = try! SplitView.consumeBindings(from: Window.dynamicValue(for: .contentView, in: windowBindings))
+				let masterViewBindings = try! View.consumeBindings(from: SplitView.dynamicValue(for: .arrangedSubviews, in: splitViewBindings).values.first!.view)
+				let layout = try! View.dynamicValue(for: .layout, in: masterViewBindings)
+				let scrollViewBindings = try! ScrollView.consumeBindings(from: layout.view(at: 0)!)
+				let clipViewBindings = try! ClipView.consumeBindings(from: ScrollView.dynamicValue(for: .contentView, in: scrollViewBindings))
+				let tableView = try! ClipView.dynamicValue(for: .documentView, in: clipViewBindings)!
+				
+				tableBindings = try! TableView<String>.consumeBindings(from: tableView)
+				addButtonBindings = try! Button.consumeBindings(from: layout.view(at: 1)!)
+				removeButtonBindings = try! Button.consumeBindings(from: layout.view(at: 2)!)
+			}
+			
+			override func tearDown() {
+			}
+			
+			func testInitialTableRows() throws {
+				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
+				XCTAssertEqual(Array(tableState.values?.map { $0 } ?? []), Document.initialContents().rows)
+			}
+			
+			func testCreateRow() throws {
+				let targetAction = try! Control.argument(for: .action, in: addButtonBindings)
+				
+				switch targetAction {
+				case .singleTarget(let input): input.send(nil)
+				default: fatalError()
+				}
+				
+				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
+				XCTAssertEqual(Array(tableState.values ?? []), Document.initialContents().rows + ["4"])
+			}
+			
+			func testDeleteRow() throws {
+				let targetAction = try! Control.argument(for: .action, in: removeButtonBindings)
+				
+				windowState.rowSelection.set().send(DetailState(index: 0, value: ""))
+				
+				switch targetAction {
+				case .singleTarget(let input): input.send(nil)
+				default: fatalError()
+				}
+				
+				let tableState = try TableView<String>.Binding.tableStructure(in: tableBindings)
+				var expected = Document.initialContents().rows
+				expected.remove(at: 0)
+
+				XCTAssertEqual(Array(tableState.values ?? []), expected)
+			}
+		}
+		"""#
 }
 
 func mockServices() -> String {
-	return """
+	return #"""
 		import Foundation
 		
 		class MockFileService: FileService {
@@ -1076,20 +1167,20 @@ func mockServices() -> String {
 				return files[url] != nil
 			}
 		}
-		"""
+		"""#
 }
 
 func documentAdapterContent() -> String {
-	return """
+	return #"""
 		typealias DocumentAdapter = Adapter<ModelState<Document, Document.Action, Document.Change>>
 		extension Adapter where State == ModelState<Document, Document.Action, Document.Change> {
 			init(document: Document) {
 				self.init(adapterState: ModelState(
-					async: true,
+					async: false,
 					initial: document,
 					resumer: { model -> Document.Change? in
 						.reload
-				},
+					},
 					reducer: { model, message, feedback -> Document.Change? in try? model.apply(message) }
 				))
 			}
@@ -1105,11 +1196,11 @@ func documentAdapterContent() -> String {
 				}
 			}
 		}
-		"""
+		"""#
 }
 
 func documentContent() -> String {
-	return """
+	return #"""
 		struct Document {
 			struct Contents: Codable {
 				var rows: [String]
@@ -1185,11 +1276,11 @@ func documentContent() -> String {
 		private extension String {
 			static let documentFileName = "document.json"
 		}
-		"""
+		"""#
 }
 
 func servicesContent() -> String {
-	return """
+	return #"""
 		struct Services {
 			let fileService: FileService
 		}
@@ -1220,7 +1311,7 @@ func servicesContent() -> String {
 				return exists && !isDirectory.boolValue
 			}
 		}
-		"""
+		"""#
 }
 
 func cwlUtilsContent(_ cwlViewsProducts: URL) throws -> String {
@@ -1244,811 +1335,855 @@ func cwlViewsTesting(_ cwlViewsProducts: URL, _ platform: Platform) throws -> St
 }
 
 func macMainContent() -> String {
-	return """
-		typealias AppModel = MainWindowModel
-		private let viewModel = MainWindowModel()
-
-		Application.run([
-			Application.terminate <-- viewModel.terminate.signal,
-			Application.mainMenu <-- mainMenu(appModel: viewModel),
-			Application.content <-- [mainWindow(viewModel: viewModel)]
-		])
-		"""
-}
-
-func macMainWindowContents() -> String {
-	return """
-		struct MainWindowModel {
-			static func load() -> String {
-				return UserDefaults.standard.string(forKey: .mainWindowTextSaveKey) ?? .defaultText
-			}
-			let text = SimpleAdapter(initialValue: MainWindowModel.load()) { last, current in
-				return (current, current)
-			}
-			let terminate = Variable<Void>(continuous: false)
-			func save() {
-				UserDefaults.standard.setValue(text.signal.poll, forKey: .mainWindowTextSaveKey)
-			}
-		}
-		
-		func mainWindow(viewModel: MainWindowModel) -> NSWindow {
-			return Window.construct(
-				Window.contentHeight <-- 150,
-				Window.contentWidth <-- WindowSize(anchor: .screen, scale: 0.25),
-				Window.frameAutosaveName <-- .mainWindowFrame,
-				Window.frameHorizontal <-- WindowPlacement(windowAnchor: .center),
-				Window.frameVertical <-- WindowPlacement(windowAnchor: .maxEdge, screenAnchor: .maxEdge, scale: 0.75),
-				Window.title <-- viewModel.text.signal,
-				View.layout <-- .vertical(
-					.view(TextField.label(
-						Control.value <-- .stringValue(.changeWindowTitle)
-					), size: nil),
-					.view(TextField.construct(
-						Control.value <-- viewModel.text.signal.map { .stringValue($0) },
-						Control.textChanged -- { text in _ = viewModel.text.input.send(value: text.string) }
-					), size: nil)
-				),
-				Window.shouldClose -- { _ in viewModel.save(); return true },
-				Window.willClose --> viewModel.terminate.input
+	return #"""
+		func application(_ windowVar: Var<WindowState>, _ doc: DocumentAdapter) -> Application {
+			return Application(
+				.mainMenu -- mainMenu(),
+				.lifetimes <-- windowVar.map {[
+					window($0, doc).nsWindow()
+				]},
+				.willEncodeRestorableState -- windowVar.storeToArchive(),
+				.didDecodeRestorableState -- windowVar.loadFromArchive(),
+				.shouldTerminateAfterLastWindowClosed() -- true
 			)
 		}
-		
-		extension String {
-			static let mainWindowTextSaveKey = "mainWindowTextSaveKey"
-			static let changeWindowTitle = NSLocalizedString("Change the window title:", comment: "")
-			static let defaultText = NSLocalizedString("Hello world!", comment: "")
+
+		private let services = Services(fileService: FileManager.default)
+		private let doc = DocumentAdapter(document: Document(services: services))
+		private let windowVar = Var(WindowState())
+
+		#if DEBUG
+			let docLog = doc.logJson(keyPath: \.contents, prefix: "Document changed: ")
+			let viewLog = windowVar.logJson(prefix: "View-state changed: ")
+		#endif
+
+		applicationMain { application(windowVar, doc) }
+		"""#
+}
+
+func macMainWindowContent() -> String {
+	return #"""
+		struct WindowState: CodableContainer {
+			let rowSelection: Var<DetailState?>
+			init() {
+				rowSelection = Var(nil)
+			}
 		}
-		
-		extension NSWindow.FrameAutosaveName {
-			static let mainWindowFrame = NSWindow.FrameAutosaveName(rawValue: "mainWindowFrame")
+
+		func window(_ windowState: WindowState, _ doc: DocumentAdapter) -> WindowConvertible {
+			return Window(
+				.contentWidth -- 650,
+				.contentHeight -- 350,
+				.frameAutosaveName -- Bundle.main.bundleIdentifier! + ".window",
+				.frameHorizontal -- 15,
+				.frameVertical -- 15,
+				.styleMask -- [.titled, .resizable, .closable, .miniaturizable],
+				.title -- .windowTitle,
+				.contentView -- SplitView.verticalThin(
+					.autosaveName -- Bundle.main.bundleIdentifier! + ".split",
+					.arrangedSubviews -- [
+						.subview(
+							masterView(windowState, doc),
+							holdingPriority: .layoutMid,
+							constraints: .equalTo(ratio: 0.3, priority: .layoutLow)
+						),
+						.subview(
+							detailContainer(windowState)
+						)
+					]
+				)
+			)
 		}
-				
-		"""
+
+		private func masterView(_ windowState: WindowState, _ doc: DocumentAdapter) -> ViewConvertible {
+			return View(
+				.layout -- .vertical(
+					align: .fill,
+					.view(
+						length: .fillRemaining,
+						TableView<String>.scrollEmbedded(
+							.rows <-- doc.rowsSignal().tableData(),
+							.focusRingType -- .none,
+							.usesAutomaticRowHeights -- true,
+							.columns -- [
+								TableColumn<String>(
+									.title -- .rowsColumnTitle,
+									.cellConstructor(cellView)
+								)
+							],
+							.cellSelected() --> Input().map(DetailState.init).bind(to: windowState.rowSelection)
+						)
+					),
+					.space(),
+					.horizontal(
+						.space(),
+						.pair(
+							.view(Button(
+								.bezelStyle -- .rounded,
+								.title -- "Add",
+								.action() --> Input().map { .add }.bind(to: doc)
+							)),
+							.view(Button(
+								.bezelStyle -- .rounded,
+								.title -- "Remove",
+								.isEnabled <-- windowState.rowSelection.map { $0 != nil },
+								.action() --> Input()
+									.withLatestFrom(windowState.rowSelection)
+									.compactMap { detail in (detail?.index).map { .removeAtIndex($0) } }
+									.bind(to: doc)
+							))
+						),
+						.space()
+					),
+					.space()
+				)
+			)
+		}
+
+		private func cellView(_ identifier: NSUserInterfaceItemIdentifier, _ cellData: SignalMulti<String>) -> TableCellViewConvertible {
+			return TableCellView(
+				.layout -- .inset(
+					margins: NSEdgeInsets(top: 8, left: 16, bottom: 8, right: 16),
+					.view(
+						TextField.label(
+							.stringValue <-- cellData.map { .rowLabel($0) },
+							.font -- .preferredFont(forTextStyle: .label, size: .controlRegular)
+						)
+					)
+				)
+			)
+		}
+
+		private extension DetailState {
+			init?(possibleCell: TableCell<String>?) {
+				guard let cell = possibleCell, let data = cell.data else { return nil }
+				self.init(index: cell.row, value: data)
+			}
+		}
+
+		private extension String {
+			static func rowLabel(_ row: String) -> String {
+				return String.localizedStringWithFormat(NSLocalizedString("Row %@", comment: ""), row)
+			}
+			
+			static let rowsColumnTitle = NSLocalizedString("Rows", comment: "")
+			static let windowTitle = NSLocalizedString("My Window", comment: "Window title")
+		}
+		"""#
 }
 
 func macMainMenuContent() -> String {
-	return """
-		func mainMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.items <-- [
-					MenuItem.construct(MenuItem.submenu <-- applicationMenu(appModel: appModel)),
-					MenuItem.construct(MenuItem.submenu <-- fileMenu(appModel: appModel)),
-					MenuItem.construct(MenuItem.submenu <-- editMenu(appModel: appModel)),
-					MenuItem.construct(MenuItem.submenu <-- formatMenu(appModel: appModel)),
-					MenuItem.construct(MenuItem.submenu <-- viewMenu(appModel: appModel)),
-					MenuItem.construct(MenuItem.submenu <-- windowsMenu(appModel: appModel)),
-					MenuItem.construct(MenuItem.submenu <-- helpMenu(appModel: appModel)),
+	return #"""
+		import CoreMedia
+
+		func mainMenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(.submenu -- applicationMenu()),
+					MenuItem(.submenu -- fileMenu()),
+					MenuItem(.submenu -- editMenu()),
+					MenuItem(.submenu -- formatMenu()),
+					MenuItem(.submenu -- viewMenu()),
+					MenuItem(.submenu -- windowsMenu()),
+					MenuItem(.submenu -- helpMenu()),
 				]
 			)
 		}
-		
+
 		fileprivate let executableName = (Bundle.main.localizedInfoDictionary?[kCFBundleNameKey as String] as? String) ?? (Bundle.main.localizedInfoDictionary?[kCFBundleExecutableKey as String] as? String) ?? ProcessInfo.processInfo.processName
-		
-		func applicationMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- executableName,
-				Menu.systemMenu <-- .apple,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .localizedStringWithFormat(.about, executableName),
-						MenuItem.action --> #selector(NSApplication.orderFrontStandardAboutPanel(_:))
+
+		func applicationMenu() -> Menu {
+			return Menu(
+				.systemName -- .apple,
+				.title -- executableName,
+				.items -- [
+					MenuItem(
+						.title -- String(format: NSLocalizedString("About %@", tableName: "MainMenu", comment: "Application menu item"), executableName),
+						.action --> #selector(NSApplication.orderFrontStandardAboutPanel(_:))
 					),
 					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .preferences,
-						MenuItem.keyEquivalent <-- ","
+					MenuItem(
+						.title -- NSLocalizedString("Preferences…", tableName: "MainMenu", comment: "Application menu item"),
+						.keyEquivalent -- ","
 					),
 					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .services,
-						MenuItem.submenu <-- Menu.construct(Menu.systemMenu <-- .services)
+					MenuItem(
+						.title -- NSLocalizedString("Services", tableName: "MainMenu", comment: "Application menu item"),
+						.submenu -- Menu(.systemName -- .services)
 					),
 					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .localizedStringWithFormat(.hide, executableName),
-						MenuItem.action --> #selector(NSApplication.hide(_:)),
-						MenuItem.keyEquivalent <-- "h"
+					MenuItem(
+						.title -- String(format: NSLocalizedString("Hide %@", tableName: "MainMenu", comment: "Application menu item"), executableName),
+						.action --> #selector(NSApplication.hide(_:)),
+						.keyEquivalent -- "h"
 					),
-					MenuItem.construct(
-						MenuItem.title <-- .hideOthers,
-						MenuItem.action --> #selector(NSApplication.hideOtherApplications(_:)),
-						MenuItem.keyEquivalent <-- "h",
-						MenuItem.keyEquivalentModifierMask <-- [.option, .command]
+					MenuItem(
+						.title -- NSLocalizedString("Hide Others", tableName: "MainMenu", comment: "Application menu item"),
+						.action --> #selector(NSApplication.hideOtherApplications(_:)),
+						.keyEquivalent -- "h",
+						.keyEquivalentModifierMask -- [.option, .command]
 					),
-					MenuItem.construct(
-						MenuItem.title <-- .showAll,
-						MenuItem.action --> #selector(NSApplication.unhideAllApplications(_:))
-					),
-					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .localizedStringWithFormat(.quit, executableName),
-						MenuItem.action --> #selector(NSApplication.terminate(_:)),
-						MenuItem.keyEquivalent <-- "q"
-					),
-				]
-			)
-		}
-		
-		func fileMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- .file,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .new,
-						MenuItem.action --> #selector(NSDocumentController.newDocument(_:)),
-						MenuItem.keyEquivalent <-- "n"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .open,
-						MenuItem.action --> #selector(NSDocumentController.openDocument(_:)),
-						MenuItem.keyEquivalent <-- "o"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .openRecent,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.systemMenu <-- .recentDocuments,
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .clearMenu,
-									MenuItem.action --> #selector(NSDocumentController.clearRecentDocuments(_:))
-								),
-							]
-						)
+					MenuItem(
+						.title -- NSLocalizedString("Show All", tableName: "MainMenu", comment: "Application menu item"),
+						.action --> #selector(NSApplication.unhideAllApplications(_:))
 					),
 					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .close,
-						MenuItem.action --> #selector(NSDocumentController.openDocument(_:)),
-						MenuItem.keyEquivalent <-- "w"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .save,
-						MenuItem.action --> #selector(NSDocumentController.openDocument(_:)),
-						MenuItem.keyEquivalent <-- "s"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .saveAs,
-						MenuItem.action --> #selector(NSDocumentController.openDocument(_:)),
-						MenuItem.keyEquivalent <-- "s",
-						MenuItem.keyEquivalentModifierMask <-- [.shift, .command]
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .revertToSaved,
-						MenuItem.action --> #selector(NSDocument.revertToSaved(_:)),
-						MenuItem.keyEquivalent <-- "r"
-					),
-					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .pageSetup,
-						MenuItem.action --> #selector(NSDocument.runPageLayout(_:)),
-						MenuItem.keyEquivalent <-- "p",
-						MenuItem.keyEquivalentModifierMask <-- [.shift, .command]
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .print,
-						MenuItem.action --> #selector(NSDocument.printDocument(_:)),
-						MenuItem.keyEquivalent <-- "p"
-					),
-				]
-			)
-		}
-		
-		func editMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- .edit,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .undo,
-						MenuItem.action --> Selector(("undo:")),
-						MenuItem.keyEquivalent <-- "z"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .redo,
-						MenuItem.action --> Selector(("redo:")),
-						MenuItem.keyEquivalent <-- "Z",
-						MenuItem.keyEquivalentModifierMask <-- [.shift, .command]
-					),
-					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .cut,
-						MenuItem.action --> #selector(NSText.cut(_:)),
-						MenuItem.keyEquivalent <-- "x"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .copy,
-						MenuItem.action --> #selector(NSText.copy(_:)),
-						MenuItem.keyEquivalent <-- "c"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .paste,
-						MenuItem.action --> #selector(NSText.paste(_:)),
-						MenuItem.keyEquivalent <-- "v"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .pasteAndMatchStyle,
-						MenuItem.action --> #selector(NSTextView.pasteAsPlainText(_:)),
-						MenuItem.keyEquivalent <-- "v",
-						MenuItem.keyEquivalentModifierMask <-- [.shift, .option, .command]
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .delete,
-						MenuItem.action --> #selector(NSText.delete(_:))
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .selectAll,
-						MenuItem.action --> #selector(NSText.selectAll(_:)),
-						MenuItem.keyEquivalent <-- "a"
-					),
-					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .find,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .findEllipsis,
-									MenuItem.action --> #selector(NSTextView.performFindPanelAction(_:)),
-									MenuItem.keyEquivalent <-- "f",
-									MenuItem.tag <-- 1
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .findAndReplace,
-									MenuItem.action --> #selector(NSTextView.performFindPanelAction(_:)),
-									MenuItem.keyEquivalent <-- "f",
-									MenuItem.keyEquivalentModifierMask <-- [.option, .command],
-									MenuItem.tag <-- 12
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .findNext,
-									MenuItem.action --> #selector(NSTextView.performFindPanelAction(_:)),
-									MenuItem.keyEquivalent <-- "g",
-									MenuItem.tag <-- 2
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .findPrevious,
-									MenuItem.action --> #selector(NSTextView.performFindPanelAction(_:)),
-									MenuItem.keyEquivalent <-- "g",
-									MenuItem.keyEquivalentModifierMask <-- [.shift, .command],
-									MenuItem.tag <-- 3
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .useSelectionForFind,
-									MenuItem.action --> #selector(NSTextView.performFindPanelAction(_:)),
-									MenuItem.keyEquivalent <-- "e",
-									MenuItem.tag <-- 7
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .jumpToSelection,
-									MenuItem.action --> #selector(NSResponder.centerSelectionInVisibleArea(_:)),
-									MenuItem.keyEquivalent <-- "j"
-								)
-							]
-						)
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .spellingAndGrammar,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .showSpellingAndGrammar,
-									MenuItem.action --> #selector(NSText.showGuessPanel(_:)),
-									MenuItem.keyEquivalent <-- ":"
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .checkDocumentNow,
-									MenuItem.action --> #selector(NSText.checkSpelling(_:)),
-									MenuItem.keyEquivalent <-- ";"
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .checkSpellingWhileTyping,
-									MenuItem.action --> #selector(NSTextView.toggleContinuousSpellChecking(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .checkGrammarWithSpelling,
-									MenuItem.action --> #selector(NSTextView.toggleGrammarChecking(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .correctSpellingAutomatically,
-									MenuItem.action --> #selector(NSTextView.toggleAutomaticSpellingCorrection(_:))
-								)
-							]
-						)
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .substitutions,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .showSubstitutions,
-									MenuItem.action --> #selector(NSTextView.orderFrontSubstitutionsPanel(_:)),
-									MenuItem.keyEquivalent <-- ":"
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .smartCopyPaste,
-									MenuItem.action --> #selector(NSTextView.toggleSmartInsertDelete(_:))
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .smartQuotes,
-									MenuItem.action --> #selector(NSTextView.toggleAutomaticQuoteSubstitution(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .smartDashes,
-									MenuItem.action --> #selector(NSTextView.toggleAutomaticDashSubstitution(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .smartLinks,
-									MenuItem.action --> #selector(NSTextView.toggleAutomaticLinkDetection(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .dataDetectors,
-									MenuItem.action --> #selector(NSTextView.toggleAutomaticDataDetection(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .textReplacement,
-									MenuItem.action --> #selector(NSTextView.toggleAutomaticTextReplacement(_:))
-								),
-							]
-						)
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .transformations,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .makeUpperCase,
-									MenuItem.action --> #selector(NSResponder.uppercaseWord(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .makeLowerCase,
-									MenuItem.action --> #selector(NSResponder.lowercaseWord(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .capitalize,
-									MenuItem.action --> #selector(NSResponder.capitalizeWord(_:))
-								),
-							]
-						)
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .speech,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .startSpeaking,
-									MenuItem.action --> #selector(NSTextView.startSpeaking(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .stopSpeaking,
-									MenuItem.action --> #selector(NSTextView.stopSpeaking(_:))
-								)
-							]
-						)
-					),
-				]
-			)
-		}
-		
-		func formatMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- .format,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .font,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.systemMenu <-- .font,
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .showFonts,
-									MenuItem.action --> #selector(NSFontManager.orderFrontFontPanel(_:)),
-									MenuItem.keyEquivalent <-- "t"
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .bold,
-									MenuItem.action --> #selector(NSFontManager.addFontTrait(_:)),
-									MenuItem.keyEquivalent <-- "b",
-									MenuItem.tag <-- 2
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .italic,
-									MenuItem.action --> #selector(NSFontManager.addFontTrait(_:)),
-									MenuItem.keyEquivalent <-- "i",
-									MenuItem.tag <-- 1
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .underline,
-									MenuItem.action --> #selector(NSText.underline(_:)),
-									MenuItem.keyEquivalent <-- "u"
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .bigger,
-									MenuItem.action --> #selector(NSFontManager.modifyFont(_:)),
-									MenuItem.keyEquivalent <-- "+",
-									MenuItem.tag <-- 3
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .smaller,
-									MenuItem.action --> #selector(NSFontManager.modifyFont(_:)),
-									MenuItem.keyEquivalent <-- "-",
-									MenuItem.tag <-- 4
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .kern,
-									MenuItem.submenu <-- Menu.construct(
-										Menu.items <-- [
-											MenuItem.construct(
-												MenuItem.title <-- .useDefault,
-												MenuItem.action --> #selector(NSTextView.useStandardKerning(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .useNone,
-												MenuItem.action --> #selector(NSTextView.turnOffKerning(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .tighten,
-												MenuItem.action --> #selector(NSTextView.tightenKerning(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .loosen,
-												MenuItem.action --> #selector(NSTextView.loosenKerning(_:))
-											),
-										]
-									)
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .ligatures,
-									MenuItem.submenu <-- Menu.construct(
-										Menu.items <-- [
-											MenuItem.construct(
-												MenuItem.title <-- .useDefault,
-												MenuItem.action --> #selector(NSTextView.useStandardLigatures(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .useNone,
-												MenuItem.action --> #selector(NSTextView.turnOffLigatures(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .useAll,
-												MenuItem.action --> #selector(NSTextView.useAllLigatures(_:))
-											)
-										]
-									)
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .baseline,
-									MenuItem.submenu <-- Menu.construct(
-										Menu.items <-- [
-											MenuItem.construct(
-												MenuItem.title <-- .useDefault,
-												MenuItem.action --> #selector(NSTextView.unscript(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .superscript,
-												MenuItem.action --> #selector(NSTextView.superscript(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .subscript,
-												MenuItem.action --> #selector(NSTextView.subscript(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .raise,
-												MenuItem.action --> #selector(NSTextView.raiseBaseline(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .lower,
-												MenuItem.action --> #selector(NSTextView.lowerBaseline(_:))
-											)
-										]
-									)
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .showColors,
-									MenuItem.action --> #selector(NSApplication.orderFrontColorPanel(_:)),
-									MenuItem.keyEquivalent <-- "c",
-									MenuItem.keyEquivalentModifierMask <-- [.shift, .command]
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .copyStyle,
-									MenuItem.action --> #selector(NSText.copyFont(_:)),
-									MenuItem.keyEquivalent <-- "c",
-									MenuItem.keyEquivalentModifierMask <-- [.option, .command]
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .pasteStyle,
-									MenuItem.action --> #selector(NSText.pasteFont(_:)),
-									MenuItem.keyEquivalent <-- "v",
-									MenuItem.keyEquivalentModifierMask <-- [.option, .command]
-								)
-							]
-						)
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .text,
-						MenuItem.submenu <-- Menu.construct(
-							Menu.items <-- [
-								MenuItem.construct(
-									MenuItem.title <-- .alignLeft,
-									MenuItem.action --> #selector(NSText.alignLeft(_:)),
-									MenuItem.keyEquivalent <-- "{"
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .center,
-									MenuItem.action --> #selector(NSText.alignCenter(_:)),
-									MenuItem.keyEquivalent <-- "|"
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .justify,
-									MenuItem.action --> #selector(NSTextView.alignJustified(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .alignRight,
-									MenuItem.action --> #selector(NSText.alignLeft(_:)),
-									MenuItem.keyEquivalent <-- "}"
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .writingDirection,
-									MenuItem.submenu <-- Menu.construct(
-										Menu.items <-- [
-											MenuItem.construct(
-												MenuItem.title <-- .paragraph,
-												MenuItem.isEnabled <-- false
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .default,
-												MenuItem.action --> #selector(NSResponder.makeBaseWritingDirectionNatural(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .letfToRight,
-												MenuItem.action --> #selector(NSResponder.makeBaseWritingDirectionLeftToRight(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .rightToLeft,
-												MenuItem.action --> #selector(NSResponder.makeBaseWritingDirectionRightToLeft(_:))
-											),
-											NSMenuItem.separator(),
-											MenuItem.construct(
-												MenuItem.title <-- .selection,
-												MenuItem.isEnabled <-- false
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .default,
-												MenuItem.action --> #selector(NSResponder.makeTextWritingDirectionNatural(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .letfToRight,
-												MenuItem.action --> #selector(NSResponder.makeTextWritingDirectionLeftToRight(_:))
-											),
-											MenuItem.construct(
-												MenuItem.title <-- .rightToLeft,
-												MenuItem.action --> #selector(NSResponder.makeTextWritingDirectionRightToLeft(_:))
-											),
-										]
-									)
-								),
-								NSMenuItem.separator(),
-								MenuItem.construct(
-									MenuItem.title <-- .showRuler,
-									MenuItem.action --> #selector(NSText.toggleRuler(_:))
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .copyRuler,
-									MenuItem.action --> #selector(NSText.copyRuler(_:)),
-									MenuItem.keyEquivalent <-- "c",
-									MenuItem.keyEquivalentModifierMask <-- [.control, .command]
-								),
-								MenuItem.construct(
-									MenuItem.title <-- .pasteRuler,
-									MenuItem.action --> #selector(NSText.pasteRuler(_:)),
-									MenuItem.keyEquivalent <-- "v",
-									MenuItem.keyEquivalentModifierMask <-- [.control, .command]
-								)
-							]
-						)
+					MenuItem(
+						.title -- String(format: NSLocalizedString("Quit %@", tableName: "MainMenu", comment: "Application menu item"), executableName),
+						.action --> #selector(NSApplication.terminate(_:)),
+						.keyEquivalent -- "q"
 					)
 				]
 			)
 		}
-		
-		func viewMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- .view,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .showToolbar,
-						MenuItem.action --> #selector(NSWindow.toggleToolbarShown(_:)),
-						MenuItem.keyEquivalent <-- "t",
-						MenuItem.keyEquivalentModifierMask <-- [.option, .command]
+
+		func fileMenu() -> Menu {
+			return Menu(
+				.title -- NSLocalizedString("File", tableName: "MainMenu", comment: "Standard menu title"),
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("New", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocumentController.newDocument(_:)),
+						.keyEquivalent -- "n"
 					),
-					MenuItem.construct(
-						MenuItem.title <-- .customizeToolbar,
-						MenuItem.action --> #selector(NSWindow.runToolbarCustomizationPalette(_:))
+					MenuItem(
+						.title -- NSLocalizedString("Open…", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocumentController.openDocument(_:)),
+						.keyEquivalent -- "o"
 					),
-					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .showSidebar,
-						MenuItem.action --> NSSelectorFromString("toggleSourceList:"),
-						MenuItem.keyEquivalent <-- "s",
-						MenuItem.keyEquivalentModifierMask <-- [.control, .command]
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .enterFullScreen,
-						MenuItem.action --> #selector(NSWindow.toggleFullScreen(_:)),
-						MenuItem.keyEquivalent <-- "f",
-						MenuItem.keyEquivalentModifierMask <-- [.control, .command]
-					)
-				]
-			)
-		}
-		
-		func windowsMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- .window,
-				Menu.systemMenu <-- .windows,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .minimize,
-						MenuItem.action --> #selector(NSWindow.performMiniaturize(_:)),
-						MenuItem.keyEquivalent <-- "m"
-					),
-					MenuItem.construct(
-						MenuItem.title <-- .zoom,
-						MenuItem.action --> #selector(NSWindow.performZoom(_:))
+					MenuItem(
+						.title -- NSLocalizedString("Open Recent", tableName: "MainMenu", comment: "File menu item"),
+						.submenu -- Menu(
+							.systemName -- .recentDocuments,
+							.items -- [
+								MenuItem(
+									.title -- NSLocalizedString("Clear Menu", tableName: "MainMenu", comment: "File menu item"),
+									.action --> #selector(NSDocumentController.clearRecentDocuments(_:))
+								)
+							]
+						)
 					),
 					NSMenuItem.separator(),
-					MenuItem.construct(
-						MenuItem.title <-- .bringAllToFront,
-						MenuItem.action --> #selector(NSApplication.arrangeInFront(_:)),
-						MenuItem.keyEquivalent <-- "s",
-						MenuItem.keyEquivalentModifierMask <-- [.control, .command]
+					MenuItem(
+						.title -- NSLocalizedString("Close", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSWindow.performClose(_:)),
+						.keyEquivalent -- "w"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Save…", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocument.save(_:)),
+						.keyEquivalent -- "s"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Save As…", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocument.saveAs(_:)),
+						.keyEquivalent -- "s",
+						.keyEquivalentModifierMask -- [.shift, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Revert to Saved", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocument.revertToSaved(_:)),
+						.keyEquivalent -- "r"
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Page Setup…", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocument.runPageLayout(_:)),
+						.keyEquivalent -- "p",
+						.keyEquivalentModifierMask -- [.shift, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Print…", tableName: "MainMenu", comment: "File menu item"),
+						.action --> #selector(NSDocument.printDocument),
+						.keyEquivalent -- "p"
 					)
 				]
 			)
 		}
-		
-		func helpMenu(appModel: AppModel) -> NSMenu {
-			return Menu.construct(
-				Menu.title <-- .help,
-				Menu.systemMenu <-- .help,
-				Menu.items <-- [
-					MenuItem.construct(
-						MenuItem.title <-- .localizedStringWithFormat(.appHelp, executableName),
-						MenuItem.action --> #selector(NSApplication.showHelp(_:)),
-						MenuItem.keyEquivalent <-- "?"
+
+		func editMenu() -> Menu {
+			return Menu(
+				.title -- NSLocalizedString("Edit", tableName: "MainMenu", comment: "Standard menu title"),
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Undo", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> Selector(("undo:")),
+						.keyEquivalent -- "z"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Redo", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> Selector(("redo:")),
+						.keyEquivalent -- "Z",
+						.keyEquivalentModifierMask -- [.shift, .command]
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Cut", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> #selector(NSText.cut(_:)),
+						.keyEquivalent -- "x"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Copy", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> #selector(NSText.copy(_:)),
+						.keyEquivalent -- "c"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Paste", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> #selector(NSText.paste(_:)),
+						.keyEquivalent -- "v"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Paste and Match Style", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> #selector(NSTextView.pasteAsPlainText(_:)),
+						.keyEquivalent -- "v",
+						.keyEquivalentModifierMask -- [.shift, .option, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Delete", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> #selector(NSText.delete(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Select All", tableName: "MainMenu", comment: "Edit menu item"),
+						.action --> #selector(NSText.selectAll(_:)),
+						.keyEquivalent -- "a"
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Find", tableName: "MainMenu", comment: "Edit menu item"),
+						.submenu -- findSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Spelling and Grammar", tableName: "MainMenu", comment: "Edit menu item"),
+						.submenu -- spellingAndGrammarSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Substitutions", tableName: "MainMenu", comment: "Edit menu item"),
+						.submenu -- substitutionsSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Transformations", tableName: "MainMenu", comment: "Edit menu item"),
+						.submenu -- transformationsSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Speech", tableName: "MainMenu", comment: "Edit menu item"),
+						.submenu -- speechSubmenu() 
 					)
 				]
 			)
 		}
-		
+
+		func formatMenu() -> Menu {
+			return Menu(
+				.title -- NSLocalizedString("Format", tableName: "MainMenu", comment: "Standard menu title"),
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Font", tableName: "MainMenu", comment: "Format menu item"),
+						.submenu -- fontSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Text", tableName: "MainMenu", comment: "Format menu item"),
+						.submenu -- textSubmenu()
+					)
+				]
+			)
+		}
+
+		func viewMenu() -> Menu {
+			return Menu(
+				.title -- NSLocalizedString("View", tableName: "MainMenu", comment: "Standard menu title"),
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Show Toolbar", tableName: "MainMenu", comment: "View menu item"),
+						.action --> #selector(NSWindow.toggleToolbarShown(_:)),
+						.keyEquivalent -- "t",
+						.keyEquivalentModifierMask -- [.option, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Customize Toolbar…", tableName: "MainMenu", comment: "View menu item"),
+						.action --> #selector(NSWindow.runToolbarCustomizationPalette(_:))
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Show Sidebar", tableName: "MainMenu", comment: "View menu item"),
+						.action --> NSSelectorFromString("toggleSourceList:"),
+						.keyEquivalent -- "s",
+						.keyEquivalentModifierMask -- [.control, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Enter Full Screen", tableName: "MainMenu", comment: "View menu item"),
+						.action --> #selector(NSWindow.toggleFullScreen(_:)),
+						.keyEquivalent -- "f",
+						.keyEquivalentModifierMask -- [.control, .command]
+					)
+				]
+			)
+		}
+
+		func windowsMenu() -> Menu {
+			return Menu(
+				.systemName -- .windows,
+				.title -- NSLocalizedString("Window", tableName: "MainMenu", comment: "Standard menu title"),
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Minimize", tableName: "MainMenu", comment: "Window menu item"),
+						.action --> #selector(NSWindow.performMiniaturize(_:)),
+						.keyEquivalent -- "m"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Zoom", tableName: "MainMenu", comment: "Window menu item"),
+						.action --> #selector(NSWindow.performZoom(_:))
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Bring All to Front", tableName: "MainMenu", comment: "Window menu item"),
+						.action --> #selector(NSApplication.arrangeInFront(_:)),
+						.keyEquivalent -- "s",
+						.keyEquivalentModifierMask -- [.control, .command]
+					)
+				]
+			)
+		}
+
+		func helpMenu() -> Menu {
+			return Menu(
+				.systemName -- .help,
+				.title -- NSLocalizedString("Help", tableName: "MainMenu", comment: "Standard menu title"),
+				.items -- [
+					MenuItem(
+						.title -- String(format: NSLocalizedString("%@ Help", tableName: "MainMenu", comment: "Help menu item"), executableName),
+						.action --> #selector(NSApplication.showHelp(_:)),
+						.keyEquivalent -- "?"
+					)
+				]
+			)
+		}
+
+		func findSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Find…", tableName: "MainMenu", comment: "Find menu item"),
+						.action --> #selector(NSTextView.performFindPanelAction(_:)),
+						.keyEquivalent -- "f",
+						.tag -- 1
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Find and Replace…", tableName: "MainMenu", comment: "Find menu item"),
+						.action --> #selector(NSTextView.performFindPanelAction(_:)),
+						.keyEquivalent -- "f",
+						.keyEquivalentModifierMask -- [.option, .command],
+						.tag -- 12
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Find Next", tableName: "MainMenu", comment: "Find menu item"),
+						.action --> #selector(NSTextView.performFindPanelAction(_:)),
+						.keyEquivalent -- "g",
+						.tag -- 2
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Find Previous", tableName: "MainMenu", comment: "Find menu item"),
+						.action --> #selector(NSTextView.performFindPanelAction(_:)),
+						.keyEquivalent -- "g",
+						.keyEquivalentModifierMask -- [.shift, .command],
+						.tag -- 3
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Use Selection for Find", tableName: "MainMenu", comment: "Find menu item"),
+						.action --> #selector(NSTextView.performFindPanelAction(_:)),
+						.keyEquivalent -- "e",
+						.tag -- 7
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Jump to Selection", tableName: "MainMenu", comment: "Find menu item"),
+						.action --> #selector(NSResponder.centerSelectionInVisibleArea(_:)),
+						.keyEquivalent -- "j"
+					)
+				]
+			)
+		}
+
+		func spellingAndGrammarSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Show Spelling and Grammar", tableName: "MainMenu", comment: "Spelling menu item"),
+						.action --> #selector(NSText.showGuessPanel(_:)),
+						.keyEquivalent -- ":"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Check Document Now", tableName: "MainMenu", comment: "Spelling menu item"),
+						.action --> #selector(NSText.checkSpelling(_:)),
+						.keyEquivalent -- ";"
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Check Spelling While Typing", tableName: "MainMenu", comment: "Spelling menu item"),
+						.action --> #selector(NSTextView.toggleContinuousSpellChecking(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Check Grammar With Spelling", tableName: "MainMenu", comment: "Spelling menu item"),
+						.action --> #selector(NSTextView.toggleGrammarChecking(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Correct Spelling Automatically", tableName: "MainMenu", comment: "Spelling menu item"),
+						.action --> #selector(NSTextView.toggleAutomaticSpellingCorrection(_:))
+					)
+				]
+			)
+		}
+
+		func substitutionsSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Show Substitutions", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.orderFrontSubstitutionsPanel(_:)),
+						.keyEquivalent -- ":"
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Smart Copy/Paste", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.toggleSmartInsertDelete(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Smart Quotes", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.toggleAutomaticQuoteSubstitution(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Smart Dashes", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.toggleAutomaticDashSubstitution(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Smart Links", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.toggleAutomaticLinkDetection(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Data Detectors", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.toggleAutomaticDataDetection(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Text Replacement", tableName: "MainMenu", comment: "Substitutions menu item"),
+						.action --> #selector(NSTextView.toggleAutomaticTextReplacement(_:))
+					)
+				]
+			)
+		}
+
+		func transformationsSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Make Upper Case", tableName: "MainMenu", comment: "Tubstitutions menu item"),
+						.action --> #selector(NSResponder.uppercaseWord(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Make Lower Case", tableName: "MainMenu", comment: "Tubstitutions menu item"),
+						.action --> #selector(NSResponder.lowercaseWord(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Capitalize", tableName: "MainMenu", comment: "Tubstitutions menu item"),
+						.action --> #selector(NSResponder.capitalizeWord(_:))
+					)
+				]
+			)
+		}
+
+		func speechSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Start Speaking", tableName: "MainMenu", comment: "Speech menu item"),
+						.action --> #selector(NSTextView.startSpeaking(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Stop Speaking", tableName: "MainMenu", comment: "Speech menu item"),
+						.action --> #selector(NSTextView.stopSpeaking(_:))
+					)
+				]
+			)
+		}
+
+		func fontSubmenu() -> Menu {
+			return Menu(
+				.systemName -- .font,
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Show Fonts", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSFontManager.orderFrontFontPanel(_:)),
+						.keyEquivalent -- "t"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Bold", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSFontManager.addFontTrait(_:)),
+						.keyEquivalent -- "b",
+						.tag -- 2
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Italic", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSFontManager.addFontTrait(_:)),
+						.keyEquivalent -- "i",
+						.tag -- 1
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Underline", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSText.underline(_:)),
+						.keyEquivalent -- "u"
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Bigger", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSFontManager.modifyFont(_:)),
+						.keyEquivalent -- "+",
+						.tag -- 3
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Smaller", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSFontManager.modifyFont(_:)),
+						.keyEquivalent -- "-",
+						.tag -- 4
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Kern", tableName: "MainMenu", comment: "Font menu item"),
+						.submenu -- kernSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Ligatures", tableName: "MainMenu", comment: "Font menu item"),
+						.submenu -- ligaturesSubmenu()
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Baseline", tableName: "MainMenu", comment: "Font menu item"),
+						.submenu -- baselineSubmenu()
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Show Colors", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSApplication.orderFrontColorPanel(_:)),
+						.keyEquivalent -- "c",
+						.keyEquivalentModifierMask -- [.shift, .command]
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Copy Style", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSText.copyFont(_:)),
+						.keyEquivalent -- "c",
+						.keyEquivalentModifierMask -- [.option, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Paste Style", tableName: "MainMenu", comment: "Font menu item"),
+						.action --> #selector(NSText.pasteFont(_:)),
+						.keyEquivalent -- "v",
+						.keyEquivalentModifierMask -- [.option, .command]
+					)
+				]
+			)
+		}
+
+		func textSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Align Left", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSText.alignLeft(_:)),
+						.keyEquivalent -- "{"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Center", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSText.alignCenter(_:)),
+						.keyEquivalent -- "|"
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Justify", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSTextView.alignJustified(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Align Right", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSText.alignLeft(_:)),
+						.keyEquivalent -- "}"
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Writing Direction", tableName: "MainMenu", comment: "Text menu item"),
+						.submenu -- writingDirectionSubmenu()
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Show Ruler", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSText.toggleRuler(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Copy Ruler", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSText.copyRuler(_:)),
+						.keyEquivalent -- "c",
+						.keyEquivalentModifierMask -- [.control, .command]
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Paste Ruler", tableName: "MainMenu", comment: "Text menu item"),
+						.action --> #selector(NSText.pasteRuler(_:)),
+						.keyEquivalent -- "v",
+						.keyEquivalentModifierMask -- [.control, .command]
+					)
+				]
+			)
+		}
+
+		func kernSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Use Default", tableName: "MainMenu", comment: "Kern menu item"),
+						.action --> #selector(NSTextView.useStandardKerning(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Use None", tableName: "MainMenu", comment: "Kern menu item"),
+						.action --> #selector(NSTextView.turnOffKerning(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Tighten", tableName: "MainMenu", comment: "Kern menu item"),
+						.action --> #selector(NSTextView.tightenKerning(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Loosen", tableName: "MainMenu", comment: "Kern menu item"),
+						.action --> #selector(NSTextView.loosenKerning(_:))
+					)
+				]
+			)
+		}
+
+		func ligaturesSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Use Default", tableName: "MainMenu", comment: "Ligatures menu item"),
+						.action --> #selector(NSTextView.useStandardLigatures(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Use None", tableName: "MainMenu", comment: "Ligatures menu item"),
+						.action --> #selector(NSTextView.turnOffLigatures(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Use All", tableName: "MainMenu", comment: "Ligatures menu item"),
+						.action --> #selector(NSTextView.useAllLigatures(_:))
+					)
+				]
+			)
+		}
+
+		func baselineSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Use Default", tableName: "MainMenu", comment: "Baseline menu item"),
+						.action --> #selector(NSTextView.unscript(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Superscript", tableName: "MainMenu", comment: "Baseline menu item"),
+						.action --> #selector(NSTextView.superscript(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Subscript", tableName: "MainMenu", comment: "Baseline menu item"),
+						.action --> #selector(NSTextView.subscript(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Raise", tableName: "MainMenu", comment: "Baseline menu item"),
+						.action --> #selector(NSTextView.raiseBaseline(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("Lower", tableName: "MainMenu", comment: "Baseline menu item"),
+						.action --> #selector(NSTextView.lowerBaseline(_:))
+					)
+				]
+			)
+		}
+
+		func writingDirectionSubmenu() -> Menu {
+			return Menu(
+				.items -- [
+					MenuItem(
+						.title -- NSLocalizedString("Paragraph", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.isEnabled -- false
+					),
+					MenuItem(
+						.title -- NSLocalizedString("\tDefault", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.action --> #selector(NSResponder.makeBaseWritingDirectionNatural(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("\tLeft to Right", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.action --> #selector(NSResponder.makeBaseWritingDirectionLeftToRight(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("\tRight to Left", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.action --> #selector(NSResponder.makeBaseWritingDirectionRightToLeft(_:))
+					),
+					NSMenuItem.separator(),
+					MenuItem(
+						.title -- NSLocalizedString("Selection", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.isEnabled -- false
+					),
+					MenuItem(
+						.title -- NSLocalizedString("\tDefault", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.action --> #selector(NSResponder.makeTextWritingDirectionNatural(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("\tLeft to Right", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.action --> #selector(NSResponder.makeTextWritingDirectionLeftToRight(_:))
+					),
+					MenuItem(
+						.title -- NSLocalizedString("\tRight to Left", tableName: "MainMenu", comment: "Writing direction menu item"),
+						.action --> #selector(NSResponder.makeTextWritingDirectionRightToLeft(_:))
+					)
+				]
+			)
+		}
+		"""#
+}
+
+func macDetailContent() -> String {
+	return #"""
+		struct DetailState: CodableContainer {
+			let index: Int
+			let value: String
+		}
+
+		func detailContainer(_ windowState: WindowState) -> ViewConvertible {
+			return View(
+				.layout <-- windowState.rowSelection.map { selection in
+					.vertical(
+						animation: Layout.Animation(style: .fade, duration: 0.1),
+						.inset(
+							margins: NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8),
+							.view(selection.map(detailView) ?? emptyDetail())
+						)
+					)
+				}
+			)
+		}
+
+		func emptyDetail() -> ViewConvertible {
+			return TextField.label(
+				.stringValue -- .noItemSelected,
+				.verticalContentHuggingPriority -- .layoutLow
+			)
+		}
+
+		private func detailView(_ detailState: DetailState) -> ViewConvertible {
+			return TextField.label(
+				.stringValue -- .contentLabel(detailState.value),
+				.verticalContentHuggingPriority -- .layoutLow
+			)
+		}
+
 		private extension String {
-			// Application menu
-			static let about = NSLocalizedString("About %@", tableName: "MainMenu", comment: "")
-			static let preferences = NSLocalizedString("Preferences…", tableName: "MainMenu", comment: "")
-			static let services = NSLocalizedString("Services", tableName: "MainMenu", comment: "")
-			static let hide = NSLocalizedString("Hide %@", tableName: "MainMenu", comment: "")
-			static let hideOthers = NSLocalizedString("Hide Others", tableName: "MainMenu", comment: "")
-			static let showAll = NSLocalizedString("Show All", tableName: "MainMenu", comment: "")
-			static let quit = NSLocalizedString("Quit %@", tableName: "MainMenu", comment: "")
-			
-			// File menu
-			static let file = NSLocalizedString("File", tableName: "MainMenu", comment: "")
-			static let new = NSLocalizedString("New", tableName: "MainMenu", comment: "")
-			static let open = NSLocalizedString("Open…", tableName: "MainMenu", comment: "")
-			static let openRecent = NSLocalizedString("Open Recent", tableName: "MainMenu", comment: "")
-			static let clearMenu = NSLocalizedString("Clear Menu", tableName: "MainMenu", comment: "")
-			static let close = NSLocalizedString("Close", tableName: "MainMenu", comment: "")
-			static let save = NSLocalizedString("Save…", tableName: "MainMenu", comment: "")
-			static let saveAs = NSLocalizedString("Save As…", tableName: "MainMenu", comment: "")
-			static let revertToSaved = NSLocalizedString("Revert to Saved", tableName: "MainMenu", comment: "")
-			static let pageSetup = NSLocalizedString("Page Setup…", tableName: "MainMenu", comment: "")
-			static let print = NSLocalizedString("Print…", tableName: "MainMenu", comment: "")
-			
-			// Edit menu
-			static let edit = NSLocalizedString("Edit", tableName: "MainMenu", comment: "")
-			static let undo = NSLocalizedString("Undo", tableName: "MainMenu", comment: "")
-			static let redo = NSLocalizedString("Redo", tableName: "MainMenu", comment: "")
-			static let cut = NSLocalizedString("Cut", tableName: "MainMenu", comment: "")
-			static let copy = NSLocalizedString("Copy", tableName: "MainMenu", comment: "")
-			static let paste = NSLocalizedString("Paste", tableName: "MainMenu", comment: "")
-			static let pasteAndMatchStyle = NSLocalizedString("Paste and Match Style", tableName: "MainMenu", comment: "")
-			static let delete = NSLocalizedString("Delete", tableName: "MainMenu", comment: "")
-			static let selectAll = NSLocalizedString("Select All", tableName: "MainMenu", comment: "")
-			static let find = NSLocalizedString("Find", tableName: "MainMenu", comment: "")
-			static let findEllipsis = NSLocalizedString("Find…", tableName: "MainMenu", comment: "")
-			static let findAndReplace = NSLocalizedString("Find and Replace…", tableName: "MainMenu", comment: "")
-			static let findNext = NSLocalizedString("Find Next", tableName: "MainMenu", comment: "")
-			static let findPrevious = NSLocalizedString("Find Previous", tableName: "MainMenu", comment: "")
-			static let useSelectionForFind = NSLocalizedString("Use Selection for Find", tableName: "MainMenu", comment: "")
-			static let jumpToSelection = NSLocalizedString("Jump to Selection", tableName: "MainMenu", comment: "")
-			static let spellingAndGrammar = NSLocalizedString("Spelling and Grammar", tableName: "MainMenu", comment: "")
-			static let showSpellingAndGrammar = NSLocalizedString("Show Spelling and Grammar", tableName: "MainMenu", comment: "")
-			static let checkDocumentNow = NSLocalizedString("Check Document Now", tableName: "MainMenu", comment: "")
-			static let checkSpellingWhileTyping = NSLocalizedString("Check Spelling While Typing", tableName: "MainMenu", comment: "")
-			static let checkGrammarWithSpelling = NSLocalizedString("Check Grammar With Spelling", tableName: "MainMenu", comment: "")
-			static let correctSpellingAutomatically = NSLocalizedString("Correct Spelling Automatically", tableName: "MainMenu", comment: "")
-			static let substitutions = NSLocalizedString("Substitutions", tableName: "MainMenu", comment: "")
-			static let showSubstitutions = NSLocalizedString("Show Substitutions", tableName: "MainMenu", comment: "")
-			static let smartCopyPaste = NSLocalizedString("Smart Copy/Paste", tableName: "MainMenu", comment: "")
-			static let smartQuotes = NSLocalizedString("Smart Quotes", tableName: "MainMenu", comment: "")
-			static let smartDashes = NSLocalizedString("Smart Dashes", tableName: "MainMenu", comment: "")
-			static let smartLinks = NSLocalizedString("Smart Links", tableName: "MainMenu", comment: "")
-			static let dataDetectors = NSLocalizedString("Data Detectors", tableName: "MainMenu", comment: "")
-			static let textReplacement = NSLocalizedString("Text Replacement", tableName: "MainMenu", comment: "")
-			static let transformations = NSLocalizedString("Transformations", tableName: "MainMenu", comment: "")
-			static let makeUpperCase = NSLocalizedString("Make Upper Case", tableName: "MainMenu", comment: "")
-			static let makeLowerCase = NSLocalizedString("Make Lower Case", tableName: "MainMenu", comment: "")
-			static let capitalize = NSLocalizedString("Capitalize", tableName: "MainMenu", comment: "")
-			static let speech = NSLocalizedString("Speech", tableName: "MainMenu", comment: "")
-			static let startSpeaking = NSLocalizedString("Start Speaking", tableName: "MainMenu", comment: "")
-			static let stopSpeaking = NSLocalizedString("Stop Speaking", tableName: "MainMenu", comment: "")
-			
-			// Format menu
-			static let format = NSLocalizedString("Format", tableName: "MainMenu", comment: "")
-			static let font = NSLocalizedString("Font", tableName: "MainMenu", comment: "")
-			static let showFonts = NSLocalizedString("Show Fonts", tableName: "MainMenu", comment: "")
-			static let bold = NSLocalizedString("Bold", tableName: "MainMenu", comment: "")
-			static let italic = NSLocalizedString("Italic", tableName: "MainMenu", comment: "")
-			static let underline = NSLocalizedString("Underline", tableName: "MainMenu", comment: "")
-			static let bigger = NSLocalizedString("Bigger", tableName: "MainMenu", comment: "")
-			static let smaller = NSLocalizedString("Smaller", tableName: "MainMenu", comment: "")
-			static let kern = NSLocalizedString("Kern", tableName: "MainMenu", comment: "")
-			static let tighten = NSLocalizedString("Tighten", tableName: "MainMenu", comment: "")
-			static let loosen = NSLocalizedString("Loosen", tableName: "MainMenu", comment: "")
-			static let ligatures = NSLocalizedString("Ligatures", tableName: "MainMenu", comment: "")
-			static let useNone = NSLocalizedString("Use None", tableName: "MainMenu", comment: "")
-			static let useAll = NSLocalizedString("Use All", tableName: "MainMenu", comment: "")
-			static let baseline = NSLocalizedString("Baseline", tableName: "MainMenu", comment: "")
-			static let useDefault = NSLocalizedString("Use Default", tableName: "MainMenu", comment: "")
-			static let superscript = NSLocalizedString("Superscript", tableName: "MainMenu", comment: "")
-			static let `subscript` = NSLocalizedString("Subscript", tableName: "MainMenu", comment: "")
-			static let raise = NSLocalizedString("Raise", tableName: "MainMenu", comment: "")
-			static let lower = NSLocalizedString("Lower", tableName: "MainMenu", comment: "")
-			static let showColors = NSLocalizedString("Show Colors", tableName: "MainMenu", comment: "")
-			static let copyStyle = NSLocalizedString("Copy Style", tableName: "MainMenu", comment: "")
-			static let pasteStyle = NSLocalizedString("Paste Style", tableName: "MainMenu", comment: "")
-			static let text = NSLocalizedString("Text", tableName: "MainMenu", comment: "")
-			static let alignLeft = NSLocalizedString("Align Left", tableName: "MainMenu", comment: "")
-			static let center = NSLocalizedString("Center", tableName: "MainMenu", comment: "")
-			static let justify = NSLocalizedString("Justify", tableName: "MainMenu", comment: "")
-			static let alignRight = NSLocalizedString("Align Right", tableName: "MainMenu", comment: "")
-			static let writingDirection = NSLocalizedString("Writing Direction", tableName: "MainMenu", comment: "")
-			static let paragraph = NSLocalizedString("Paragraph", tableName: "MainMenu", comment: "")
-			static let selection = NSLocalizedString("Selection", tableName: "MainMenu", comment: "")
-			static let `default` = NSLocalizedString("\\tDefault", tableName: "MainMenu", comment: "")
-			static let letfToRight = NSLocalizedString("\\tLeft to Right", tableName: "MainMenu", comment: "")
-			static let rightToLeft = NSLocalizedString("\\tRight to Left", tableName: "MainMenu", comment: "")
-			static let showRuler = NSLocalizedString("Show Ruler", tableName: "MainMenu", comment: "")
-			static let copyRuler = NSLocalizedString("Copy Ruler", tableName: "MainMenu", comment: "")
-			static let pasteRuler = NSLocalizedString("Paste Ruler", tableName: "MainMenu", comment: "")
-			
-			// View menu
-			static let view = NSLocalizedString("View", tableName: "MainMenu", comment: "")
-			static let showToolbar = NSLocalizedString("Show Toolbar", tableName: "MainMenu", comment: "")
-			static let customizeToolbar = NSLocalizedString("Customize Toolbar…", tableName: "MainMenu", comment: "")
-			static let showSidebar = NSLocalizedString("Show Sidebar", tableName: "MainMenu", comment: "")
-			static let enterFullScreen = NSLocalizedString("Enter Full Screen", tableName: "MainMenu", comment: "")
-			
-			// Winow menu
-			static let window = NSLocalizedString("Window", tableName: "MainMenu", comment: "")
-			static let minimize = NSLocalizedString("Minimize", tableName: "MainMenu", comment: "")
-			static let zoom = NSLocalizedString("Zoom", tableName: "MainMenu", comment: "")
-			static let bringAllToFront = NSLocalizedString("Bring All to Front", tableName: "MainMenu", comment: "")
-			
-			// Help menu
-			static let help = NSLocalizedString("Help", tableName: "MainMenu", comment: "")
-			static let appHelp = NSLocalizedString("%@ Help", tableName: "MainMenu", comment: "")
+			static func contentLabel(_ row: String) -> String {
+				return String.localizedStringWithFormat(NSLocalizedString("Row %@ selected", comment: ""), row)
+			}
+			static let noItemSelected = NSLocalizedString("No item selected", comment: "")
 		}
-		
-		"""
+		"""#
 }
 
 func templateIconPng() -> Data {
-	return Data(base64Encoded: """
+	return Data(base64Encoded: #"""
 	iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAVlpVFh0
 	WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0
 	YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJo
@@ -2101,11 +2236,11 @@ func templateIconPng() -> Data {
 	/wN43Dsevt7/rAbknA+kl+GQ/zvPK+7CuhjRopAAcDB8PcsyixxtnD7PRpW8dGKGLH8QDyRP
 	YStFOshkiJiW5EOpwVLGRRvLrg0hEVi3BPkPIqKFwDeZkOWiCaULrH/SizYuZKoNqeog9I+6
 	K7TwH3CMLqoN/nlmAAAAAElFTkSuQmCC
-	""", options: .ignoreUnknownCharacters)!
+	"""#, options: .ignoreUnknownCharacters)!
 }
 
 func templateIconPngAt2x() -> Data {
-	return Data(base64Encoded: """
+	return Data(base64Encoded: #"""
 	iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAAXNSR0IArs4c6QAAAVlpVFh0
 	WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0
 	YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJo
@@ -2227,18 +2362,18 @@ func templateIconPngAt2x() -> Data {
 	4tYrbggQE687pi/7AfyqoRJm3rHweaKVOx/nGusR+f9A2ON5vLoCrhJOv/hAsH3iLXDMz5+4
 	4m898kgBwee1t/dBkYtCVB2TBH7lp6Og3arIF+CotugIPH1f7oFiF40QbH6ySfVDn67d4it4
 	LOdr2XY/XA/LSCLa3fN7WNsu3sf9P5XYkDLWyaqoAAAAAElFTkSuQmCC
-	""", options: .ignoreUnknownCharacters)!
+	"""#, options: .ignoreUnknownCharacters)!
 }
 
 func contentsJson() -> String {
-	return """
+	return #"""
 		{
 		  "info" : {
 			 "version" : 1,
 			 "author" : "xcode"
 		  }
 		}
-		"""
+		"""#
 }
 
 run()

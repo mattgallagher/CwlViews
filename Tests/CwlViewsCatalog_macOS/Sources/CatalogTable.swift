@@ -44,7 +44,7 @@ func catalogTable(_ windowState: WindowState, tag: Int) -> ViewConvertible {
 				}
 			)
 		],
-		.rowSelected(\.viewState) --> windowState.rowSelection
+		.cellSelected(\.data?.viewState) --> Input().compact().bind(to: windowState.rowSelection)
 	)
 }
 

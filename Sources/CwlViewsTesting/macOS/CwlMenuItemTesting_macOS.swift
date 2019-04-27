@@ -19,39 +19,37 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == MenuItem.Binding {
+extension BindingParser where Downcast: MenuItemBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, MenuItem.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asMenuItemBinding() }) }
 		
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var isEnabled: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isEnabled(let x) = binding { return x } else { return nil } }) }
-	public static var isHidden: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isHidden(let x) = binding { return x } else { return nil } }) }
-	public static var isAlternate: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isAlternate(let x) = binding { return x } else { return nil } }) }
-	public static var title: BindingParser<Dynamic<String>, Binding> { return BindingParser<Dynamic<String>, Binding>(parse: { binding -> Optional<Dynamic<String>> in if case .title(let x) = binding { return x } else { return nil } }) }
-	public static var attributedTitle: BindingParser<Dynamic<NSAttributedString?>, Binding> { return BindingParser<Dynamic<NSAttributedString?>, Binding>(parse: { binding -> Optional<Dynamic<NSAttributedString?>> in if case .attributedTitle(let x) = binding { return x } else { return nil } }) }
-	public static var tag: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .tag(let x) = binding { return x } else { return nil } }) }
-	public static var representedObject: BindingParser<Dynamic<AnyObject?>, Binding> { return BindingParser<Dynamic<AnyObject?>, Binding>(parse: { binding -> Optional<Dynamic<AnyObject?>> in if case .representedObject(let x) = binding { return x } else { return nil } }) }
-	public static var state: BindingParser<Dynamic<NSControl.StateValue>, Binding> { return BindingParser<Dynamic<NSControl.StateValue>, Binding>(parse: { binding -> Optional<Dynamic<NSControl.StateValue>> in if case .state(let x) = binding { return x } else { return nil } }) }
-	public static var indentationLevel: BindingParser<Dynamic<Int>, Binding> { return BindingParser<Dynamic<Int>, Binding>(parse: { binding -> Optional<Dynamic<Int>> in if case .indentationLevel(let x) = binding { return x } else { return nil } }) }
-	public static var image: BindingParser<Dynamic<NSImage?>, Binding> { return BindingParser<Dynamic<NSImage?>, Binding>(parse: { binding -> Optional<Dynamic<NSImage?>> in if case .image(let x) = binding { return x } else { return nil } }) }
-	public static var onStateImage: BindingParser<Dynamic<NSImage?>, Binding> { return BindingParser<Dynamic<NSImage?>, Binding>(parse: { binding -> Optional<Dynamic<NSImage?>> in if case .onStateImage(let x) = binding { return x } else { return nil } }) }
-	public static var offStateImage: BindingParser<Dynamic<NSImage?>, Binding> { return BindingParser<Dynamic<NSImage?>, Binding>(parse: { binding -> Optional<Dynamic<NSImage?>> in if case .offStateImage(let x) = binding { return x } else { return nil } }) }
-	public static var mixedStateImage: BindingParser<Dynamic<NSImage?>, Binding> { return BindingParser<Dynamic<NSImage?>, Binding>(parse: { binding -> Optional<Dynamic<NSImage?>> in if case .mixedStateImage(let x) = binding { return x } else { return nil } }) }
-	public static var submenu: BindingParser<Dynamic<MenuConvertible?>, Binding> { return BindingParser<Dynamic<MenuConvertible?>, Binding>(parse: { binding -> Optional<Dynamic<MenuConvertible?>> in if case .submenu(let x) = binding { return x } else { return nil } }) }
-	public static var keyEquivalent: BindingParser<Dynamic<String>, Binding> { return BindingParser<Dynamic<String>, Binding>(parse: { binding -> Optional<Dynamic<String>> in if case .keyEquivalent(let x) = binding { return x } else { return nil } }) }
-	public static var keyEquivalentModifierMask: BindingParser<Dynamic<NSEvent.ModifierFlags>, Binding> { return BindingParser<Dynamic<NSEvent.ModifierFlags>, Binding>(parse: { binding -> Optional<Dynamic<NSEvent.ModifierFlags>> in if case .keyEquivalentModifierMask(let x) = binding { return x } else { return nil } }) }
-	public static var toolTip: BindingParser<Dynamic<String?>, Binding> { return BindingParser<Dynamic<String?>, Binding>(parse: { binding -> Optional<Dynamic<String?>> in if case .toolTip(let x) = binding { return x } else { return nil } }) }
-	public static var view: BindingParser<Dynamic<ViewConvertible?>, Binding> { return BindingParser<Dynamic<ViewConvertible?>, Binding>(parse: { binding -> Optional<Dynamic<ViewConvertible?>> in if case .view(let x) = binding { return x } else { return nil } }) }
-
+	public static var isEnabled: BindingParser<Dynamic<Bool>, MenuItem.Binding, Downcast> { return .init(extract: { if case .isEnabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var isHidden: BindingParser<Dynamic<Bool>, MenuItem.Binding, Downcast> { return .init(extract: { if case .isHidden(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var isAlternate: BindingParser<Dynamic<Bool>, MenuItem.Binding, Downcast> { return .init(extract: { if case .isAlternate(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var title: BindingParser<Dynamic<String>, MenuItem.Binding, Downcast> { return .init(extract: { if case .title(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var attributedTitle: BindingParser<Dynamic<NSAttributedString?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .attributedTitle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var tag: BindingParser<Dynamic<Int>, MenuItem.Binding, Downcast> { return .init(extract: { if case .tag(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var representedObject: BindingParser<Dynamic<AnyObject?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .representedObject(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var state: BindingParser<Dynamic<NSControl.StateValue>, MenuItem.Binding, Downcast> { return .init(extract: { if case .state(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var indentationLevel: BindingParser<Dynamic<Int>, MenuItem.Binding, Downcast> { return .init(extract: { if case .indentationLevel(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var image: BindingParser<Dynamic<NSImage?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .image(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var onStateImage: BindingParser<Dynamic<NSImage?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .onStateImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var offStateImage: BindingParser<Dynamic<NSImage?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .offStateImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var mixedStateImage: BindingParser<Dynamic<NSImage?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .mixedStateImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var submenu: BindingParser<Dynamic<MenuConvertible?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .submenu(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var keyEquivalent: BindingParser<Dynamic<String>, MenuItem.Binding, Downcast> { return .init(extract: { if case .keyEquivalent(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var keyEquivalentModifierMask: BindingParser<Dynamic<NSEvent.ModifierFlags>, MenuItem.Binding, Downcast> { return .init(extract: { if case .keyEquivalentModifierMask(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var toolTip: BindingParser<Dynamic<String?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .toolTip(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	public static var view: BindingParser<Dynamic<ViewConvertible?>, MenuItem.Binding, Downcast> { return .init(extract: { if case .view(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
+	
 	// 2. Signal bindings are performed on the object after construction.
-
+	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var action: BindingParser<TargetAction, Binding> { return BindingParser<TargetAction, Binding>(parse: { binding -> Optional<TargetAction> in if case .action(let x) = binding { return x } else { return nil } }) }
-
-	// 4. Delegate bindings require synchronous evaluation within the object's context.
+	public static var action: BindingParser<TargetAction, MenuItem.Binding, Downcast> { return .init(extract: { if case .action(let x) = $0 { return x } else { return nil } }, upcast: { $0.asMenuItemBinding() }) }
 }
 
 #endif

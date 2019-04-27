@@ -339,14 +339,22 @@ public extension SplitViewController {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SplitViewControllerBinding: ViewControllerBinding {
 	static func splitViewControllerBinding(_ binding: SplitViewController.Binding) -> Self
+	func asSplitViewControllerBinding() -> SplitViewController.Binding?
 }
 public extension SplitViewControllerBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return splitViewControllerBinding(.inheritedBinding(binding))
 	}
 }
+public extension SplitViewControllerBinding where Preparer.Inherited.Binding: SplitViewControllerBinding {
+	func asSplitViewControllerBinding() -> SplitViewController.Binding? {
+		return asInheritedBinding()?.asSplitViewControllerBinding()
+	}
+}
 public extension SplitViewController.Binding {
 	typealias Preparer = SplitViewController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSplitViewControllerBinding() -> SplitViewController.Binding? { return self }
 	static func splitViewControllerBinding(_ binding: SplitViewController.Binding) -> SplitViewController.Binding {
 		return binding
 	}

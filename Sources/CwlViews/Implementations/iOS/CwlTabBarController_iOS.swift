@@ -300,14 +300,22 @@ public extension TabBarController {
 public protocol TabBarControllerBinding: ViewControllerBinding {
 	associatedtype ItemIdentifierType: Hashable
 	static func tabBarControllerBinding(_ binding: TabBarController<ItemIdentifierType>.Binding) -> Self
+	func asTabBarControllerBinding() -> TabBarController<ItemIdentifierType>.Binding?
 }
 public extension TabBarControllerBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return tabBarControllerBinding(TabBarController<ItemIdentifierType>.Binding.inheritedBinding(binding))
 	}
 }
+public extension TabBarControllerBinding where Preparer.Inherited.Binding: TabBarControllerBinding, Preparer.Inherited.Binding.ItemIdentifierType == ItemIdentifierType {
+	func asTabBarControllerBinding() -> TabBarController<ItemIdentifierType>.Binding? {
+		return asInheritedBinding()?.asTabBarControllerBinding()
+	}
+}
 public extension TabBarController.Binding {
 	typealias Preparer = TabBarController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTabBarControllerBinding() -> TabBarController.Binding? { return self }
 	static func tabBarControllerBinding(_ binding: TabBarController<ItemIdentifierType>.Binding) -> TabBarController<ItemIdentifierType>.Binding {
 		return binding
 	}

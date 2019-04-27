@@ -55,7 +55,7 @@ public extension StackView {
 		case distribution(Dynamic<NSUIStackViewDistribution>)
 		case spacing(Dynamic<CGFloat>)
 		
-		@available(macOS 10.13, *) @available(iOS, unavailable) case edgeInsets(Dynamic<EdgeInsets>)
+		@available(macOS 10.13, *) @available(iOS, unavailable) case edgeInsets(Dynamic<NSUIEdgeInsets>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case horizontalClippingResistance(Dynamic<NSUILayoutPriority>)
 		@available(macOS 10.13, *) @available(iOS, unavailable) case horizontalHuggingPriority(Dynamic<NSUILayoutPriority>)
 		@available(macOS, unavailable) @available(iOS 11, *) case isLayoutMarginsRelativeArrangement(Dynamic<Bool>)
@@ -70,9 +70,9 @@ public extension StackView {
 	}
 	
 	#if os(macOS)
-		typealias EdgeInsets = NSEdgeInsets
+		typealias NSUIEdgeInsets = NSEdgeInsets
 	#else
-		typealias EdgeInsets = UIEdgeInsets
+		typealias NSUIEdgeInsets = UIEdgeInsets
 	#endif
 }
 
@@ -200,7 +200,7 @@ public extension BindingName where Binding: StackViewBinding {
 	static var distribution: StackViewName<Dynamic<StackView.NSUIStackViewDistribution>> { return .name(StackView.Binding.distribution) }
 	static var spacing: StackViewName<Dynamic<CGFloat>> { return .name(StackView.Binding.spacing) }
 	
-	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<StackView.EdgeInsets>> { return .name(StackView.Binding.edgeInsets) }
+	@available(macOS 10.13, *) @available(iOS, unavailable) static var edgeInsets: StackViewName<Dynamic<StackView.NSUIEdgeInsets>> { return .name(StackView.Binding.edgeInsets) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalClippingResistance: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(StackView.Binding.horizontalClippingResistance) }
 	@available(macOS 10.13, *) @available(iOS, unavailable) static var horizontalHuggingPriority: StackViewName<Dynamic<StackView.NSUILayoutPriority>> { return .name(StackView.Binding.horizontalHuggingPriority) }
 	@available(macOS, unavailable) @available(iOS 11, *) static var isLayoutMarginsRelativeArrangement: StackViewName<Dynamic<Bool>> { return .name(StackView.Binding.isLayoutMarginsRelativeArrangement) }
@@ -246,14 +246,22 @@ public extension BindingName where Binding: StackViewBinding {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol StackViewBinding: ViewBinding {
 	static func stackViewBinding(_ binding: StackView.Binding) -> Self
+	func asStackViewBinding() -> StackView.Binding?
 }
 public extension StackViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return stackViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension StackViewBinding where Preparer.Inherited.Binding: StackViewBinding {
+	func asStackViewBinding() -> StackView.Binding? {
+		return asInheritedBinding()?.asStackViewBinding()
+	}
+}
 public extension StackView.Binding {
 	typealias Preparer = StackView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asStackViewBinding() -> StackView.Binding? { return self }
 	static func stackViewBinding(_ binding: StackView.Binding) -> StackView.Binding {
 		return binding
 	}

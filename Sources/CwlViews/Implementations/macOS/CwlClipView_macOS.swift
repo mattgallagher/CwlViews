@@ -195,14 +195,22 @@ public extension ClipView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ClipViewBinding: ViewBinding {
 	static func clipViewBinding(_ binding: ClipView.Binding) -> Self
+	func asClipViewBinding() -> ClipView.Binding?
 }
 public extension ClipViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return clipViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ClipViewBinding where Preparer.Inherited.Binding: ClipViewBinding {
+	func asClipViewBinding() -> ClipView.Binding? {
+		return asInheritedBinding()?.asClipViewBinding()
+	}
+}
 public extension ClipView.Binding {
 	typealias Preparer = ClipView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asClipViewBinding() -> ClipView.Binding? { return self }
 	static func clipViewBinding(_ binding: ClipView.Binding) -> ClipView.Binding {
 		return binding
 	}

@@ -8,10 +8,10 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding: ExtendedViewControllerBinding {
+extension BindingParser where Downcast: ExtendedViewControllerBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<$2, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asExtendedViewControllerBinding() }) }
 	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 
@@ -22,13 +22,13 @@ extension BindingParser where Binding: ExtendedViewControllerBinding {
 	// 3. Action bindings are triggered by the object after construction.
 
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var didAppear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<(UIViewController, Bool) -> Void> in if case .didAppear(let x) = binding { return x } else { return nil } }) }
-	public static var didDisappear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<(UIViewController, Bool) -> Void> in if case .didDisappear(let x) = binding { return x } else { return nil } }) }
-	public static var didReceiveMemoryWarning: BindingParser<(UIViewController) -> Void, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<(UIViewController) -> Void, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<(UIViewController) -> Void> in if case .didReceiveMemoryWarning(let x) = binding { return x } else { return nil } }) }
-	public static var loadView: BindingParser<() -> ViewConvertible, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<() -> ViewConvertible, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<() -> ViewConvertible> in if case .loadView(let x) = binding { return x } else { return nil } }) }
-	public static var traitCollectionDidChange: BindingParser<(UIViewController, UITraitCollection?) -> Void, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<(UIViewController, UITraitCollection?) -> Void, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<(UIViewController, UITraitCollection?) -> Void> in if case .traitCollectionDidChange(let x) = binding { return x } else { return nil } }) }
-	public static var willAppear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<(UIViewController, Bool) -> Void> in if case .willAppear(let x) = binding { return x } else { return nil } }) }
-	public static var willDisappear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding> { return BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Binding.SubclassType>.Binding>(parse: { binding -> Optional<(UIViewController, Bool) -> Void> in if case .willDisappear(let x) = binding { return x } else { return nil } }) }
+	public static var didAppear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .didAppear(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
+	public static var didDisappear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .didDisappear(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
+	public static var didReceiveMemoryWarning: BindingParser<(UIViewController) -> Void, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .didReceiveMemoryWarning(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
+	public static var loadView: BindingParser<() -> ViewConvertible, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .loadView(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
+	public static var traitCollectionDidChange: BindingParser<(UIViewController, UITraitCollection?) -> Void, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .traitCollectionDidChange(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
+	public static var willAppear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .willAppear(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
+	public static var willDisappear: BindingParser<(UIViewController, Bool) -> Void, ExtendedViewController<Downcast.SubclassType>.Binding, Downcast> { return .init(extract: { if case .willDisappear(let x) = $0 { return x } else { return nil } }, upcast: { $0.asExtendedViewControllerBinding() }) }
 }
 
 #endif

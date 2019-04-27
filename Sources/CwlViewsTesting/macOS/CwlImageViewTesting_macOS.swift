@@ -8,22 +8,22 @@
 
 #if os(macOS)
 
-extension BindingParser where Binding == ImageView.Binding {
+extension BindingParser where Downcast: ImageViewBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, ImageView.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asImageViewBinding() }) }
 		
 	// 0. Static bindings are applied at construction and are subsequently immutable.
 
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var allowsCutCopyPaste: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .allowsCutCopyPaste(let x) = binding { return x } else { return nil } }) }
-	public static var animates: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .animates(let x) = binding { return x } else { return nil } }) }
-	public static var image: BindingParser<Dynamic<NSImage?>, Binding> { return BindingParser<Dynamic<NSImage?>, Binding>(parse: { binding -> Optional<Dynamic<NSImage?>> in if case .image(let x) = binding { return x } else { return nil } }) }
-	public static var imageAlignment: BindingParser<Dynamic<NSImageAlignment>, Binding> { return BindingParser<Dynamic<NSImageAlignment>, Binding>(parse: { binding -> Optional<Dynamic<NSImageAlignment>> in if case .imageAlignment(let x) = binding { return x } else { return nil } }) }
-	public static var imageFrameStyle: BindingParser<Dynamic<NSImageView.FrameStyle>, Binding> { return BindingParser<Dynamic<NSImageView.FrameStyle>, Binding>(parse: { binding -> Optional<Dynamic<NSImageView.FrameStyle>> in if case .imageFrameStyle(let x) = binding { return x } else { return nil } }) }
-	public static var imageScaling: BindingParser<Dynamic<NSImageScaling>, Binding> { return BindingParser<Dynamic<NSImageScaling>, Binding>(parse: { binding -> Optional<Dynamic<NSImageScaling>> in if case .imageScaling(let x) = binding { return x } else { return nil } }) }
-	public static var isEditable: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isEditable(let x) = binding { return x } else { return nil } }) }
-	@available(macOS 10.14, *) public static var contentTintColor: BindingParser<Dynamic<NSColor?>, Binding> { return BindingParser<Dynamic<NSColor?>, Binding>(parse: { binding -> Optional<Dynamic<NSColor?>> in if case .contentTintColor(let x) = binding { return x } else { return nil } }) }
+	public static var allowsCutCopyPaste: BindingParser<Dynamic<Bool>, ImageView.Binding, Downcast> { return .init(extract: { if case .allowsCutCopyPaste(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var animates: BindingParser<Dynamic<Bool>, ImageView.Binding, Downcast> { return .init(extract: { if case .animates(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var image: BindingParser<Dynamic<NSImage?>, ImageView.Binding, Downcast> { return .init(extract: { if case .image(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var imageAlignment: BindingParser<Dynamic<NSImageAlignment>, ImageView.Binding, Downcast> { return .init(extract: { if case .imageAlignment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var imageFrameStyle: BindingParser<Dynamic<NSImageView.FrameStyle>, ImageView.Binding, Downcast> { return .init(extract: { if case .imageFrameStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var imageScaling: BindingParser<Dynamic<NSImageScaling>, ImageView.Binding, Downcast> { return .init(extract: { if case .imageScaling(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	public static var isEditable: BindingParser<Dynamic<Bool>, ImageView.Binding, Downcast> { return .init(extract: { if case .isEditable(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
+	@available(macOS 10.14, *) public static var contentTintColor: BindingParser<Dynamic<NSColor?>, ImageView.Binding, Downcast> { return .init(extract: { if case .contentTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asImageViewBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

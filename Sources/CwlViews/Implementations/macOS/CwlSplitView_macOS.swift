@@ -272,14 +272,22 @@ public extension SplitView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SplitViewBinding: ViewBinding {
 	static func splitViewBinding(_ binding: SplitView.Binding) -> Self
+	func asSplitViewBinding() -> SplitView.Binding?
 }
 public extension SplitViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return splitViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension SplitViewBinding where Preparer.Inherited.Binding: SplitViewBinding {
+	func asSplitViewBinding() -> SplitView.Binding? {
+		return asInheritedBinding()?.asSplitViewBinding()
+	}
+}
 public extension SplitView.Binding {
 	typealias Preparer = SplitView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSplitViewBinding() -> SplitView.Binding? { return self }
 	static func splitViewBinding(_ binding: SplitView.Binding) -> SplitView.Binding {
 		return binding
 	}

@@ -166,14 +166,22 @@ public extension Toolbar {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ToolbarBinding: ViewBinding {
 	static func scrollViewBinding(_ binding: Toolbar.Binding) -> Self
+	func asToolbarBinding() -> Toolbar.Binding?
 }
 public extension ToolbarBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return scrollViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ToolbarBinding where Preparer.Inherited.Binding: ToolbarBinding {
+	func asToolbarBinding() -> Toolbar.Binding? {
+		return asInheritedBinding()?.asToolbarBinding()
+	}
+}
 public extension Toolbar.Binding {
 	typealias Preparer = Toolbar.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asToolbarBinding() -> Toolbar.Binding? { return self }
 	static func scrollViewBinding(_ binding: Toolbar.Binding) -> Toolbar.Binding {
 		return binding
 	}

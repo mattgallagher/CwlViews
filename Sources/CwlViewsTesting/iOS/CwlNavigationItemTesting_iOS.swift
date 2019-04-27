@@ -19,22 +19,22 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == NavigationItem.Binding {
+extension BindingParser where Downcast: NavigationItemBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, NavigationItem.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asNavigationItemBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var backBarButtonItem: BindingParser<Dynamic<BarButtonItemConvertible?>, Binding> { return BindingParser<Dynamic<BarButtonItemConvertible?>, Binding>(parse: { binding -> Optional<Dynamic<BarButtonItemConvertible?>> in if case .backBarButtonItem(let x) = binding { return x } else { return nil } }) }
-	public static var hidesBackButton: BindingParser<Dynamic<SetOrAnimate<Bool>>, Binding> { return BindingParser<Dynamic<SetOrAnimate<Bool>>, Binding>(parse: { binding -> Optional<Dynamic<SetOrAnimate<Bool>>> in if case .hidesBackButton(let x) = binding { return x } else { return nil } }) }
-	public static var leftBarButtonItems: BindingParser<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding> { return BindingParser<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding>(parse: { binding -> Optional<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> in if case .leftBarButtonItems(let x) = binding { return x } else { return nil } }) }
-	public static var leftItemsSupplementBackButton: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .leftItemsSupplementBackButton(let x) = binding { return x } else { return nil } }) }
-	public static var prompt: BindingParser<Dynamic<String?>, Binding> { return BindingParser<Dynamic<String?>, Binding>(parse: { binding -> Optional<Dynamic<String?>> in if case .prompt(let x) = binding { return x } else { return nil } }) }
-	public static var rightBarButtonItems: BindingParser<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding> { return BindingParser<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, Binding>(parse: { binding -> Optional<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>> in if case .rightBarButtonItems(let x) = binding { return x } else { return nil } }) }
-	public static var title: BindingParser<Dynamic<String>, Binding> { return BindingParser<Dynamic<String>, Binding>(parse: { binding -> Optional<Dynamic<String>> in if case .title(let x) = binding { return x } else { return nil } }) }
-	public static var titleView: BindingParser<Dynamic<ViewConvertible?>, Binding> { return BindingParser<Dynamic<ViewConvertible?>, Binding>(parse: { binding -> Optional<Dynamic<ViewConvertible?>> in if case .titleView(let x) = binding { return x } else { return nil } }) }
+	public static var backBarButtonItem: BindingParser<Dynamic<BarButtonItemConvertible?>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .backBarButtonItem(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var hidesBackButton: BindingParser<Dynamic<SetOrAnimate<Bool>>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .hidesBackButton(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var leftBarButtonItems: BindingParser<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .leftBarButtonItems(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var leftItemsSupplementBackButton: BindingParser<Dynamic<Bool>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .leftItemsSupplementBackButton(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var prompt: BindingParser<Dynamic<String?>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .prompt(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var rightBarButtonItems: BindingParser<Dynamic<SetOrAnimate<[BarButtonItemConvertible]>>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .rightBarButtonItems(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var title: BindingParser<Dynamic<String>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .title(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
+	public static var titleView: BindingParser<Dynamic<ViewConvertible?>, NavigationItem.Binding, Downcast> { return .init(extract: { if case .titleView(let x) = $0 { return x } else { return nil } }, upcast: { $0.asNavigationItemBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
 

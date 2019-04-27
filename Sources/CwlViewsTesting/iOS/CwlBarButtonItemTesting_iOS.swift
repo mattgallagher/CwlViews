@@ -19,30 +19,30 @@
 
 #if os(iOS)
 
-public extension BindingParser where Binding == BarButtonItem.Binding {
+extension BindingParser where Downcast: BarButtonItemBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asBarButtonItemBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
-	static var systemItem: BindingParser<Constant<UIBarButtonItem.SystemItem>, Binding> { return BindingParser<Constant<UIBarButtonItem.SystemItem>, Binding>(parse: { binding -> Optional<Constant<UIBarButtonItem.SystemItem>> in if case .systemItem(let x) = binding { return x } else { return nil } }) }
+	public static var systemItem: BindingParser<Constant<UIBarButtonItem.SystemItem>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .systemItem(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
 	
 	//	1. Value bindings may be applied at construction and may subsequently change.
-	static var backButtonBackgroundImage: BindingParser<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> in if case .backButtonBackgroundImage(let x) = binding { return x } else { return nil } }) }
-	static var backButtonTitlePositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> in if case .backButtonTitlePositionAdjustment(let x) = binding { return x } else { return nil } }) }
-	static var backgroundImage: BindingParser<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>, Binding> { return BindingParser<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>> in if case .backgroundImage(let x) = binding { return x } else { return nil } }) }
-	static var backgroundVerticalPositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>> in if case .backgroundVerticalPositionAdjustment(let x) = binding { return x } else { return nil } }) }
-	static var customView: BindingParser<Dynamic<ViewConvertible?>, Binding> { return BindingParser<Dynamic<ViewConvertible?>, Binding>(parse: { binding -> Optional<Dynamic<ViewConvertible?>> in if case .customView(let x) = binding { return x } else { return nil } }) }
-	static var itemStyle: BindingParser<Dynamic<UIBarButtonItem.Style>, Binding> { return BindingParser<Dynamic<UIBarButtonItem.Style>, Binding>(parse: { binding -> Optional<Dynamic<UIBarButtonItem.Style>> in if case .itemStyle(let x) = binding { return x } else { return nil } }) }
-	static var possibleTitles: BindingParser<Dynamic<Set<String>?>, Binding> { return BindingParser<Dynamic<Set<String>?>, Binding>(parse: { binding -> Optional<Dynamic<Set<String>?>> in if case .possibleTitles(let x) = binding { return x } else { return nil } }) }
-	static var tintColor: BindingParser<Dynamic<UIColor?>, Binding> { return BindingParser<Dynamic<UIColor?>, Binding>(parse: { binding -> Optional<Dynamic<UIColor?>> in if case .tintColor(let x) = binding { return x } else { return nil } }) }
-	static var titlePositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding> { return BindingParser<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, Binding>(parse: { binding -> Optional<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>> in if case .titlePositionAdjustment(let x) = binding { return x } else { return nil } }) }
-	static var width: BindingParser<Dynamic<CGFloat>, Binding> { return BindingParser<Dynamic<CGFloat>, Binding>(parse: { binding -> Optional<Dynamic<CGFloat>> in if case .width(let x) = binding { return x } else { return nil } }) }
+	public static var backButtonBackgroundImage: BindingParser<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .backButtonBackgroundImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var backButtonTitlePositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .backButtonTitlePositionAdjustment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var backgroundImage: BindingParser<Dynamic<ScopedValues<StateStyleAndMetrics, UIImage?>>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .backgroundImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var backgroundVerticalPositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, CGFloat>>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .backgroundVerticalPositionAdjustment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var customView: BindingParser<Dynamic<ViewConvertible?>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .customView(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var itemStyle: BindingParser<Dynamic<UIBarButtonItem.Style>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .itemStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var possibleTitles: BindingParser<Dynamic<Set<String>?>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .possibleTitles(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var tintColor: BindingParser<Dynamic<UIColor?>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .tintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var titlePositionAdjustment: BindingParser<Dynamic<ScopedValues<UIBarMetrics, UIOffset>>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .titlePositionAdjustment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
+	public static var width: BindingParser<Dynamic<CGFloat>, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .width(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
 	
 	//	2. Signal bindings are performed on the object after construction.
 	
 	//	3. Action bindings are triggered by the object after construction.
-	static var action: BindingParser<TargetAction, Binding> { return BindingParser<TargetAction, Binding>(parse: { binding -> Optional<TargetAction> in if case .action(let x) = binding { return x } else { return nil } }) }
+	public static var action: BindingParser<TargetAction, BarButtonItem.Binding, Downcast> { return .init(extract: { if case .action(let x) = $0 { return x } else { return nil } }, upcast: { $0.asBarButtonItemBinding() }) }
 	
 	//	4. Delegate bindings require synchronous evaluation within the object's context.
 }

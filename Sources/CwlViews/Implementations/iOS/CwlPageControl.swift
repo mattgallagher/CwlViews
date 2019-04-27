@@ -134,14 +134,22 @@ public extension PageControl {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol PageControlBinding: ControlBinding {
 	static func pageControlBinding(_ binding: PageControl.Binding) -> Self
+	func asPageControlBinding() -> PageControl.Binding?
 }
 public extension PageControlBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return pageControlBinding(.inheritedBinding(binding))
 	}
 }
+public extension PageControlBinding where Preparer.Inherited.Binding: PageControlBinding {
+	func asPageControlBinding() -> PageControl.Binding? {
+		return asInheritedBinding()?.asPageControlBinding()
+	}
+}
 public extension PageControl.Binding {
 	typealias Preparer = PageControl.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asPageControlBinding() -> PageControl.Binding? { return self }
 	static func pageControlBinding(_ binding: PageControl.Binding) -> PageControl.Binding {
 		return binding
 	}

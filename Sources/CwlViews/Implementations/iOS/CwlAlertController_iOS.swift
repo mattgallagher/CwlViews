@@ -165,14 +165,22 @@ public extension AlertController {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol AlertControllerBinding: ViewControllerBinding {
 	static func alertControllerBinding(_ binding: AlertController.Binding) -> Self
+	func asAlertControllerBinding() -> AlertController.Binding?
 }
 public extension AlertControllerBinding {
 	static func viewControllerBinding(_ binding: ViewController.Binding) -> Self {
 		return alertControllerBinding(.inheritedBinding(binding))
 	}
 }
+public extension AlertControllerBinding where Preparer.Inherited.Binding: AlertControllerBinding {
+	func asAlertControllerBinding() -> AlertController.Binding? {
+		return asInheritedBinding()?.asAlertControllerBinding()
+	}
+}
 public extension AlertController.Binding {
 	typealias Preparer = AlertController.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asAlertControllerBinding() -> AlertController.Binding? { return self }
 	static func alertControllerBinding(_ binding: AlertController.Binding) -> AlertController.Binding {
 		return binding
 	}

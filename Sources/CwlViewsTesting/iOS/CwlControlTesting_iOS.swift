@@ -19,24 +19,24 @@
 
 #if os(iOS)
 
-extension BindingParser where Binding == Control.Binding {
+extension BindingParser where Downcast: ControlBinding {
 	// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    public static var $1: BindingParser<$2, Binding> { return BindingParser<$2, Binding>(parse: { binding -> Optional<$2> in if case .$1(let x) = binding { return x } else { return nil } }) }
+	// With:    public static var $1: BindingParser<$2, Control.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asControlBinding() }) }
 	
 	//	0. Static bindings are applied at construction and are subsequently immutable.
 	
 	// 1. Value bindings may be applied at construction and may subsequently change.
-	public static var isEnabled: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isEnabled(let x) = binding { return x } else { return nil } }) }
-	public static var isSelected: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isSelected(let x) = binding { return x } else { return nil } }) }
-	public static var isHighlighted: BindingParser<Dynamic<Bool>, Binding> { return BindingParser<Dynamic<Bool>, Binding>(parse: { binding -> Optional<Dynamic<Bool>> in if case .isHighlighted(let x) = binding { return x } else { return nil } }) }
-	public static var contentVerticalAlignment: BindingParser<Dynamic<UIControl.ContentVerticalAlignment>, Binding> { return BindingParser<Dynamic<UIControl.ContentVerticalAlignment>, Binding>(parse: { binding -> Optional<Dynamic<UIControl.ContentVerticalAlignment>> in if case .contentVerticalAlignment(let x) = binding { return x } else { return nil } }) }
-	public static var contentHorizontalAlignment: BindingParser<Dynamic<UIControl.ContentHorizontalAlignment>, Binding> { return BindingParser<Dynamic<UIControl.ContentHorizontalAlignment>, Binding>(parse: { binding -> Optional<Dynamic<UIControl.ContentHorizontalAlignment>> in if case .contentHorizontalAlignment(let x) = binding { return x } else { return nil } }) }
+	public static var isEnabled: BindingParser<Dynamic<Bool>, Control.Binding, Downcast> { return .init(extract: { if case .isEnabled(let x) = $0 { return x } else { return nil } }, upcast: { $0.asControlBinding() }) }
+	public static var isSelected: BindingParser<Dynamic<Bool>, Control.Binding, Downcast> { return .init(extract: { if case .isSelected(let x) = $0 { return x } else { return nil } }, upcast: { $0.asControlBinding() }) }
+	public static var isHighlighted: BindingParser<Dynamic<Bool>, Control.Binding, Downcast> { return .init(extract: { if case .isHighlighted(let x) = $0 { return x } else { return nil } }, upcast: { $0.asControlBinding() }) }
+	public static var contentVerticalAlignment: BindingParser<Dynamic<UIControl.ContentVerticalAlignment>, Control.Binding, Downcast> { return .init(extract: { if case .contentVerticalAlignment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asControlBinding() }) }
+	public static var contentHorizontalAlignment: BindingParser<Dynamic<UIControl.ContentHorizontalAlignment>, Control.Binding, Downcast> { return .init(extract: { if case .contentHorizontalAlignment(let x) = $0 { return x } else { return nil } }, upcast: { $0.asControlBinding() }) }
 	
 	// 2. Signal bindings are performed on the object after construction.
 	
 	// 3. Action bindings are triggered by the object after construction.
-	public static var actions: BindingParser<ControlActions, Binding> { return BindingParser<ControlActions, Binding>(parse: { binding -> Optional<ControlActions> in if case .actions(let x) = binding { return x } else { return nil } }) }
+	public static var actions: BindingParser<ControlActions, Control.Binding, Downcast> { return .init(extract: { if case .actions(let x) = $0 { return x } else { return nil } }, upcast: { $0.asControlBinding() }) }
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }

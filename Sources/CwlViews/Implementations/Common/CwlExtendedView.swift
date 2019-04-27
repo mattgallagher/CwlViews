@@ -146,14 +146,22 @@ public extension ExtendedView {
 public protocol ExtendedViewBinding: ViewBinding {
 	associatedtype SubclassType: Layout.View & ViewWithDelegate & HasDelegate
 	static func extendedViewBinding(_ binding: ExtendedView<SubclassType>.Binding) -> Self
+	func asExtendedViewBinding() -> ExtendedView<SubclassType>.Binding?
 }
 public extension ExtendedViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return extendedViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ExtendedViewBinding where Preparer.Inherited.Binding: ExtendedViewBinding, Preparer.Inherited.Binding.SubclassType == SubclassType {
+	func asExtendedViewBinding() -> ExtendedView<SubclassType>.Binding? {
+		return asInheritedBinding()?.asExtendedViewBinding()
+	}
+}
 public extension ExtendedView.Binding {
 	typealias Preparer = ExtendedView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asExtendedViewBinding() -> ExtendedView.Binding? { return self }
 	static func extendedViewBinding(_ binding: ExtendedView.Binding) -> ExtendedView.Binding {
 		return binding
 	}

@@ -348,14 +348,22 @@ public extension SearchBar {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol SearchBarBinding: ViewBinding {
 	static func searchBarBinding(_ binding: SearchBar.Binding) -> Self
+	func asSearchBarBinding() -> SearchBar.Binding?
 }
 public extension SearchBarBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return searchBarBinding(.inheritedBinding(binding))
 	}
 }
+public extension SearchBarBinding where Preparer.Inherited.Binding: SearchBarBinding {
+	func asSearchBarBinding() -> SearchBar.Binding? {
+		return asInheritedBinding()?.asSearchBarBinding()
+	}
+}
 public extension SearchBar.Binding {
 	typealias Preparer = SearchBar.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asSearchBarBinding() -> SearchBar.Binding? { return self }
 	static func searchBarBinding(_ binding: SearchBar.Binding) -> SearchBar.Binding {
 		return binding
 	}

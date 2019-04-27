@@ -75,9 +75,16 @@ public struct BinderBase: BinderPreparer {
 
 public protocol BinderBaseBinding: Binding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self
+	func asBinderBaseBinding() -> BinderBase.Binding?
+}
+public extension BinderBaseBinding where Preparer.Inherited.Binding: BinderBaseBinding {
+	func asBinderBaseBinding() -> BinderBase.Binding? {
+		return asInheritedBinding()?.asBinderBaseBinding()
+	}
 }
 public extension BinderBase.Binding {
 	typealias Preparer = BinderBase
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { return nil }
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> BinderBase.Binding { return binding }
 }
 

@@ -290,14 +290,22 @@ public extension TextField {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol TextFieldBinding: ControlBinding {
 	static func textFieldBinding(_ binding: TextField.Binding) -> Self
+	func asTextFieldBinding() -> TextField.Binding?
 }
 public extension TextFieldBinding {
 	static func controlBinding(_ binding: Control.Binding) -> Self {
 		return textFieldBinding(.inheritedBinding(binding))
 	}
 }
+public extension TextFieldBinding where Preparer.Inherited.Binding: TextFieldBinding {
+	func asTextFieldBinding() -> TextField.Binding? {
+		return asInheritedBinding()?.asTextFieldBinding()
+	}
+}
 public extension TextField.Binding {
 	typealias Preparer = TextField.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTextFieldBinding() -> TextField.Binding? { return self }
 	static func textFieldBinding(_ binding: TextField.Binding) -> TextField.Binding {
 		return binding
 	}

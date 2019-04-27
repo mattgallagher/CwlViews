@@ -202,14 +202,22 @@ public extension View {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ViewBinding: BinderBaseBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self
+	func asViewBinding() -> View.Binding?
 }
 public extension ViewBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return viewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ViewBinding where Preparer.Inherited.Binding: ViewBinding {
+	func asViewBinding() -> View.Binding? {
+		return asInheritedBinding()?.asViewBinding()
+	}
+}
 public extension View.Binding {
 	typealias Preparer = View.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asViewBinding() -> View.Binding? { return self }
 	static func viewBinding(_ binding: View.Binding) -> View.Binding {
 		return binding
 	}

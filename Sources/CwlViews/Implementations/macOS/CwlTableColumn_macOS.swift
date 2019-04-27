@@ -55,7 +55,7 @@ public extension TableColumn {
 		// 3. Action bindings are triggered by the object after construction.
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		case cellConstructor((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<RowData>) -> TableCellViewConvertible)
+		case cellConstructor((_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: SignalMulti<RowData>) -> TableCellViewConvertible)
 		case cellIdentifierForRow((RowData?) -> NSUserInterfaceItemIdentifier)
 		case dataMissingCell(() -> TableCellViewConvertible?)
 	}
@@ -191,7 +191,7 @@ public extension BindingName where Binding: TableColumnBinding {
 	// 3. Action bindings are triggered by the object after construction.
 	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	static var cellConstructor: TableColumnName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: Signal<Binding.RowDataType>) -> TableCellViewConvertible> { return .name(TableColumn.Binding.cellConstructor) }
+	static var cellConstructor: TableColumnName<(_ identifier: NSUserInterfaceItemIdentifier, _ rowSignal: SignalMulti<Binding.RowDataType>) -> TableCellViewConvertible> { return .name(TableColumn.Binding.cellConstructor) }
 	static var cellIdentifierForRow: TableColumnName<(Binding.RowDataType?) -> NSUserInterfaceItemIdentifier> { return .name(TableColumn.Binding.cellIdentifierForRow) }
 	static var dataMissingCell: TableColumnName<() -> TableCellViewConvertible?> { return .name(TableColumn.Binding.dataMissingCell) }
 }
@@ -202,14 +202,22 @@ public extension BindingName where Binding: TableColumnBinding {
 public protocol TableColumnBinding: BinderBaseBinding {
 	associatedtype RowDataType
 	static func tableColumnBinding(_ binding: TableColumn<RowDataType>.Binding) -> Self
+	func asTableColumnBinding() -> TableColumn<RowDataType>.Binding?
 }
 public extension TableColumnBinding {
 	static func binderBaseBinding(_ binding: BinderBase.Binding) -> Self {
 		return tableColumnBinding(.inheritedBinding(binding))
 	}
 }
+public extension TableColumnBinding where Preparer.Inherited.Binding: TableColumnBinding, Preparer.Inherited.Binding.RowDataType == RowDataType {
+	func asTableColumnBinding() -> TableColumn<RowDataType>.Binding? {
+		return asInheritedBinding()?.asTableColumnBinding()
+	}
+}
 public extension TableColumn.Binding {
 	typealias Preparer = TableColumn.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asTableColumnBinding() -> TableColumn.Binding? { return self }
 	static func tableColumnBinding(_ binding: TableColumn.Binding) -> TableColumn.Binding {
 		return binding
 	}

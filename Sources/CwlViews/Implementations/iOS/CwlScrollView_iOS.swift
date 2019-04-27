@@ -349,14 +349,22 @@ public extension ScrollView {
 // MARK: - Binder Part 8: Downcast protocols
 public protocol ScrollViewBinding: ViewBinding {
 	static func scrollViewBinding(_ binding: ScrollView.Binding) -> Self
+	func asScrollViewBinding() -> ScrollView.Binding?
 }
 public extension ScrollViewBinding {
 	static func viewBinding(_ binding: View.Binding) -> Self {
 		return scrollViewBinding(.inheritedBinding(binding))
 	}
 }
+public extension ScrollViewBinding where Preparer.Inherited.Binding: ScrollViewBinding {
+	func asScrollViewBinding() -> ScrollView.Binding? {
+		return asInheritedBinding()?.asScrollViewBinding()
+	}
+}
 public extension ScrollView.Binding {
 	typealias Preparer = ScrollView.Preparer
+	func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+	func asScrollViewBinding() -> ScrollView.Binding? { return self }
 	static func scrollViewBinding(_ binding: ScrollView.Binding) -> ScrollView.Binding {
 		return binding
 	}

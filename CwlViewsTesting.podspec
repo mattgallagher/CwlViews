@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
-  s.name          = "CwlViews"
+  s.name          = "CwlViewsTesting"
   s.version       = "0.1.0"
   
-  s.summary       = "A declarative view-construction framework for iOS and macOS applications"
+  s.summary       = "A parser/decomposer for CwlViews to enable testing."
   s.description   = <<-DESC
-    A collection of wrappers around iOS UIKit and macOS AppKit class construction, making views declaratively constructed and reactively driven.
+    A support library for CwlViews to allow the decomposition of view binders for testing.
   DESC
   
   s.homepage      = "https://github.com/mattgallagher/CwlViews"
@@ -17,7 +17,8 @@ Pod::Spec.new do |s|
 
   s.dependency 'CwlUtils', '~> 2.2.0'
   s.dependency 'CwlSignal', '~> 2.2.0'
+  s.dependency 'CwlViews', '~> 0.1.0'
   
   s.source        = { :git => "https://github.com/mattgallagher/CwlViews.git", :tag => "0.1.0" }
-  s.source_files  = "Sources/CwlViews/**/*.{swift,h}"
+  s.source_files  = "Sources/CwlViewsTesting/**/*.{swift,h}"
 end

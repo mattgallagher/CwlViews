@@ -21,7 +21,18 @@
 
 import AppKit
 
+extension FileHandle: TextOutputStream {
+	public func write(_ string: String) { string.data(using: .utf8).map { write($0) } }
+	static var err = FileHandle.standardError
+}
+
 func run() {
+	var isDirectory: ObjCBool = false
+	guard FileManager.default.fileExists(atPath: "../CwlViews.xcodeproj", isDirectory: &isDirectory), isDirectory.boolValue else {
+		print("\u{01b}[1mError: install_cwlviews_templates.swift must be run from inside the Scripts directory of the CwlViews repository.\u{01b}[0m", to: &FileHandle.err)
+		exit(1)
+	}
+	
 	guard let libraryDirectory = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first else {
 		fatalError("Unable to locate user library directory.")
 	}
@@ -76,9 +87,10 @@ func run() {
 			try FileManager.default.createDirectory(at: destinationUrl, withIntermediateDirectories: false)
 			try installFunction(destinationUrl, cwlViewsProducts)
 		}
-		print("Completed successfully.")
+		print("\u{01b}[1mCompleted successfully.\u{01b}[0m")
 	} catch {
-		print("Failed with error: \(error)")
+		print("\u{01b}[1mFailed with error: \(error)\u{01b}[0m")
+		exit(1)
 	}
 }
 
@@ -101,7 +113,7 @@ func removeDirectory(url: URL) throws {
 	var result: (urls: [URL: URL], error: Error?)? = nil
 	NSWorkspace.shared.recycle([url]) { (urls, error) in result = (urls: urls, error: error) }
 	while result == nil {
-		RunLoop.main.run(mode: .defaultRunLoopMode, before: Date(timeIntervalSinceNow: 0.01))
+		RunLoop.main.run(mode: .default, before: Date(timeIntervalSinceNow: 0.01))
 	}
 	if let e = result?.error {
 		throw e

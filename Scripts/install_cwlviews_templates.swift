@@ -458,7 +458,7 @@ func binderContent() -> String {
 		extension BindingParser where Downcast: ___VARIABLE_basename___Binding {
 			// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
 			// Replace: case ([^\(]+)\((.+)\)$
-			// With:    public static var $1: BindingParser<$2, ___VARIABLE_basename___.Binding, Downcast> { return BindingParser(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.as___VARIABLE_basename___Binding() }) }
+			// With:    public static var $1: BindingParser<$2, ___VARIABLE_basename___.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.as___VARIABLE_basename___Binding() }) }
 		
 		}
 		"""#

@@ -2478,7 +2478,7 @@ func macPlaygroundContent() -> String {
 		import NaturalLanguage
 
 		struct TextFieldViewState: CodableContainer {
-			var text: Var<String>
+			let text: Var<String>
 			init() {
 				text = Var("")
 			}
@@ -2526,7 +2526,7 @@ func iOSPlaygroundContent() -> String {
 		import NaturalLanguage
 
 		struct TextFieldViewState: CodableContainer {
-			var text: Var<String>
+			let text: Var<String>
 			init() {
 				text = Var("")
 			}

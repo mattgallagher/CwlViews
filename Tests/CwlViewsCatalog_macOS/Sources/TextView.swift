@@ -10,7 +10,7 @@ import CwlViews
 import NaturalLanguage
 
 struct TextViewState: CodableContainer {
-	var text: Var<String>
+	let text: Var<String>
 	init() {
 		text = Var("")
 	}

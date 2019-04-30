@@ -24,9 +24,8 @@ func buttonView(_ buttonViewState: ButtonViewState) -> ViewConvertible {
 func layoutWithAnimation(_ buttonViewState: ButtonViewState) -> Signal<Layout> {
 	let button = Button(
 		.bezelStyle -- .rounded,
-		.title <-- buttonViewState.showChild
-			.map { show in show ? .collapse : .expand },
-			.action() --> buttonViewState.showChild
+		.title <-- buttonViewState.showChild.map { show in show ? .collapse : .expand },
+		.action() --> buttonViewState.showChild
 	)
 	let childView = View(
 		.layer -- Layer(.backgroundColor <-- buttonViewState.showChild.map { show in

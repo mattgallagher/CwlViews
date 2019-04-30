@@ -33,6 +33,11 @@ func run() {
 		exit(1)
 	}
 	
+	var uninstall = false
+	if ProcessInfo.processInfo.arguments.last == "uninstall" || ProcessInfo.processInfo.arguments.last == "--uninstall" {
+		uninstall = true
+	}
+	
 	guard let libraryDirectory = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first else {
 		fatalError("Unable to locate user library directory.")
 	}
@@ -53,22 +58,35 @@ func run() {
 			appropriateFor: libraryDirectory,
 			create: true
 		)
-		_ = launch("/usr/bin/xcodebuild", [
-			"-project",
-			"../CwlViews.xcodeproj",
-			"-scheme",
-			"CwlViewsConcat",
-			"-sdk",
-			"macosx",
-			"build",
-			"-derivedDataPath",
-			temporaryLocation.path,
-			"-configuration",
-			"Debug"
-		])
+		
+		if !uninstall {
+			_ = launch("/usr/bin/xcodebuild", [
+				"-project",
+				"../CwlViews.xcodeproj",
+				"-scheme",
+				"CwlViewsConcat",
+				"-sdk",
+				"macosx",
+				"build",
+				"-derivedDataPath",
+				temporaryLocation.path,
+				"-configuration",
+				"Debug"
+			])
+		}
 		let cwlViewsProducts = temporaryLocation.appendingPathComponent("Build/Products/Debug")
 
+		var removed = false
 		for (destinationUrl, installFunction) in templates {
+			guard !uninstall else {
+				if FileManager.default.fileExists(atPath: destinationUrl.path) {
+					try removeDirectory(url: destinationUrl)
+					print("Uninstalled:\n   \(destinationUrl.path)")
+					removed = true
+				}
+				continue
+			}
+			
 			// Create the parent directory, if necessary
 			try FileManager.default.createDirectory(at: destinationUrl.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 			
@@ -77,17 +95,25 @@ func run() {
 			// If the destination already exists, move it to the Trash
 			if FileManager.default.fileExists(atPath: destinationUrl.path) {
 				try removeDirectory(url: destinationUrl)
-				display = "Installing template at location:\n   \(destinationUrl.path)\nPrevious item has been moved to Trash."
-			} else {
-				display = "Installing template at location:\n   \(destinationUrl.path)"
+				removed = true
 			}
+			display = "Installing template at location:\n   \(destinationUrl.path)"
 			
 			// Create the destination director and install the template
 			print(display)
 			try FileManager.default.createDirectory(at: destinationUrl, withIntermediateDirectories: false)
 			try installFunction(destinationUrl, cwlViewsProducts)
 		}
-		print("\u{01b}[1mCompleted successfully.\u{01b}[0m")
+		
+		if uninstall {
+			if removed {
+				print("\u{01b}[1mUninstalled items have been moved to the Trash.\u{01b}[0m")
+			} else {
+				print("\u{01b}[1mNo installed templates found. No changes made.\u{01b}[0m")
+			}
+		} else {
+			print("\u{01b}[1mTemplates installed successfully.\(removed ? " Some previous items were encountered at the install locations and were moved to the Trash." : "")\u{01b}[0m")
+		}
 	} catch {
 		print("\u{01b}[1mFailed with error: \(error)\u{01b}[0m")
 		exit(1)

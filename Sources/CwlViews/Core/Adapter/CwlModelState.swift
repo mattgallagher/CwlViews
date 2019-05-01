@@ -53,6 +53,13 @@ public struct ModelState<Wrapped, M, N>: AdapterState {
 
 
 public extension Adapter {
+	/// Access the internal state outside of the reactive pipeline.
+	///
+	/// NOTE: this function is `throws` *not* `rethrows`. The function may throw regardless of whether the supplied `processor` may throw.
+	///
+	/// - Parameter processor: performs work with the underlying state
+	/// - Returns: the result from `processor`
+	/// - Throws: Other than any error thrown from `processor`, this function can throw if no model value is available (it might not be initialized or the execution context may have delayed the response).
 	func sync<Wrapped, R, M, N>(_ processor: (Wrapped) throws -> R) throws -> R where ModelState<Wrapped, M, N> == State {
 		// Don't `peek` inside the `invokeSync` since that would require re-entering the `executionContext`.
 		let wrapped = try combinedSignal.capture().get().state.wrapped

@@ -12,33 +12,18 @@ struct WindowState: CodableContainer {
 	let appearance: TempVar<NSAppearance.Name>
 	let error: TempVar<Error>
 	let selectedTab: Var<Tabs>
-	let rowSelection: Adapter<SelectionState>
+	let rowSelection: Var<CatalogViewState?>
 	
 	init() {
 		appearance = TempVar()
 		error = TempVar()
 		selectedTab = Var(.left)
-		rowSelection = Adapter(adapterState: SelectionState())
+		rowSelection = Var(nil)
 	}
 	
 	var windowContentColor: Signal<CGColor> {
 		return appearance.map { name in
 			name == .darkAqua ? NSColor(white: 0.2, alpha: 1).cgColor : NSColor.white.cgColor
-		}
-	}
-}
-
-struct SelectionState: PersistentContainerAdapterState {
-	var value: CatalogViewState?
-	init(value: CatalogViewState? = nil) {
-		self.value = value
-	}
-
-	func reduce(message: CatalogViewState?, feedback: SignalMultiInput<CatalogViewState?>) throws -> (state: SelectionState, notification: CatalogViewState??) {
-		if message?.caseName != value?.caseName {
-			return (state: SelectionState(value: message), notification: message)
-		} else {
-			return (state: self, notification: nil)
 		}
 	}
 }
@@ -151,7 +136,7 @@ private func tabView(_ windowState: WindowState) -> TabViewConvertible {
 private func detailContainer(_ windowState: WindowState) -> ViewConvertible {
 	return View(
 		.layer -- Layer(.backgroundColor <-- windowState.windowContentColor),
-		.layout <-- windowState.rowSelection.map { selection in
+		.layout <-- windowState.rowSelection.distinctUntilChanged { $0?.caseName == $1?.caseName }.map { selection in
 			.vertical(
 				animation: Layout.Animation(style: .fade, duration: 0.1),
 				.center(

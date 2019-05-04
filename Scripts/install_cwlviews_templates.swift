@@ -727,7 +727,7 @@ func testTemplateInfo(_ cwlViewsProducts: URL, _ platform: Platform) throws -> [
 		] as [Any],
 		"Definitions": [
 			"*:imports:importProject": "@testable import ___VARIABLE_productName:identifier___",
-			"CwlViews_\(platform.rawValue)Testing.swift:content": try cwlViewsTesting(cwlViewsProducts, platform, internal: false),
+			"CwlViews_\(platform.rawValue)Testing.swift:content": try cwlViewsTesting(cwlViewsProducts, platform, internal: true),
 			"MockServices.swift:content": mockServices(),
 			"TableViewTests.swift:content": platform.isIos ? iOSTableViewTests() : macOSTableViewTests()
 		] as [String: Any]

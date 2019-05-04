@@ -321,8 +321,13 @@ func binderContent() -> String {
 			import UIKit
 		#endif
 
-		import CwlViews
-		
+		#if canImport(CwlViews)
+			import CwlViews
+		#endif
+
+		// NOTE: If using this with the `internal` access CwlViews (e.g. Xcode app templates) then you'll need to remove the `public` access modifiers from this file.
+		// e.g. search for `public ` and replace with nothing.
+
 		// MARK: - Binder Part 1: Binder
 		public class ___VARIABLE_basename___: Binder, ___VARIABLE_basename___Convertible {
 			public var state: BinderState<Preparer>
@@ -471,8 +476,15 @@ func binderContent() -> String {
 				return ___VARIABLE_lowercaseBasename___Binding(.inheritedBinding(binding))
 			}
 		}
+		extension ___VARIABLE_basename___Binding where Preparer.Inherited.Binding: ___VARIABLE_basename___Binding {
+			func as___VARIABLE_basename___Binding() -> ___VARIABLE_basename___.Binding? {
+				return asInheritedBinding()?.as___VARIABLE_basename___Binding()
+			}
+		}
 		public extension ___VARIABLE_basename___.Binding {
 			typealias Preparer = ___VARIABLE_basename___.Preparer
+			func asInheritedBinding() -> Preparer.Inherited.Binding? { if case .inheritedBinding(let b) = self { return b } else { return nil } }
+			func as___VARIABLE_basename___Binding() -> ___VARIABLE_basename___.Binding? { return self }
 			static func ___VARIABLE_lowercaseBasename___Binding(_ binding: ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___.Binding {
 				return binding
 			}
@@ -481,12 +493,13 @@ func binderContent() -> String {
 		// MARK: - Binder Part 9: Other supporting types
 		
 		// MARK: - Binder Part 10: Test support
-		extension BindingParser where Downcast: ___VARIABLE_basename___Binding {
-			// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
-			// Replace: case ([^\(]+)\((.+)\)$
-			// With:    public static var $1: BindingParser<$2, ___VARIABLE_basename___.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.as___VARIABLE_basename___Binding() }) }
-		
-		}
+		#if canImport(CwlViews)
+			extension BindingParser where Downcast: ViewSubclassBinding {
+				// You can easily convert the `Binding` cases to `BindingParser` using the following Xcode-style regex:
+				// Replace: case ([^\(]+)\((.+)\)$
+				// With:    public static var $1: BindingParser<$2, ViewSubclass.Binding, Downcast> { return .init(extract: { if case .$1(let x) = \$0 { return x } else { return nil } }, upcast: { \$0.asViewSubclassBinding() }) }
+			}
+		#endif
 		"""#
 }
 

@@ -1577,8 +1577,8 @@ func macMainWindowContent() -> String {
 
 		private extension DetailState {
 			init?(possibleCell: TableCell<String>?) {
-				guard let cell = possibleCell, let data = cell.data else { return nil }
-				self.init(index: cell.row, value: data)
+				guard let cell = possibleCell, let data = cell.data, let row = cell.row else { return nil }
+				self.init(index: row, value: data)
 			}
 		}
 
@@ -2503,6 +2503,8 @@ func macPlaygroundContent() -> String {
 		import PlaygroundSupport
 		import NaturalLanguage
 
+		// NOTE: after loading for the first time, this playground will take 45-60 seconds before it can run
+		
 		struct TextFieldViewState: CodableContainer {
 			let text: Var<String>
 			init() {
@@ -2551,6 +2553,8 @@ func iOSPlaygroundContent() -> String {
 		import PlaygroundSupport
 		import NaturalLanguage
 
+		// NOTE: after loading for the first time, this playground will take 45-60 seconds before it can run
+		
 		struct TextFieldViewState: CodableContainer {
 			let text: Var<String>
 			init() {

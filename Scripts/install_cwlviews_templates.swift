@@ -1151,8 +1151,8 @@ func iOSTableViewTests() -> String {
 
 				let viewControllerBindings = try! ViewController.consumeBindings(from: tableViewController(tableState, navState, doc))
 				let navigationItemBindings = try! NavigationItem.consumeBindings(from: ViewController.constantValue(for: .navigationItem, in: viewControllerBindings))
-				rightBarButtonBindings = try! BarButtonItem.consumeBindings(from: NavigationItem.dynamicValue(for: .rightBarButtonItems, in: navigationItemBindings).value.first!)
-				tableBindings = try! TableView<String>.consumeBindings(from: ViewController.dynamicValue(for: .view, in: viewControllerBindings))
+				rightBarButtonBindings = try! BarButtonItem.consumeBindings(from: NavigationItem.latestValue(for: .rightBarButtonItems, in: navigationItemBindings).value.first!)
+				tableBindings = try! TableView<String>.consumeBindings(from: ViewController.latestValue(for: .view, in: viewControllerBindings))
 			}
 			
 			override func tearDown() {
@@ -1208,12 +1208,12 @@ func macOSTableViewTests() -> String {
 				windowState = WindowState()
 
 				let windowBindings = try! Window.consumeBindings(from: window(windowState, doc))
-				let splitViewBindings = try! SplitView.consumeBindings(from: Window.dynamicValue(for: .contentView, in: windowBindings))
-				let masterViewBindings = try! View.consumeBindings(from: SplitView.dynamicValue(for: .arrangedSubviews, in: splitViewBindings).values.first!.view)
-				let layout = try! View.dynamicValue(for: .layout, in: masterViewBindings)
+				let splitViewBindings = try! SplitView.consumeBindings(from: Window.latestValue(for: .contentView, in: windowBindings))
+				let masterViewBindings = try! View.consumeBindings(from: SplitView.latestValue(for: .arrangedSubviews, in: splitViewBindings).values.first!.view)
+				let layout = try! View.latestValue(for: .layout, in: masterViewBindings)
 				let scrollViewBindings = try! ScrollView.consumeBindings(from: layout.view(at: 0)!)
-				let clipViewBindings = try! ClipView.consumeBindings(from: ScrollView.dynamicValue(for: .contentView, in: scrollViewBindings))
-				let tableView = try! ClipView.dynamicValue(for: .documentView, in: clipViewBindings)!
+				let clipViewBindings = try! ClipView.consumeBindings(from: ScrollView.latestValue(for: .contentView, in: scrollViewBindings))
+				let tableView = try! ClipView.latestValue(for: .documentView, in: clipViewBindings)!
 				
 				tableBindings = try! TableView<String>.consumeBindings(from: tableView)
 				addButtonBindings = try! Button.consumeBindings(from: layout.view(at: 1)!)

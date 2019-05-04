@@ -133,8 +133,8 @@ public extension BindingName where Binding: NavigationItemBinding {
 	// Composite binding names
 	static func leftBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
 		return Binding.compositeName(
-			value: { dynamicArray in 
-				switch dynamicArray {
+			value: { latestArray in 
+				switch latestArray {
 				case .constant(let b) where animate == .always: return .constant(.animate(b))
 				case .constant(let b): return .constant(.set(b))
 				case .dynamic(let b): return .dynamic(b.animate(animate))
@@ -146,8 +146,8 @@ public extension BindingName where Binding: NavigationItemBinding {
 	}
 	static func rightBarButtonItems(animate: AnimationChoice = .subsequent) -> NavigationItemName<Dynamic<[BarButtonItemConvertible]>> {
 		return Binding.compositeName(
-			value: { dynamicArray in 
-				switch dynamicArray {
+			value: { latestArray in 
+				switch latestArray {
 				case .constant(let b) where animate == .always: return .constant(.animate(b))
 				case .constant(let b): return .constant(.set(b))
 				case .dynamic(let b): return .dynamic(b.animate(animate))

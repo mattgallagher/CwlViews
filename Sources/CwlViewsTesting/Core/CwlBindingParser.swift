@@ -64,7 +64,7 @@ extension Binder {
 		return try consume(from: possibleBinder).bindings
 	}
 	
-	static func dynamicValue<Downcast, V, S: Sequence>(for parser: BindingParser<Dynamic<V>, Preparer.Binding, Downcast>, in bindings: S) throws -> V where S.Element == Downcast {
+	static func latestValue<Downcast, V, S: Sequence>(for parser: BindingParser<Dynamic<V>, Preparer.Binding, Downcast>, in bindings: S) throws -> V where S.Element == Downcast {
 		var found: V? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {
@@ -80,7 +80,7 @@ extension Binder {
 		throw BindingParserErrors.noMatchesFound
 	}
 	
-	static func dynamicArray<Downcast, V, S: Sequence>(for parser: BindingParser<Dynamic<V>, Preparer.Binding, Downcast>, in bindings: S) throws -> [V] where S.Element == Downcast {
+	static func latestArray<Downcast, V, S: Sequence>(for parser: BindingParser<Dynamic<V>, Preparer.Binding, Downcast>, in bindings: S) throws -> [V] where S.Element == Downcast {
 		var found: [V]? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {
@@ -112,7 +112,7 @@ extension Binder {
 		throw BindingParserErrors.noMatchesFound
 	}
 	
-	static func dynamicSignal<Downcast, V, S: Sequence>(for parser: BindingParser<Dynamic<V>, Preparer.Binding, Downcast>, in bindings: S) throws -> Signal<V> where S.Element == Downcast {
+	static func valueSignal<Downcast, V, S: Sequence>(for parser: BindingParser<Dynamic<V>, Preparer.Binding, Downcast>, in bindings: S) throws -> Signal<V> where S.Element == Downcast {
 		var found: Signal<V>? = nil
 		for b in bindings {
 			if let v = parser.parse(b) {

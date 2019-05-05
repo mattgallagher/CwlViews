@@ -68,7 +68,7 @@ public extension SearchBar {
 		case bookmarkButtonClicked((UISearchBar) -> Void)
 		case cancelButtonClicked((UISearchBar) -> Void)
 		case textDidBeginEditing((UISearchBar) -> Void)
-		case textDidChange((UISearchBar) -> Void)
+		case textDidChange((UISearchBar, String) -> Void)
 		case textDidEndEditing((UISearchBar) -> Void)
 		case position((UIBarPositioning) -> UIBarPosition)
 		case resultsListButtonClicked((UISearchBar) -> Void)
@@ -109,7 +109,7 @@ public extension SearchBar.Preparer {
 		case .bookmarkButtonClicked(let x): delegate().addMultiHandler1(x, #selector(UISearchBarDelegate.searchBarBookmarkButtonClicked(_:)))
 		case .cancelButtonClicked(let x): delegate().addMultiHandler1(x, #selector(UISearchBarDelegate.searchBarCancelButtonClicked(_:)))
 		case .textDidBeginEditing(let x): delegate().addMultiHandler1(x, #selector(UISearchBarDelegate.searchBarTextDidBeginEditing(_:)))
-		case .textDidChange(let x): delegate().addMultiHandler1(x, #selector(UISearchBarDelegate.searchBar(_:textDidChange:)))
+		case .textDidChange(let x): delegate().addMultiHandler2(x, #selector(UISearchBarDelegate.searchBar(_:textDidChange:)))
 		case .textDidEndEditing(let x): delegate().addMultiHandler1(x, #selector(UISearchBarDelegate.searchBarTextDidEndEditing(_:)))
 		case .position(let x): delegate().addSingleHandler1(x, #selector(UISearchBarDelegate.position(for:)))
 		case .resultsListButtonClicked(let x): delegate().addMultiHandler1(x, #selector(UISearchBarDelegate.searchBarResultsListButtonClicked(_:)))
@@ -311,7 +311,7 @@ public extension BindingName where Binding: SearchBarBinding {
 	static var bookmarkButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.bookmarkButtonClicked) }
 	static var cancelButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.cancelButtonClicked) }
 	static var textDidBeginEditing: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.textDidBeginEditing) }
-	static var textDidChange: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.textDidChange) }
+	static var textDidChange: SearchBarName<(UISearchBar, String) -> Void> { return .name(SearchBar.Binding.textDidChange) }
 	static var textDidEndEditing: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.textDidEndEditing) }
 	static var position: SearchBarName<(UIBarPositioning) -> UIBarPosition> { return .name(SearchBar.Binding.position) }
 	static var resultsListButtonClicked: SearchBarName<(UISearchBar) -> Void> { return .name(SearchBar.Binding.resultsListButtonClicked) }
@@ -324,7 +324,7 @@ public extension BindingName where Binding: SearchBarBinding {
 	// Composite binding names
 	static func textChanged(_ void: Void = ()) -> SearchBarName<SignalInput<String>> {
 		return Binding.compositeName(
-			value: { input in { searchBar in searchBar.text.map { input.send(value: $0) } } },
+			value: { input in { (searchBar, text) in input.send(value: text) } },
 			binding: SearchBar.Binding.textDidChange,
 			downcast: Binding.searchBarBinding
 		)

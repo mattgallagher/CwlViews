@@ -49,6 +49,7 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 				case .textField(let state)?: return textFieldView(state, navigationItem)
 				case .textView(let state)?: return textView(state, navigationItem)
 				case .webView(let state)?: return webView(state, navigationItem)
+                case .segmentedView(let state)?: return segmentedControlView(state, navigationItem)
 				}
 			}.map { .reload([$0]) }
 		),

@@ -22,6 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		26E80D2F22843EB000FC848C /* CwlSegementControl_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D2E22843EB000FC848C /* CwlSegementControl_iOS.swift */; };
+		26E80D31228447E700FC848C /* SegmentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D30228447E700FC848C /* SegmentedView.swift */; };
 		C9033CC221EB5C220077245D /* CwlAdapterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9033CC121EB5C220077245D /* CwlAdapterState.swift */; };
 		C9086A182196502A006DBD43 /* CwlLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlLayerTests.swift */; };
 		C909ACA6225CD036006F855D /* CwlImageView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */; };
@@ -340,6 +342,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		26E80D2E22843EB000FC848C /* CwlSegementControl_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSegementControl_iOS.swift; sourceTree = "<group>"; };
+		26E80D30228447E700FC848C /* SegmentedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedView.swift; sourceTree = "<group>"; };
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
 		C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageView_macOS.swift; sourceTree = "<group>"; };
 		C909ACAB225E0C51006F855D /* CwlSlider_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSlider_macOS.swift; sourceTree = "<group>"; };
@@ -1084,6 +1088,7 @@
 				C9924B3C1E6E8A38006CD314 /* CwlView_iOS.swift */,
 				C9D282341E76398A0072A18C /* CwlViewController_iOS.swift */,
 				C9924B3A1E6E8058006CD314 /* CwlWindow_iOS.swift */,
+				26E80D2E22843EB000FC848C /* CwlSegementControl_iOS.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -1179,6 +1184,7 @@
 				C9BFDF6B220FFB81005F4009 /* TextFieldView.swift */,
 				C99E963A2237CCA0003FD574 /* TextView.swift */,
 				C9C30217222529E5005B0FCD /* WebView.swift */,
+				26E80D30228447E700FC848C /* SegmentedView.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -1708,6 +1714,7 @@
 				C985C9D921DDC6B600E8FF8B /* CwlToggleVar.swift in Sources */,
 				C9B0D12322225A7B00D2FB42 /* CwlTableHeaderView_macOS.swift in Sources */,
 				C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
+				26E80D2F22843EB000FC848C /* CwlSegementControl_iOS.swift in Sources */,
 				C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
 				C97A5B5921D5BE8A001D98DD /* CwlMenu_macOS.swift in Sources */,
 				C9F0AC6D2236736A0051DD43 /* CwlShapeLayer.swift in Sources */,
@@ -1873,6 +1880,7 @@
 				C9BFDF68220FFB69005F4009 /* SliderView.swift in Sources */,
 				C9C30218222529E5005B0FCD /* WebView.swift in Sources */,
 				C9F9A35021DF70F100026DC1 /* main.swift in Sources */,
+				26E80D31228447E700FC848C /* SegmentedView.swift in Sources */,
 				C9BFDF66220FFB5D005F4009 /* SearchBarView.swift in Sources */,
 				C93E06D5220E76D30028DCB2 /* CatalogTable.swift in Sources */,
 				C9BFDF5C220FFA4F005F4009 /* ControlView.swift in Sources */,

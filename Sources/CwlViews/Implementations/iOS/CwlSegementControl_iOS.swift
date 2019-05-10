@@ -69,10 +69,13 @@ public extension SegmentedControl.Preparer {
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+		
+		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .apportionsSegmentWidthsByContent(let x):
 			return x.apply(instance) { i, v in i.apportionsSegmentWidthsByContent = v }
 		case .backgroundImage(let x):
 			return x.apply(instance) { i, v in i.setBackgroundImage(v.1, for: v.0.controlState, barMetrics: v.0.barMetrics) }
+		case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
 		case .segments(let x):
 			return x.apply(instance) { i, v in
 				i.removeAllSegments()
@@ -81,11 +84,14 @@ public extension SegmentedControl.Preparer {
 					if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
 					if let width = segment.width { i.setWidth(width, forSegmentAt: index) }
 					if let contentOffset = segment.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
+					if let enabled = segment.enabled { i.setEnabled(enabled, forSegmentAt: index) }
 				}
 			}
-		case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
-		case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+			
+		// 2. Signal bindings are performed on the object after construction.
+		case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
+		
         }
 	}
 }
@@ -105,10 +111,11 @@ extension BindingName where Binding: SegmentedControlBinding {
 public extension BindingName where Binding: SegmentedControlBinding {
 	static var apportionsSegmentWidthsByContent: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.apportionsSegmentWidthsByContent) }
 	static var backgroundImage: SegmentControlName<Dynamic<(StateAndMetrics, UIImage?)>> { return .name(SegmentedControl.Binding.backgroundImage) }
-	static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
-	static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
-	static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
 	static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
+	static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
+	static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
+	
+	static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
@@ -159,27 +166,40 @@ public struct SegmentDescriptor {
 
 	public let width: CGFloat?
 	public let contentOffset: CGSize?
+	public let enabled: Bool?
 
 	public init(title: String,
 				width: CGFloat? = nil,
-				contentOffset: CGSize? = nil) {
-		self.init(image: nil, title: title, width: width, contentOffset: contentOffset)
+				contentOffset: CGSize? = nil,
+				enabled: Bool? = nil) {
+		self.init(image: nil,
+				  title: title,
+				  width: width,
+				  contentOffset: contentOffset,
+				  enabled: enabled)
 	}
 
 	public init(image: UIImage,
 				width: CGFloat? = nil,
-				contentOffset: CGSize? = nil) {
-		self.init(image: image, title: nil, width: width, contentOffset: contentOffset)
+				contentOffset: CGSize? = nil,
+				enabled: Bool? = nil) {
+		self.init(image: image,
+				  title: nil,
+				  width: width,
+				  contentOffset: contentOffset,
+				  enabled: enabled)
 	}
 
 	private init(image: UIImage?,
 				 title: String?,
 				 width: CGFloat?,
-				 contentOffset: CGSize?) {
+				 contentOffset: CGSize?,
+				 enabled: Bool?) {
 		self.image = image
 		self.title = title
 		self.width = width
 		self.contentOffset = contentOffset
+		self.enabled = enabled
 	}
 }
 

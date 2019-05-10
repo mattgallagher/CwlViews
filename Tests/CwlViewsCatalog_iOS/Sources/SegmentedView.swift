@@ -37,7 +37,8 @@ func segmentedControlView(_ viewState: SegmentedViewState, _ navigationItem: Nav
 										//.backgroundImage -- (StateAndMetrics(), .drawn(width: 512, height: 512, drawIcon)),
 										.segments -- [SegmentDescriptor(title: "0", width: 40),
 													  SegmentDescriptor(title: "1", width: 40),
-													  SegmentDescriptor(title: "2", width: 40)])
+													  SegmentDescriptor(title: "2", width: 40, enabled: false),
+													  SegmentDescriptor(title: "3", width: 40)])
 							)
 			)
 			)

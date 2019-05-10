@@ -31,15 +31,15 @@ public extension SegmentedControl {
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		/* case someProperty(Dynamic<PropertyType>) */
-        case apportionsSegmentWidthsByContent(Dynamic<Bool>)
-        case backgroundImage(Dynamic<(StateAndMetrics, UIImage?)>)
-        case momentary(Dynamic<Bool>)
-        case segments(Dynamic<SetOrAnimate<[SegmentDescriptor]>>)
-        case tintColor(Dynamic<UIColor?>)
+		case apportionsSegmentWidthsByContent(Dynamic<Bool>)
+		case backgroundImage(Dynamic<(StateAndMetrics, UIImage?)>)
+		case momentary(Dynamic<Bool>)
+		case segments(Dynamic<SetOrAnimate<[SegmentDescriptor]>>)
+		case tintColor(Dynamic<UIColor?>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		/* case someFunction(Signal<FunctionParametersAsTuple>) */
-        case selectItem(Signal<Int>)
+		case selectItem(Signal<Int>)
         
 		// 3. Action bindings are triggered by the object after construction.
 		/* case someAction(SignalInput<CallbackParameters>) */
@@ -101,23 +101,23 @@ public extension SegmentedControl.Preparer {
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-        case .apportionsSegmentWidthsByContent(let x):
-            return x.apply(instance) { i, v in i.apportionsSegmentWidthsByContent = v }
-        case .backgroundImage(let x):
-            return x.apply(instance) { i, v in i.setBackgroundImage(v.1, for: v.0.controlState, barMetrics: v.0.barMetrics) }
-        case .segments(let x):
-            return x.apply(instance) { i, v in
-                i.removeAllSegments()
-                for (index, segment) in v.value.enumerated() {
-                    if let image = segment.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
-                    if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
-                    if let width = segment.width { i.setWidth(width, forSegmentAt: index) }
-                    if let contentOffset = segment.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
-                }
-            }
-        case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
-        case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
-        case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
+		case .apportionsSegmentWidthsByContent(let x):
+			return x.apply(instance) { i, v in i.apportionsSegmentWidthsByContent = v }
+		case .backgroundImage(let x):
+			return x.apply(instance) { i, v in i.setBackgroundImage(v.1, for: v.0.controlState, barMetrics: v.0.barMetrics) }
+		case .segments(let x):
+			return x.apply(instance) { i, v in
+				i.removeAllSegments()
+				for (index, segment) in v.value.enumerated() {
+					if let image = segment.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
+					if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
+					if let width = segment.width { i.setWidth(width, forSegmentAt: index) }
+					if let contentOffset = segment.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
+				}
+			}
+		case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
+		case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
+		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
         }
 	}
 }
@@ -148,12 +148,12 @@ extension BindingName where Binding: SegmentedControlBinding {
 	}
 }
 public extension BindingName where Binding: SegmentedControlBinding {
-    static var apportionsSegmentWidthsByContent: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.apportionsSegmentWidthsByContent) }
-    static var backgroundImage: SegmentControlName<Dynamic<(StateAndMetrics, UIImage?)>> { return .name(SegmentedControl.Binding.backgroundImage) }
-    static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
-    static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
-    static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
-    static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
+	static var apportionsSegmentWidthsByContent: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.apportionsSegmentWidthsByContent) }
+	static var backgroundImage: SegmentControlName<Dynamic<(StateAndMetrics, UIImage?)>> { return .name(SegmentedControl.Binding.backgroundImage) }
+	static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
+	static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
+	static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
+	static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
@@ -197,35 +197,35 @@ public extension SegmentedControl.Binding {
 #endif
 // MARK: - Binder Part 9: Other supporting types
 public struct SegmentDescriptor {
-    // Only one, title or image, can be non-nil
-    // This is enfored through the constructor
-    public let title: String?
-    public let image: UIImage?
-    
-    public let width: CGFloat?
-    public let contentOffset: CGSize?
-    
-    public init(title: String,
-                width: CGFloat? = nil,
-                contentOffset: CGSize? = nil) {
-        self.init(image: nil, title: title, width: width, contentOffset: contentOffset)
-    }
-    
-    public init(image: UIImage,
-                width: CGFloat? = nil,
-                contentOffset: CGSize? = nil) {
-        self.init(image: image, title: nil, width: width, contentOffset: contentOffset)
-    }
-    
-    private init(image: UIImage?,
-                 title: String?,
-                 width: CGFloat?,
-                 contentOffset: CGSize?) {
-        self.image = image
-        self.title = title
-        self.width = width
-        self.contentOffset = contentOffset
-    }
+	// Only one, title or image, can be non-nil
+	// This is enfored through the constructor
+	public let title: String?
+	public let image: UIImage?
+
+	public let width: CGFloat?
+	public let contentOffset: CGSize?
+
+	public init(title: String,
+				width: CGFloat? = nil,
+				contentOffset: CGSize? = nil) {
+		self.init(image: nil, title: title, width: width, contentOffset: contentOffset)
+	}
+
+	public init(image: UIImage,
+				width: CGFloat? = nil,
+				contentOffset: CGSize? = nil) {
+		self.init(image: image, title: nil, width: width, contentOffset: contentOffset)
+	}
+
+	private init(image: UIImage?,
+				 title: String?,
+				 width: CGFloat?,
+				 contentOffset: CGSize?) {
+		self.image = image
+		self.title = title
+		self.width = width
+		self.contentOffset = contentOffset
+	}
 }
 
 // MARK: - Binder Part 10: Test support

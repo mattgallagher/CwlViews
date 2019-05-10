@@ -10,9 +10,6 @@
 
 import UIKit
 
-// NOTE: If using this with the `internal` access CwlViews (e.g. Xcode app templates) then you'll need to remove the `public` access modifiers from this file.
-// e.g. search for `public ` and replace with nothing.
-
 // MARK: - Binder Part 1: Binder
 public class SegmentedControl: Binder, SegmentControlConvertible {
 	public var state: BinderState<Preparer>
@@ -55,23 +52,9 @@ public extension SegmentedControl {
 		public typealias Binding = SegmentedControl.Binding
 		public typealias Inherited = Control.Preparer
 		public typealias Instance = UISegmentedControl
-		
-		/*
-		// If instance construction requires parameters, uncomment this
-		public typealias Parameters = (paramOne, paramTwo)
-		*/
-		
+
 		public var inherited = Inherited()
 		public init() {}
-		
-		/*
-		// If Preparer is BinderDelegateEmbedderConstructor, use these instead of the `init` on the previous line
-		public var dynamicDelegate: Delegate? = nil
-		public let delegateClass: Delegate.Type
-		public init(delegateClass: Delegate.Type) {
-			self.delegateClass = delegateClass
-		}
-		*/
 		
 		public func constructStorage(instance: Instance) -> Storage { return Storage() }
 		public func inheritedBinding(from: Binding) -> Inherited.Binding? {
@@ -82,21 +65,6 @@ public extension SegmentedControl {
 
 // MARK: - Binder Part 4: Preparer overrides
 public extension SegmentedControl.Preparer {
-	/* If instance construction requires parameters, uncomment this
-	func constructInstance(type: Instance.Type, parameters: Preparer.Parameters) -> Instance {
-		return type.init(paramOne: parameters.0, paramTwo: parameters.1)
-	}
-	*/
-
-	/* Enable if delegate bindings used or setup prior to other bindings required 
-	mutating func prepareBinding(_ binding: Binding) {
-		switch binding {
-		case .inheritedBinding(let x): inherited.prepareBinding(x)
-		case .someDelegate(let x): delegate().addMultiHandler(x, #selector(someDelegateFunction))
-		default: break
-		}
-	}
-	*/
 
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
@@ -125,19 +93,6 @@ public extension SegmentedControl.Preparer {
 // MARK: - Binder Part 5: Storage and Delegate
 extension SegmentedControl.Preparer {
 	public typealias Storage = Control.Preparer.Storage
-	/*
-	// Use instead of previous line if additional runtime storage is required
-	open class Storage: Control.Preparer.Storage {}
-	*/
-	
-	/*
-	// Enable if Preparer is BinderDelegateEmbedderConstructor
-	open class Delegate: DynamicDelegate, UISegmentControlDelegate {
-		open func someDelegateFunction(_ segmentControl: UISegmentControlDelegate) -> Bool {
-			return singleHandler(segmentControl)
-		}
-	}
-	*/
 }
 
 // MARK: - Binder Part 6: BindingNames

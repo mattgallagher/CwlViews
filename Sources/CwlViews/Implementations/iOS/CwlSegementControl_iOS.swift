@@ -31,6 +31,7 @@ public extension SegmentedControl {
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		/* case someProperty(Dynamic<PropertyType>) */
+        case apportionsSegmentWidthsByContent(Dynamic<Bool>)
         case backgroundImage(Dynamic<(StateAndMetrics, UIImage?)>)
         case momentary(Dynamic<Bool>)
         case segments(Dynamic<SetOrAnimate<[SegmentDescriptor]>>)
@@ -100,18 +101,18 @@ public extension SegmentedControl.Preparer {
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
+        case .apportionsSegmentWidthsByContent(let x):
+            return x.apply(instance) { i, v in i.apportionsSegmentWidthsByContent = v }
         case .backgroundImage(let x):
             return x.apply(instance) { i, v in i.setBackgroundImage(v.1, for: v.0.controlState, barMetrics: v.0.barMetrics) }
         case .segments(let x):
-            return x.apply(instance) {i, v in
+            return x.apply(instance) { i, v in
                 i.removeAllSegments()
-                var index = 0;
-                for segment in v.value {
+                for (index, segment) in v.value.enumerated() {
                     if let image = segment.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
                     if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
                     if let width = segment.width { i.setWidth(width, forSegmentAt: index) }
                     if let contentOffset = segment.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
-                    index += 1
                 }
             }
         case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
@@ -147,9 +148,7 @@ extension BindingName where Binding: SegmentedControlBinding {
 	}
 }
 public extension BindingName where Binding: SegmentedControlBinding {
-	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
-	// Replace: case ([^\(]+)\((.+)\)$
-	// With:    static var $1: SegmentControlName<$2> { return .name(SegmentControl.Binding.$1) }
+    static var apportionsSegmentWidthsByContent: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.apportionsSegmentWidthsByContent) }
     static var backgroundImage: SegmentControlName<Dynamic<(StateAndMetrics, UIImage?)>> { return .name(SegmentedControl.Binding.backgroundImage) }
     static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
     static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}

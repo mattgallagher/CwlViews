@@ -24,7 +24,7 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case textField(TextFieldViewState)
 	case textView(TextViewState)
 	case webView(WebViewState)
-    case segmentedView(SegmentedViewState)
+	case segmentedView(SegmentedViewState)
 }
 
 func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
@@ -61,7 +61,7 @@ extension CatalogViewState {
 		case textField
 		case textView
 		case webView
-        case segmentedView
+		case segmentedView
 	}
 }
 
@@ -83,7 +83,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .textField: return NSLocalizedString("TextField", comment: "")
 		case .textView: return NSLocalizedString("TextView", comment: "")
 		case .webView: return NSLocalizedString("WebView", comment: "")
-        case .segmentedView: return NSLocalizedString("SegmentedView", comment: "")
+		case .segmentedView: return NSLocalizedString("SegmentedView", comment: "")
 		}
 	}
 	
@@ -108,7 +108,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .textField: return .textField(try container.decodeIfPresent(TextFieldViewState.self, forKey: self) ?? .init())
 		case .textView: return .textView(try container.decodeIfPresent(TextViewState.self, forKey: self) ?? .init())
 		case .webView: return .webView(try container.decodeIfPresent(WebViewState.self, forKey: self) ?? .init())
-        case .segmentedView: return .segmentedView(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
+		case .segmentedView: return .segmentedView(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
 		}
 	}
 }

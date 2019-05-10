@@ -34,7 +34,7 @@ public extension SegmentedControl {
         case backgroundImage(Dynamic<(StateAndMetrics, UIImage?)>)
         case momentary(Dynamic<Bool>)
         case segments(Dynamic<SetOrAnimate<[SegmentDescriptor]>>)
-        case tintColor(Dynamic<UIColor>)
+        case tintColor(Dynamic<UIColor?>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		/* case someFunction(Signal<FunctionParametersAsTuple>) */
@@ -108,7 +108,9 @@ public extension SegmentedControl.Preparer {
                 var index = 0;
                 for segment in v.value {
                     if let image = segment.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
-                    if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated)}
+                    if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
+                    if let width = segment.width { i.setWidth(width, forSegmentAt: index) }
+                    if let contentOffset = segment.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
                     index += 1
                 }
             }
@@ -151,7 +153,7 @@ public extension BindingName where Binding: SegmentedControlBinding {
     static var backgroundImage: SegmentControlName<Dynamic<(StateAndMetrics, UIImage?)>> { return .name(SegmentedControl.Binding.backgroundImage) }
     static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
     static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
-    static var tintColor: SegmentControlName<Dynamic<UIColor>> { return .name(SegmentedControl.Binding.tintColor)}
+    static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
     static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
 }
 
@@ -196,17 +198,34 @@ public extension SegmentedControl.Binding {
 #endif
 // MARK: - Binder Part 9: Other supporting types
 public struct SegmentDescriptor {
+    // Only one, title or image, can be non-nil
+    // This is enfored through the constructor
     public let title: String?
     public let image: UIImage?
     
-    public init(title: String) {
-        self.title = title
-        self.image = nil
+    public let width: CGFloat?
+    public let contentOffset: CGSize?
+    
+    public init(title: String,
+                width: CGFloat? = nil,
+                contentOffset: CGSize? = nil) {
+        self.init(image: nil, title: title, width: width, contentOffset: contentOffset)
     }
     
-    public init(image: UIImage) {
-        self.title = nil
+    public init(image: UIImage,
+                width: CGFloat? = nil,
+                contentOffset: CGSize? = nil) {
+        self.init(image: image, title: nil, width: width, contentOffset: contentOffset)
+    }
+    
+    private init(image: UIImage?,
+                 title: String?,
+                 width: CGFloat?,
+                 contentOffset: CGSize?) {
         self.image = image
+        self.title = title
+        self.width = width
+        self.contentOffset = contentOffset
     }
 }
 

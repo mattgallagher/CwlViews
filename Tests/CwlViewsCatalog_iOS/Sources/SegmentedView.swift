@@ -31,11 +31,12 @@ func segmentedControlView(_ viewState: SegmentedViewState, _ navigationItem: Nav
                                 SegmentedControl(
                                     .momentary -- false,
                                     .selectItem <-- viewState.indexValue,
+                                    .tintColor -- .red,
                                     .action(.valueChanged, \.selectedSegmentIndex) --> viewState.indexValue.update(),
                                     //.backgroundImage -- (StateAndMetrics(), .drawn(width: 512, height: 512, drawIcon)),
-                                    .segments -- [SegmentDescriptor(title: "0"),
-                                                  SegmentDescriptor(title: "1"),
-                                                  SegmentDescriptor(title: "2")]))
+                                    .segments -- [SegmentDescriptor(title: "0", width: 40),
+                                                  SegmentDescriptor(title: "1", width: 40),
+                                                  SegmentDescriptor(title: "2", width: 40)]))
                                 ))))
 }
 

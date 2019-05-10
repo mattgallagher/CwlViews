@@ -9,20 +9,40 @@
 import CwlViews
 
 struct SegmentedViewState: CodableContainer {
-    let value: Var<Bool>
+    let indexValue: Var<Int>
     init() {
-        value = Var(true)
+        indexValue = Var(1)
     }
 }
 
 func segmentedControlView(_ viewState: SegmentedViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
     return ViewController(
         .navigationItem -- navigationItem,
-        .view -- View(.backgroundColor -- .white,
-        .layout -- .center(.view(SegmentedControl(
-            .backgroundImage -- .drawn(width: 512, height: 512, drawIcon),
-            .segments -- [SegmentDescriptor(title: "Hello", position: 0), SegmentDescriptor(title: "World", position: 1)])))))
+        .view -- View(
+            .backgroundColor -- .white,
+            .layout -- .center(marginEdges: .allLayout,
+                               length: .equalTo(constant: 100.0),
+                               breadth: .equalTo(constant: 400.0),
+                               .vertical(
+                                align: .center,
+                               .view(Label(.text <-- viewState.indexValue.allChanges().map { value in "\(value)" })),
+                               .space(),
+                               .view(
+                                SegmentedControl(
+                                    .momentary -- false,
+                                    .selectItem <-- viewState.indexValue,
+                                    .action(.valueChanged, \.selectedSegmentIndex) --> viewState.indexValue.update(),
+                                    //.backgroundImage -- (StateAndMetrics(), .drawn(width: 512, height: 512, drawIcon)),
+                                    .segments -- [SegmentDescriptor(title: "Hello"),
+                                                  SegmentDescriptor(title: "World"),
+                                                  SegmentDescriptor(image: .drawn(width: 20, height: 20, drawIcon))]))
+                                ))))
 }
 
 // .drawn(width: 512, height: 512, drawIcon
 //(StateAndMetrics(state: .normal, metrics: .default), .drawn(width: 512, height: 512, drawIcon))
+
+private extension String {
+    static let selected = NSLocalizedString("Selected", comment: "")
+    static let noValue = NSLocalizedString("No value selected", comment: "")
+}

@@ -31,12 +31,15 @@ public extension SegmentedControl {
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
 		/* case someProperty(Dynamic<PropertyType>) */
-        case backgroundImage(Dynamic<UIImage?>)
-        case segments(Dynamic<[SegmentDescriptor]>)
+        case backgroundImage(Dynamic<(StateAndMetrics, UIImage?)>)
+        case momentary(Dynamic<Bool>)
+        case segments(Dynamic<SetOrAnimate<[SegmentDescriptor]>>)
+        case tintColor(Dynamic<UIColor>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		/* case someFunction(Signal<FunctionParametersAsTuple>) */
-
+        case selectItem(Signal<Int>)
+        
 		// 3. Action bindings are triggered by the object after construction.
 		/* case someAction(SignalInput<CallbackParameters>) */
 
@@ -98,21 +101,20 @@ public extension SegmentedControl.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
         case .backgroundImage(let x):
-            return x.apply(instance) { i, v in i.setBackgroundImage(v, for: .normal, barMetrics: .default) }
+            return x.apply(instance) { i, v in i.setBackgroundImage(v.1, for: v.0.controlState, barMetrics: v.0.barMetrics) }
         case .segments(let x):
             return x.apply(instance) {i, v in
-                var count = 0
-                for segment in v {
-                    i.insertSegment(withTitle: segment.title, at: segment.position, animated: true)
-                    count += 1
+                i.removeAllSegments()
+                var index = 0;
+                for segment in v.value {
+                    if let image = segment.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
+                    if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated)}
+                    index += 1
                 }
             }
-		/* All bindings should have an "apply" (although some might simply return nil). Here are some typical examples... */
-		/* case .someStatic(let x): instance.someStatic = x.value */
-		/* case .someProperty(let x): return x.apply(instance) { i, v in i.someProperty = v } */
-		/* case .someSignal(let x): return x.apply(instance) { i, v in i.something(v) } */
-		/* case .someAction(let x): return instance.addListenerAndReturnLifetime(x) */
-		/* case .someDelegate(let x): return nil */
+        case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
+        case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
+        case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
         }
 	}
 }
@@ -146,8 +148,11 @@ public extension BindingName where Binding: SegmentedControlBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: SegmentControlName<$2> { return .name(SegmentControl.Binding.$1) }
-    static var backgroundImage: SegmentControlName<Dynamic<UIImage?>> { return .name(SegmentedControl.Binding.backgroundImage) }
-    static var segments: SegmentControlName<Dynamic<[SegmentDescriptor]>> { return .name(SegmentedControl.Binding.segments)}
+    static var backgroundImage: SegmentControlName<Dynamic<(StateAndMetrics, UIImage?)>> { return .name(SegmentedControl.Binding.backgroundImage) }
+    static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescriptor]>>> { return .name(SegmentedControl.Binding.segments)}
+    static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
+    static var tintColor: SegmentControlName<Dynamic<UIColor>> { return .name(SegmentedControl.Binding.tintColor)}
+    static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)
@@ -191,12 +196,17 @@ public extension SegmentedControl.Binding {
 #endif
 // MARK: - Binder Part 9: Other supporting types
 public struct SegmentDescriptor {
-    public let title: String
-    public let position: Int
+    public let title: String?
+    public let image: UIImage?
     
-    public init(title: String, position: Int) {
+    public init(title: String) {
         self.title = title
-        self.position = position
+        self.image = nil
+    }
+    
+    public init(image: UIImage) {
+        self.title = nil
+        self.image = image
     }
 }
 

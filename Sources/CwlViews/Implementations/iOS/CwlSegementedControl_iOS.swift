@@ -161,7 +161,6 @@ public extension SegmentedControl.Binding {
 	}
 }
 
-#endif
 // MARK: - Binder Part 9: Other supporting types
 public struct SegmentDescription {
 	// Only one, title or image, can be non-nil
@@ -207,6 +206,7 @@ public struct SegmentDescription {
 		self.enabled = enabled
 	}
 }
+#endif
 
 // MARK: - Binder Part 10: Test support
 #if canImport(CwlViews)

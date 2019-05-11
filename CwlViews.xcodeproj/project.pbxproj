@@ -22,7 +22,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		26E80D2F22843EB000FC848C /* CwlSegementControl_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D2E22843EB000FC848C /* CwlSegementControl_iOS.swift */; };
+		26E80D2F22843EB000FC848C /* CwlSegementedControl_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D2E22843EB000FC848C /* CwlSegementedControl_iOS.swift */; };
 		26E80D31228447E700FC848C /* SegmentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D30228447E700FC848C /* SegmentedView.swift */; };
 		C9033CC221EB5C220077245D /* CwlAdapterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9033CC121EB5C220077245D /* CwlAdapterState.swift */; };
 		C9086A182196502A006DBD43 /* CwlLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92169BF218F083600396AB0 /* CwlLayerTests.swift */; };
@@ -342,7 +342,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		26E80D2E22843EB000FC848C /* CwlSegementControl_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSegementControl_iOS.swift; sourceTree = "<group>"; };
+		26E80D2E22843EB000FC848C /* CwlSegementedControl_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSegementedControl_iOS.swift; sourceTree = "<group>"; };
 		26E80D30228447E700FC848C /* SegmentedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedView.swift; sourceTree = "<group>"; };
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
 		C909ACA5225CD036006F855D /* CwlImageView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlImageView_macOS.swift; sourceTree = "<group>"; };
@@ -1071,6 +1071,7 @@
 				C940A3C11E877DDA001F1310 /* CwlScreenEdgePanGestureRecognizer_iOS.swift */,
 				C940A3B31E87751B001F1310 /* CwlScrollView_iOS.swift */,
 				C926D0611FF07348002BF020 /* CwlSearchBar_iOS.swift */,
+				26E80D2E22843EB000FC848C /* CwlSegementedControl_iOS.swift */,
 				C97CFB0C1EE505DD00C18737 /* CwlSlider_iOS.swift */,
 				C9785B961EB9BC4B00B29F64 /* CwlSplitViewController_iOS.swift */,
 				C940A3BD1E877D92001F1310 /* CwlSwipeGestureRecognizer_iOS.swift */,
@@ -1088,7 +1089,6 @@
 				C9924B3C1E6E8A38006CD314 /* CwlView_iOS.swift */,
 				C9D282341E76398A0072A18C /* CwlViewController_iOS.swift */,
 				C9924B3A1E6E8058006CD314 /* CwlWindow_iOS.swift */,
-				26E80D2E22843EB000FC848C /* CwlSegementControl_iOS.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -1177,6 +1177,7 @@
 				C9BFDF61220FFB46005F4009 /* NavigationBarView.swift */,
 				C9BFDF63220FFB50005F4009 /* PageView.swift */,
 				C9BFDF65220FFB5D005F4009 /* SearchBarView.swift */,
+				26E80D30228447E700FC848C /* SegmentedView.swift */,
 				C9BFDF67220FFB69005F4009 /* SliderView.swift */,
 				C9E4CEF4220C38E200D7165D /* SplitView.swift */,
 				C9BFDF69220FFB76005F4009 /* SwitchView.swift */,
@@ -1184,7 +1185,6 @@
 				C9BFDF6B220FFB81005F4009 /* TextFieldView.swift */,
 				C99E963A2237CCA0003FD574 /* TextView.swift */,
 				C9C30217222529E5005B0FCD /* WebView.swift */,
-				26E80D30228447E700FC848C /* SegmentedView.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -1714,7 +1714,7 @@
 				C985C9D921DDC6B600E8FF8B /* CwlToggleVar.swift in Sources */,
 				C9B0D12322225A7B00D2FB42 /* CwlTableHeaderView_macOS.swift in Sources */,
 				C925223B20957D3400CA39A4 /* CwlSignalCallback.swift in Sources */,
-				26E80D2F22843EB000FC848C /* CwlSegementControl_iOS.swift in Sources */,
+				26E80D2F22843EB000FC848C /* CwlSegementedControl_iOS.swift in Sources */,
 				C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
 				C97A5B5921D5BE8A001D98DD /* CwlMenu_macOS.swift in Sources */,
 				C9F0AC6D2236736A0051DD43 /* CwlShapeLayer.swift in Sources */,

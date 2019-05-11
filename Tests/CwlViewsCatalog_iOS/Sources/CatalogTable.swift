@@ -19,12 +19,12 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case navigationBar(NavigationBarViewState)
 	case pageViewController(PageViewState)
 	case searchBar(SearchBarViewState)
+	case segmentedView(SegmentedViewState)
 	case slider(SliderViewState)
 	case `switch`(SwitchViewState)
 	case textField(TextFieldViewState)
 	case textView(TextViewState)
 	case webView(WebViewState)
-	case segmentedView(SegmentedViewState)
 }
 
 func catalogTable(_ viewState: SplitViewState) -> ViewControllerConvertible {
@@ -56,12 +56,12 @@ extension CatalogViewState {
 		case navigationBar
 		case pageViewController
 		case searchBar
+		case segmentedView
 		case slider
 		case `switch`
 		case textField
 		case textView
 		case webView
-		case segmentedView
 	}
 }
 
@@ -78,12 +78,12 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .navigationBar: return NSLocalizedString("NavigationBar", comment: "")
 		case .pageViewController: return NSLocalizedString("PageViewController", comment: "")
 		case .searchBar: return NSLocalizedString("SearchBar", comment: "")
+		case .segmentedView: return NSLocalizedString("SegmentedView", comment: "")
 		case .slider: return NSLocalizedString("Slider", comment: "")
 		case .`switch`: return NSLocalizedString("Switch", comment: "")
 		case .textField: return NSLocalizedString("TextField", comment: "")
 		case .textView: return NSLocalizedString("TextView", comment: "")
 		case .webView: return NSLocalizedString("WebView", comment: "")
-		case .segmentedView: return NSLocalizedString("SegmentedView", comment: "")
 		}
 	}
 	
@@ -103,12 +103,12 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .navigationBar: return .navigationBar(try container.decodeIfPresent(NavigationBarViewState.self, forKey: self) ?? .init())
 		case .pageViewController: return .pageViewController(try container.decodeIfPresent(PageViewState.self, forKey: self) ?? .init())
 		case .searchBar: return .searchBar(try container.decodeIfPresent(SearchBarViewState.self, forKey: self) ?? .init())
+		case .segmentedView: return .segmentedView(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
 		case .slider: return .slider(try container.decodeIfPresent(SliderViewState.self, forKey: self) ?? .init())
 		case .switch: return .switch(try container.decodeIfPresent(SwitchViewState.self, forKey: self) ?? .init())
 		case .textField: return .textField(try container.decodeIfPresent(TextFieldViewState.self, forKey: self) ?? .init())
 		case .textView: return .textView(try container.decodeIfPresent(TextViewState.self, forKey: self) ?? .init())
 		case .webView: return .webView(try container.decodeIfPresent(WebViewState.self, forKey: self) ?? .init())
-		case .segmentedView: return .segmentedView(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
 		}
 	}
 }

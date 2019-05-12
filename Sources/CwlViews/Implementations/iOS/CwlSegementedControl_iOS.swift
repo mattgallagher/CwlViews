@@ -31,7 +31,7 @@ public extension SegmentedControl {
 		case apportionsSegmentWidthsByContent(Dynamic<Bool>)
 		case backgroundImage(Dynamic<ScopedValues<StateAndMetrics, UIImage?>>)
 		case momentary(Dynamic<Bool>)
-		case segments(Dynamic<SetOrAnimate<[SegmentDescription]>>)
+		case segments(Dynamic<SetOrAnimate<ArrayMutation<SegmentDescription>>>)
 		case tintColor(Dynamic<UIColor?>)
 
 		// 2. Signal bindings are performed on the object after construction.
@@ -79,19 +79,20 @@ public extension SegmentedControl.Preparer {
 				removeOld: { i, scope, v in i.setBackgroundImage(nil, for: scope.controlState, barMetrics: scope.barMetrics) },
 				applyNew: { i, scope, v in i.setBackgroundImage(v, for: scope.controlState, barMetrics: scope.barMetrics) }
 			)
-			//return x.apply(instance) { i, v in i.setBackgroundImage(v.1, for: v.0.controlState, barMetrics: v.0.barMetrics) }
 		case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
 		case .segments(let x):
 			return x.apply(instance) { i, v in
 				i.removeAllSegments()
-				for (index, segment) in v.value.enumerated() {
-					if let image = segment.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
-					if let title = segment.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
-					if let width = segment.width { i.setWidth(width, forSegmentAt: index) }
-					if let contentOffset = segment.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
-					if let enabled = segment.enabled { i.setEnabled(enabled, forSegmentAt: index) }
-				}
-			}
+
+				v.value.insertionsAndRemovals(length: i.numberOfSegments ,
+											  insert: { index, identifier in
+												if let image = identifier.image { i.insertSegment(with: image, at: index, animated: v.isAnimated) }
+												if let title = identifier.title { i.insertSegment(withTitle: title, at: index, animated: v.isAnimated) }
+												if let width = identifier.width { i.setWidth(width, forSegmentAt: index) }
+												if let contentOffset = identifier.contentOffset { i.setContentOffset(contentOffset, forSegmentAt: index) }
+												if let enabled = identifier.enabled { i.setEnabled(enabled, forSegmentAt: index) } },
+											  remove: { index in i.removeSegment(at: index, animated: v.isAnimated)})
+		}
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
 			
 		// 2. Signal bindings are performed on the object after construction.
@@ -117,7 +118,7 @@ public extension BindingName where Binding: SegmentedControlBinding {
 	static var apportionsSegmentWidthsByContent: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.apportionsSegmentWidthsByContent) }
 	static var backgroundImage: SegmentControlName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> { return .name(SegmentedControl.Binding.backgroundImage) }
 	static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
-	static var segments: SegmentControlName<Dynamic<SetOrAnimate<[SegmentDescription]>>> { return .name(SegmentedControl.Binding.segments)}
+	static var segments: SegmentControlName<Dynamic<SetOrAnimate<ArrayMutation<SegmentDescription>>>> { return .name(SegmentedControl.Binding.segments)}
 	static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
 	
 	static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}

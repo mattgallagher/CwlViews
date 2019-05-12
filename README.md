@@ -40,7 +40,9 @@ Adding the "CwlViews.xcodeproj" file to your project's file tree will also add a
 
 Add the following line to your Cartfile:
 
-    git "https://github.com/mattgallagher/CwlViews.git" "master"
+```
+git "https://github.com/mattgallagher/CwlViews.git" "master"
+```
 
 Follow the remaining steps that Carthage requires to fetch and build dependencies. You will need to add the "CwlViews.framework", "CwlSignal.framework" and "CwlUtils.framework" to the copy frameworks phase of your target.
 
@@ -48,7 +50,8 @@ Follow the remaining steps that Carthage requires to fetch and build dependencie
 
 Add the following lines to your target in your "Podfile":
 
-    pod 'CwlViews', '~> 0.1.0'
-    pod 'CwlSignal', '~> 2.2.0'
-    pod 'CwlUtils', '~> 2.2.0'
-
+```ruby
+pod 'CwlViews', '~> 0.1.0'
+pod 'CwlSignal', '~> 2.2.0'
+pod 'CwlUtils', '~> 2.2.0'
+```

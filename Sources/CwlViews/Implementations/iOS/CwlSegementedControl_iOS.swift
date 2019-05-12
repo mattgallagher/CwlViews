@@ -30,9 +30,12 @@ public extension SegmentedControl {
 		/* case someProperty(Dynamic<PropertyType>) */
 		case apportionsSegmentWidthsByContent(Dynamic<Bool>)
 		case backgroundImage(Dynamic<ScopedValues<StateAndMetrics, UIImage?>>)
+		case contentPositionAdjustment(Dynamic<ScopedValues<SegmentTypeAndMetrics, UIOffset>>)
+		case dividerImage(Dynamic<ScopedValues<LeftRightControlStateAndMetrics, UIImage?>>)
 		case momentary(Dynamic<Bool>)
 		case segments(Dynamic<SetOrAnimate<ArrayMutation<SegmentDescription>>>)
 		case tintColor(Dynamic<UIColor?>)
+		case titleTextAttributes(Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]?>>)
 
 		// 2. Signal bindings are performed on the object after construction.
 		/* case someFunction(Signal<FunctionParametersAsTuple>) */
@@ -79,6 +82,18 @@ public extension SegmentedControl.Preparer {
 				removeOld: { i, scope, v in i.setBackgroundImage(nil, for: scope.controlState, barMetrics: scope.barMetrics) },
 				applyNew: { i, scope, v in i.setBackgroundImage(v, for: scope.controlState, barMetrics: scope.barMetrics) }
 			)
+		case .contentPositionAdjustment(let x):
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setContentPositionAdjustment(UIOffset(), forSegmentType: scope.segmentType, barMetrics: scope.barMetrics) },
+				applyNew: { i, scope, v in i.setContentPositionAdjustment(v, forSegmentType: scope.segmentType, barMetrics: scope.barMetrics) }
+			)
+		case .dividerImage(let x):
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setDividerImage(nil, forLeftSegmentState: scope.leftSegmentState, rightSegmentState: scope.rightSegmentState, barMetrics: scope.barMetrics) },
+				applyNew: { i, scope, v in i.setDividerImage(v, forLeftSegmentState: scope.leftSegmentState, rightSegmentState: scope.rightSegmentState, barMetrics: scope.barMetrics) }
+			)
 		case .momentary(let x): return x.apply(instance) { i, v in i.isMomentary = v }
 		case .segments(let x):
 			return x.apply(instance) { i, v in
@@ -94,7 +109,12 @@ public extension SegmentedControl.Preparer {
 											  remove: { index in i.removeSegment(at: index, animated: v.isAnimated)})
 		}
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
-			
+		case .titleTextAttributes(let x):
+			return x.apply(
+				instance: instance,
+				removeOld: { i, scope, v in i.setTitleTextAttributes([:], for: scope) },
+				applyNew:  { i, scope, v in i.setTitleTextAttributes(v, for: scope) }
+			)
 		// 2. Signal bindings are performed on the object after construction.
 		case .selectItem(let x): return x.apply(instance) { i, v in i.selectedSegmentIndex = v }
 		
@@ -117,9 +137,13 @@ extension BindingName where Binding: SegmentedControlBinding {
 public extension BindingName where Binding: SegmentedControlBinding {
 	static var apportionsSegmentWidthsByContent: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.apportionsSegmentWidthsByContent) }
 	static var backgroundImage: SegmentControlName<Dynamic<ScopedValues<StateAndMetrics, UIImage?>>> { return .name(SegmentedControl.Binding.backgroundImage) }
+	static var contentPositionAdjustment: SegmentControlName<Dynamic<ScopedValues<SegmentTypeAndMetrics, UIOffset
+		>>> { return .name(SegmentedControl.Binding.contentPositionAdjustment) }
+	static var dividerImage: SegmentControlName<Dynamic<ScopedValues<LeftRightControlStateAndMetrics, UIImage?>>> { return .name(SegmentedControl.Binding.dividerImage) }
 	static var momentary: SegmentControlName<Dynamic<Bool>> { return .name(SegmentedControl.Binding.momentary)}
 	static var segments: SegmentControlName<Dynamic<SetOrAnimate<ArrayMutation<SegmentDescription>>>> { return .name(SegmentedControl.Binding.segments)}
 	static var tintColor: SegmentControlName<Dynamic<UIColor?>> { return .name(SegmentedControl.Binding.tintColor)}
+	static var titleTextAttributes: SegmentControlName<Dynamic<ScopedValues<UIControl.State, [NSAttributedString.Key: Any]?>>> { return .name(SegmentedControl.Binding.titleTextAttributes) }
 	
 	static var selectItem: SegmentControlName<Signal<Int>> { return .name(SegmentedControl.Binding.selectItem)}
 }
@@ -207,6 +231,47 @@ public struct SegmentDescription {
 		self.enabled = enabled
 	}
 }
+
+public struct SegmentTypeAndMetrics {
+	public let segmentType: UISegmentedControl.Segment
+	public let barMetrics: UIBarMetrics
+	public init(segmentType: UISegmentedControl.Segment = .any, metrics: UIBarMetrics = .default) {
+		self.segmentType = segmentType
+		self.barMetrics = metrics
+	}
+}
+
+public struct LeftRightControlStateAndMetrics {
+	public let leftSegmentState: UIControl.State
+	public let rightSegmentState: UIControl.State
+	public let barMetrics: UIBarMetrics
+	public init(leftState: UIControl.State = .normal,
+				rightState: UIControl.State,
+				metrics: UIBarMetrics = .default) {
+		self.leftSegmentState = leftState
+		self.rightSegmentState = rightState
+		self.barMetrics = metrics
+	}
+}
+
+extension ScopedValues where Scope == SegmentTypeAndMetrics {
+	public static func any(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
+		return .value(value, for: SegmentTypeAndMetrics(segmentType: .any, metrics: metrics))
+	}
+	public static func left(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
+		return .value(value, for: SegmentTypeAndMetrics(segmentType: .left, metrics: metrics))
+	}
+	public static func center(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
+		return .value(value, for: SegmentTypeAndMetrics(segmentType: .center, metrics: metrics))
+	}
+	public static func right(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
+		return .value(value, for: SegmentTypeAndMetrics(segmentType: .right, metrics: metrics))
+	}
+	public static func alone(metrics: UIBarMetrics = .default, _ value: Value) -> ScopedValues<Scope, Value> {
+		return .value(value, for: SegmentTypeAndMetrics(segmentType: .alone, metrics: metrics))
+	}
+}
+
 #endif
 
 // MARK: - Binder Part 10: Test support

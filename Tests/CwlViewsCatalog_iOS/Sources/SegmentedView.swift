@@ -34,7 +34,6 @@ func segmentedControlView(_ viewState: SegmentedViewState, _ navigationItem: Nav
 										.selectItem <-- viewState.indexValue,
 										.tintColor -- .red,
 										.action(.valueChanged, \.selectedSegmentIndex) --> viewState.indexValue.update(),
-										//.backgroundImage -- (StateAndMetrics(), .drawn(width: 512, height: 512, drawIcon)),
 										.segments -- .reload([SegmentDescription(title: "0", width: 40),
 													  SegmentDescription(title: "1", width: 40),
 													  SegmentDescription(title: "2", width: 40, enabled: false),

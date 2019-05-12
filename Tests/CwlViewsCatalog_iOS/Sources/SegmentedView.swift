@@ -33,6 +33,8 @@ func segmentedControlView(_ viewState: SegmentedViewState, _ navigationItem: Nav
 										.momentary -- false,
 										.selectItem <-- viewState.indexValue,
 										.tintColor -- .red,
+										.contentPositionAdjustment -- .right(UIOffset(horizontal: 5, vertical: 5)),
+										.dividerImage -- .value(.drawn(width: 10, height: 10) { $0.fillEllipse(in: $1) }, for: LeftRightControlStateAndMetrics()),
 										.action(.valueChanged, \.selectedSegmentIndex) --> viewState.indexValue.update(),
 										.segments -- .reload([SegmentDescription(title: "0", width: 40),
 													  SegmentDescription(title: "1", width: 40),

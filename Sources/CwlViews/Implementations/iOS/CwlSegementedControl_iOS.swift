@@ -246,7 +246,7 @@ public struct LeftRightControlStateAndMetrics {
 	public let rightSegmentState: UIControl.State
 	public let barMetrics: UIBarMetrics
 	public init(leftState: UIControl.State = .normal,
-				rightState: UIControl.State,
+				rightState: UIControl.State = .normal,
 				metrics: UIBarMetrics = .default) {
 		self.leftSegmentState = leftState
 		self.rightSegmentState = rightState

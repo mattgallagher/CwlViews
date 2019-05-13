@@ -5,6 +5,17 @@
 //  Created by Matt Gallagher on 9/2/19.
 //  Copyright © 2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
+//  Permission to use, copy, modify, and/or distribute this software for any purpose with or without
+//  fee is hereby granted, provided that the above copyright notice and this permission notice
+//  appear in all copies.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+//  SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+//  AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+//  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+//  NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+//  OF THIS SOFTWARE.
+//
 
 import CwlViews
 
@@ -19,6 +30,7 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case navigationBar(NavigationBarViewState)
 	case pageViewController(PageViewState)
 	case searchBar(SearchBarViewState)
+	case segmentedControl(SegmentedViewState)
 	case slider(SliderViewState)
 	case `switch`(SwitchViewState)
 	case textField(TextFieldViewState)
@@ -55,6 +67,7 @@ extension CatalogViewState {
 		case navigationBar
 		case pageViewController
 		case searchBar
+		case segmentedControl
 		case slider
 		case `switch`
 		case textField
@@ -76,6 +89,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .navigationBar: return NSLocalizedString("NavigationBar", comment: "")
 		case .pageViewController: return NSLocalizedString("PageViewController", comment: "")
 		case .searchBar: return NSLocalizedString("SearchBar", comment: "")
+		case .segmentedControl: return NSLocalizedString("SegmentedControl", comment: "")
 		case .slider: return NSLocalizedString("Slider", comment: "")
 		case .`switch`: return NSLocalizedString("Switch", comment: "")
 		case .textField: return NSLocalizedString("TextField", comment: "")
@@ -100,6 +114,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .navigationBar: return .navigationBar(try container.decodeIfPresent(NavigationBarViewState.self, forKey: self) ?? .init())
 		case .pageViewController: return .pageViewController(try container.decodeIfPresent(PageViewState.self, forKey: self) ?? .init())
 		case .searchBar: return .searchBar(try container.decodeIfPresent(SearchBarViewState.self, forKey: self) ?? .init())
+		case .segmentedControl: return .segmentedControl(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
 		case .slider: return .slider(try container.decodeIfPresent(SliderViewState.self, forKey: self) ?? .init())
 		case .switch: return .switch(try container.decodeIfPresent(SwitchViewState.self, forKey: self) ?? .init())
 		case .textField: return .textField(try container.decodeIfPresent(TextFieldViewState.self, forKey: self) ?? .init())

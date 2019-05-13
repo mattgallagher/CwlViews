@@ -46,7 +46,7 @@ public extension SegmentedControl {
 
 		// 2. Signal bindings are performed on the object after construction.
 		case selectItem(Signal<Int>)
-        
+		
 		// 3. Action bindings are triggered by the object after construction.
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.

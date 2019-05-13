@@ -32,6 +32,7 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case searchBar(SearchBarViewState)
 	case segmentedControl(SegmentedViewState)
 	case slider(SliderViewState)
+	case stepper(StepperViewState)
 	case `switch`(SwitchViewState)
 	case textField(TextFieldViewState)
 	case textView(TextViewState)
@@ -69,6 +70,7 @@ extension CatalogViewState {
 		case searchBar
 		case segmentedControl
 		case slider
+		case stepper
 		case `switch`
 		case textField
 		case textView
@@ -91,6 +93,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .searchBar: return NSLocalizedString("SearchBar", comment: "")
 		case .segmentedControl: return NSLocalizedString("SegmentedControl", comment: "")
 		case .slider: return NSLocalizedString("Slider", comment: "")
+		case .stepper: return NSLocalizedString("Stepper", comment: "")
 		case .`switch`: return NSLocalizedString("Switch", comment: "")
 		case .textField: return NSLocalizedString("TextField", comment: "")
 		case .textView: return NSLocalizedString("TextView", comment: "")
@@ -117,6 +120,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .segmentedControl: return .segmentedControl(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
 		case .slider: return .slider(try container.decodeIfPresent(SliderViewState.self, forKey: self) ?? .init())
 		case .switch: return .switch(try container.decodeIfPresent(SwitchViewState.self, forKey: self) ?? .init())
+		case .stepper: return .stepper(try container.decodeIfPresent(StepperViewState.self, forKey: self) ?? .init())
 		case .textField: return .textField(try container.decodeIfPresent(TextFieldViewState.self, forKey: self) ?? .init())
 		case .textView: return .textView(try container.decodeIfPresent(TextViewState.self, forKey: self) ?? .init())
 		case .webView: return .webView(try container.decodeIfPresent(WebViewState.self, forKey: self) ?? .init())

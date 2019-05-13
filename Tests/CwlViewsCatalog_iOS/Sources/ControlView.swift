@@ -30,7 +30,8 @@ func controlView(_ controlViewState: ControlViewState, _ navigationItem: Navigat
 						.backgroundColor -- .orange,
 						.layer -- Layer(.borderWidth -- 2, .borderColor -- UIColor.brown.cgColor, .cornerRadius -- 8),
 						.action(.touchDown) --> Input().map { .touchDownEvent }.bind(to: controlViewState.lastEvent),
-						.action(.touchUpInside) --> Input().map { .touchUpEvent }.bind(to: controlViewState.lastEvent)
+						.action(.touchUpInside) --> Input().map { .touchUpEvent }.bind(to: controlViewState.lastEvent),
+						.action(.touchDragInside) --> Input().map { .touchDragEvent }.bind(to:controlViewState.lastEvent)
 					)
 				)
 			)
@@ -42,4 +43,5 @@ private extension String {
 	static let noEvent = NSLocalizedString("No actions emitted", comment: "")
 	static let touchDownEvent = NSLocalizedString("TouchDown emitted", comment: "")
 	static let touchUpEvent = NSLocalizedString("TouchUp emitted", comment: "")
+	static let touchDragEvent = NSLocalizedString("Touch drag emitted", comment: "")
 }

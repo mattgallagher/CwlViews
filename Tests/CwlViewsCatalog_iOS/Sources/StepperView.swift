@@ -43,6 +43,9 @@ func stepperlView(_ viewState: StepperViewState, _ navigationItem: NavigationIte
 						Stepper(
 							.minimumValue -- 0.0,
 							.maximumValue -- 100.0,
+							.isContinuous -- true,
+							.stepValue -- 1.5,
+							.tintColor -- .purple,
 							.decrementImage -- .normal(.drawn(width: 10, height: 10) { $0.fillEllipse(in: $1) }),
 							.incrementImage -- .normal(.drawn(width: 10, height: 10) { $0.fill($1) }),
 							.action(.valueChanged, \.value) --> viewState.value)

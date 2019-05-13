@@ -108,7 +108,7 @@ public extension Stepper.Preparer {
 		case .stepValue(let x): return x.apply(instance) { i, v in i.stepValue = v }
 		case .tintColor(let x): return x.apply(instance) { i, v in i.tintColor = v }
 		case .value(let x): return x.apply(instance) { i, v in i.value = v }
-		case .wraps(let x): return x.apply(instance) { i, v in i.wraps = v}
+		case .wraps(let x): return x.apply(instance) { i, v in i.wraps = v }
 		}
 	}
 }
@@ -121,7 +121,7 @@ extension Stepper.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: StepperBinding {
 	public typealias StepperName<V> = BindingName<V, Stepper.Binding, Binding>
-			private static func name<V>(_ source: @escaping (V) -> Stepper.Binding) -> StepperName<V> {
+	private static func name<V>(_ source: @escaping (V) -> Stepper.Binding) -> StepperName<V> {
 		return StepperName<V>(source: source, downcast: Binding.stepperBinding)
 	}
 }

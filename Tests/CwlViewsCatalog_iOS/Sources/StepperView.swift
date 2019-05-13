@@ -49,11 +49,11 @@ func stepperlView(_ viewState: StepperViewState, _ navigationItem: NavigationIte
 							.decrementImage -- .normal(.drawn(width: 10, height: 10) { $0.fillEllipse(in: $1) }),
 							.incrementImage -- .normal(.drawn(width: 10, height: 10) { $0.fill($1) }),
 							.value <-- viewState.value,
-							.action(.valueChanged, \.value) --> viewState.value.update())
+							.action(.valueChanged, \.value) --> viewState.value.update()
+						)
 					)
 				)
 			)
 		)
 	)
 }
-

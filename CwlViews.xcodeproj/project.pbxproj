@@ -24,6 +24,7 @@
 /* Begin PBXBuildFile section */
 		26B761EE2289C57F002823A6 /* CwlStepper_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761ED2289C57F002823A6 /* CwlStepper_iOS.swift */; };
 		26B761F42289D037002823A6 /* StepperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761F32289D036002823A6 /* StepperView.swift */; };
+		26B761F62289DA6C002823A6 /* CwlStepperTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */; };
 		26E80D2F22843EB000FC848C /* CwlSegmentedControl_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D2E22843EB000FC848C /* CwlSegmentedControl_iOS.swift */; };
 		26E80D31228447E700FC848C /* SegmentedControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E80D30228447E700FC848C /* SegmentedControlView.swift */; };
 		C9033CC221EB5C220077245D /* CwlAdapterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9033CC121EB5C220077245D /* CwlAdapterState.swift */; };
@@ -347,6 +348,7 @@
 /* Begin PBXFileReference section */
 		26B761ED2289C57F002823A6 /* CwlStepper_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStepper_iOS.swift; sourceTree = "<group>"; };
 		26B761F32289D036002823A6 /* StepperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
+		26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStepperTesting_iOS.swift; sourceTree = "<group>"; };
 		26E80D2E22843EB000FC848C /* CwlSegmentedControl_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSegmentedControl_iOS.swift; sourceTree = "<group>"; };
 		26E80D30228447E700FC848C /* SegmentedControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedControlView.swift; sourceTree = "<group>"; };
 		C9033CC121EB5C220077245D /* CwlAdapterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlAdapterState.swift; sourceTree = "<group>"; };
@@ -1142,6 +1144,7 @@
 				C97D4D4422899D8D003B788B /* CwlSegmentedControlTesting_iOS.swift */,
 				C918FD04226B2A9B002C6308 /* CwlSliderTesting_iOS.swift */,
 				C918FD09226B2A9B002C6308 /* CwlSplitViewControllerTesting_iOS.swift */,
+				26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */,
 				C918FD2A226B2A9F002C6308 /* CwlSwipeGestureRecognizerTesting_iOS.swift */,
 				C918FD13226B2A9D002C6308 /* CwlSwitchTesting_iOS.swift */,
 				C918FD1F226B2A9E002C6308 /* CwlTabBarControllerTesting_iOS.swift */,
@@ -1837,6 +1840,7 @@
 				C918FD2C226B2A9F002C6308 /* CwlSliderTesting_iOS.swift in Sources */,
 				C918FD9C226B51E8002C6308 /* CwlControlTesting_macOS.swift in Sources */,
 				C918FD9E226B51E8002C6308 /* CwlTabViewItemTesting_macOS.swift in Sources */,
+				26B761F62289DA6C002823A6 /* CwlStepperTesting_iOS.swift in Sources */,
 				C918FD3D226B2A9F002C6308 /* CwlPageViewControllerTesting_iOS.swift in Sources */,
 				C918FD3E226B2A9F002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift in Sources */,
 				C97D4D4522899D8D003B788B /* CwlSegmentedControlTesting_iOS.swift in Sources */,

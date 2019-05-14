@@ -35,13 +35,13 @@ public extension ProgressView {
 		// 0. Static bindings are applied at construction and are subsequently immutable.
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
-        case progress(Dynamic<SetOrAnimate<Float>>)
-        case observedProgress(Dynamic<Progress?>)
-        case progressViewStyle(Dynamic<UIProgressView.Style>)
-        case progressTintColor(Dynamic<UIColor?>)
-        case progressImage(Dynamic<UIImage?>)
-        case trackTintColor(Dynamic<UIColor?>)
-        case trackImage(Dynamic<UIImage?>)
+		case progress(Dynamic<SetOrAnimate<Float>>)
+		case observedProgress(Dynamic<Progress?>)
+		case progressViewStyle(Dynamic<UIProgressView.Style>)
+		case progressTintColor(Dynamic<UIColor?>)
+		case progressImage(Dynamic<UIImage?>)
+		case trackTintColor(Dynamic<UIColor?>)
+		case trackImage(Dynamic<UIImage?>)
 
 		// 2. Signal bindings are performed on the object after construction.
 
@@ -72,13 +72,13 @@ public extension ProgressView.Preparer {
 	func applyBinding(_ binding: Binding, instance: Instance, storage: Storage) -> Lifetime? {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
-        case .progress(let x): return x.apply(instance) { i, v in i.setProgress(v.value, animated: v.isAnimated) }
-        case .observedProgress(let x): return x.apply(instance) { i, v in i.observedProgress = v}
-        case .progressViewStyle(let x): return x.apply(instance) { i, v in i.progressViewStyle = v }
-        case .progressTintColor(let x): return x.apply(instance) { i, v in i.progressTintColor = v }
-        case .progressImage(let x): return x.apply(instance) { i, v in i.progressImage = v }
-        case .trackTintColor(let x): return x.apply(instance) { i, v in i.trackTintColor = v }
-        case .trackImage(let x): return x.apply(instance) { i, v in i.trackImage = v }
+		case .progress(let x): return x.apply(instance) { i, v in i.setProgress(v.value, animated: v.isAnimated) }
+		case .observedProgress(let x): return x.apply(instance) { i, v in i.observedProgress = v}
+		case .progressViewStyle(let x): return x.apply(instance) { i, v in i.progressViewStyle = v }
+		case .progressTintColor(let x): return x.apply(instance) { i, v in i.progressTintColor = v }
+		case .progressImage(let x): return x.apply(instance) { i, v in i.progressImage = v }
+		case .trackTintColor(let x): return x.apply(instance) { i, v in i.trackTintColor = v }
+		case .trackImage(let x): return x.apply(instance) { i, v in i.trackImage = v }
         }
 	}
 }
@@ -96,13 +96,13 @@ extension BindingName where Binding: ProgressViewBinding {
 	}
 }
 public extension BindingName where Binding: ProgressViewBinding {
-    static var progress: ProgressViewName<Dynamic<SetOrAnimate<Float>>> { return .name(ProgressView.Binding.progress) }
-    static var observedProgress: ProgressViewName<Dynamic<Progress?>> { return .name(ProgressView.Binding.observedProgress) }
-    static var progressViewStyle: ProgressViewName<Dynamic<UIProgressView.Style>> { return .name(ProgressView.Binding.progressViewStyle) }
-    static var progressTintColor: ProgressViewName<Dynamic<UIColor?>> { return .name(ProgressView.Binding.progressTintColor) }
-    static var progressImage: ProgressViewName<Dynamic<UIImage?>> { return .name(ProgressView.Binding.progressImage) }
-    static var trackTintColor: ProgressViewName<Dynamic<UIColor?>> { return .name(ProgressView.Binding.trackTintColor) }
-    static var trackImage: ProgressViewName<Dynamic<UIImage?>> { return .name(ProgressView.Binding.trackImage) }
+	static var progress: ProgressViewName<Dynamic<SetOrAnimate<Float>>> { return .name(ProgressView.Binding.progress) }
+	static var observedProgress: ProgressViewName<Dynamic<Progress?>> { return .name(ProgressView.Binding.observedProgress) }
+	static var progressViewStyle: ProgressViewName<Dynamic<UIProgressView.Style>> { return .name(ProgressView.Binding.progressViewStyle) }
+	static var progressTintColor: ProgressViewName<Dynamic<UIColor?>> { return .name(ProgressView.Binding.progressTintColor) }
+	static var progressImage: ProgressViewName<Dynamic<UIImage?>> { return .name(ProgressView.Binding.progressImage) }
+	static var trackTintColor: ProgressViewName<Dynamic<UIColor?>> { return .name(ProgressView.Binding.trackTintColor) }
+	static var trackImage: ProgressViewName<Dynamic<UIImage?>> { return .name(ProgressView.Binding.trackImage) }
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

@@ -20,23 +20,23 @@
 #if os(iOS)
 
 extension BindingParser where Downcast: ProgressViewBinding {
-    
-    //    0. Static bindings are applied at construction and are subsequently immutable.
 
-    // 1. Value bindings may be applied at construction and may subsequently change.
-    public static var progress: BindingParser<Dynamic<SetOrAnimate<Float>>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progress(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
-    public static var observedProgress: BindingParser<Dynamic<Progress?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .observedProgress(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
-    public static var progressViewStyle: BindingParser<Dynamic<UIProgressView.Style>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progressViewStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
-    public static var progressTintColor: BindingParser<Dynamic<UIColor?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progressTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
-    public static var progressImage: BindingParser<Dynamic<UIImage?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progressImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
-    public static var trackTintColor: BindingParser<Dynamic<UIColor?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .trackTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
-    public static var trackImage: BindingParser<Dynamic<UIImage?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .trackImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	//    0. Static bindings are applied at construction and are subsequently immutable.
 
-    // 2. Signal bindings are performed on the object after construction.
+	// 1. Value bindings may be applied at construction and may subsequently change.
+	public static var progress: BindingParser<Dynamic<SetOrAnimate<Float>>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progress(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	public static var observedProgress: BindingParser<Dynamic<Progress?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .observedProgress(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	public static var progressViewStyle: BindingParser<Dynamic<UIProgressView.Style>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progressViewStyle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	public static var progressTintColor: BindingParser<Dynamic<UIColor?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progressTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	public static var progressImage: BindingParser<Dynamic<UIImage?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .progressImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	public static var trackTintColor: BindingParser<Dynamic<UIColor?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .trackTintColor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
+	public static var trackImage: BindingParser<Dynamic<UIImage?>, ProgressView.Binding, Downcast> { return .init(extract: { if case .trackImage(let x) = $0 { return x } else { return nil } }, upcast: { $0.asProgressViewBinding() }) }
 
-    // 3. Action bindings are triggered by the object after construction.
+	// 2. Signal bindings are performed on the object after construction.
 
-    // 4. Delegate bindings require synchronous evaluation within the object's context.
+	// 3. Action bindings are triggered by the object after construction.
+
+	// 4. Delegate bindings require synchronous evaluation within the object's context.
 }
 
 #endif

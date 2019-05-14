@@ -87,7 +87,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .barButton: return NSLocalizedString("BarButton", comment: "")
 		case .button: return NSLocalizedString("Button", comment: "")
 		case .control: return NSLocalizedString("Control", comment: "")
-		case .datePicker: return NSLocalizedString("Date Picker", comment: "")
+		case .datePicker: return NSLocalizedString("DatePicker", comment: "")
 		case .gestureRecognizer: return NSLocalizedString("GestureRecognizer", comment: "")
 		case .imageView: return NSLocalizedString("ImageView", comment: "")
 		case .layers: return NSLocalizedString("Layers", comment: "")

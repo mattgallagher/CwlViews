@@ -22,6 +22,9 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		2633589C228AB84600A667FB /* CwlDatePicker_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633589B228AB84600A667FB /* CwlDatePicker_iOS.swift */; };
+		263358A2228ABDDD00A667FB /* DatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263358A1228ABDDD00A667FB /* DatePickerView.swift */; };
+		263358A5228AD00000A667FB /* CwlDatePickerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263358A3228ACFFA00A667FB /* CwlDatePickerTesting_iOS.swift */; };
 		26B761EE2289C57F002823A6 /* CwlStepper_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761ED2289C57F002823A6 /* CwlStepper_iOS.swift */; };
 		26B761F42289D037002823A6 /* StepperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761F32289D036002823A6 /* StepperView.swift */; };
 		26B761F62289DA6C002823A6 /* CwlStepperTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */; };
@@ -346,6 +349,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2633589B228AB84600A667FB /* CwlDatePicker_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlDatePicker_iOS.swift; sourceTree = "<group>"; };
+		263358A1228ABDDD00A667FB /* DatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerView.swift; sourceTree = "<group>"; };
+		263358A3228ACFFA00A667FB /* CwlDatePickerTesting_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlDatePickerTesting_iOS.swift; sourceTree = "<group>"; };
 		26B761ED2289C57F002823A6 /* CwlStepper_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStepper_iOS.swift; sourceTree = "<group>"; };
 		26B761F32289D036002823A6 /* StepperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
 		26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStepperTesting_iOS.swift; sourceTree = "<group>"; };
@@ -1063,6 +1069,7 @@
 				C95A62261EA59F560059D152 /* CwlBarItem_iOS.swift */,
 				C9A18B331E82BCCD00ADDCD4 /* CwlButton_iOS.swift */,
 				C9A18B311E827F9D00ADDCD4 /* CwlControl_iOS.swift */,
+				2633589B228AB84600A667FB /* CwlDatePicker_iOS.swift */,
 				C9F0AC78223731E30051DD43 /* CwlExtendedViewController_iOS.swift */,
 				C940A3B51E877CBD001F1310 /* CwlGestureRecognizer_iOS.swift */,
 				C978CCF41E8747BE00A0BF05 /* CwlImageView_iOS.swift */,
@@ -1125,6 +1132,7 @@
 				C918FD18226B2A9D002C6308 /* CwlBarItemTesting_iOS.swift */,
 				C918FD29226B2A9F002C6308 /* CwlButtonTesting_iOS.swift */,
 				C918FD0C226B2A9C002C6308 /* CwlControlTesting_iOS.swift */,
+				263358A3228ACFFA00A667FB /* CwlDatePickerTesting_iOS.swift */,
 				C918FD1E226B2A9E002C6308 /* CwlExtendedViewControllerTesting_iOS.swift */,
 				C918FD1D226B2A9E002C6308 /* CwlGestureRecognizerTesting_iOS.swift */,
 				C918FD23226B2A9E002C6308 /* CwlImageViewTesting_iOS.swift */,
@@ -1181,6 +1189,7 @@
 				C9BFDF52220FFA38005F4009 /* ButtonView.swift */,
 				C93E06D4220E76D30028DCB2 /* CatalogTable.swift */,
 				C9BFDF5B220FFA4F005F4009 /* ControlView.swift */,
+				263358A1228ABDDD00A667FB /* DatePickerView.swift */,
 				C9BFDF5D220FFB1C005F4009 /* GestureRecognizerView.swift */,
 				C9BFDF5F220FFB2A005F4009 /* ImageView.swift */,
 				C9C30215222529D8005B0FCD /* LayersView.swift */,
@@ -1744,6 +1753,7 @@
 				C9B0D12522225A7B00D2FB42 /* CwlTableView_macOS.swift in Sources */,
 				C95FABC621D4A1C6007CCE78 /* CwlLayer.swift in Sources */,
 				C90BAE96223917A90043948A /* CwlSplitView_macOS.swift in Sources */,
+				2633589C228AB84600A667FB /* CwlDatePicker_iOS.swift in Sources */,
 				C97B16ED21DC429C00F72DB9 /* CwlTextInputTraits_iOS.swift in Sources */,
 				C97A5B5521D59656001D98DD /* CwlWebView.swift in Sources */,
 				C99E96392237C4E8003FD574 /* CwlExtendedView.swift in Sources */,
@@ -1777,6 +1787,7 @@
 				C918FD30226B2A9F002C6308 /* CwlLongPressGestureRecognizerTesting_iOS.swift in Sources */,
 				C9B705FA2068758F00B4CD29 /* CwlBindingParser.swift in Sources */,
 				C918FD32226B2A9F002C6308 /* CwlPageControl.swift in Sources */,
+				263358A5228AD00000A667FB /* CwlDatePickerTesting_iOS.swift in Sources */,
 				C918FD9D226B51E8002C6308 /* CwlPanGestureRecognizerTesting_macOS.swift in Sources */,
 				C918FD3B226B2A9F002C6308 /* CwlSwitchTesting_iOS.swift in Sources */,
 				C918FD8B226B51E8002C6308 /* CwlSliderTesting_macOS.swift in Sources */,
@@ -1880,6 +1891,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C93C7E33220F0534000484E4 /* AlertView.swift in Sources */,
+				263358A2228ABDDD00A667FB /* DatePickerView.swift in Sources */,
 				C9C30216222529D8005B0FCD /* LayersView.swift in Sources */,
 				C9A715A8220FDED100A05C44 /* AboutTab.swift in Sources */,
 				C9BFDF62220FFB46005F4009 /* NavigationBarView.swift in Sources */,

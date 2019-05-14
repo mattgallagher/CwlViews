@@ -24,6 +24,7 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case barButton(BarButtonViewState)
 	case button(ButtonViewState)
 	case control(ControlViewState)
+	case datePicker(DatePickerViewState)
 	case gestureRecognizer(GestureRecognizerViewState)
 	case imageView(ImageViewState)
 	case layers(LayersViewState)
@@ -62,6 +63,7 @@ extension CatalogViewState {
 		case barButton
 		case button
 		case control
+		case datePicker
 		case gestureRecognizer
 		case imageView
 		case layers
@@ -85,6 +87,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .barButton: return NSLocalizedString("BarButton", comment: "")
 		case .button: return NSLocalizedString("Button", comment: "")
 		case .control: return NSLocalizedString("Control", comment: "")
+		case .datePicker: return NSLocalizedString("Date Picker", comment: "")
 		case .gestureRecognizer: return NSLocalizedString("GestureRecognizer", comment: "")
 		case .imageView: return NSLocalizedString("ImageView", comment: "")
 		case .layers: return NSLocalizedString("Layers", comment: "")
@@ -111,6 +114,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .barButton: return .barButton(try container.decodeIfPresent(BarButtonViewState.self, forKey: self) ?? .init())
 		case .button: return .button(try container.decodeIfPresent(ButtonViewState.self, forKey: self) ?? .init())
 		case .control: return .control(try container.decodeIfPresent(ControlViewState.self, forKey: self) ?? .init())
+		case .datePicker: return .datePicker(try container.decodeIfPresent(DatePickerViewState.self, forKey: self) ?? .init())
 		case .gestureRecognizer: return .gestureRecognizer(try container.decodeIfPresent(GestureRecognizerViewState.self, forKey: self) ?? .init())
 		case .imageView: return .imageView(try container.decodeIfPresent(ImageViewState.self, forKey: self) ?? .init())
 		case .layers: return .layers(try container.decodeIfPresent(LayersViewState.self, forKey: self) ?? .init())

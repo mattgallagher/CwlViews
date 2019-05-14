@@ -29,6 +29,7 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case layers(LayersViewState)
 	case navigationBar(NavigationBarViewState)
 	case pageViewController(PageViewState)
+    case progressView(ProgressViewState)
 	case searchBar(SearchBarViewState)
 	case segmentedControl(SegmentedViewState)
 	case slider(SliderViewState)
@@ -67,6 +68,7 @@ extension CatalogViewState {
 		case layers
 		case navigationBar
 		case pageViewController
+        case progressView
 		case searchBar
 		case segmentedControl
 		case slider
@@ -90,6 +92,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .layers: return NSLocalizedString("Layers", comment: "")
 		case .navigationBar: return NSLocalizedString("NavigationBar", comment: "")
 		case .pageViewController: return NSLocalizedString("PageViewController", comment: "")
+        case .progressView: return NSLocalizedString("ProgressView", comment: "")
 		case .searchBar: return NSLocalizedString("SearchBar", comment: "")
 		case .segmentedControl: return NSLocalizedString("SegmentedControl", comment: "")
 		case .slider: return NSLocalizedString("Slider", comment: "")
@@ -116,6 +119,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .layers: return .layers(try container.decodeIfPresent(LayersViewState.self, forKey: self) ?? .init())
 		case .navigationBar: return .navigationBar(try container.decodeIfPresent(NavigationBarViewState.self, forKey: self) ?? .init())
 		case .pageViewController: return .pageViewController(try container.decodeIfPresent(PageViewState.self, forKey: self) ?? .init())
+        case .progressView: return .progressView(try container.decodeIfPresent(ProgressViewState.self, forKey: self) ?? .init())
 		case .searchBar: return .searchBar(try container.decodeIfPresent(SearchBarViewState.self, forKey: self) ?? .init())
 		case .segmentedControl: return .segmentedControl(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
 		case .slider: return .slider(try container.decodeIfPresent(SliderViewState.self, forKey: self) ?? .init())

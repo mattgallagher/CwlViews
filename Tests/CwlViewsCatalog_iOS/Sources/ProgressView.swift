@@ -26,8 +26,6 @@ struct ProgressViewState: CodableContainer {
 }
 
 private class ProgressGenerator {
-    static let shared = ProgressGenerator()
-
     private var displayLink: CADisplayLink!
     private var ticker: Float
 
@@ -62,7 +60,7 @@ func progressView(_ viewState: ProgressViewState, _ navigationItem: NavigationIt
                     ProgressView(
                         .trackTintColor -- .green,
                         .progressImage -- .drawn(width: 10, height: 10) { $0.fillEllipse(in: $1) },
-                        .progress <-- ProgressGenerator.shared.value.map { $0 == 0 ? .set($0) : .animate($0) }
+                        .progress <-- ProgressGenerator().value.map { $0 == 0 ? .set($0) : .animate($0) }
                     )
                 )
             )

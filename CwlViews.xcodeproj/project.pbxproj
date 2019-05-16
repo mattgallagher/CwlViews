@@ -25,6 +25,9 @@
 		2633589C228AB84600A667FB /* CwlDatePicker_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633589B228AB84600A667FB /* CwlDatePicker_iOS.swift */; };
 		263358A2228ABDDD00A667FB /* DatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263358A1228ABDDD00A667FB /* DatePickerView.swift */; };
 		263358A5228AD00000A667FB /* CwlDatePickerTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263358A3228ACFFA00A667FB /* CwlDatePickerTesting_iOS.swift */; };
+		26283B5D228B1601002A9F89 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26283B5C228B1601002A9F89 /* ProgressView.swift */; };
+		26283B5F228B2ED2002A9F89 /* CwlProgressViewTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26283B5E228B2ED2002A9F89 /* CwlProgressViewTesting_iOS.swift */; };
+		263DD190228B0C3500E55451 /* CwlProgressView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263DD18F228B0C3500E55451 /* CwlProgressView_iOS.swift */; };
 		26B761EE2289C57F002823A6 /* CwlStepper_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761ED2289C57F002823A6 /* CwlStepper_iOS.swift */; };
 		26B761F42289D037002823A6 /* StepperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761F32289D036002823A6 /* StepperView.swift */; };
 		26B761F62289DA6C002823A6 /* CwlStepperTesting_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */; };
@@ -352,6 +355,9 @@
 		2633589B228AB84600A667FB /* CwlDatePicker_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlDatePicker_iOS.swift; sourceTree = "<group>"; };
 		263358A1228ABDDD00A667FB /* DatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerView.swift; sourceTree = "<group>"; };
 		263358A3228ACFFA00A667FB /* CwlDatePickerTesting_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlDatePickerTesting_iOS.swift; sourceTree = "<group>"; };
+		26283B5C228B1601002A9F89 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		26283B5E228B2ED2002A9F89 /* CwlProgressViewTesting_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlProgressViewTesting_iOS.swift; sourceTree = "<group>"; };
+		263DD18F228B0C3500E55451 /* CwlProgressView_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlProgressView_iOS.swift; sourceTree = "<group>"; };
 		26B761ED2289C57F002823A6 /* CwlStepper_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStepper_iOS.swift; sourceTree = "<group>"; };
 		26B761F32289D036002823A6 /* StepperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
 		26B761F52289DA6C002823A6 /* CwlStepperTesting_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStepperTesting_iOS.swift; sourceTree = "<group>"; };
@@ -1082,6 +1088,7 @@
 				C997F858206600B0001A7BF8 /* CwlPageViewController_iOS.swift */,
 				C940A3BF1E877DBD001F1310 /* CwlPanGestureRecognizer_iOS.swift */,
 				C940A3B91E877D55001F1310 /* CwlPinchGestureRecognizer_iOS.swift */,
+				263DD18F228B0C3500E55451 /* CwlProgressView_iOS.swift */,
 				C940A3BB1E877D74001F1310 /* CwlRotationGestureRecognizer_iOS.swift */,
 				C940A3C11E877DDA001F1310 /* CwlScreenEdgePanGestureRecognizer_iOS.swift */,
 				C940A3B31E87751B001F1310 /* CwlScrollView_iOS.swift */,
@@ -1145,6 +1152,7 @@
 				C918FD15226B2A9D002C6308 /* CwlPageViewControllerTesting_iOS.swift */,
 				C918FD10226B2A9C002C6308 /* CwlPanGestureRecognizerTesting_iOS.swift */,
 				C918FD16226B2A9D002C6308 /* CwlPinchGestureRecognizerTesting_iOS.swift */,
+				26283B5E228B2ED2002A9F89 /* CwlProgressViewTesting_iOS.swift */,
 				C918FD21226B2A9E002C6308 /* CwlRotationGestureRecognizerTesting_iOS.swift */,
 				C918FD24226B2A9F002C6308 /* CwlScreenEdgePanGestureRecognizerTesting_iOS.swift */,
 				C918FD07226B2A9B002C6308 /* CwlScrollViewTesting_iOS.swift */,
@@ -1196,6 +1204,7 @@
 				C9F9A34F21DF70F100026DC1 /* main.swift */,
 				C9BFDF61220FFB46005F4009 /* NavigationBarView.swift */,
 				C9BFDF63220FFB50005F4009 /* PageView.swift */,
+				26283B5C228B1601002A9F89 /* ProgressView.swift */,
 				C9BFDF65220FFB5D005F4009 /* SearchBarView.swift */,
 				26E80D30228447E700FC848C /* SegmentedControlView.swift */,
 				C9BFDF67220FFB69005F4009 /* SliderView.swift */,
@@ -1739,6 +1748,7 @@
 				C9A18B391E83E4A600ADDCD4 /* CwlBinderPreparer.swift in Sources */,
 				C97A5B5921D5BE8A001D98DD /* CwlMenu_macOS.swift in Sources */,
 				C9F0AC6D2236736A0051DD43 /* CwlShapeLayer.swift in Sources */,
+				263DD190228B0C3500E55451 /* CwlProgressView_iOS.swift in Sources */,
 				C985C9B521DC7CB600E8FF8B /* CwlTextField_iOS.swift in Sources */,
 				C985C9BA21DC879100E8FF8B /* CwlLabel_iOS.swift in Sources */,
 				26B761EE2289C57F002823A6 /* CwlStepper_iOS.swift in Sources */,
@@ -1809,6 +1819,7 @@
 				C918FD3F226B2A9F002C6308 /* CwlNavigationControllerTesting_iOS.swift in Sources */,
 				C918FD34226B2A9F002C6308 /* CwlControlTesting_iOS.swift in Sources */,
 				C918FD80226B51E8002C6308 /* CwlWebViewTesting.swift in Sources */,
+				26283B5F228B2ED2002A9F89 /* CwlProgressViewTesting_iOS.swift in Sources */,
 				C918FD2B226B2A9F002C6308 /* CwlSearchBarTesting_iOS.swift in Sources */,
 				C918FD44226B2A9F002C6308 /* CwlViewControllerTesting_iOS.swift in Sources */,
 				C918FD3C226B2A9F002C6308 /* CwlViewTesting_iOS.swift in Sources */,
@@ -1912,6 +1923,7 @@
 				C9BFDF66220FFB5D005F4009 /* SearchBarView.swift in Sources */,
 				C93E06D5220E76D30028DCB2 /* CatalogTable.swift in Sources */,
 				C9BFDF5C220FFA4F005F4009 /* ControlView.swift in Sources */,
+				26283B5D228B1601002A9F89 /* ProgressView.swift in Sources */,
 				C9BFDF53220FFA38005F4009 /* ButtonView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -55,6 +55,7 @@ func splitView(_ viewState: SplitViewState) -> ViewControllerConvertible {
 				case .layers(let state)?: return layersView(state, navigationItem)
 				case .navigationBar(let state)?: return navigationView(state, navigationItem)
 				case .pageViewController(let state)?: return pageView(state, navigationItem)
+				case .progressView(let state)?: return progressView(state, navigationItem)
 				case .searchBar(let state)?: return searchBarView(state, navigationItem)
 				case .segmentedControl(let state)?: return segmentedControlView(state, navigationItem)
 				case .slider(let state)?: return sliderView(state, navigationItem)

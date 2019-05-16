@@ -1,5 +1,5 @@
 //
-//  DatePickerView.swift
+//  ProgressView.swift
 //  CwlViewsCatalog_iOS
 //
 //  Created by Sye Boddeus on 14/5/19.
@@ -19,14 +19,14 @@
 
 import CwlViews
 
-struct DatePickerViewState: CodableContainer {
-	let date: Var<Date>
+struct ProgressViewState: CodableContainer {
+	var progress: TempVar<Float>
 	init() {
-		date = Var(Date())
+		progress = TempVar<Float>()
 	}
 }
 
-func datePickerView(_ datePickerViewState: DatePickerViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
+func progressView(_ viewState: ProgressViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
 	return ViewController(
 		.navigationItem -- navigationItem,
 		.view -- View(
@@ -35,35 +35,40 @@ func datePickerView(_ datePickerViewState: DatePickerViewState, _ navigationItem
 				marginEdges: .allLayout,
 				.view(
 					Label(
-						.text <-- datePickerViewState.date.allChanges().map(DateFormatter.dateFormatter.string),
-						.font -- UIFont.monospacedDigitSystemFont(ofSize: 20, weight: .regular)
+						.text <-- viewState.progress.map(String.label),
+						.font -- UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .regular)
 					)
 				),
 				.space(),
 				.view(
-					DatePicker(
-						.locale -- Locale.current,
-						.datePickerMode -- .date,
-						.minimumDate -- .min,
-						.maximumDate -- .max,
-						.date <-- datePickerViewState.date.map { .animate($0) },
-						.action(.valueChanged, \.date) --> datePickerViewState.date.update()
+					length: 20,
+					ProgressView(
+						.trackTintColor -- .green,
+						.progressImage -- .drawn(width: 300, height: 20) { $0.fillEllipse(in: $1) },
+						.progress <-- viewState.progress.animate(.never)
 					)
 				)
 			)
-		)
+		),
+		.lifetimes -- [
+			Signal
+				.interval(.sixtyTimesPerSecond)
+				.map { Float($0 % .fiveSecondsAtSixtyPerSecond) / Float(Int.fiveSecondsAtSixtyPerSecond) }
+				.cancellableBind(to: viewState.progress)
+		]
 	)
 }
 
-private extension Date {
-	static let min = DateFormatter.dateFormatter.date(from: "2007/06/29")!
-	static let max = Calendar.current.date(byAdding: DateComponents(year: 2), to: Date())!
+private extension Int {
+	static let fiveSecondsAtSixtyPerSecond = 60 * 5
 }
 
-private extension DateFormatter {
-	static let dateFormatter: DateFormatter = {
-		let formatter = DateFormatter()
-		formatter.dateFormat = "yyyy/MM/dd"
-		return formatter
-	}()
+private extension DispatchTimeInterval {
+	static let sixtyTimesPerSecond = DispatchTimeInterval.interval(1 / 60)
+}
+
+private extension String {
+	static func label(_ progress: Float) -> String {
+		return String.localizedStringWithFormat(NSLocalizedString("Progress: %0.3f", comment: ""), progress)
+	}
 }

@@ -442,7 +442,7 @@ func binderContent() -> String {
 		// MARK: - Binder Part 6: BindingNames
 		extension BindingName where Binding: ___VARIABLE_basename___Binding {
 			public typealias ___VARIABLE_basename___Name<V> = BindingName<V, ___VARIABLE_basename___.Binding, Binding>
-					private static func name<V>(_ source: @escaping (V) -> ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___Name<V> {
+			private static func name<V>(_ source: @escaping (V) -> ___VARIABLE_basename___.Binding) -> ___VARIABLE_basename___Name<V> {
 				return ___VARIABLE_basename___Name<V>(source: source, downcast: Binding.___VARIABLE_lowercaseBasename___Binding)
 			}
 		}

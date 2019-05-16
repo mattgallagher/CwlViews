@@ -20,13 +20,9 @@
 import CwlViews
 
 struct SliderViewState: CodableContainer {
-	static let min = 0 as Float
-	static let max = 500 as Float
-	static let initial = 100 as Float
-	
 	let value: Var<Float>
 	init() {
-		value = Var(SliderViewState.initial)
+		value = Var(.initial)
 	}
 }
 
@@ -38,7 +34,7 @@ func sliderView(_ sliderViewState: SliderViewState, _ navigationItem: Navigation
 			.layout -- .center(marginEdges: .allLayout,
 				.view(
 					Label(
-						.text <-- sliderViewState.value.allChanges().map { .localizedStringWithFormat(.valueFormat, $0, SliderViewState.max) },
+						.text <-- sliderViewState.value.allChanges().map { .localizedStringWithFormat(.valueFormat, $0, Float.max) },
 						.font -- UIFont.monospacedDigitSystemFont(ofSize: 20, weight: .regular)
 					)
 				),
@@ -46,8 +42,8 @@ func sliderView(_ sliderViewState: SliderViewState, _ navigationItem: Navigation
 				.view(
 					Slider(
 						.isContinuous -- true,
-						.minimumValue -- SliderViewState.min,
-						.maximumValue -- SliderViewState.max,
+						.minimumValue -- .min,
+						.maximumValue -- .max,
 						.value <-- sliderViewState.value.animate(),
 						.action(.valueChanged, \.value) --> sliderViewState.value.update()
 					)
@@ -55,6 +51,12 @@ func sliderView(_ sliderViewState: SliderViewState, _ navigationItem: Navigation
 			)
 		)
 	)
+}
+
+private extension Float {
+	static let min: Float = 0
+	static let max: Float = 500
+	static let initial: Float = 100
 }
 
 private extension String {

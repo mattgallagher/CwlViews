@@ -20,10 +20,6 @@
 import CwlViews
 
 struct SliderViewState: CodableContainer {
-	static let min = 0 as Double
-	static let max = 500 as Double
-	static let initial = 100 as Double
-	
 	let value: Var<Double>
 	init() {
 		value = Var(.initial)
@@ -35,7 +31,7 @@ func sliderView(_ sliderViewState: SliderViewState) -> ViewConvertible {
 		.layout -- .center(
 			.view(
 				TextField.label(
-					.stringValue <-- sliderViewState.value.allChanges().map { .localizedStringWithFormat(.valueFormat, $0, SliderViewState.max) },
+					.stringValue <-- sliderViewState.value.allChanges().map { .localizedStringWithFormat(.valueFormat, $0, Double.max) },
 					.font -- NSFont.monospacedDigitSystemFont(ofSize: 20, weight: .regular)
 				)
 			),

@@ -22,7 +22,7 @@ import CwlViews
 struct StepperViewState: CodableContainer {
 	let value: Var<Double>
 	init() {
-		value = Var(10.5)
+		value = Var(.initial)
 	}
 }
 
@@ -41,10 +41,10 @@ func stepperlView(_ viewState: StepperViewState, _ navigationItem: NavigationIte
 					.space(),
 					.view(
 						Stepper(
-							.minimumValue -- 0.0,
-							.maximumValue -- 100.0,
+							.minimumValue -- .min,
+							.maximumValue -- .max,
 							.isContinuous -- true,
-							.stepValue -- 1.5,
+							.stepValue -- .step,
 							.tintColor -- .purple,
 							.decrementImage -- .normal(.drawn(width: 10, height: 10) { $0.fillEllipse(in: $1) }),
 							.incrementImage -- .normal(.drawn(width: 10, height: 10) { $0.fill($1) }),
@@ -56,4 +56,11 @@ func stepperlView(_ viewState: StepperViewState, _ navigationItem: NavigationIte
 			)
 		)
 	)
+}
+
+private extension Double {
+	static let initial = 10.5
+	static let max = 100.0
+	static let min = 0.0
+	static let step = 1.5
 }

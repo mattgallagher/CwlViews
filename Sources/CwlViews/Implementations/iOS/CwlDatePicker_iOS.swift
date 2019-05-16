@@ -92,7 +92,7 @@ extension DatePicker.Preparer {
 // MARK: - Binder Part 6: BindingNames
 extension BindingName where Binding: DatePickerBinding {
 	public typealias DatePickerName<V> = BindingName<V, DatePicker.Binding, Binding>
-			private static func name<V>(_ source: @escaping (V) -> DatePicker.Binding) -> DatePickerName<V> {
+	private static func name<V>(_ source: @escaping (V) -> DatePicker.Binding) -> DatePickerName<V> {
 		return DatePickerName<V>(source: source, downcast: Binding.datePickerBinding)
 	}
 }

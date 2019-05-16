@@ -20,24 +20,9 @@
 import CwlViews
 
 struct DatePickerViewState: CodableContainer {
-	// Set min as iOS release date
-	static let min: Date? = {
-		let formatter = DateFormatter.dateFormatter
-		return formatter.date(from: "2007/06/29")
-	}()
-	// Set max two years into the future
-	static let max: Date? = {
-		let date = Date()
-		var components = DateComponents()
-		components.setValue(2, for: .year)
-		return Calendar.current.date(byAdding: components, to: date)
-	}()
-	// Set initial date as now
-	static let initial = Date()
-
 	let date: Var<Date>
 	init() {
-		date = Var(DatePickerViewState.initial)
+		date = Var(Date())
 	}
 }
 
@@ -50,16 +35,18 @@ func datePickerView(_ datePickerViewState: DatePickerViewState, _ navigationItem
 			.layout -- .center(
 				marginEdges: .allLayout,
 				.view(
-				Label(
-					.text <-- datePickerViewState.date.allChanges().map { DateFormatter.dateFormatter.string(from: $0) },
-					.font -- UIFont.monospacedDigitSystemFont(ofSize: 20, weight: .regular))),
+					Label(
+						.text <-- datePickerViewState.date.allChanges().map(DateFormatter.dateFormatter.string),
+						.font -- UIFont.monospacedDigitSystemFont(ofSize: 20, weight: .regular)
+					)
+				),
 				.space(),
 				.view(
 					DatePicker(
 						.locale -- Locale.current,
 						.datePickerMode -- .date,
-						.minimumDate -- DatePickerViewState.min,
-						.maximumDate -- DatePickerViewState.max,
+						.minimumDate -- .min,
+						.maximumDate -- .max,
 						.date <-- datePickerViewState.date.map { .animate($0) },
 						.action(.valueChanged, \.date) --> datePickerViewState.date.update()
 					)
@@ -69,6 +56,11 @@ func datePickerView(_ datePickerViewState: DatePickerViewState, _ navigationItem
 	)
 }
 
+private extension Date {
+	static let min = DateFormatter.dateFormatter.date(from: "2007/06/29")!
+	static let max = Calendar.current.date(byAdding: DateComponents(year: 2), to: Date())!
+}
+
 private extension DateFormatter {
 	static let dateFormatter: DateFormatter = {
 		let formatter = DateFormatter()
@@ -76,4 +68,3 @@ private extension DateFormatter {
 		return formatter
 	}()
 }
-

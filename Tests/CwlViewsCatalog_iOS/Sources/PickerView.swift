@@ -52,7 +52,7 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 				.view(
 					PickerView<String>(
 						.backgroundColor -- .red,
-						.pickerData -- .reload([PickerComponent<String>(elements: [.text("1"), .text("2"), .text("3"), .view("4")])]),
+						.pickerData -- .reload([PickerComponent<String>(elements: [.text("1"), .text("2"), .text("3"), .view("4")]), PickerComponent<String>(elements: [.text("5"), .text("6"), .text("7"), .view("🏁")])]),
 						.rowSelected --> viewState.selectedRow,
 						.viewConstructor -- { data in
 							Label(.text <-- data)

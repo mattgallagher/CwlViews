@@ -50,13 +50,21 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 				),
 				.space(),
 				.view(
-					PickerView<Void>(
+					PickerView<String>(
 						.backgroundColor -- .red,
-						.pickerData -- .reload([PickerComponent<Void>(elements: [.text("1"), .text("2"), .text("3")])]),
-						.rowSelected --> viewState.selectedRow
+						.pickerData -- .reload([PickerComponent<String>(elements: [.text("1"), .text("2"), .text("3"), .view("4")])]),
+						.rowSelected --> viewState.selectedRow,
+						.viewConstructor -- { data in
+							Label(.text <-- data)
+						}
 					)
 				)
 			)
 		)
 	)
 }
+/*
+.cellConstructor -- { reuseIdentifier, cellData in
+TableViewCell(.textLabel -- Label(.text <-- cellData.map { data in data.localizedString }))
+}
+*/

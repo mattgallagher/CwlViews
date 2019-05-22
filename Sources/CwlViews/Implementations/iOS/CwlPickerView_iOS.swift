@@ -152,7 +152,14 @@ extension PickerView.Preparer {
 					label.attributedText = x
 					label.textAlignment = .center
 					return label
-				case .view(let x): assertionFailure("Not yet implemented"); return UIView()
+				case .view(let x):
+					if let vc = viewConstructor {
+						let dataTuple = Input<ViewData>().multicast()
+						let constructed = vc(dataTuple.signal).uiView()
+						constructed.setAssociatedRowInput(to: dataTuple.input)
+						dataTuple.input.send(value: x)
+						return constructed
+					}
 				}
 			}
 			// We don't seem to have such an element so return an view
@@ -332,6 +339,18 @@ public struct PickerComponent<ElementData> {
 		self.width = width
 		self.rowHeight = rowHeight
 		self.elements = elements
+	}
+}
+
+private var associatedInputKey = NSObject()
+private extension UIView {
+	func associatedRowInput<B>(valueType: B.Type) ->
+		SignalInput<B>? {
+			return objc_getAssociatedObject(self, &associatedInputKey) as? SignalInput<B>
+	}
+
+	func setAssociatedRowInput<B>(to input: SignalInput<B>) {
+		objc_setAssociatedObject(self, &associatedInputKey, input, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 	}
 }
 

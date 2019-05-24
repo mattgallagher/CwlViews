@@ -20,22 +20,13 @@
 import CwlViews
 
 struct PickerViewState: CodableContainer {
-	var selectedRow: TempVar<PickerRowAndComponent>
+	var selectedRow: TempVar<PickerView<String>.RowComponentAndData>
 	init() {
-		selectedRow = TempVar<PickerRowAndComponent>()
+		selectedRow = TempVar<PickerView<String>.RowComponentAndData>()
 	}
 }
 
 func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) -> ViewControllerConvertible {
-	//let moreFirstThing = PickerComponent<Void>.ComponentType.text("hello")
-    //let firstThing = PickerComponent<Void>(width: 100,  rowHeight: 50, elements: [])
-	//let things: Dynamic<PickerComponentMutation<PickerComponent<Void>>> = .reload([PickerComponent<Void>(width: 100,  rowHeight: 50, elements: [.text("1"), .text("2"), .text("3")])])
-//	PickerView<Void>(
-//		.backgroundColor -- .red,
-//		.pickerData -- .reload([PickerComponent<Void>(elements: [.text("1"), .text("2"), .text("3")])]),
-//		.row
-//	)
-
 	return ViewController(
 		.navigationItem -- navigationItem,
 		.view -- View(
@@ -44,7 +35,7 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 				marginEdges: .allLayout,
 				.view(
 					Label(
-						.text <-- viewState.selectedRow.map { value in return "\(value)"},
+						.text <-- viewState.selectedRow.map { value in return "\(value.data)"},
 						.font -- UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .regular)
 					)
 				),
@@ -52,19 +43,15 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 				.view(
 					PickerView<String>(
 						.backgroundColor -- .red,
-						.pickerData -- .reload([PickerComponent<String>(elements: [.text("1"), .text("2"), .text("3"), .view("4")]), PickerComponent<String>(elements: [.text("5"), .text("6"), .text("7"), .view("🏁")])]),
+						.pickerData -- .reload([PickerComponent<String>(elements: ["1", "2", "3", "4"]), PickerComponent<String>(elements: ["1", "2", "3", "4"])]),
 						.rowSelected --> viewState.selectedRow,
-						.viewConstructor -- { data in
-							Label(.text <-- data)
-						}
+						.title -- { $0.data }
+//						.viewConstructor -- { data in
+//							Label(.text <-- data.map { $0.data})
+//						}
 					)
 				)
 			)
 		)
 	)
 }
-/*
-.cellConstructor -- { reuseIdentifier, cellData in
-TableViewCell(.textLabel -- Label(.text <-- cellData.map { data in data.localizedString }))
-}
-*/

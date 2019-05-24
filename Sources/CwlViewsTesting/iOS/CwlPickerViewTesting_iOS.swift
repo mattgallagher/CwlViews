@@ -24,17 +24,20 @@ extension BindingParser where Downcast: PickerViewBinding {
 
 	// 1. Value bindings may be applied at construction and may subsequently change.
 	public static var showsSelectionIndicator: BindingParser<Dynamic<Bool>, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .showsSelectionIndicator(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
-	public static var pickerData: BindingParser<Dynamic<PickerComponentMutation<PickerComponent<Downcast.ViewDataType>>>, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .pickerData(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
+	public static var pickerData: BindingParser<Dynamic<ArrayMutation<PickerComponent<Downcast.ViewDataType>>>, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .pickerData(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
 
 	// 2. Signal bindings are performed on the object after construction.
-	public static var selectRowAndComponent: BindingParser<Signal<SetOrAnimate<PickerRowAndComponent>>, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .selectRowAndComponent(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
+	public static var selectRowAndComponent: BindingParser<Signal<SetOrAnimate<PickerView<Downcast.ViewDataType>.RowAndComponent>>, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .selectRowAndComponent(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
 	public static var reload: BindingParser<Signal<PickerView<Downcast.ViewDataType>.Reload>, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .reload(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
 
 	// 3. Action bindings are triggered by the object after construction.
 
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	public static var didSelectRowAndComponent: BindingParser<(_ pickerView: UIPickerView, _ rowAndComponent: PickerRowAndComponent) -> Void, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .didSelectRowAndComponent(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
-	public static var viewConstructor: BindingParser<(_ rowSignal: SignalMulti<Downcast.ViewDataType>) -> ViewConvertible, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .viewConstructor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
+	// Pass in the row signal instead of row and component index because passing in those would circumvent the need for the pickerData
+	public static var attributedTitle: BindingParser<(_ rowComponentAndData: PickerView<Downcast.ViewDataType>.RowComponentAndData) -> NSAttributedString?, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .attributedTitle(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
+	public static var didSelectRowAndComponent: BindingParser<(_ pickerView: UIPickerView, _ rowComponentAndData: PickerView<Downcast.ViewDataType>.RowComponentAndData) -> Void, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .didSelectRowAndComponent(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
+	public static var title: BindingParser<(_ rowComponentAndData: PickerView<Downcast.ViewDataType>.RowComponentAndData) -> String?, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .title(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
+	public static var viewConstructor: BindingParser<(_ rowSignal: SignalMulti<PickerView<Downcast.ViewDataType>.RowComponentAndData>) -> ViewConvertible, PickerView<Downcast.ViewDataType>.Binding, Downcast> { return .init(extract: { if case .viewConstructor(let x) = $0 { return x } else { return nil } }, upcast: { $0.asPickerViewBinding() }) }
 }
 
 #endif

@@ -292,6 +292,21 @@ public extension BindingName where Binding: PickerViewBinding {
 			downcast: Binding.pickerViewBinding
 		)
 	}
+	static var rowsSelected: PickerViewName<SignalInput<[PickerView<Binding.ViewDataType>.RowComponentAndData]>> {
+		return Binding.compositeName(
+			value: { input in { pickerView, rowAndComponent -> Void in
+				if let components = (pickerView.delegate as? PickerView<Binding.ViewDataType>.Preparer.Storage)?.components {
+					let selected: [PickerView<Binding.ViewDataType>.RowComponentAndData] = (0..<pickerView.numberOfComponents).map {
+						let row = pickerView.selectedRow(inComponent: $0)
+						return ((row: row, component: $0), data: (components.at($0)?.elements.at(row))!)
+					}
+					input.send(value: selected)
+				}
+			} },
+			binding: PickerView.Binding.didSelectRowAndComponent,
+			downcast: Binding.pickerViewBinding
+		)
+	}
 }
 
 // MARK: - Binder Part 7: Convertible protocols (if constructible)

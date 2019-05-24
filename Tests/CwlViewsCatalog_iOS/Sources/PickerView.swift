@@ -20,9 +20,9 @@
 import CwlViews
 
 struct PickerViewState: CodableContainer {
-	var selectedRow: TempVar<PickerView<String>.RowComponentAndData>
+	var selectedRow: TempVar<[PickerView<String>.RowComponentAndData]>
 	init() {
-		selectedRow = TempVar<PickerView<String>.RowComponentAndData>()
+		selectedRow = TempVar<[PickerView<String>.RowComponentAndData]>()
 	}
 }
 
@@ -35,7 +35,7 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 				marginEdges: .allLayout,
 				.view(
 					Label(
-						.text <-- viewState.selectedRow.map { value in return "\(value.data)"},
+						.text <-- viewState.selectedRow.map { $0.reduce("") { result, next in result + "\(next.data)\t"  } },
 						.font -- UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .regular)
 					)
 				),
@@ -44,7 +44,7 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 					PickerView<String>(
 						.backgroundColor -- .red,
 						.pickerData -- .reload([PickerComponent<String>(elements: ["1", "2", "3", "4"]), PickerComponent<String>(elements: ["1", "2", "3", "4"])]),
-						.rowSelected --> viewState.selectedRow,
+						.rowsSelected --> viewState.selectedRow,
 						.title -- { $0.data }
 //						.viewConstructor -- { data in
 //							Label(.text <-- data.map { $0.data})

@@ -36,21 +36,22 @@ public extension PickerView {
 		// 0. Static bindings are applied at construction and are subsequently immutable.
 
 		// 1. Value bindings may be applied at construction and may subsequently change.
+		case pickerData(Dynamic<ArrayMutation<[ViewData]>>)
 		case showsSelectionIndicator(Dynamic<Bool>)
-		case pickerData(Dynamic<ArrayMutation<PickerComponent<ViewData>>>)
 
 		// 2. Signal bindings are performed on the object after construction.
-		case selectRowAndComponent(Signal<SetOrAnimate<PickerView.RowAndComponent>>)
-		case reload(Signal<PickerView.Reload>)
+		case selectLocation(Signal<SetOrAnimate<PickerLocation>>)
 
 		// 3. Action bindings are triggered by the object after construction.
 
 		// 4. Delegate bindings require synchronous evaluation within the object's context.
-		// Pass in the row signal instead of row and component index because passing in those would circumvent the need for the pickerData
-		case attributedTitle((_ rowComponentAndData: PickerView.RowComponentAndData) -> NSAttributedString?)
-		case didSelectRowAndComponent((_ pickerView: UIPickerView, _ rowComponentAndData: PickerView.RowComponentAndData) -> Void)
-		case title((_ rowComponentAndData: PickerView.RowComponentAndData) -> String?)
-		case viewConstructor((_ rowSignal: SignalMulti<PickerView.RowComponentAndData>) -> ViewConvertible)
+		case attributedTitle((_ data: Data) -> NSAttributedString?)
+		case didSelectLocation((_ pickerView: UIPickerView, _ data: Data) -> Void)
+		case rowHeightForComponent((_ pickerView: UIPickerView, _ component: Int, _ data: [ViewData]) -> CGFloat)
+		case title((_ data: Data) -> String?)
+		case viewConstructor((_ identifier: String?, _ rowSignal: SignalMulti<ViewData>) -> ViewConvertible)
+		case viewIdentifier((_ data: Data) -> String?)
+		case widthForComponent((_ pickerView: UIPickerView, _ component: Int, _ data: [ViewData]) -> CGFloat)
 	}
 }
 
@@ -83,9 +84,11 @@ public extension PickerView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): inherited.prepareBinding(x)
 		case .attributedTitle(let x): delegate().addSingleHandler1(x, #selector(UIPickerViewDelegate.pickerView(_:attributedTitleForRow:forComponent:)))
-		case .didSelectRowAndComponent(let x): delegate().addMultiHandler2(x, #selector(UIPickerViewDelegate.pickerView(_:didSelectRow:inComponent:)))
+		case .didSelectLocation(let x): delegate().addMultiHandler2(x, #selector(UIPickerViewDelegate.pickerView(_:didSelectRow:inComponent:)))
 		case .title(let x): delegate().addSingleHandler1(x, #selector(UIPickerViewDelegate.pickerView(_:titleForRow:forComponent:)))
-		case .viewConstructor(let x): delegate().addSingleHandler1(x, #selector(UIPickerViewDelegate.pickerView(_:viewForRow:forComponent:reusing:)))
+		case .viewConstructor(let x): delegate().addSingleHandler2(x, #selector(UIPickerViewDelegate.pickerView(_:viewForRow:forComponent:reusing:)))
+		case .rowHeightForComponent(let x): delegate().addSingleHandler3(x, #selector(UIPickerViewDelegate.pickerView(_:rowHeightForComponent:)))
+		case .widthForComponent(let x): delegate().addSingleHandler3(x, #selector(UIPickerViewDelegate.pickerView(_:widthForComponent:)))
 		default: break
 		}
 	}
@@ -101,32 +104,27 @@ public extension PickerView.Preparer {
 		switch binding {
 		case .inheritedBinding(let x): return inherited.applyBinding(x, instance: instance, storage: storage)
 
-		// 1.
+		// 0. Static bindings are applied at construction and are subsequently immutable.
+			
+		// 1. Value bindings may be applied at construction and may subsequently change.
 		case .showsSelectionIndicator(let x): return x.apply(instance) { i, v in i.showsSelectionIndicator = v }
 		case .pickerData(let x): return x.apply(instance, storage) { i, s, v in s.applyComponents(v, to: i) }
 
-		// 2.
-		case .selectRowAndComponent(let x): return x.apply(instance) { i, v in i.selectRow(v.value.row, inComponent: v.value.component, animated: v.isAnimated) }
-		case .reload(let x): return x.apply(instance) { i, v in
-			switch v {
-			case .all:
-				i.reloadAllComponents()
-			case .component(let component):
-				i.reloadComponent(component)
-			}
-		}
+		// 2. Signal bindings are performed on the object after construction.
+		case .selectLocation(let x): return x.apply(instance) { i, v in i.selectRow(v.value.row, inComponent: v.value.component, animated: v.isAnimated) }
 
-		// 4. Delegate Bindings
-		case .attributedTitle(let x):
-			storage.attributedTitleConstructor = x
+		// 3. Action bindings are triggered by the object after construction.
+			
+		// 4. Delegate bindings require synchronous evaluation within the object's context.
+		case .attributedTitle: return nil
+		case .didSelectLocation(_): return nil
+		case .rowHeightForComponent: return nil
+		case .title: return nil
+		case .viewConstructor: return nil
+		case .viewIdentifier(let x):
+			storage.viewIdentifier = x
 			return nil
-		case .didSelectRowAndComponent(_): return nil
-		case .title(let x):
-			storage.titleConstructor = x
-			return nil
-		case .viewConstructor(let x):
-			storage.viewConstructor = x
-			return nil
+		case .widthForComponent: return nil
 		}
 	}
 }
@@ -137,59 +135,36 @@ extension PickerView.Preparer {
 	open class Storage: View.Preparer.Storage, UIPickerViewDelegate, UIPickerViewDataSource {
 		open override var isInUse: Bool { return true }
 
-		open var components = PickerComponentState<PickerComponent<ViewData>>()
-		open var viewConstructor: ((SignalMulti<PickerView.RowComponentAndData>) -> ViewConvertible)?
-		open var titleConstructor: ((PickerView.RowComponentAndData) -> String?)?
-		open var attributedTitleConstructor: ((PickerView.RowComponentAndData) -> NSAttributedString?)?
+		open var components = [[ViewData]]()
+		open var viewIdentifier: ((PickerView.Data) -> String?)?
 
-		// Data Source
 		open func numberOfComponents(in pickerView: UIPickerView) -> Int {
 			return components.count
 		}
-
+		
 		open func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-			return components.at(component)?.elements.count ?? 0
+			return components.at(component)?.count ?? 0
 		}
 
-		// Delegate
-		open func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-			return components.at(component)?.rowHeight ?? 0
-		}
-
-		open func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-			return components.at(component)?.width ?? 0
-		}
-
-		// Helpers
-		open func applyComponents(_ componentMutation: ArrayMutation<PickerComponent<ViewData>>, to i: UIPickerView) {
-			componentMutation.insertionsAndRemovals(length: components.count,
-													insert: { index, component in
-														components.insert(component, at: index)
-														i.reloadComponent(index)
-													},
-													remove: { index in
-														components.remove(at: index)
-														i.reloadAllComponents()
+		open func applyComponents(_ componentMutation: ArrayMutation<[ViewData]>, to i: UIPickerView) {
+			componentMutation.insertionsAndRemovals(length: components.count, insert: { index, component in
+				components.insert(component, at: index)
+				i.reloadComponent(index)
+			}, remove: { index in
+				components.remove(at: index)
+				i.reloadAllComponents()
 			})
 		}
 
 	}
 
 	open class Delegate: DynamicDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
-		private func pickerViewData(at row: Int, component: Int, in pickerView: UIPickerView) -> ViewData? {
-			return (pickerView.delegate as? PickerView<ViewData>.Preparer.Storage)?.components.at(component)?.elements.at(row)
+		private func storage(in pickerView: UIPickerView) -> Storage? {
+			return pickerView.delegate as? PickerView<ViewData>.Preparer.Storage
 		}
-
-		private func viewConstructor(inPickerView: UIPickerView) -> ((SignalMulti<PickerView.RowComponentAndData>) -> ViewConvertible)? {
-			return (inPickerView.delegate as? PickerView<ViewData>.Preparer.Storage)?.viewConstructor
-		}
-
-		private func titleConstructor(inPickerView: UIPickerView) -> ((PickerView.RowComponentAndData) -> String?)? {
-			return (inPickerView.delegate as? PickerView<ViewData>.Preparer.Storage)?.titleConstructor
-		}
-
-		private func attributedTitleConstructor(inPickerView: UIPickerView) -> ((PickerView.RowComponentAndData) -> NSAttributedString?)? {
-			return (inPickerView.delegate as? PickerView<ViewData>.Preparer.Storage)?.attributedTitleConstructor
+		
+		private func data(at row: Int, component: Int, in pickerView: UIPickerView) -> ViewData? {
+			return storage(in: pickerView)?.components.at(component)?.at(row)
 		}
 
 		open func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -200,55 +175,58 @@ extension PickerView.Preparer {
 			return 0
 		}
 
-		// Delegate
-		open func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-			if let element = pickerViewData(at: row, component: component, in: pickerView) {
-				if let tc = titleConstructor(inPickerView: pickerView) {
-					let constructed = tc(((row, component), element))
-					return constructed
-				}
-			}
-			// We don't seem to have such an element so return nil
-			return nil
-		}
-
-		open func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
-
-			if let element = pickerViewData(at: row, component: component, in: pickerView) {
-				if let vc = viewConstructor(inPickerView: pickerView) {
-					let dataTuple = Input<PickerView<ViewData>.RowComponentAndData>().multicast()
-					let constructed = vc(dataTuple.signal).uiView()
-					constructed.setAssociatedRowInput(to: dataTuple.input)
-					dataTuple.input.send(value: ((row, component), element))
-					return constructed
-				}
-			}
-			// We don't seem to have such an element so return an empty view
-			return UIView()
-		}
-
 		open func pickerView(_ pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
-			if let element = pickerViewData(at: row, component: component, in: pickerView) {
-				if let atc = attributedTitleConstructor(inPickerView: pickerView) {
-					let constructed = atc(((row, component), element))
-					return constructed
-				}
+			guard let data = data(at: row, component: component, in: pickerView) else { return nil }
+			return singleHandler(PickerView.Data(location: PickerLocation(row: row, component: component), data: data))
+		}
+
+		open func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+			guard let data = data(at: row, component: component, in: pickerView) else { return nil }
+			return singleHandler(PickerView.Data(location: PickerLocation(row: row, component: component), data: data))
+		}
+
+		open func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing previousView: UIView?) -> UIView {
+			guard let data = data(at: row, component: component, in: pickerView) else {
+				return UIView()
 			}
-			// We don't seem to have such an element so return nil
-			return nil
+			let identifier: String?
+			if let viewIdentifier = storage(in: pickerView)?.viewIdentifier {
+				identifier = viewIdentifier(PickerView.Data(location: PickerLocation(row: row, component: component), data: data))
+			} else {
+				identifier = String(component)
+			}
+			if let identifier = identifier, let view = previousView, let (previousIdentifier, input) = view.associatedRowIdentifierAndInput(valueType: ViewData.self), previousIdentifier == identifier {
+				input.send(value: data)
+				return view
+			}
+			let dataTuple = Input<ViewData>().multicast()
+			let constructed = (singleHandler(identifier, dataTuple.signal) as ViewConvertible).uiView()
+			if let identifier = identifier {
+				constructed.setAssociatedRowIdentifierAndInput(identifier: identifier, to: dataTuple.input)
+			}
+			dataTuple.input.send(value: data)
+			return constructed
 		}
 
 		open func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-			return 0
+			guard let storage = storage(in: pickerView), let data = storage.components.at(component) else {
+				let defaultRowHeightIOS12: CGFloat = 32
+				return defaultRowHeightIOS12
+			}
+			return singleHandler(pickerView, component, data)
 		}
 
 		open func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-			return 0
+			guard let storage = storage(in: pickerView) else { return 0 }
+			guard let data = storage.components.at(component) else {
+				return pickerView.bounds.width / CGFloat(max(1, storage.components.count))
+			}
+			return singleHandler(pickerView, component, data)
 		}
 
 		open func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-			let element = pickerViewData(at: row, component: component, in: pickerView)!
-			return multiHandler(pickerView, (rowAndComponent: (row: row, component: component), data: element))
+			let d = data(at: row, component: component, in: pickerView)!
+			return multiHandler(pickerView, PickerView.Data(location: PickerLocation(row: row, component: component), data: d))
 		}
 	}
 
@@ -265,45 +243,45 @@ public extension BindingName where Binding: PickerViewBinding {
 	// You can easily convert the `Binding` cases to `BindingName` using the following Xcode-style regex:
 	// Replace: case ([^\(]+)\((.+)\)$
 	// With:    static var $1: PickerViewName<$2> { return .name(PickerView.Binding.$1) }
+	
 	// 0. Static bindings are applied at construction and are subsequently immutable.
-
+	
 	// 1. Value bindings may be applied at construction and may subsequently change.
+	static var pickerData: PickerViewName<Dynamic<ArrayMutation<[Binding.ViewDataType]>>> { return .name(PickerView.Binding.pickerData) }
 	static var showsSelectionIndicator: PickerViewName<Dynamic<Bool>> { return .name(PickerView.Binding.showsSelectionIndicator) }
-	static var pickerData: PickerViewName<Dynamic<ArrayMutation<PickerComponent<Binding.ViewDataType>>>> { return .name(PickerView.Binding.pickerData) }
-
+	
 	// 2. Signal bindings are performed on the object after construction.
-	static var selectRowAndComponent: PickerViewName<Signal<SetOrAnimate<PickerView<Binding.ViewDataType>.RowAndComponent>>> { return .name(PickerView.Binding.selectRowAndComponent) }
-	static var reload: PickerViewName<Signal<PickerView<Binding.ViewDataType>.Reload>> { return .name(PickerView.Binding.reload) }
-
+	static var selectLocation: PickerViewName<Signal<SetOrAnimate<PickerLocation>>> { return .name(PickerView.Binding.selectLocation) }
+	
 	// 3. Action bindings are triggered by the object after construction.
-
+	
 	// 4. Delegate bindings require synchronous evaluation within the object's context.
-	// Pass in the row signal instead of row and component index because passing in those would circumvent the need for the pickerData
-	static var attributedTitle: PickerViewName<(_ rowComponentAndData: PickerView<Binding.ViewDataType>.RowComponentAndData) -> NSAttributedString?> { return .name(PickerView.Binding.attributedTitle) }
-	static var didSelectRowAndComponent: PickerViewName<(_ pickerView: UIPickerView, _ rowComponentAndData: PickerView<Binding.ViewDataType>.RowComponentAndData) -> Void> { return .name(PickerView.Binding.didSelectRowAndComponent) }
-	static var title: PickerViewName<(_ rowComponentAndData: PickerView<Binding.ViewDataType>.RowComponentAndData) -> String?> { return .name(PickerView.Binding.title) }
-	static var viewConstructor: PickerViewName<(_ rowSignal: SignalMulti<PickerView<Binding.ViewDataType>.RowComponentAndData>) -> ViewConvertible> { return .name(PickerView.Binding.viewConstructor) }
+	static var attributedTitle: PickerViewName<(_ data: PickerView<Binding.ViewDataType>.Data) -> NSAttributedString?> { return .name(PickerView.Binding.attributedTitle) }
+	static var didSelectLocation: PickerViewName<(_ pickerView: UIPickerView, _ data: PickerView<Binding.ViewDataType>.Data) -> Void> { return .name(PickerView.Binding.didSelectLocation) }
+	static var rowHeightForComponent: PickerViewName<(_ pickerView: UIPickerView, _ component: Int, _ data: [Binding.ViewDataType]) -> CGFloat> { return .name(PickerView.Binding.rowHeightForComponent) }
+	static var title: PickerViewName<(_ data: PickerView<Binding.ViewDataType>.Data) -> String?> { return .name(PickerView.Binding.title) }
+	static var viewConstructor: PickerViewName<(_ identifier: String?, _ rowSignal: SignalMulti<Binding.ViewDataType>) -> ViewConvertible> { return .name(PickerView.Binding.viewConstructor) }
+	static var viewIdentifier: PickerViewName<(_ data: PickerView<Binding.ViewDataType>.Data) -> String?> { return .name(PickerView.Binding.viewIdentifier) }
+	static var widthForComponent: PickerViewName<(_ pickerView: UIPickerView, _ component: Int, _ data: [Binding.ViewDataType]) -> CGFloat> { return .name(PickerView.Binding.widthForComponent) }
 
 	// Composite binding names
-	static var rowSelected: PickerViewName<SignalInput<PickerView<Binding.ViewDataType>.RowComponentAndData>> {
+	static var rowSelected: PickerViewName<SignalInput<PickerView<Binding.ViewDataType>.Data>> {
 		return Binding.compositeName(
-			value: { input in { picker, rowAndComponent -> Void in input.send(value: rowAndComponent) } },
-			binding: PickerView.Binding.didSelectRowAndComponent,
+			value: { input in { picker, data -> Void in input.send(value: data) } },
+			binding: PickerView.Binding.didSelectLocation,
 			downcast: Binding.pickerViewBinding
 		)
 	}
-	static var rowsSelected: PickerViewName<SignalInput<[PickerView<Binding.ViewDataType>.RowComponentAndData]>> {
+	static var selectionChanged: PickerViewName<SignalInput<[Binding.ViewDataType]>> {
 		return Binding.compositeName(
-			value: { input in { pickerView, rowAndComponent -> Void in
+			value: { input in { pickerView, _ -> Void in
 				if let components = (pickerView.delegate as? PickerView<Binding.ViewDataType>.Preparer.Storage)?.components {
-					let selected: [PickerView<Binding.ViewDataType>.RowComponentAndData] = (0..<pickerView.numberOfComponents).map {
-						let row = pickerView.selectedRow(inComponent: $0)
-						return ((row: row, component: $0), data: (components.at($0)?.elements.at(row))!)
-					}
-					input.send(value: selected)
+					input.send(value: (0..<pickerView.numberOfComponents).compactMap {
+						components.at($0)?.at(pickerView.selectedRow(inComponent: $0))
+					})
 				}
 			} },
-			binding: PickerView.Binding.didSelectRowAndComponent,
+			binding: PickerView.Binding.didSelectLocation,
 			downcast: Binding.pickerViewBinding
 		)
 	}
@@ -350,41 +328,31 @@ public extension PickerView.Binding {
 
 // MARK: - Binder Part 9: Other supporting types
 
+public struct PickerLocation {
+	public let row: Int
+	public let component: Int
+
+	public init(row: Int, component: Int) {
+		self.row = row
+		self.component = component
+	}
+}
+
 public extension PickerView {
-	typealias RowAndComponent = (row: Int, component: Int)
-	typealias RowComponentAndData = (rowAndComponent: RowAndComponent, data: ViewData)
-
-	enum Reload {
-		case all
-		case component(Int)
+	struct Data {
+		public let location: PickerLocation
+		public let data: ViewData
 	}
 }
 
-public typealias PickerComponentState<Element> = Array<Element>
-
-public struct PickerComponent<ElementData> {
-	let width: CGFloat
-	let rowHeight: CGFloat
-	let elements: [ElementData]
-
-	public init(width: CGFloat = 100,
-				rowHeight: CGFloat = 50,
-				elements: [ElementData]) {
-		self.width = width
-		self.rowHeight = rowHeight
-		self.elements = elements
-	}
-}
-
-private var associatedInputKey = NSObject()
+private var associatedRowIdentifierAndInputKey = NSObject()
 private extension UIView {
-	func associatedRowInput<B>(valueType: B.Type) ->
-		SignalInput<B>? {
-			return objc_getAssociatedObject(self, &associatedInputKey) as? SignalInput<B>
+	func associatedRowIdentifierAndInput<B>(valueType: B.Type) -> (String, SignalInput<B>)? {
+		return objc_getAssociatedObject(self, &associatedRowIdentifierAndInputKey) as? (String, SignalInput<B>)
 	}
 
-	func setAssociatedRowInput<B>(to input: SignalInput<B>) {
-		objc_setAssociatedObject(self, &associatedInputKey, input, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
+	func setAssociatedRowIdentifierAndInput<B>(identifier: String, to input: SignalInput<B>) {
+		objc_setAssociatedObject(self, &associatedRowIdentifierAndInputKey, (identifier, input), objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 	}
 }
 

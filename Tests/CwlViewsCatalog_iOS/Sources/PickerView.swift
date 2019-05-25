@@ -20,9 +20,14 @@
 import CwlViews
 
 struct PickerViewState: CodableContainer {
-	var selectedRow: TempVar<[PickerView<String>.RowComponentAndData]>
+	static let min = 1
+	static let max = 100
+	
+	var selectedRow: Var<[String]>
+	var digit: Var<String>
 	init() {
-		selectedRow = TempVar<[PickerView<String>.RowComponentAndData]>()
+		selectedRow = Var([String(PickerViewState.min), String(PickerViewState.max)])
+		digit = Var(String(PickerViewState.min))
 	}
 }
 
@@ -35,20 +40,44 @@ func pickerView(_ viewState: PickerViewState, _ navigationItem: NavigationItem) 
 				marginEdges: .allLayout,
 				.view(
 					Label(
-						.text <-- viewState.selectedRow.map { $0.reduce("") { result, next in result + "\(next.data)\t"  } },
+						.text <-- viewState.selectedRow.map { $0.reduce("") { result, next in result + "\(next)\t"  } },
 						.font -- UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .regular)
 					)
 				),
 				.space(),
 				.view(
 					PickerView<String>(
-						.backgroundColor -- .red,
-						.pickerData -- .reload([PickerComponent<String>(elements: ["1", "2", "3", "4"]), PickerComponent<String>(elements: ["1", "2", "3", "4"])]),
-						.rowsSelected --> viewState.selectedRow,
-						.title -- { $0.data }
-//						.viewConstructor -- { data in
-//							Label(.text <-- data.map { $0.data})
-//						}
+						.pickerData -- [
+							(PickerViewState.min...PickerViewState.max).map(String.init) as [String],
+							(PickerViewState.min...PickerViewState.max).reversed().map(String.init) as [String]
+						],
+						.selectionChanged --> viewState.selectedRow,
+						.viewConstructor -- { identifier, data in
+							Label(
+								.text <-- data.map { $0 },
+								.textColor -- .blue
+							)
+						},
+						.rowHeightForComponent -- { pickerView, component, data in 60 as CGFloat },
+						.widthForComponent -- { pickerView, component, data in 35 as CGFloat }
+					)
+				),
+				.space(40),
+				.view(
+					Label(
+						.text <-- viewState.digit,
+						.font -- UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .regular)
+					)
+				),
+				.space(),
+				.view(
+					PickerView<String>(
+						.pickerData -- [(PickerViewState.min...PickerViewState.max).map(String.init) as [String]],
+						.rowSelected --> Input().map { $0.data }.bind(to: viewState.digit),
+						.attributedTitle -- {
+							(($0.location.row % 2) == 1) ? nil : .init(string: $0.data, attributes: [.foregroundColor: UIColor.red])
+						},
+						.title -- { (($0.location.row % 2) == 0) ? nil : $0.data }
 					)
 				)
 			)

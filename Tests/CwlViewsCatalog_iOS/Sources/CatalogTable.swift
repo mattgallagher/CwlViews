@@ -30,6 +30,7 @@ enum CatalogViewState: CodableContainer, CaseNameCodable {
 	case layers(LayersViewState)
 	case navigationBar(NavigationBarViewState)
 	case pageViewController(PageViewState)
+	case pickerView(PickerViewState)
 	case progressView(ProgressViewState)
 	case searchBar(SearchBarViewState)
 	case segmentedControl(SegmentedViewState)
@@ -70,6 +71,7 @@ extension CatalogViewState {
 		case layers
 		case navigationBar
 		case pageViewController
+		case pickerView
 		case progressView
 		case searchBar
 		case segmentedControl
@@ -95,6 +97,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .layers: return NSLocalizedString("Layers", comment: "")
 		case .navigationBar: return NSLocalizedString("NavigationBar", comment: "")
 		case .pageViewController: return NSLocalizedString("PageViewController", comment: "")
+		case .pickerView: return NSLocalizedString("PickerView", comment: "")
 		case .progressView: return NSLocalizedString("ProgressView", comment: "")
 		case .searchBar: return NSLocalizedString("SearchBar", comment: "")
 		case .segmentedControl: return NSLocalizedString("SegmentedControl", comment: "")
@@ -123,6 +126,7 @@ extension CatalogViewState.CaseName: CaseNameDecoder {
 		case .layers: return .layers(try container.decodeIfPresent(LayersViewState.self, forKey: self) ?? .init())
 		case .navigationBar: return .navigationBar(try container.decodeIfPresent(NavigationBarViewState.self, forKey: self) ?? .init())
 		case .pageViewController: return .pageViewController(try container.decodeIfPresent(PageViewState.self, forKey: self) ?? .init())
+		case .pickerView: return .pickerView(try container.decodeIfPresent(PickerViewState.self, forKey: self) ?? .init())
 		case .progressView: return .progressView(try container.decodeIfPresent(ProgressViewState.self, forKey: self) ?? .init())
 		case .searchBar: return .searchBar(try container.decodeIfPresent(SearchBarViewState.self, forKey: self) ?? .init())
 		case .segmentedControl: return .segmentedControl(try container.decodeIfPresent(SegmentedViewState.self, forKey: self) ?? .init())
